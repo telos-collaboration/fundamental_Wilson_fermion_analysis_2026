@@ -1,3 +1,13 @@
+function latticesize(file)
+    for line in eachline(file)
+        if occursin("Global size is",line)
+            pos  = last(findfirst("Global size is",line))+1
+            sizestring  = lstrip(line[pos:end])
+            latticesize = parse.(Int,split(sizestring,"x"))
+            return latticesize
+        end
+    end
+end
 function _parse_data!(array,string) 
     substrings = eachsplit(string," ",keepempty=false)
     for (i,s) in enumerate(substrings)
@@ -14,8 +24,7 @@ function _parse_channel_name(string)
     label = string[1:first(f)-1]
     src   = parse(Int,string[l+1:n-1])
 
-    # increase number of sources by one, to have one-based indexing
-    return label, src+1
+    return label, src
 end
 function _count_labels(file)
     return length(_label_list(file))
@@ -52,14 +61,22 @@ function _sources(file)
     end
 end
 function parse_isospin_one(file)
+    T = first(latticesize(file))
     cut  = length("[IO][0]")
-    Nmom = 2 # This is currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
+    # This is currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
+    # plus negative momenta are allowed for the 4-point functions 
+    Nmom = 3 #(allowed values -1,0,1) 
     Nlab = _count_labels(file)
     Nsrc = _sources(file)
     tmp  = zeros(6) # temporary array for parsing result
-    tmpRe = zeros(T,Nmom,Nmom,Nmom,Nsrc,Nlab)
-    tmpIm = zeros(T,Nmom,Nmom,Nmom,Nsrc,Nlab)
     conf = 0 
+    src  = 0
+    li   = 0
+    tmpRe = zeros(Nmom,Nmom,Nmom,T,Nsrc,Nlab)
+    tmpIm = zeros(Nmom,Nmom,Nmom,T,Nsrc,Nlab)
+    Re = Array{Float64}[]
+    Im = Array{Float64}[]
+    labels = _label_list(file)
     for line in eachline(file)
         if startswith(line,"[IO][0]")
             if startswith(line,"[IO][0]Configuration")
@@ -69,15 +86,29 @@ function parse_isospin_one(file)
             # first line that starts here encodes the channel, source and configuration name
             if isletter(line[cut+1])
                 label, src = _parse_channel_name(l)
-                @show label, src 
+                li = findfirst(isequal(label),labels)
             else
                 _parse_data!(tmp, l)
                 px, py, pz, t, re, im = tmp
+                px, py, pz, t = Int(px), Int(py), Int(pz), Int(t)
+                # increase indices by one, to have one-based indexing
+                # for momenta: index 1: p = -1
+                #              index 2: p =  0
+                #              index 3: p =  1
+                tmpRe[px+2,py+2,pz+2,t+1,src+1,li] = re
+                tmpIm[px+2,py+2,pz+2,t+1,src+1,li] = im
             end
         end
         if startswith(line,"[MAIN][0]Configuration from")
             conf += 1
             @show conf
         end
+        if startswith(line,"[MAIN][0]Configuration : analysed")
+            push!(Re,copy(tmpRe))
+            push!(Im,copy(tmpIm))
+            tmpRe .= 0.0 
+            tmpIm .= 0.0 
+        end
     end
+    return Re, Im
 end
