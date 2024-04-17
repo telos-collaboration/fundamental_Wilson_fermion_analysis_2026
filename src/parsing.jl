@@ -8,16 +8,11 @@ function latticesize(file)
         end
     end
 end
-function fermionmasses(file;pattern="[MAIN][0]Mass[0]")
-    masses = Float64[]
+function fermionmass(file)
     for line in eachline(file)
-        if occursin(pattern,line)
-            s = split(line,(","))
-            for i in eachindex(s)
-                m = parse(Float64,split(s[i],"=")[2])
-                append!(masses,m)
-            end
-            return masses
+        if startswith(line,"[MAIN][0]mass is :")
+            l = length("[MAIN][0]mass is :")
+            return parse(Float64,line[l+1:end])
         end
     end
 end
@@ -122,12 +117,6 @@ function _sources(file)
         end
     end
 end
-# increase indices by one, to have one-based indexing
-# encode the momenta in a linear index. This is essentially base 3
-#      p_index = (px+1)(py+1)(pz+1)_base3 
-_momentum_to_index(px,py,pz) = 9*(px+1) + 3*(py+1) + (pz+1) + 1
-_index_to_momentum(index) = reverse(Tuple(digits(index-1,base=3,pad=3).-1))
-_index_to_momentum_label(index) = string(_index_to_momentum(index))
 function parse_isospin_one(file)
     T = first(latticesize(file))
     cut  = length("[IO][0]")
@@ -144,10 +133,8 @@ function parse_isospin_one(file)
     # fill arrays with NaNs. The idea is that not all momentum indices are used for all diagrams
     # All available entries will be replaced by finite Float64 numbers, the rest remains a NaN rather 
     # than a zero. 
-    #
-    # Furthermore, I encode the momena in base three, since onlc three possible values are hardcoded
-    Re = zeros(Nlab,Nconf,Nsrc,Nmom^3,T) .* NaN
-    Im = zeros(Nlab,Nconf,Nsrc,Nmom^3,T) .* NaN
+    Re = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
+    Im = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
 
     labels = label_list(file)
     for line in eachline(file)
@@ -164,9 +151,12 @@ function parse_isospin_one(file)
                 _parse_data!(tmp, l)
                 px, py, pz, t, re, im = tmp
                 px, py, pz, t = Int(px), Int(py), Int(pz), Int(t)
-                p_index = _momentum_to_index(px,py,pz)
-                Re[li,conf,src+1,p_index,t+1] = re
-                Im[li,conf,src+1,p_index,t+1] = im
+                # increase indices by one, to have one-based indexing
+                # for momenta: index 1: p = -1
+                #              index 2: p =  0
+                #              index 3: p =  1
+                Re[li,conf,src+1,px+2,py+2,pz+2,t+1] = re
+                Im[li,conf,src+1,px+2,py+2,pz+2,t+1] = im
             end
         end
         if startswith(line,"[MAIN][0]Configuration from")
