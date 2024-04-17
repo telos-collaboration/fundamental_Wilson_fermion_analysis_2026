@@ -96,6 +96,7 @@ function _parse_isospin_one(file)
     # than a zero. 
     Re = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
     Im = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
+
     labels = _label_list(file)
     for line in eachline(file)
         if startswith(line,"[IO][0]")
