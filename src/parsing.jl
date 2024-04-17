@@ -18,21 +18,25 @@ function _parse_channel_name(string)
     return label, src+1
 end
 function _count_labels(file)
-    Nsrc    = _sources(file)
-    cut     = length("[IO][0]")
-    nlabels = 0
-    conf    = 0    
+    return length(_label_list(file))
+end
+function _label_list(file)
+    cut  = length("[IO][0]")
+    conf = 0
+    labels = String[]
     for line in eachline(file)
         if startswith(line,"[IO][0]")
             startswith(line,"[IO][0]Configuration") && continue
-            isletter(line[cut+1]) && (nlabels += 1)
+            if isletter(line[cut+1])
+                label, src = _parse_channel_name(line[cut+1:end])
+                push!(labels,label) 
+            end
         end
         # This overcounts by a factor of the number of sources
         if startswith(line,"[MAIN][0]Configuration from")
             conf += 1
             if conf == 2
-                @assert nlabels % Nsrc == 0
-                return nlabels÷Nsrc
+                return unique(labels)
             end
         end
     end
@@ -56,7 +60,6 @@ function parse_isospin_one(file)
     tmpRe = zeros(T,Nmom,Nmom,Nmom,Nsrc,Nlab)
     tmpIm = zeros(T,Nmom,Nmom,Nmom,Nsrc,Nlab)
     conf = 0 
-    
     for line in eachline(file)
         if startswith(line,"[IO][0]")
             if startswith(line,"[IO][0]Configuration")
@@ -77,5 +80,4 @@ function parse_isospin_one(file)
             @show conf
         end
     end
-
 end
