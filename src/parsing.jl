@@ -8,6 +8,50 @@ function latticesize(file)
         end
     end
 end
+function fermionmasses(file;pattern="[MAIN][0]Mass[0]")
+    masses = Float64[]
+    for line in eachline(file)
+        if occursin(pattern,line)
+            s = split(line,(","))
+            for i in eachindex(s)
+                m = parse(Float64,split(s[i],"=")[2])
+                append!(masses,m)
+            end
+            return masses
+        end
+    end
+end
+function plaquettes(file)
+    plaquettes = Float64[]
+    for line in eachline(file)
+        if occursin("Plaquette",line)
+            line = replace(line,"="=>" ")
+            line = replace(line,":"=>" ")
+            p = parse(Float64,split(line)[end])
+            append!(plaquettes,p)
+        end
+    end
+    return plaquettes
+end
+function _match_config_name(filename)
+    regex = r".*/(?<run>[^/]*)_(?<T>[0-9]+)x(?<L>[0-9]+)x[0-9]+x[0-9]+nc[0-9]+(?:r[A-Z]+)?(?:nf[0-9]+)?b(?<beta>[0-9]+\.[0-9]+)?(?:m-?[0-9]+\.[0-9]+)?n(?<conf>[0-9]+)"
+    return match(regex,filename)
+end
+function inverse_coupling(file)
+    try
+        l = split(file,"beta")[end]
+        β = parse(Float64,split(l,"m")[1])
+        return β
+    catch
+        for line in eachline(file)
+            if occursin("Configuration from",line)
+                match = _match_config_name(line)
+                β = parse(Float64,match[:beta])
+                return β
+            end
+        end
+    end
+end
 function _parse_data!(array,string) 
     substrings = eachsplit(string," ",keepempty=false)
     for (i,s) in enumerate(substrings)
@@ -27,9 +71,9 @@ function _parse_channel_name(string)
     return label, src
 end
 function _count_labels(file)
-    return length(_label_list(file))
+    return length(label_list(file))
 end
-function _label_list(file)
+function label_list(file)
     cut  = length("[IO][0]")
     conf = 0
     labels = String[]
@@ -78,7 +122,7 @@ function _sources(file)
         end
     end
 end
-function _parse_isospin_one(file)
+function parse_isospin_one(file)
     T = first(latticesize(file))
     cut  = length("[IO][0]")
     # The measured  momenta are currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
@@ -97,7 +141,7 @@ function _parse_isospin_one(file)
     Re = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
     Im = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
 
-    labels = _label_list(file)
+    labels = label_list(file)
     for line in eachline(file)
         if startswith(line,"[IO][0]")
             if startswith(line,"[IO][0]Configuration")
@@ -125,4 +169,17 @@ function _parse_isospin_one(file)
         end
     end
     return Re, Im
+end
+function confignames(file)
+    fns = AbstractString[]
+    for line in eachline(file)
+        if occursin("read",line)
+            if occursin("Configuration",line)
+                pos1 = findlast('/',line)
+                pos2 = findnext(']',line,pos1)
+                push!(fns,line[pos1+1:pos2-1])
+            end
+        end
+    end
+    return fns
 end
