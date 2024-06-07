@@ -16,14 +16,14 @@ end
 hdf5file = "isospin1_raw.hdf5"
 h5dset = h5open(hdf5file)
 
-CorrRe = h5dset["E1/p(0,0,0)/rho_g1/p_diag(1,0,0)/C_re"][] + h5dset["E1/p(0,0,0)/rho_g2/p_diag(0,1,0)/C_re"][] + h5dset["E1/p(0,0,0)/rho_g3/p_diag(0,0,1)/C_re"][]
-CorrRe = h5dset["E1/p(0,0,0)/pi/p_diag(1,0,0)/C_re"][]
-CorrRe = h5dset["E1/p(0,0,0)/pi/p_diag(1,0,0)/C_re"][] + h5dset["E1/p(0,0,0)/pi/p_diag(0,1,0)/C_re"][] + h5dset["E1/p(0,0,0)/pi/p_diag(0,0,1)/C_re"][]
+Corr = h5dset["E1/p(0,0,1)/r1/p_diag(0,0,1)/C_re"][]
+Corr = h5dset["E1/p(0,0,1)/d/p_diag(0,0,1)/C_re"][]
+Corr = h5dset["E1/p(0,0,1)/pi/p_diag(0,0,1)/C_re"][]
+Corr = h5dset["E1/p(0,0,1)/rho_g33/p_diag(0,0,1)/C_re"][]
+Corr = h5dset["E1/p(1,1,0)/t1_g3/p_diag(1,1,0)/C_im"][]
 
-C_re, ΔC_re = _average_correlator(CorrRe)
+C_re, ΔC_re = _average_correlator(Corr)
 
 plt = plot()
-scatter!(plt,C_re,yerr=ΔC_re)
-#scatter!(plt,C_re,yerr=ΔC_re,yscale=:log10)
-#scatter!(plt,C_im,yerr=ΔC_im)
+scatter!(plt,C_re,yerr=ΔC_re,yscale=:log10)
 
