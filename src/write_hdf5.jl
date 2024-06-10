@@ -28,6 +28,7 @@ function isospin1_to_hdf5(file,h5file;setup=true,ensemble="")
     
     for i in 1:Nlabels
         channel, P_tot =_splitlabel(labels[i])
+        # only the 'd' diagram has negative momenta being measured in HiRep
         pindex = channel=="d" ? (1:3) : (2:3)
         for px in pindex, py in pindex, pz in pindex
             p_diag = "p_diag($(px-2),$(py-2),$(pz-2))"

@@ -136,12 +136,18 @@ function parse_isospin_one(file)
     Re = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
     Im = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
 
+    nlines = countlines(file)
+    p = Progress(nlines)
+
     labels = label_list(file)
     for line in eachline(file)
-        if startswith(line,"[IO][0]")
-            if startswith(line,"[IO][0]Configuration")
-                continue
+        if startswith(line,"[IO][0]Configuration")
+            if occursin("read",line)
+                conf += 1
             end
+            continue
+        end
+        if startswith(line,"[IO][0]")
             l = line[cut+1:end]
             # first line that starts here encodes the channel, source and configuration name
             if isletter(line[cut+1])
@@ -151,7 +157,7 @@ function parse_isospin_one(file)
                 _parse_data!(tmp, l)
                 px, py, pz, t, re, im = tmp
                 px, py, pz, t = Int(px), Int(py), Int(pz), Int(t)
-                # increase indices by one, to have one-based indexing
+                # increase indices by two, to have one-based indexing
                 # for momenta: index 1: p = -1
                 #              index 2: p =  0
                 #              index 3: p =  1
@@ -159,9 +165,7 @@ function parse_isospin_one(file)
                 Im[li,conf,src+1,px+2,py+2,pz+2,t+1] = im
             end
         end
-        if startswith(line,"[MAIN][0]Configuration from")
-            conf += 1
-        end
+        next!(p)
     end
     return Re, Im
 end
