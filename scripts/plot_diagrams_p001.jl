@@ -5,7 +5,7 @@ using HDF5
 using Statistics
 using LaTeXStrings
 plotlyjs(frame=:box, legend=:topright,legendfontsize=12)
-pgfplotsx(frame=:box, legend=:topright,legendfontsize=12,markersize=5,tickfontsize=12)
+pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=16, legendfontsize=14,markersize=5,tickfontsize=12)
 function _average_correlator(Corr)
     N, nhits, T = size(Corr)
     CorrAvg = dropdims(mean(Corr,dims=2),dims=2)
@@ -16,7 +16,7 @@ end
 
 # Lt32Ls24beta6.9m1-0.92m2-0.92
 
-hdf5file = "isospin1_h16_raw.hdf5"
+hdf5file = "isospin1_h4_raw.hdf5"
 h5dset = h5open(hdf5file)
 
 p1 = "(0,0,1)"
@@ -37,35 +37,44 @@ Cπ,  ΔCπ  = _average_correlator(Corrπ)
 Cρ,  ΔCρ  = _average_correlator(Corrρ)
 CT1, ΔCT1 = _average_correlator(CorrT1)
 CT2, ΔCT2 = _average_correlator(CorrT2)
-
 CR1, ΔCR1 = _average_correlator(CorrR1)
 CR2, ΔCR2 = _average_correlator(CorrR2)
 CR3, ΔCR3 = _average_correlator(CorrR3)
 CR4, ΔCR4 = _average_correlator(CorrR4)
 
-pltCross = plot(yscale=:log10,legend=:top)
+title = L"32 \times 24^3, \beta=6.9, m_0^f=-0.92, \vec p = %$p1"
+pltCross = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10,legend=:top)
+pltMes   = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
+pltPiPi  = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10, legend_columns=2, legend=:top)
+pltR3R4  = plot(; title, xlabel=L"t",ylabel=L"C(t)",legend=:top)
+
 scatter!(pltCross,CT1,yerr=ΔCT1,label=L"$-$Im(T1)",marker=:circle)
 scatter!(pltCross,CT2,yerr=ΔCT2,label=L"$+$Im(T2)",marker=:star)
 
-pltMes  = plot(yscale=:log10)
-scatter!(pltMes,Cπ, yerr=ΔCπ, label=L"$\pi~  \bf p =%$p$",alpha=0.5)
-scatter!(pltMes,Cρ, yerr=ΔCρ, label=L"$\rho~ \bf p =%$p$",alpha=0.5)
+scatter!(pltMes,Cπ, yerr=ΔCπ, label=L"\pi",alpha=0.9)
+scatter!(pltMes,Cρ, yerr=ΔCρ, label=L"\rho",alpha=0.9)
 
 t_R3R4 = vcat(1:7,27:32)
-pltPiPi = plot(yscale=:log10, legend_columns=2, legend=:top)
 scatter!(pltPiPi,CR1,yerr=ΔCR1,label="R1",marker=:rect)
 scatter!(pltPiPi,CR2,yerr=ΔCR2,label="R2",marker=:cross)
 scatter!(pltPiPi,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
 scatter!(pltPiPi,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
 scatter!(pltPiPi,CD, yerr=ΔCD ,label="D2",marker=:circle)
 
-pltR1R2 = plot(legend=:top)
 t_R3R4 = vcat(6:28)
-scatter!(pltR1R2,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
-scatter!(pltR1R2,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
+scatter!(pltR3R4,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
+scatter!(pltR3R4,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
 
+display(pltPiPi)
+display(pltR3R4)
+display(pltMes)
+display(pltCross)
 
-pltPiPi
-pltR1R2
-pltMes
-pltCross
+save=true
+if save
+    isdir("plots") || mkpath("plots")
+    savefig(pltPiPi,"plots/box_diagrams.pdf")
+    savefig(pltR3R4,"plots/R3R4.pdf")
+    savefig(pltMes,"plots/mesons.pdf")
+    savefig(pltCross,"plots/triangles.pdf")
+end
