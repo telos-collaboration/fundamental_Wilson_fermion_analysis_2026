@@ -42,7 +42,7 @@ CR2, ΔCR2 = _average_correlator(CorrR2)
 CR3, ΔCR3 = _average_correlator(CorrR3)
 CR4, ΔCR4 = _average_correlator(CorrR4)
 
-title = L"32 \times 24^3, \beta=6.9, m_0^f=-0.92, \vec p = %$p1"
+title = L"32 \times 24^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1"
 pltCross = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10,legend=:top)
 pltMes   = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
 pltPiPi  = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10, legend_columns=2, legend=:top)
