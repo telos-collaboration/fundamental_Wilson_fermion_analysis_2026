@@ -31,3 +31,15 @@ function _insert_decimal(val::Int,digits)
     inserted = int*"."*dec
     return inserted
 end
+function _average_correlator(Corr)
+    N, nhits, T = size(Corr)
+    CorrAvg = dropdims(mean(Corr,dims=2),dims=2)
+    C  = dropdims(mean(CorrAvg,dims=1),dims=1)
+    ΔC = dropdims(std(CorrAvg,dims=1),dims=1)./sqrt(N)
+    return C, ΔC
+end
+function D1(h5dset,p)
+    πp =  h5dset["E1/p$p/pi/p_diag$p/C_re"][]
+    π0 =  h5dset["E1/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
+    return πp .* π0
+end
