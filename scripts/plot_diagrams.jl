@@ -9,26 +9,25 @@ pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=16, legen
 include("utils.jl")
 
 # Lt32Ls24beta6.9m1-0.92m2-0.92
+hdf5file = "isospin1_h4_L16_raw.hdf5"
 hdf5file = "isospin1_h4_raw.hdf5"
 h5dset = h5open(hdf5file)
 
-p1 = "(0,0,1)"
-Corrπ  =  h5dset["E1/p$p1/pi/p_diag$p1/C_re"][]
-Corrρ  =  h5dset["E1/p$p1/rho_g33/p_diag$p1/C_re"][]
-CorrT1 = -h5dset["E1/p$p1/t1_g3/p_diag$p1/C_im"][]
-CorrT2 =  h5dset["E1/p$p1/t2_g3/p_diag$p1/C_im"][]
-CorrR1 =  h5dset["E1/p$p1/r1/p_diag$p1/C_re"][]
-CorrR2 =  h5dset["E1/p$p1/r2/p_diag$p1/C_re"][]
-CorrR3 =  h5dset["E1/p$p1/r3/p_diag$p1/C_re"][]
-CorrR4 =  h5dset["E1/p$p1/r4/p_diag$p1/C_re"][]
-CorrD1 = D1(h5dset,p1)
-CorrD2 =  h5dset["E1/p$p1/d/p_diag$p1/C_re"][]
+p1  = "(0,0,1)"
+p1  = "(1,1,0)"
+ens = "E1"
+T, L = h5dset["$ens/lattice"][1:2]
+L3 = L^3
+cut = 4
+title = L"%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1"
+
+Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens)
+Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp110(h5dset,ens)
 
 N, nhits, T = size(CorrD1)
-L3 = 24^3
 
-CD1, ΔCD1  = _average_correlator(CorrD1)
-CD2, ΔCD2  = _average_correlator(CorrD2)
+CD1, ΔCD1 = _average_correlator(CorrD1)
+CD2, ΔCD2 = _average_correlator(CorrD2)
 Cπ,  ΔCπ  = _average_correlator(Corrπ)
 Cρ,  ΔCρ  = _average_correlator(Corrρ)
 CT1, ΔCT1 = _average_correlator(CorrT1)
@@ -38,7 +37,6 @@ CR2, ΔCR2 = _average_correlator(CorrR2)
 CR3, ΔCR3 = _average_correlator(CorrR3)
 CR4, ΔCR4 = _average_correlator(CorrR4)
 
-title = L"32 \times 24^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1"
 pltCross = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10,legend=:top)
 pltMes   = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
 pltPiPi  = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10, legend_columns=2, legend=:top)
@@ -50,7 +48,7 @@ scatter!(pltCross,CT2,yerr=ΔCT2,label=L"$+$Im(T2)",marker=:star)
 scatter!(pltMes,Cπ, yerr=ΔCπ, label=L"\pi" ,marker=:rect,alpha=0.9)
 scatter!(pltMes,Cρ, yerr=ΔCρ, label=L"\rho",marker=:circ,alpha=0.9)
 
-t_R3R4 = vcat(1:7,27:32)
+t_R3R4 = vcat(1:cut+1,T-cut+1:T)
 scatter!(pltPiPi,CR1,yerr=ΔCR1,label="R1",marker=:rect)
 scatter!(pltPiPi,CR2,yerr=ΔCR2,label="R2",marker=:cross)
 scatter!(pltPiPi,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
@@ -58,7 +56,7 @@ scatter!(pltPiPi,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
 scatter!(pltPiPi,CD1, yerr=ΔCD1,label="D1",marker=:pent)
 scatter!(pltPiPi,CD2, yerr=ΔCD2,label="D2",marker=:circ)
 
-t_R3R4 = vcat(6:28)
+t_R3R4 = vcat(cut:T-cut+2)
 scatter!(pltR3R4,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
 scatter!(pltR3R4,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
 
