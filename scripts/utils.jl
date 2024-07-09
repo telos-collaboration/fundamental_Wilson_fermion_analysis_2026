@@ -72,3 +72,30 @@ function correlatorsp110(h5dset,ens)
     CorrR3 =   h5dset["$ens/p$p1/r3/p_diag$p1/C_re"][]
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
+function correlatorsp000(h5dset,ens)
+    p1 = "(0,0,0)"
+    CorrD1 = D1(h5dset,p1)
+    CorrD2 = h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
+    Corrπ  = h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
+    # THE FOLLOWING DOES NOT GIVE A SIGNAL. IS SOMETHING WRONG WITH THE PARSING?
+    Corrρ  =  (h5dset["$ens/p$p1/rho_g11/p_diag$p1/C_re"][])
+    #Corrρ  =  (h5dset["$ens/p$p1/rho_g22/p_diag$p1/C_re"][])
+    CorrT1 = -(h5dset["$ens/p$p1/t1_g1/p_diag$p1/C_im"][]   + h5dset["E1/p$p1/t1_g2/p_diag$p1/C_im"][])/sqrt(2)
+    CorrT2 =  (h5dset["$ens/p$p1/t2_g1/p_diag$p1/C_im"][]   + h5dset["E1/p$p1/t2_g2/p_diag$p1/C_im"][])/sqrt(2)
+    CorrR1 =   h5dset["$ens/p$p1/r1/p_diag$p1/C_re"][]
+    CorrR2 =   h5dset["$ens/p$p1/r2/p_diag$p1/C_re"][]
+    CorrR3 =   h5dset["$ens/p$p1/r3/p_diag$p1/C_re"][]
+    return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
+end
+function read_hdf5_file(file,ens,p1)
+    h5dset = h5open(file)
+    T, L = h5dset["$ens/lattice"][1:2]
+    if p1 == "(0,0,0)"
+        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp000(h5dset,ens)
+    elseif p1 == "(0,0,1)"
+        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens)
+    elseif p1 == "(1,1,0)"
+        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp110(h5dset,ens)
+    end
+    return T, L, Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
+end
