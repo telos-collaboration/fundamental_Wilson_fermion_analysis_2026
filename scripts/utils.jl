@@ -43,8 +43,8 @@ function D1(h5dset,p)
     π0 =  h5dset["E1/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
     return πp .* π0
 end
-function correlatorsp001(h5dset,ens)
-    p1 = "(0,0,1)"
+function correlatorsp001(h5dset,ens;p=1)
+    p1 = "(0,0,$p)"
     CorrD1 = D1(h5dset,p1)
     CorrD2 =  h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
     Corrπ  =  h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
@@ -57,8 +57,8 @@ function correlatorsp001(h5dset,ens)
     CorrR4 =  h5dset["$ens/p$p1/r4/p_diag$p1/C_re"][]
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
-function correlatorsp110(h5dset,ens)
-    p1 = "(1,1,0)"
+function correlatorsp110(h5dset,ens;p=1)
+    p1 = "($p,$p,0)"
     CorrD1 = D1(h5dset,p1)
     CorrD2 = h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
     Corrπ  = h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
@@ -74,12 +74,12 @@ function correlatorsp110(h5dset,ens)
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
 function correlatorsp000(h5dset,ens)
-    CorrD1 = D1(h5dset,"(0,0,0)")
-    CorrD2 = h5dset["$ens/p(0,0,1)/d/p_diag(0,0,0)/C_re"][]
     Corrπ  = h5dset["$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
+    Corrρ  = h5dset["$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re"][]
+    CorrD1 = D1(h5dset,"(0,0,0)")
     # THE FOLLOWING IS NOT FULLY SELFCONSISTENT
     # It is used to compare the correlator normalization
-    Corrρ  =  h5dset["$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re"][]
+    CorrD2 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,0)/C_re"][]
     CorrT1 = -h5dset["$ens/p(0,0,1)/t1_g1/p_diag(0,0,0)/C_im"][]  
     CorrT2 =  h5dset["$ens/p(0,0,1)/t2_g1/p_diag(0,0,0)/C_im"][] 
     CorrR1 =  h5dset["$ens/p(0,0,1)/r1/p_diag(0,0,0)/C_re"][]
@@ -88,15 +88,15 @@ function correlatorsp000(h5dset,ens)
     CorrR4 =  h5dset["$ens/p(0,0,1)/r4/p_diag(0,0,0)/C_re"][]
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
-function read_hdf5_file(file,ens,p1)
+function read_hdf5_file(file,ens,p1,p)
     h5dset = h5open(file)
     T, L = h5dset["$ens/lattice"][1:2]
     if p1 == "(0,0,0)"
         Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp000(h5dset,ens)
-    elseif p1 == "(0,0,1)"
-        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens)
-    elseif p1 == "(1,1,0)"
-        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp110(h5dset,ens)
+    elseif p1 == "(0,0,1)" || "(0,0,2)" || "(0,0,3)"
+        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp00n(h5dset,ens;p)
+    elseif p1 == "(1,1,0)" || "(2,2,0)" || "(3,3,0)"
+        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorspnn0(h5dset,ens;p)
     end
     return T, L, Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
