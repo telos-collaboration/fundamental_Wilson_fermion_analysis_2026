@@ -70,6 +70,7 @@ function correlatorsp110(h5dset,ens)
     CorrR1 =   h5dset["$ens/p$p1/r1/p_diag$p1/C_re"][]
     CorrR2 =   h5dset["$ens/p$p1/r2/p_diag$p1/C_re"][]
     CorrR3 =   h5dset["$ens/p$p1/r3/p_diag$p1/C_re"][]
+    CorrR4 =   h5dset["$ens/p$p1/r4/p_diag$p1/C_re"][]
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
 function correlatorsp000(h5dset,ens)
@@ -84,6 +85,7 @@ function correlatorsp000(h5dset,ens)
     CorrR1 =  h5dset["$ens/p(0,0,1)/r1/p_diag(0,0,0)/C_re"][]
     CorrR2 =  h5dset["$ens/p(0,0,1)/r2/p_diag(0,0,0)/C_re"][]
     CorrR3 =  h5dset["$ens/p(0,0,1)/r3/p_diag(0,0,0)/C_re"][]
+    CorrR4 =  h5dset["$ens/p(0,0,1)/r4/p_diag(0,0,0)/C_re"][]
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
 function read_hdf5_file(file,ens,p1)

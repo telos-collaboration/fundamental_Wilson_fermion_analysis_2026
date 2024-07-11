@@ -9,12 +9,12 @@ pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=16, legen
 include("utils.jl")
 
 # Lt32Ls24beta6.9m1-0.92m2-0.92
-hdf5file = "isospin1_h4_L16_raw.hdf5"
 hdf5file = "isospin1_h4_raw.hdf5"
+hdf5file = "isospin1_h4_L16_raw.hdf5"
 h5dset = h5open(hdf5file)
 
-p1  = "(0,0,1)"
 p1  = "(1,1,0)"
+p1  = "(0,0,1)"
 ens = "E1"
 T, L = h5dset["$ens/lattice"][1:2]
 L3 = L^3

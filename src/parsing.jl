@@ -117,12 +117,12 @@ function _sources(file)
         end
     end
 end
-function parse_isospin_one(file)
+function parse_isospin_one(file,pmax)
     T = first(latticesize(file))
     cut  = length("[IO][0]")
     # The measured  momenta are currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
     # plus negative momenta are allowed for the 4-point functions 
-    Nmom  = 3 #(allowed values -1,0,1) 
+    Nmom  = 2pmax + 1 #(allowed values -pmax,...,0,...pmax) 
     Nconf = _nconfs(file)
     Nlab = _count_labels(file)
     Nsrc = _sources(file)
@@ -157,12 +157,13 @@ function parse_isospin_one(file)
                 _parse_data!(tmp, l)
                 px, py, pz, t, re, im = tmp
                 px, py, pz, t = Int(px), Int(py), Int(pz), Int(t)
-                # increase indices by two, to have one-based indexing
-                # for momenta: index 1: p = -1
-                #              index 2: p =  0
-                #              index 3: p =  1
-                Re[li,conf,src+1,px+2,py+2,pz+2,t+1] = re
-                Im[li,conf,src+1,px+2,py+2,pz+2,t+1] = im
+                offset = pmax + 1
+                # increase indices by pmax+1, to have one-based indexing
+                # e.g. for pmax=1: index 1: p = -1
+                #                  index 2: p =  0
+                #                  index 3: p =  1
+                Re[li,conf,src+1,px+offset,py+offset,pz+offset,t+1] = re
+                Im[li,conf,src+1,px+offset,py+offset,pz+offset,t+1] = im
             end
         end
         next!(p)
