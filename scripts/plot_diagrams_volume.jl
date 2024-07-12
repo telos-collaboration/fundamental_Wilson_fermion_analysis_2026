@@ -23,7 +23,7 @@ ret2 = read_hdf5_file(file2,ens,p1B,3)
 
 L1 = ret1[2]
 L2 = ret2[2]
-ind_corr = 12
+ind_corr = 1
 Corr1 = ret1[ind_corr] 
 Corr2 = ret2[ind_corr] 
 
@@ -35,8 +35,8 @@ plt2 = plot(;xlabel=L"t",ylabel=L"$C(t)$ ratio",legend=:top)
 
 ratio(C1,C2) = C1 / C2
 Δratio(C1,C2,ΔC1,ΔC2) = ΔC1 / C2 + ΔC2 * C1 / C2 ^ 2
-N1 = L1^(3)
-N2 = L2^(3)
+N1 = L1^(6)
+N2 = L2^(6)
 s  = (N1/N2)
 
 scatter!(plt1,C1/N1, yerr=ΔC1/N1, label=L"\pi (L=%$L1)" ,marker=:rect,alpha=0.9)
