@@ -4,25 +4,24 @@ using Plots
 using HDF5
 using Statistics
 using LaTeXStrings
-plotlyjs(frame=:box, legend=:topright,legendfontsize=12)
 pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=16, legendfontsize=14,markersize=5,tickfontsize=12)
+plotlyjs(frame=:box, legend=:topright,legendfontsize=12)
 include("utils.jl")
 
-# Lt32Ls24beta6.9m1-0.92m2-0.92
-hdf5file = "isospin1_h4_raw.hdf5"
-hdf5file = "isospin1_h4_L16_raw.hdf5"
+hdf5file = "isospin1_L16_h2_p2.hdf5"
+hdf5file = "isospin1_L24_h16_p23.hdf5"
 h5dset = h5open(hdf5file)
 
-p1  = "(1,1,0)"
-p1  = "(0,0,1)"
+p1  = "(0,0,3)"
+p   = 3
 ens = "E1"
 T, L = h5dset["$ens/lattice"][1:2]
+
 L3 = L^3
 cut = 4
 title = L"%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1"
 
-Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens)
-Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp110(h5dset,ens)
+Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens;p)
 
 N, nhits, T = size(CorrD1)
 
@@ -51,14 +50,13 @@ scatter!(pltMes,Cρ, yerr=ΔCρ, label=L"\rho",marker=:circ,alpha=0.9)
 t_R3R4 = vcat(1:cut+1,T-cut+1:T)
 scatter!(pltPiPi,CR1,yerr=ΔCR1,label="R1",marker=:rect)
 scatter!(pltPiPi,CR2,yerr=ΔCR2,label="R2",marker=:cross)
-scatter!(pltPiPi,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
-scatter!(pltPiPi,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
+#scatter!(pltPiPi,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
+#scatter!(pltPiPi,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
 scatter!(pltPiPi,CD1, yerr=ΔCD1,label="D1",marker=:pent)
 scatter!(pltPiPi,CD2, yerr=ΔCD2,label="D2",marker=:circ)
 
-t_R3R4 = vcat(cut:T-cut+2)
-scatter!(pltR3R4,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
-scatter!(pltR3R4,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
+scatter!(pltR3R4,CR3,yerr=ΔCR3,label="R3",marker=:pent)
+scatter!(pltR3R4,CR4,yerr=ΔCR4,label="R4",marker=:star)
 
 display(pltR3R4)
 display(pltMes)

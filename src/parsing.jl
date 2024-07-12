@@ -168,6 +168,7 @@ function parse_isospin_one(file,pmax)
         end
         next!(p)
     end
+    finish!(p)
     return Re, Im
 end
 function confignames(file)

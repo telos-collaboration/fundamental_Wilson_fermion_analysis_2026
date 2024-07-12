@@ -1,8 +1,6 @@
 using Pkg; Pkg.activate(".")
 using ScatteringI1
 
-path = 
-
 pmax = 1
 file = "/home/fabian/Downloads/I1_HDF5/out_scattering_I1_L24_h4"
 h5file = "isospin1_L24_h4.hdf5"
