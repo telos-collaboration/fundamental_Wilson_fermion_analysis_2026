@@ -93,10 +93,10 @@ function read_hdf5_file(file,ens,p1,p)
     T, L = h5dset["$ens/lattice"][1:2]
     if p1 == "(0,0,0)"
         Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp000(h5dset,ens)
-    elseif p1 == "(0,0,1)" || "(0,0,2)" || "(0,0,3)"
-        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp00n(h5dset,ens;p)
-    elseif p1 == "(1,1,0)" || "(2,2,0)" || "(3,3,0)"
-        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorspnn0(h5dset,ens;p)
+    elseif p1 ∈ [ "(0,0,1)" , "(0,0,2)" , "(0,0,3)"]
+        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens;p)
+    elseif p1 ∈ [ "(1,1,0)" , "(2,2,0)" , "(3,3,0)"]
+        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp110(h5dset,ens;p)
     end
     return T, L, Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
