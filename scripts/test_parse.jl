@@ -1,6 +1,7 @@
 using Pkg; Pkg.activate(".")
 using ScatteringI1
 
+#=
 pmax = 1
 file = "/home/fabian/Downloads/I1_HDF5/out_scattering_I1_L24_h4"
 h5file = "isospin1_L24_h4.hdf5"
@@ -24,4 +25,10 @@ isospin1_to_hdf5(file,h5file,pmax;ensemble="E1")
 pmax = 2
 file = "/home/fabian/Downloads/I1_HDF5/out_scattering_I1_L16_h2_p2"
 h5file = "isospin1_L16_h2_p2.hdf5"
+isospin1_to_hdf5(file,h5file,pmax;ensemble="E1")
+=#
+
+pmax = 1
+file = "/home/fabian/Dokumente/Physics/Data/DataVSC/measurements/runsSp4/Lt32Ls16beta6.9m1-0.92m2-0.92/out/out_scattering_I1_PA"
+h5file = "isospin1_L16_PA.hdf5"
 isospin1_to_hdf5(file,h5file,pmax;ensemble="E1")

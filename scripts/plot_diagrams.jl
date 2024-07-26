@@ -5,13 +5,14 @@ using HDF5
 using Statistics
 using LaTeXStrings
 #gr(frame=:box, legend=:topright,legendfontsize=12)
-plotlyjs(frame=:box)
 pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=16, legendfontsize=14,markersize=5,tickfontsize=12)
+plotlyjs(frame=:box)
 include("utils.jl")
 
 hdf5file = "isospin1_L16_h2_p2.hdf5"
 hdf5file = "isospin1_L24_h16_p23.hdf5"
 hdf5file = "isospin1_L24_h16.hdf5"
+hdf5file = "isospin1_L16_PA.hdf5"
 h5dset = h5open(hdf5file)
 
 p1  = "(0,0,1)"
@@ -22,6 +23,7 @@ T, L = h5dset["$ens/lattice"][1:2]
 L3, L6 = L^3, L^6
 title = L"%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1"
 range = vcat(1:9,25:32)
+range = vcat(1:32)
 
 Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens;p)
 
