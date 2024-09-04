@@ -5,14 +5,14 @@ using HDF5
 using Statistics
 using LaTeXStrings
 #gr(frame=:box, legend=:topright,legendfontsize=12)
-pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=16, legendfontsize=14,markersize=5,tickfontsize=12)
+pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
 plotlyjs(frame=:box)
 include("utils.jl")
 
-hdf5file = "isospin1_L16_h2_p2.hdf5"
 hdf5file = "isospin1_L24_h16_p23.hdf5"
 hdf5file = "isospin1_L24_h16.hdf5"
-hdf5file = "isospin1_L16_PA.hdf5"
+hdf5file = "isospin1_L16_h4.hdf5"
+hdf5file = "isospin1_L16_PA_h4.hdf5"
 h5dset = h5open(hdf5file)
 
 p1  = "(0,0,1)"
@@ -40,43 +40,42 @@ CR2, ΔCR2 = _average_correlator(CorrR2/L3)
 CR3, ΔCR3 = _average_correlator(CorrR3/L3)
 CR4, ΔCR4 = _average_correlator(CorrR4/L3)
 
-pltCross = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10,legend=:top)
+pltCross = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
 pltMes   = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
-pltPiPi  = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10, legend_columns=1, legend=:top)
-pltR3R4  = plot(; title, xlabel=L"t",ylabel=L"C(t)",legend=:top)
-pltPosNeg = plot(; title, xlabel=L"t",ylabel=L"C(t)",legend=:top,yscale=:log10)
+pltPiPi  = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
+pltR3R4  = plot(; title, xlabel=L"t",ylabel=L"C(t)")
+pltPosNeg = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
 
 scatter!(pltCross,CT1,yerr=ΔCT1,label=L"$-$Im(T1)",marker=:circle)
 scatter!(pltCross,CT2,yerr=ΔCT2,label=L"$+$Im(T2)",marker=:star)
 scatter!(pltMes,  Cπ ,yerr=ΔCπ ,label=L"\pi" ,marker=:rect,alpha=0.9)
 scatter!(pltMes,  Cρ ,yerr=ΔCρ ,label=L"\rho",marker=:circ,alpha=0.9)
 
-
 scatter!(pltPosNeg,CD1+CR1+CR2,yerr=ΔCR1+ΔCR2+ΔCD1,label="(D1+R1+R2)",marker=:rect)
 scatter!(pltPosNeg,range,(CD2+CR3+CR4)[range],yerr=(ΔCD2+ΔCR3+ΔCR4)[range],label="(D2+R3+R4)",marker=:pent)
-#scatter!(pltPosNeg,CD1+CR1+CR2-(CD2+CR3+CR4),yerr=ΔCR2,label="full",marker=:cross)
-#scatter!(pltPosNeg,CD1+CR1+CR2+(CD2+CR3+CR4),yerr=ΔCR2,label="full (non relative sign)",marker=:cross)
+scatter!(pltPosNeg,range2,(CD2+CR3+CR4+CD1+CR1+CR2)[range2],yerr=(ΔCD2+ΔCR3+ΔCR4+ΔCR1+ΔCR2+ΔCD1)[range2],label="all",marker=:pent)
+scatter!(pltPosNeg,CD1+CR1+CR2-(CD2+CR3+CR4),yerr=ΔCR2,label="full",marker=:cross)
+scatter!(pltPosNeg,CD1+CR1+CR2+(CD2+CR3+CR4),yerr=ΔCR2,label="full (non relative sign)",marker=:cross)
 
 cut = 6
-t_R3R4 = vcat(1:cut+1,T-cut+1:T)
+t_R3R4 = 1:32
 scatter!(pltPiPi,CD1, yerr=ΔCD1,label="D1",marker=:pent)
 scatter!(pltPiPi,CD2, yerr=ΔCD2,label="D2",marker=:circ)
 scatter!(pltPiPi,CR1,yerr=ΔCR1,label="R1/2",marker=:rect)
 scatter!(pltPiPi,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3/4",marker=:pent)
-#scatter!(pltPiPi,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
-#scatter!(pltPiPi,CR2,yerr=ΔCR2,label="R2",marker=:cross)
+scatter!(pltPiPi,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
+scatter!(pltPiPi,CR2,yerr=ΔCR2,label="R2",marker=:cross)
 
-#scatter!(pltPiPi,CT1,yerr=ΔCT1,label=L"$-$Im(T1)",marker=:circle)
+scatter!(pltPiPi,CT1,yerr=ΔCT1,label=L"$-$Im(T1)",marker=:circle)
 scatter!(pltPiPi,CT2,yerr=ΔCT2,label=L"$\pm$Im(T1/2)",marker=:star)
 
-
-#display(pltR3R4)
-#display(pltMes)
-#display(pltCross)
+display(pltR3R4)
+display(pltMes)
+display(pltCross)
 display(pltPiPi)
-#display(pltPosNeg)
-savefig(pltPiPi,"all_diagrams.pdf")
-savefig(pltPosNeg,"sum_of_each_sign.pdf")
+display(pltPosNeg)
+#savefig(pltPiPi,"all_diagrams.pdf")
+#savefig(pltPosNeg,"sum_of_each_sign.pdf")
 
 
 save=false
