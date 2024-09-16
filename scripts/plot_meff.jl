@@ -40,7 +40,7 @@ CR2, ΔCR2 = _average_correlator(CorrR2/L3)
 CR3, ΔCR3 = _average_correlator(CorrR3/L3)
 CR4, ΔCR4 = _average_correlator(CorrR4/L3)
 
-Corr2π = dropdims(mean(1CorrD1/L6+2CorrR1/L3-1CorrD2/L6-2CorrR3/L3,dims=2),dims=2)
+Corr2π = dropdims(mean(CorrD1/L6+2CorrR1/L3+CorrD2/L6+2CorrR3/L3,dims=2),dims=2)
 Corr2π = correlator_derivative(Corr2π,t_dim=2)
 
 Corr1π0 = dropdims(mean(Corrπ0/L3,dims=2),dims=2)
