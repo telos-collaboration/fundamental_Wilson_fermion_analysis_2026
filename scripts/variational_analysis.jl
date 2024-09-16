@@ -6,10 +6,11 @@ using Statistics
 using LaTeXStrings
 include("utils.jl")
 
-hdf5file = "isospin1_L16_PA_h4.hdf5"
 hdf5file = "isospin1_L24_h16_p23.hdf5"
 hdf5file = "isospin1_L24_h16.hdf5"
+hdf5file = "isospin1_L24_h16.hdf5"
 hdf5file = "isospin1_L16_h4.hdf5"
+hdf5file = "isospin1_L16_PA_h4.hdf5"
 h5dset = h5open(hdf5file)
 
 p1  = "(0,0,1)"
@@ -38,10 +39,16 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
 end
 Corr2π = pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
 Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
+Corr   = correlator_derivative(Corr,t_dim=4)
 eigvals, Δeigvals = eigenvalues(Corr)
-eigvals
+eigvals_resamples = eigenvalues_jackknife_samples(Corr)
+meff, Δmeff =  meff_from_jackknife(eigvals_resamples;sign=+1,swap=nothing)
 
 plotlyjs()
 plt = plot(yscale=:log10)
 scatter!(plt,eigvals[2,:],yerr=Δeigvals[2,:])
 scatter!(plt,abs.(eigvals[1,:]),yerr=Δeigvals[1,:])
+
+plt_meff = plot()
+scatter!(plt_meff,meff[2,:],yerr=Δmeff[2,:])
+scatter!(plt_meff,meff[1,:],yerr=Δmeff[1,:])

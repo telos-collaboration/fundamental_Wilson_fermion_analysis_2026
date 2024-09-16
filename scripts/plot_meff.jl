@@ -5,16 +5,16 @@ using HDF5
 using Statistics
 using LaTeXStrings
 #gr(frame=:box, legend=:topright,legendfontsize=12)
-pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
+#pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
 plotlyjs(frame=:box)
 include("utils.jl")
 
-hdf5file = "isospin1_L24_h16.hdf5"
 hdf5file = "isospin1_L24_h16_p23.hdf5"
 hdf5file = "isospin1_L16_PA_h4.hdf5"
 hdf5file = "isospin1_L16_h4.hdf5"
-hdf5file = "isospin1_T24_L12.hdf5"
 hdf5file = "isospin1_T32_L12.hdf5"
+hdf5file = "isospin1_T24_L12.hdf5"
+hdf5file = "isospin1_L24_h16.hdf5"
 
 h5dset = h5open(hdf5file)
 
