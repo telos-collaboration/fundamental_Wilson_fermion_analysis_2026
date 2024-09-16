@@ -26,7 +26,6 @@ range = vcat(1:9,25:32)
 range = vcat(1:32)
 
 Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens;p)
-
 N, nhits, T = size(CorrD1)
 
 CD1, ΔCD1 = _average_correlator(CorrD1/L6)
@@ -40,17 +39,29 @@ CR2, ΔCR2 = _average_correlator(CorrR2/L3)
 CR3, ΔCR3 = _average_correlator(CorrR3/L3)
 CR4, ΔCR4 = _average_correlator(CorrR4/L3)
 
-Corr2π = CorrD1/L6+2CorrR1/L3+CorrD2/L6+2CorrR3/L3
-Corr2π_deriv = correlator_derivative(Corr2π,t_dim=3)
+function pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
+    L3, L6 = L^3, L^6
+    Corr2π = CorrD1/L6+2CorrR1/L3+CorrD2/L6+2CorrR3/L3
+    return Corr2π 
+end
+function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2)
+    N, nhits, T = size(Corr2π)
+    corr = zeros(2,2,N,nhits,T)
+    corr[1,1,:,:,:] = Corrρ
+    corr[1,2,:,:,:] = CorrT1
+    corr[2,1,:,:,:] = CorrT2
+    corr[2,2,:,:,:] = Corr2π
+    return corr
+end
+Corr2π = pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
+pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2)
 C2π, ΔC2π  = _average_correlator(Corr2π)
-C2π_deriv, ΔC2π_deriv  = _average_correlator(Corr2π_deriv)
 
 pltCross = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
 pltMes   = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
 pltPiPi  = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
 pltR3R4  = plot(; title, xlabel=L"t",ylabel=L"C(t)")
 
-cut = 6
 t_R3R4 = 1:32
 scatter!(pltCross,CT1,yerr=ΔCT1,label=L"$-$Im(T1)",marker=:circle)
 scatter!(pltCross,CT2,yerr=ΔCT2,label=L"$+$Im(T2)",marker=:star)
