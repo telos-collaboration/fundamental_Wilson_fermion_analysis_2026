@@ -115,25 +115,3 @@ function implicit_meff_jackknife(corrs::AbstractArray;sign=+1)
     end
     return meff, Δmeff
 end
-# apply jackknife while ignoring NaNs
-function nan_apply_jackknife(obs::AbstractArray;dims::Integer)
-    N  = size(obs)[dims]
-    O  = dropdims(nanmean(obs;dims);dims)
-    ΔO = dropdims(sqrt(N-1)*nanstd(obs;dims,corrected=false);dims)
-    return O, ΔO
-end
-function nan_apply_jackknife(obs::AbstractVector)
-    N  = length(obs)
-    O  = nanmean(obs)
-    ΔO = sqrt(N-1)*nanstd(obs,corrected=false)
-    return O, ΔO
-end
-function cov_jackknife_eigenvalues(evjk::AbstractArray)
-    Nev, Nsamples, T = size(evjk) 
-    covm = zeros(Nev,T,T)
-    for N in 1:Nev
-        c0 = (Nsamples-1)*cov(evjk[N,:,:],dims=1,corrected=false)
-        covm[N,:,:] = Hermitian(c0)
-    end
-    return covm
-end

@@ -6,11 +6,14 @@ using ProgressMeter
 using Roots
 using NaNStatistics
 using Statistics
+using LinearAlgebra
 
 include("parsing.jl")
 export parse_isospin_one
 include("write_hdf5.jl")
 export isospin1_to_hdf5
+include("gevp.jl")
+export eigenvalues, eigenvalues_eigenvectors, eigenvalues_jackknife_samples
 include("meff.jl")
 export implicit_meff_jackknife, implicit_meff, meff_from_jackknife
 include("correlator_derivative.jl")
