@@ -25,18 +25,19 @@ function pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
     Corr2π = CorrD1/L6+2CorrR1/L3+CorrD2/L6+2CorrR3/L3
     return Corr2π 
 end
-function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2)
+function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
     N, nhits, T = size(Corr2π)
+    L3, L6 = L^3, L^6
     corr = zeros(2,2,N,nhits,T)
-    corr[1,1,:,:,:] = Corrρ
-    corr[1,2,:,:,:] = CorrT1
-    corr[2,1,:,:,:] = CorrT2
+    corr[1,1,:,:,:] = Corrρ/L3
+    corr[1,2,:,:,:] = CorrT1/L3
+    corr[2,1,:,:,:] = CorrT2/L3
     corr[2,2,:,:,:] = Corr2π
     corr = dropdims(mean(corr,dims=4),dims=4)
     return corr
 end
 Corr2π = pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
-Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2)
+Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
 eigvals, Δeigvals = eigenvalues(Corr)
 eigvals
 
