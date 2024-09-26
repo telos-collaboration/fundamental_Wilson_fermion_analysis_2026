@@ -7,6 +7,7 @@ using Roots
 using NaNStatistics
 using Statistics
 using LinearAlgebra
+using Plots
 
 include("parsing.jl")
 export parse_isospin_one
@@ -18,5 +19,8 @@ include("meff.jl")
 export implicit_meff_jackknife, implicit_meff, meff_from_jackknife
 include("correlator_derivative.jl")
 export correlator_derivative
+include("plotting.jl")
+export add_mass_band!, add_fit_range!, plot_correlator!
+
 
 end # module ScatteringI1

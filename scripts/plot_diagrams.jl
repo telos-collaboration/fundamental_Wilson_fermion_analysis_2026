@@ -4,9 +4,9 @@ using Plots
 using HDF5
 using Statistics
 using LaTeXStrings
-#gr(frame=:box, legend=:topright,legendfontsize=12)
-pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
+gr(frame=:box, legend=:topright,legendfontsize=12)
 plotlyjs(frame=:box)
+pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
 include("utils.jl")
 
 hdf5file = "isospin1_L16_PA_h4.hdf5"
@@ -64,13 +64,15 @@ pltPiPi  = plot(; title, xlabel=L"t",ylabel=L"C(t)",yscale=:log10)
 pltR3R4  = plot(; title, xlabel=L"t",ylabel=L"C(t)")
 
 t_R3R4 = 1:32
-scatter!(pltCross,CT1,yerr=ΔCT1,label=L"$-$Im(T1)",marker=:circle)
-scatter!(pltCross,CT2,yerr=ΔCT2,label=L"$+$Im(T2)",marker=:star)
-scatter!(pltMes,  Cπ ,yerr=ΔCπ ,label=L"\pi" ,marker=:rect,alpha=0.9)
-scatter!(pltMes,  Cρ ,yerr=ΔCρ ,label=L"\rho",marker=:circ,alpha=0.9)
-scatter!(pltPiPi,C2π,yerr=ΔC2π,label="full (non relative sign)",marker=:cross)
-scatter!(pltR3R4,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
-scatter!(pltR3R4,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
+t = 1:T
+plot_correlator!(pltCross,t,CT1,ΔCT1;label=L"$-$Im(T1)",marker=:circle)
+plot_correlator!(pltCross,t,CT1,ΔCT1,label=L"$-$Im(T1)",marker=:circle)
+plot_correlator!(pltCross,t,CT2,ΔCT2,label=L"$+$Im(T2)",marker=:star)
+plot_correlator!(pltMes,t,Cπ,ΔCπ,label=L"\pi" ,marker=:rect,alpha=0.9)
+plot_correlator!(pltMes,t,Cρ,ΔCρ,label=L"\rho",marker=:circ,alpha=0.9)
+plot_correlator!(pltPiPi,t,C2π,ΔC2π,label="full (non relative sign)",marker=:circle)
+plot_correlator!(pltR3R4,t_R3R4,CR3[t_R3R4],ΔCR3[t_R3R4],label="R3",marker=:pent)
+plot_correlator!(pltR3R4,t_R3R4,CR4[t_R3R4],ΔCR4[t_R3R4],label="R4",marker=:star)
 
 save=false
 if save
@@ -82,6 +84,6 @@ if save
 else
     display(pltCross)
     display(pltMes)
-    display(pltPiPi)
     display(pltR3R4)    
+    display(pltPiPi)
 end
