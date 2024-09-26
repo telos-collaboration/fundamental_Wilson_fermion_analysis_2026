@@ -4,17 +4,17 @@ using Plots
 using HDF5
 using Statistics
 using LaTeXStrings
-#gr(frame=:box, legend=:topright,legendfontsize=12)
-#pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
+gr(frame=:box, legend=:topright,legendfontsize=12)
 plotlyjs(frame=:box)
+pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
 include("utils.jl")
 
 hdf5file = "isospin1_L24_h16_p23.hdf5"
 hdf5file = "isospin1_L16_PA_h4.hdf5"
-hdf5file = "isospin1_L16_h4.hdf5"
 hdf5file = "isospin1_T32_L12.hdf5"
 hdf5file = "isospin1_T24_L12.hdf5"
 hdf5file = "isospin1_L24_h16.hdf5"
+hdf5file = "isospin1_L16_h4.hdf5"
 
 h5dset = h5open(hdf5file)
 
@@ -22,6 +22,7 @@ p1  = "(0,0,1)"
 p   = 1
 ens = "E1"
 T, L = h5dset["$ens/lattice"][1:2]
+title = L"$%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1$: Effective masses"
 
 Corrπ0, Corrρ0, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp000(h5dset,ens)
 Corrπ , Corrρ , CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(h5dset,ens;p)
@@ -42,7 +43,16 @@ m1π0, Δm1π0 = implicit_meff_jackknife(Corr1π0')
 m1ρ, Δm1ρ   = implicit_meff_jackknife(Corr1ρ')
 m1ρ0, Δm1ρ0 = implicit_meff_jackknife(Corr1ρ0')
 
-scatter(m2π,yerr=Δm2π, label="pipi")
-scatter!(m1ρ0,yerr=Δm1ρ0,label="rho")
-scatter!(m1π+m1π0,yerr=Δm1π+Δm1π0,label="pi(0) + pi(p)")
-plot!(ylims=(0,3))
+plt = plot(;title, ylabel=L"m_{\rm eff}", xlabel=L"t")
+scatter!(plt,m2π,yerr=Δm2π, label="pipi")
+scatter!(plt,m1ρ0,yerr=Δm1ρ0,label="rho")
+scatter!(plt,m1π+m1π0,yerr=Δm1π+Δm1π0,label="pi(0) + pi(p)")
+plot!(plt,ylims=(0,3),xlims=(0,T÷2+0.5),xticks=1:2:T)
+
+save=true
+if save
+    path = "plots/$hdf5file/"
+    ispath(path) || mkpath(path)
+    savefig(plt,joinpath(path,"effctive_masses.pdf"))
+end
+display(plt)

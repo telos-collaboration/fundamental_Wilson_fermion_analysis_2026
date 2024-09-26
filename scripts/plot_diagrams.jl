@@ -9,11 +9,11 @@ plotlyjs(frame=:box)
 pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
 include("utils.jl")
 
-hdf5file = "isospin1_L16_PA_h4.hdf5"
 hdf5file = "isospin1_L24_h16_p23.hdf5"
 hdf5file = "isospin1_L24_h16.hdf5"
-hdf5file = "isospin1_L16_h4.hdf5"
 hdf5file = "isospin1_L24_h16.hdf5"
+hdf5file = "isospin1_L16_h4.hdf5"
+hdf5file = "isospin1_L16_PA_h4.hdf5"
 h5dset = h5open(hdf5file)
 
 p1  = "(0,0,1)"
@@ -71,16 +71,17 @@ plot_correlator!(pltCross,t,CT2,ΔCT2,label=L"$+$Im(T2)",marker=:star)
 plot_correlator!(pltMes,t,Cπ,ΔCπ,label=L"\pi" ,marker=:rect,alpha=0.9)
 plot_correlator!(pltMes,t,Cρ,ΔCρ,label=L"\rho",marker=:circ,alpha=0.9)
 plot_correlator!(pltPiPi,t,C2π,ΔC2π,label="full (non relative sign)",marker=:circle)
-plot_correlator!(pltR3R4,t_R3R4,CR3[t_R3R4],ΔCR3[t_R3R4],label="R3",marker=:pent)
-plot_correlator!(pltR3R4,t_R3R4,CR4[t_R3R4],ΔCR4[t_R3R4],label="R4",marker=:star)
+scatter!(pltR3R4,t_R3R4,CR3[t_R3R4],yerr=ΔCR3[t_R3R4],label="R3",marker=:pent)
+scatter!(pltR3R4,t_R3R4,CR4[t_R3R4],yerr=ΔCR4[t_R3R4],label="R4",marker=:star)
 
 save=false
 if save
-    isdir("plots") || mkpath("plots")
-    savefig(pltPiPi,"plots/full_correlator.pdf")
-    savefig(pltR3R4,"plots/R3R4.pdf")
-    savefig(pltMes,"plots/mesons.pdf")
-    savefig(pltCross,"plots/triangles.pdf")
+    path = "plots/$hdf5file/"
+    ispath(path) || mkpath(path)
+    savefig(pltPiPi,joinpath(path,"full_correlator.pdf"))
+    savefig(pltR3R4,joinpath(path,"R3R4.pdf"))
+    savefig(pltMes,joinpath(path,"mesons.pdf"))
+    savefig(pltCross,joinpath(path,"triangles.pdf"))
 else
     display(pltCross)
     display(pltMes)
