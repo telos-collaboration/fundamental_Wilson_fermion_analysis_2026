@@ -88,6 +88,7 @@ function label_list(file)
             end
         end
     end
+    return unique(labels)
 end
 function _nconfs(file)
     nconf   = 0
