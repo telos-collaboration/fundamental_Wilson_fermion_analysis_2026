@@ -38,14 +38,14 @@ function _average_correlator(Corr)
     ΔC = dropdims(std(CorrAvg,dims=1),dims=1)./sqrt(N)
     return C, ΔC
 end
-function D1(h5dset,p)
-    πp =  h5dset["E1/p$p/pi/p_diag$p/C_re"][]
-    π0 =  h5dset["E1/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
+function D1(h5dset,p,ens)
+    πp =  h5dset["$ens/p$p/pi/p_diag$p/C_re"][]
+    π0 =  h5dset["$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
     return πp .* π0
 end
 function correlatorsp001(h5dset,ens;p=1)
     p1 = "(0,0,$p)"
-    CorrD1 = D1(h5dset,p1)
+    CorrD1 = D1(h5dset,p1,ens)
     CorrD2 =  h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
     Corrπ  =  h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
     Corrρ  =  h5dset["$ens/p$p1/rho_g33/p_diag$p1/C_re"][]
@@ -59,7 +59,7 @@ function correlatorsp001(h5dset,ens;p=1)
 end
 function correlatorsp110(h5dset,ens;p=1)
     p1 = "($p,$p,0)"
-    CorrD1 = D1(h5dset,p1)
+    CorrD1 = D1(h5dset,p1,ens)
     CorrD2 = h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
     Corrπ  = h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
     # THE FOLLOWING DOES NOT GIVE A SIGNAL. IS SOMETHING WRONG WITH THE PARSING?
@@ -76,7 +76,7 @@ end
 function correlatorsp000(h5dset,ens)
     Corrπ  = h5dset["$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
     Corrρ  = h5dset["$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re"][]
-    CorrD1 = D1(h5dset,"(0,0,0)")
+    CorrD1 = D1(h5dset,"(0,0,0)",ens)
     # THE FOLLOWING IS NOT FULLY SELFCONSISTENT
     # It is used to compare the correlator normalization
     CorrD2 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,0)/C_re"][]
