@@ -64,9 +64,9 @@ function correlatorsp110(h5dset,ens;p=1)
     Corrπ  = h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
     # THE FOLLOWING DOES NOT GIVE A SIGNAL. IS SOMETHING WRONG WITH THE PARSING?
     Corrρ  =  (h5dset["$ens/p$p1/rho_g11/p_diag$p1/C_re"][])
-    #Corrρ  =  (h5dset["$ens/p$p1/rho_g22/p_diag$p1/C_re"][])
-    CorrT1 = -(h5dset["$ens/p$p1/t1_g1/p_diag$p1/C_im"][]   + h5dset["E1/p$p1/t1_g2/p_diag$p1/C_im"][])/sqrt(2)
-    CorrT2 =  (h5dset["$ens/p$p1/t2_g1/p_diag$p1/C_im"][]   + h5dset["E1/p$p1/t2_g2/p_diag$p1/C_im"][])/sqrt(2)
+    #Corrρ  =  (h5dset["$ens/p$p1/rho_g11/p_diag$p1/C_re"][] + h5dset["$ens/p$p1/rho_g22/p_diag$p1/C_re"][])/sqrt(2)
+    CorrT1 = -(h5dset["$ens/p$p1/t1_g1/p_diag$p1/C_im"][]   + h5dset["$ens/p$p1/t1_g2/p_diag$p1/C_im"][])/sqrt(2)
+    CorrT2 =  (h5dset["$ens/p$p1/t2_g1/p_diag$p1/C_im"][]   + h5dset["$ens/p$p1/t2_g2/p_diag$p1/C_im"][])/sqrt(2)
     CorrR1 =   h5dset["$ens/p$p1/r1/p_diag$p1/C_re"][]
     CorrR2 =   h5dset["$ens/p$p1/r2/p_diag$p1/C_re"][]
     CorrR3 =   h5dset["$ens/p$p1/r3/p_diag$p1/C_re"][]
