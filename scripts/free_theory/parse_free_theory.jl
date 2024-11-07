@@ -10,6 +10,3 @@ for file in files
     name = split(basename(file),['_','.'])[end-1]
     isospin1_to_hdf5(file,h5file,pmax;ensemble=name)
 end
-
-using HDF5
-f = h5open(h5file)
