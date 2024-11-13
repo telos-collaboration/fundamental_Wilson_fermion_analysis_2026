@@ -11,9 +11,9 @@ gr(frame=:box,legendfontsize=12)
 hdf5file = expanduser("~/Downloads/free_theory_results_v2.hdf5")
 h5dset = h5open(hdf5file)
 
-ens = "T16L8"
+ens = "T16L4"
 T,L = h5dset["$ens/lattice"][1:2]
-m = -0.6
+m = -0.605
 p = 1
 P_phys = [0,0,0,1*2π/L]
 
@@ -26,3 +26,4 @@ C  = analytic_free_pion(T,L,m,P_phys)
 plt = plot(legend=:top)
 scatter!(plt,abs.(Cπ),yscale=:log10,label="π (measured)")
 scatter!(plt,real.(C),yscale=:log10,label="π (analytic)")
+display(plt)
