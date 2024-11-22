@@ -18,7 +18,7 @@ function _splitlabel(label)
         return l, p
     end
 end
-function isospin1_to_hdf5(file,h5file,pmax;setup=true,ensemble="")
+function isospin1_to_hdf5(file,h5file;setup=true,ensemble="",pmax)
     setup &&  _write_lattice_setup(file,h5file;h5group=ensemble)
     Re, Im = parse_isospin_one(file,pmax)
     labels = label_list(file)
