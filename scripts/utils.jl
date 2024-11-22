@@ -64,8 +64,8 @@ function correlatorsp110(h5dset,ens;p=1)
     CorrD1 =  h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
     CorrD2 =  h5dset["$ens/p$p1/d/p_diag(0,0,0)/C_re"][]
     Corrπ  = h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
-    # THE FOLLOWING DOES NOT GIVE A SIGNAL. IS SOMETHING WRONG WITH THE PARSING?
     Corrρ  =  (h5dset["$ens/p$p1/rho_g11/p_diag$p1/C_re"][])
+    # THE FOLLOWING DOES NOT GIVE A SIGNAL. IS SOMETHING WRONG WITH THE PARSING?
     #Corrρ  =  (h5dset["$ens/p$p1/rho_g11/p_diag$p1/C_re"][] + h5dset["$ens/p$p1/rho_g22/p_diag$p1/C_re"][])/sqrt(2)
     CorrT1 = -(h5dset["$ens/p$p1/t1_g1/p_diag$p1/C_im"][]   + h5dset["$ens/p$p1/t1_g2/p_diag$p1/C_im"][])/sqrt(2)
     CorrT2 =  (h5dset["$ens/p$p1/t2_g1/p_diag$p1/C_im"][]   + h5dset["$ens/p$p1/t2_g2/p_diag$p1/C_im"][])/sqrt(2)
@@ -81,7 +81,7 @@ function correlatorsp000(h5dset,ens)
     CorrD1_old = D1(h5dset,"(0,0,0)",ens)
     # THE FOLLOWING IS NOT FULLY SELFCONSISTENT
     # It is used to compare the correlator normalization
-    CorrD1 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,0)/C_re"][]
+    CorrD1 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,1)/C_re"][]
     CorrD2 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,0)/C_re"][]
     CorrT1 = -h5dset["$ens/p(0,0,1)/t1_g1/p_diag(0,0,0)/C_im"][]  
     CorrT2 =  h5dset["$ens/p(0,0,1)/t2_g1/p_diag(0,0,0)/C_im"][] 
