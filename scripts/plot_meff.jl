@@ -9,18 +9,12 @@ plotlyjs(frame=:box)
 pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
 include("utils.jl")
 
-hdf5file = "isospin1_L24_h16_p23.hdf5"
-hdf5file = "isospin1_L16_PA_h4.hdf5"
-hdf5file = "isospin1_T32_L12.hdf5"
-hdf5file = "isospin1_T24_L12.hdf5"
-hdf5file = "isospin1_L24_h16.hdf5"
-hdf5file = "isospin1_L16_h4.hdf5"
-
+hdf5file = "isospin1.hdf5"
 h5dset = h5open(hdf5file)
 
 p1  = "(0,0,1)"
 p   = 1
-ens = "E1"
+ens = "T32_L16_h4_p1"
 T, L = h5dset["$ens/lattice"][1:2]
 title = L"$%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1$: Effective masses"
 

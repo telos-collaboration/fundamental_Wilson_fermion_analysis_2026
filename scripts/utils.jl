@@ -81,8 +81,8 @@ function correlatorsp000(h5dset,ens)
     CorrD1_old = D1(h5dset,"(0,0,0)",ens)
     # THE FOLLOWING IS NOT FULLY SELFCONSISTENT
     # It is used to compare the correlator normalization
-    CorrD1 =  h5dset["$ens/p(0,0,0)/d/p_diag(0,0,0)/C_re"][]
-    CorrD2 =  h5dset["$ens/p(0,0,0)/d/p_diag(0,0,0)/C_re"][]
+    CorrD1 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,0)/C_re"][]
+    CorrD2 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,0)/C_re"][]
     CorrT1 = -h5dset["$ens/p(0,0,1)/t1_g1/p_diag(0,0,0)/C_im"][]  
     CorrT2 =  h5dset["$ens/p(0,0,1)/t2_g1/p_diag(0,0,0)/C_im"][] 
     CorrR1 =  h5dset["$ens/p(0,0,1)/r1/p_diag(0,0,0)/C_re"][]

@@ -2,7 +2,7 @@ using Pkg; Pkg.activate(".")
 using ScatteringI1
 
 dir    = expanduser("~/Downloads/Measurements/")
-h5file = expanduser("~/Downloads/free_theory_results_v2.hdf5")
+h5file = expanduser("~/Downloads/free_theory_results.hdf5")
 pmax   = 1
 
 files = filter(startswith("out_")∘basename,readdir(dir,join=true))
