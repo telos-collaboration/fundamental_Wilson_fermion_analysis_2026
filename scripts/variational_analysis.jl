@@ -13,8 +13,8 @@ hdf5file = "isospin1.hdf5"
 h5dset = h5open(hdf5file)
 p   = 1
 p1  = "(0,0,1)"
-ens = "T32_L16_h4_p1"
 ens = "m0.90/T32_L12_h4_p1"
+ens = "T32_L24_h4_p1"
 t0 = 1
 
 T, L = h5dset["$ens/lattice"][1:2]
@@ -32,11 +32,11 @@ end
 function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
     N, nhits, T = size(Corr2π)
     L3, L6 = L^3, L^6
-    corr = zeros(2,2,N,nhits,T)
-    corr[1,1,:,:,:] = Corrρ/L3
-    corr[1,2,:,:,:] = CorrT1/L3
-    corr[2,1,:,:,:] = CorrT2/L3
-    corr[2,2,:,:,:] = Corr2π
+    corr = zeros(ComplexF64,(2,2,N,nhits,T))
+    corr[1,1,:,:,:] =  @. Corrρ/L3 + im*0
+    corr[1,2,:,:,:] =  @. 0        - im*CorrT1/L3
+    corr[2,1,:,:,:] =  @. 0        + im*CorrT2/L3
+    corr[2,2,:,:,:] =  @. Corr2π   + im*0
     corr = dropdims(mean(corr,dims=4),dims=4)
     return corr
 end

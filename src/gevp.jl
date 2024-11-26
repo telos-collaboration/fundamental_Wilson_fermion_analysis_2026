@@ -49,7 +49,7 @@ end
 function eigenvalues_jackknife_samples(corr;t0 = 1, imag_thresh = 1E-11)
     sample = delete1_resample(corr)
     nops, nconf, T = size(sample)[2:4]
-    eigvals_jk = zeros(eltype(sample),(nops,nconf,T))
+    eigvals_jk = zeros(Float64,(nops,nconf,T))
     for s in 1:nconf, t in 1:T
         # smaller values correspond to a faster decay, and thus correspond to a larger masses
         # use sortby to sort the eigenvalues by ascending eigen-energy of the meson state
