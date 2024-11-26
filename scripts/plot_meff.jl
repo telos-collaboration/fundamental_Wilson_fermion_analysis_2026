@@ -10,10 +10,11 @@ include("utils.jl")
 hdf5file = "isospin1.hdf5"
 h5dset = h5open(hdf5file)
 
-p   = 2
+p   = 1
 p1  = "(0,0,$p)"
 ens = "T32_L24_h16_p23"
 ens = "T32_L16_h2_p2"
+ens = "m0.90/T32_L12_h4_p1"
 T, L = h5dset["$ens/lattice"][1:2]
 title = L"$%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1$: Effective masses"
 

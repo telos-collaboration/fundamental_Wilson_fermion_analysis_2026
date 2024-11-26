@@ -6,15 +6,16 @@ using Statistics
 using LaTeXStrings
 include("utils.jl")
 gr(frame=:box, legend=:topright,legendfontsize=12)
-plotlyjs(frame=:box)
 pgfplotsx(frame=:box, legend=:topright,labelfontsize=16, titlefontsize=11, legendfontsize=8,markersize=5,tickfontsize=12)
+plotlyjs(frame=:box)
 
 hdf5file = "isospin1.hdf5"
 h5dset = h5open(hdf5file)
 p   = 1
 p1  = "(0,0,1)"
-ens = "m0.90/T32_L12_h4_p1"
 ens = "T32_L16_h4_p1"
+ens = "m0.90/T32_L12_h4_p1"
+t0 = 1
 
 T, L = h5dset["$ens/lattice"][1:2]
 title_corr = L"$%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1$: Eigenvalues from GEVP "
@@ -41,11 +42,10 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
 end
 Corr2π = pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
 Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
-eigvals, Δeigvals = eigenvalues(Corr,t0=5)
-eigvals_resamples = eigenvalues_jackknife_samples(Corr)
+eigvals, Δeigvals = eigenvalues(Corr;t0)
+eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
 meff, Δmeff =  meff_from_jackknife(eigvals_resamples;sign=+1,swap=nothing)
 
-meffρ, Δmeffρ
 
 t = 1:T
 plt_corr = plot(;title=title_corr,yscale=:log10)
