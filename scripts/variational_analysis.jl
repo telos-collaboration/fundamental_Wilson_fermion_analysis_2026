@@ -13,7 +13,8 @@ hdf5file = "isospin1.hdf5"
 h5dset = h5open(hdf5file)
 p   = 1
 p1  = "(0,0,1)"
-ens = "T32_L16_h4_p1_PA"
+ens = "m0.90/T32_L12_h4_p1"
+ens = "T32_L16_h4_p1"
 
 T, L = h5dset["$ens/lattice"][1:2]
 title_corr = L"$%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1$: Eigenvalues from GEVP "
@@ -24,7 +25,7 @@ N, nhits, T = size(CorrD1)
 
 function pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
     L3, L6 = L^3, L^6
-    Corr2π = CorrD1/L6+2CorrR1/L3+CorrD2/L6+2CorrR3/L3
+    Corr2π = + CorrD1/L6 - CorrD2/L6 + 2CorrR1/L3 - 2CorrR3/L3
     return Corr2π 
 end
 function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
@@ -40,10 +41,11 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
 end
 Corr2π = pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
 Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
-Corr   = correlator_derivative(Corr,t_dim=4)
-eigvals, Δeigvals = eigenvalues(Corr)
+eigvals, Δeigvals = eigenvalues(Corr,t0=5)
 eigvals_resamples = eigenvalues_jackknife_samples(Corr)
 meff, Δmeff =  meff_from_jackknife(eigvals_resamples;sign=+1,swap=nothing)
+
+meffρ, Δmeffρ
 
 t = 1:T
 plt_corr = plot(;title=title_corr,yscale=:log10)
@@ -53,15 +55,7 @@ plot_correlator!(plt_corr,t,abs.(eigvals[1,:]),Δeigvals[1,:],label="Eigenvalue 
 plt_meff = plot(;title=title_meff)
 scatter!(plt_meff,meff[2,:],yerr=Δmeff[2,:],label="Eigenvalue #1")
 scatter!(plt_meff,meff[1,:],yerr=Δmeff[1,:],label="Eigenvalue #2")
-plot!(plt_meff,xlims=(0.5,T÷2+0.5))
+plot!(plt_meff,xlims=(0.5,T÷2+0.5),ylims=(0,2))
 
 display(plt_corr)
 display(plt_meff)
-
-save=true
-if save
-    path = "plots/$hdf5file/"
-    ispath(path) || mkpath(path)
-    savefig(plt_corr,joinpath(path,"eigenvalues_gevp.pdf"))
-    savefig(plt_meff,joinpath(path,"meff_gevp.pdf"))
-end

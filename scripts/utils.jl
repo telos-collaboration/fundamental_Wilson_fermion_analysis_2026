@@ -75,20 +75,20 @@ function correlatorsp110(h5dset,ens;p=1)
     CorrR4 =   h5dset["$ens/p$p1/r4/p_diag$p1/C_re"][]
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2, CorrD1_old
 end
-function correlatorsp000(h5dset,ens)
+function correlatorsp000(h5dset,ens;p=1)
     Corrπ  = h5dset["$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
     Corrρ  = h5dset["$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re"][]
     CorrD1_old = D1(h5dset,"(0,0,0)",ens)
     # THE FOLLOWING IS NOT FULLY SELFCONSISTENT
     # It is used to compare the correlator normalization
-    CorrD1 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,1)/C_re"][]
-    CorrD2 =  h5dset["$ens/p(0,0,1)/d/p_diag(0,0,0)/C_re"][]
-    CorrT1 = -h5dset["$ens/p(0,0,1)/t1_g1/p_diag(0,0,0)/C_im"][]  
-    CorrT2 =  h5dset["$ens/p(0,0,1)/t2_g1/p_diag(0,0,0)/C_im"][] 
-    CorrR1 =  h5dset["$ens/p(0,0,1)/r1/p_diag(0,0,0)/C_re"][]
-    CorrR2 =  h5dset["$ens/p(0,0,1)/r2/p_diag(0,0,0)/C_re"][]
-    CorrR3 =  h5dset["$ens/p(0,0,1)/r3/p_diag(0,0,0)/C_re"][]
-    CorrR4 =  h5dset["$ens/p(0,0,1)/r4/p_diag(0,0,0)/C_re"][]
+    CorrD1 =  h5dset["$ens/p(0,0,$p)/d/p_diag(0,0,0)/C_re"][]
+    CorrD2 =  h5dset["$ens/p(0,0,$p)/d/p_diag(0,0,0)/C_re"][]
+    CorrT1 = -h5dset["$ens/p(0,0,$p)/t1_g1/p_diag(0,0,0)/C_im"][]  
+    CorrT2 =  h5dset["$ens/p(0,0,$p)/t2_g1/p_diag(0,0,0)/C_im"][] 
+    CorrR1 =  h5dset["$ens/p(0,0,$p)/r1/p_diag(0,0,0)/C_re"][]
+    CorrR2 =  h5dset["$ens/p(0,0,$p)/r2/p_diag(0,0,0)/C_re"][]
+    CorrR3 =  h5dset["$ens/p(0,0,$p)/r3/p_diag(0,0,0)/C_re"][]
+    CorrR4 =  h5dset["$ens/p(0,0,$p)/r4/p_diag(0,0,0)/C_re"][]
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
 function read_hdf5_file(file,ens,p1,p)

@@ -48,11 +48,7 @@ CorrD1b = ret1[13]
 CD1a, ΔCD1a = _average_correlator(CorrD1a)
 CD1b, ΔCD1b = _average_correlator(CorrD1b)
 s0 = 1/48
-scatter!(plt3,ratio.(CD1a*s0,CD1b), yerr=Δratio.(CD1a*s0,CD1b,ΔCD1a*s0,ΔCD1b), label="" ,marker=:rect,alpha=0.9)
 
+scatter!(plt3,ratio.(CD1a*s0,CD1b), yerr=Δratio.(CD1a*s0,CD1b,ΔCD1a*s0,ΔCD1b), label="" ,marker=:rect,alpha=0.9)
 plot!(plt2,ylims=(0,2))
 plot!(plt3,ylims=(0,2))
-display(plt1)
-display(plt3)
-#savefig(plt1,"pions_different_L.pdf")
-#savefig(plt2,"pions_different_L_ratio.pdf")
