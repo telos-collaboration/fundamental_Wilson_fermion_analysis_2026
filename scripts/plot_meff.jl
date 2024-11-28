@@ -12,8 +12,8 @@ h5dset = h5open(hdf5file)
 
 p   = 1
 p1  = "(0,0,$p)"
-ens = "T32_L24_h16_p23"
 ens = "T32_L16_h2_p2"
+ens = "T32_L24_h16_p1"
 ens = "m0.90/T32_L12_h4_p1"
 T, L = h5dset["$ens/lattice"][1:2]
 title = L"$%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1$: Effective masses"
@@ -25,7 +25,8 @@ Corrπ , Corrρ , CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 N, nhits, T = size(CorrD1)
 L3, L6 = L^3, L^6
 
-Corr2π = dropdims(mean(CorrD1/L6 + 2CorrR1/L3 - CorrD2/L6 - 2CorrR3/L3,dims=2),dims=2)
+Corr2π = dropdims(mean(CorrD1/L6 - CorrD2/L6 + 2CorrR1/L3 - 2CorrR3/L3,dims=2),dims=2) # Isospin - 1
+Corr2π = dropdims(mean(CorrD1/L6 + CorrD2/L6 -  CorrR1/L3 -  CorrR3/L3,dims=2),dims=2) # Isospin - 2
 #Corr2π = correlator_derivative(Corr2π,t_dim=2)
 
 Corr1π0 = dropdims(mean(Corrπ0/L3,dims=2),dims=2)
