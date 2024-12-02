@@ -8,6 +8,7 @@ using NaNStatistics
 using Statistics
 using LinearAlgebra
 using Plots
+using HiRepParsing
 
 include("parsing.jl")
 export parse_isospin_one

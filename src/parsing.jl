@@ -1,52 +1,3 @@
-function latticesize(file)
-    for line in eachline(file)
-        if occursin("Global size is",line)
-            pos  = last(findfirst("Global size is",line))+1
-            sizestring  = lstrip(line[pos:end])
-            latticesize = parse.(Int,split(sizestring,"x"))
-            return latticesize
-        end
-    end
-end
-function fermionmass(file)
-    for line in eachline(file)
-        if startswith(line,"[MAIN][0]mass is :")
-            l = length("[MAIN][0]mass is :")
-            return parse(Float64,line[l+1:end])
-        end
-    end
-end
-function plaquettes(file)
-    plaquettes = Float64[]
-    for line in eachline(file)
-        if occursin("Plaquette",line)
-            line = replace(line,"="=>" ")
-            line = replace(line,":"=>" ")
-            p = parse(Float64,split(line)[end])
-            append!(plaquettes,p)
-        end
-    end
-    return plaquettes
-end
-function _match_config_name(filename)
-    regex = r".*/(?<run>[^/]*)_(?<T>[0-9]+)x(?<L>[0-9]+)x[0-9]+x[0-9]+nc[0-9]+(?:r[A-Z]+)?(?:nf[0-9]+)?b(?<beta>[0-9]+\.[0-9]+)?(?:m-?[0-9]+\.[0-9]+)?n(?<conf>[0-9]+)"
-    return match(regex,filename)
-end
-function inverse_coupling(file)
-    try
-        l = split(file,"beta")[end]
-        β = parse(Float64,split(l,"m")[1])
-        return β
-    catch
-        for line in eachline(file)
-            if occursin("Configuration from",line)
-                match = _match_config_name(line)
-                β = parse(Float64,match[:beta])
-                return β
-            end
-        end
-    end
-end
 function _parse_data!(array,string) 
     substrings = eachsplit(string," ",keepempty=false)
     for (i,s) in enumerate(substrings)
@@ -171,17 +122,4 @@ function parse_isospin_one(file,pmax)
     end
     finish!(p)
     return Re, Im
-end
-function confignames(file)
-    fns = AbstractString[]
-    for line in eachline(file)
-        if occursin("read",line)
-            if occursin("Configuration",line)
-                pos1 = findlast('/',line)
-                pos2 = findnext(']',line,pos1)
-                push!(fns,line[pos1+1:pos2-1])
-            end
-        end
-    end
-    return fns
 end

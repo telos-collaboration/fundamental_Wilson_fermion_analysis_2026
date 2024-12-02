@@ -1,10 +1,3 @@
-function _write_lattice_setup(file,h5file;h5group="")
-    h5write(h5file,joinpath(h5group,"plaquette"),plaquettes(file))
-    h5write(h5file,joinpath(h5group,"configurations"),confignames(file))
-    #h5write(h5file,joinpath(h5group,"beta"),inverse_coupling(file))
-    h5write(h5file,joinpath(h5group,"lattice"),latticesize(file))
-    #h5write(h5file,joinpath(h5group,"mass"),fermionmass(file))
-end
 function _splitlabel(label)
     label == "pi" && (return label, "p(0,0,0)")
     if contains(label,"p0") 
@@ -19,7 +12,7 @@ function _splitlabel(label)
     end
 end
 function isospin1_to_hdf5(file,h5file;setup=true,ensemble="",pmax)
-    setup &&  _write_lattice_setup(file,h5file;h5group=ensemble)
+    setup &&  HiRepParsing._write_lattice_setup(file,h5file;h5group=ensemble)
     Re, Im = parse_isospin_one(file,pmax)
     labels = label_list(file)
     
