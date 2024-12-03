@@ -33,10 +33,10 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
     N, nhits, T = size(Corr2π)
     L3, L6 = L^3, L^6
     corr = zeros(ComplexF64,(2,2,N,nhits,T))
-    corr[1,1,:,:,:] =  @. Corrρ/L3 + im*0
-    corr[1,2,:,:,:] =  @. 0        - im*CorrT1/L3
-    corr[2,1,:,:,:] =  @. 0        + im*CorrT2/L3
-    corr[2,2,:,:,:] =  @. Corr2π   + im*0
+    corr[1,1,:,:,:] =  @. Corrρ/L3 + 0*im
+    corr[1,2,:,:,:] =  @. 0        - im*(CorrT1+CorrT2)/L3
+    corr[2,1,:,:,:] =  @. 0        + im*(CorrT1+CorrT2)/L3
+    corr[2,2,:,:,:] =  @. Corr2π   + 0*im
     corr = dropdims(mean(corr,dims=4),dims=4)
     return corr
 end
