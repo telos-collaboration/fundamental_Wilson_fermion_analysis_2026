@@ -1,4 +1,6 @@
 *.hdf5
 *.pdf
+*.csv
+*.svg
 output/
 plots/
