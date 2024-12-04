@@ -99,8 +99,8 @@ function parse_isospin_one(file)
     # fill arrays with NaNs. The idea is that not all momentum indices are used for all diagrams
     # All available entries will be replaced by finite Float64 numbers, the rest remains a NaN rather 
     # than a zero. 
-    Re = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
-    Im = zeros(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T) .* NaN
+    Re = fill(NaN,(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T))
+    Im = fill(NaN,(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T))
 
     nlines = countlines(file)
     p = Progress(nlines)
