@@ -69,11 +69,24 @@ function _sources(file)
         end
     end
 end
-function parse_isospin_one(file,pmax)
+function _find_pmax(file)
+    p_max = typemin(Int)
+    for line in eachline(file)
+        if startswith(line,"[MAIN][0]The momenta are: ")
+            for m in eachmatch(r"[0-9]+",line)
+                p_max = max( parse(Int,m.match) , p_max)
+            end
+            @assert p_max > 0
+            return p_max
+        end
+    end
+end
+function parse_isospin_one(file)
     T = first(latticesize(file))
     cut  = length("[IO][0]")
     # The measured  momenta are currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
     # plus negative momenta are allowed for the 4-point functions 
+    pmax  = _find_pmax(file)
     Nmom  = 2pmax + 1 #(allowed values -pmax,...,0,...pmax) 
     Nconf = _nconfs(file)
     Nlab = _count_labels(file)

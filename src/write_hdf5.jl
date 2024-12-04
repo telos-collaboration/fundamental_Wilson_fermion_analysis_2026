@@ -11,10 +11,11 @@ function _splitlabel(label)
         return l, p
     end
 end
-function isospin1_to_hdf5(file,h5file;setup=true,ensemble="",pmax)
+function isospin1_to_hdf5(file,h5file;setup=true,ensemble="")
     setup &&  HiRepParsing._write_lattice_setup(file,h5file;h5group=ensemble)
-    Re, Im = parse_isospin_one(file,pmax)
+    Re, Im = parse_isospin_one(file)
     labels = label_list(file)
+    pmax  = _find_pmax(file)
     
     Nlabels, Nconf, Nsrc, Nmom, T = size(Re)
     @assert length(labels) == Nlabels
