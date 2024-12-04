@@ -1,7 +1,8 @@
-function _parse_data!(array,string) 
-    substrings = eachsplit(string," ",keepempty=false)
-    for (i,s) in enumerate(substrings)
-        array[i] = parse(Float64,s)
+function _parse_data!(array,string;n=6) 
+    opts = Parsers.Options(delim=' ', ignorerepeated=true)
+    io = IOBuffer(string)
+    for i in 1:n
+        array[i] = Parsers.parse(Float64, io, opts)
     end
 end
 function _parse_channel_name(string)
