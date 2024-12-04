@@ -33,8 +33,8 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
     L3, L6 = L^3, L^6
     corr = zeros(ComplexF64,(2,2,N,nhits,T))
     corr[1,1,:,:,:] =  @. Corrρ/L3 + 0*im
-    corr[1,2,:,:,:] =  @. 0        - im*(CorrT1+CorrT2)/L3
-    corr[2,1,:,:,:] =  @. 0        + im*(CorrT1+CorrT2)/L3
+    corr[1,2,:,:,:] =  @. 0        + im*(CorrT1-CorrT2)/L3
+    corr[2,1,:,:,:] =  @. 0        + im*(CorrT2-CorrT1)/L3
     corr[2,2,:,:,:] =  @. Corr2π   + 0*im
     corr = dropdims(mean(corr,dims=4),dims=4)
     return corr
@@ -53,7 +53,7 @@ plot_correlator!(plt_corr,t,abs.(eigvals[1,:]),Δeigvals[1,:],label="Eigenvalue 
 
 plt = plot(;title=title_meff)
 scatter!(plt,meff[2,:],yerr=Δmeff[2,:],label="Eigenvalue #1")
-scatter!(plt,meff[1,:],yerr=Δmeff[1,:],label="Eigenvalue #2")
+scatter!(plt,meff[1,1:10],yerr=Δmeff[1,1:10],label="Eigenvalue #2")
 plot!(plt,xlims=(0.5,T÷2+0.5),ylims=(0,2))
 display(plt_corr)
 display(plt)
