@@ -7,14 +7,19 @@ using LaTeXStrings
 include("utils.jl")
 gr(frame=:box, legend=:topright,legendfontsize=12)
 
-hdf5file = "isospin1_finer_lattices.hdf5"
+hdf5file = "data/isospin1.hdf5"
 h5dset = h5open(hdf5file)
 p   = 1
 p1  = "(0,0,$p)"
-ens = "Lt32Ls16beta7.2m1-0.794m2-0.794"
-ens = "Lt32Ls16beta7.05m1-0.85m2-0.85"
+ens = "Lt48Ls16beta7.4m1-0.75m2-0.75"
+ens = "Lt48Ls16beta7.4m1-0.74m2-0.74"
 ens = "Lt36Ls16beta7.2m1-0.76m2-0.76"
-t0  = 4
+ens = "Lt32Ls16beta7.2m1-0.794m2-0.794"
+ens = "Lt32Ls16beta7.2m1-0.78m2-0.78"
+ens = "Lt32Ls16beta7.05m1-0.85m2-0.85"
+ens = "Lt32Ls16beta6.9m1-0.92m2-0.92"
+ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"
+t0  = 2
 
 T, L = h5dset["$ens/lattice"][1:2]
 title_corr = L"$%$T \times %$L^3, \beta=6.9, m_0^f=-0.92, \mathbf p = %$p1$: Eigenvalues from GEVP "
@@ -41,19 +46,23 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
 end
 Corr2π = pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
 Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
+sign   = +1
+Corr   = correlator_derivative(Corr;t_dim=4)
+sign   = -1
+
 eigvals, Δeigvals = eigenvalues(Corr;t0)
 eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
-meff, Δmeff =  meff_from_jackknife(eigvals_resamples;sign=+1,swap=nothing)
+meff, Δmeff =  meff_from_jackknife(eigvals_resamples;sign,swap=nothing)
 
+#t = 1:T
+#plt_corr = plot(;title=title_corr,yscale=:log10)
+#plot_correlator!(plt_corr,t,abs.(eigvals[2,:]),Δeigvals[2,:],label="Eigenvalue #1")
+#plot_correlator!(plt_corr,t,abs.(eigvals[1,:]),Δeigvals[1,:],label="Eigenvalue #2")
 
-t = 1:T
-plt_corr = plot(;title=title_corr,yscale=:log10)
-plot_correlator!(plt_corr,t,abs.(eigvals[2,:]),Δeigvals[2,:],label="Eigenvalue #1")
-plot_correlator!(plt_corr,t,abs.(eigvals[1,:]),Δeigvals[1,:],label="Eigenvalue #2")
-
-plt = plot(;title=title_meff)
+r = 1:15
+#plt = plot(;title=title_meff)
 scatter!(plt,meff[2,:],yerr=Δmeff[2,:],label="Eigenvalue #1")
-scatter!(plt,meff[1,1:10],yerr=Δmeff[1,1:10],label="Eigenvalue #2")
-plot!(plt,xlims=(0.5,T÷2+0.5),ylims=(0,2))
-display(plt_corr)
+scatter!(plt,meff[1,r],yerr=Δmeff[1,r],label="Eigenvalue #2")
+plot!(plt,ylims=(0.5,1.5),xlims=(1.5,13),xticks=2:2:T)
 display(plt)
+savefig(plt,joinpath("gevp.pdf"))

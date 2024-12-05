@@ -1,7 +1,7 @@
 using Pkg; Pkg.activate(".")
 using ScatteringI1
 
-h5file = "isospin1_finer_lattices.hdf5"
+h5file = "data/isospin1.hdf5"
 path   = "/home/fabian/Documents/Physics/Data/DataVSC/measurements/"
 names  = [
     "runsSp4/Lt32Ls16beta6.9m1-0.92m2-0.92",
@@ -20,7 +20,3 @@ for name in names
     h5file == "test.hdf5" && isfile(h5file) && rm(h5file)
     isospin1_to_hdf5(file,h5file;ensemble=ens,setup=true)
 end
-
-#using HDF5
-#f = h5open("isospin1_finer_lattices_v2.hdf5")
-#keys(f)
