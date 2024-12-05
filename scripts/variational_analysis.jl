@@ -4,6 +4,7 @@ using Plots
 using HDF5
 using Statistics
 using LaTeXStrings
+using LatticeUtils
 include("utils.jl")
 gr(frame=:box, legend=:topright,legendfontsize=12)
 
@@ -52,12 +53,7 @@ sign   = -1
 
 eigvals, Δeigvals = eigenvalues(Corr;t0)
 eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
-meff, Δmeff =  meff_from_jackknife(eigvals_resamples;sign,swap=nothing)
-
-#t = 1:T
-#plt_corr = plot(;title=title_corr,yscale=:log10)
-#plot_correlator!(plt_corr,t,abs.(eigvals[2,:]),Δeigvals[2,:],label="Eigenvalue #1")
-#plot_correlator!(plt_corr,t,abs.(eigvals[1,:]),Δeigvals[1,:],label="Eigenvalue #2")
+meff, Δmeff =  LatticeUtils.implicit_meff_jackknife(real.(eigvals_resamples);sign)
 
 r = 1:15
 #plt = plot(;title=title_meff)
