@@ -5,7 +5,7 @@ using HDF5
 using Statistics
 using LaTeXStrings
 gr(frame=:box,markersize=5,markeralpha=0.75)
-include("utils.jl")
+include("read_rhopipi_diagrams.jl")
 
 hdf5file = "data/isospin1.hdf5"
 h5dset = h5open(hdf5file)
