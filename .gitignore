@@ -2,6 +2,7 @@
 *.pdf
 *.csv
 *.svg
+*.webm
 output/
 data/
 plots/

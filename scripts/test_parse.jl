@@ -2,6 +2,7 @@ using Pkg; Pkg.activate(".")
 using ScatteringI1
 
 h5file = "data/isospin1.hdf5"
+path   = "/home/fabian/Dokumente/Physics/Data/DataVSC/measurements/"
 path   = "/home/fabian/Documents/Physics/Data/DataVSC/measurements/"
 log    = "out/out_scattering_I1"
 names  = [

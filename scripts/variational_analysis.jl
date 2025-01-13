@@ -36,14 +36,14 @@ mπ,Δmπ = 0.43800, 0.00100
 ens = "Lt24Ls14beta7.05m1-0.85m2-0.85"   # t0=8; deriv; (bad signal,larger L?)
 ens = "Lt32Ls16beta7.05m1-0.85m2-0.85"   # t0=8; deriv; (bad signal,larger L?)
 mπ,Δmπ = 0.33076, 0.00097
-ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"    # t0=8; deriv
-ens = "Lt24Ls14beta6.9m1-0.92m2-0.92"    # t0=7; deriv (ok signal, better meff)
-ens = "Lt32Ls16beta6.9m1-0.92m2-0.92"    # t0=8; deriv (bad signal,larger L?)
-mπ,Δmπ = 0.38649, 0.00051
 ens = "Lt32Ls16beta7.2m1-0.78m2-0.78"    # t0=8; deriv (below?) 
 mπ,Δmπ = 0.36963, 0.00039
+ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"    # t0=8; deriv
+ens = "Lt32Ls16beta6.9m1-0.92m2-0.92"    # t0=8; deriv (bad signal,larger L?)
+ens = "Lt24Ls14beta6.9m1-0.92m2-0.92"    # t0=7; deriv (ok signal, better meff)
+mπ,Δmπ = 0.38649, 0.00051
 
-maxhits = 64
+maxhits = 128
 t0  = 8
 
 T, L = h5dset["$ens/lattice"][1:2]
@@ -68,26 +68,48 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L;maxhits=typemax(Int))
     corr = dropdims(mean(corr[:,:,:,1:h,:],dims=4),dims=4)
     return corr
 end
+function effective_masses(CorrD1,CorrR1,CorrD2,CorrR3,Corrρ,CorrT1,CorrT2,L;maxhits,t0)
+    sign   = +1
+    Corr2π = pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
+    Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L;maxhits)
+    Corr   = correlator_folding(Corr;t_dim=4,sign)
+    Corr   = correlator_derivative(Corr;t_dim=4)
+    sign   = -1
 
-sign   = +1
-Corr2π = pipi_correlator(CorrD1,CorrR1,CorrD2,CorrR3,L)
-Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L;maxhits)
-Corr   = correlator_folding(Corr;t_dim=4,sign)
-Corr   = correlator_derivative(Corr;t_dim=4)
-sign   = -1
+    eigvals, Δeigvals = eigenvalues(Corr;t0)
+    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
+    meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
 
-eigvals, Δeigvals = eigenvalues(Corr;t0)
-eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
-meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
+    # get the actual number of hits used in the plot
+    nhits = size(Corr2π)[2]
+    h = min(nhits,maxhits)
 
-plt = plot(ylabel="effective mass",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), \mathbf p=(0,0,1)$")
-scatter!(plt,meff[2,1:t1_max],yerr=Δmeff[2,1:t1_max],label="eigenvalue #1")
-scatter!(plt,meff[1,1:t2_max],yerr=Δmeff[1,1:t2_max],label="eigenvalue #2")
-plot!(plt,ylims=(0.2,1.2),xlims=(1.5,T÷2),xticks=2:2:T)
-for p2 in 1:2
-    label = p2 == 1 ? L"non-interacting $E_{\pi(\mathbf p)\pi(\mathbf 0)}$" : "" 
-    add_mass_band!(plt,non_interacting_energy(mπ,10Δmπ,p2,L)...;label)
+    return meff, Δmeff, h
+end
+function plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ)
+    plt = plot(ylabel="effective mass",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), \mathbf p=(0,0,1), n_{src}=%$h, t_0 = %$(t0)$")
+    scatter!(plt,meff[2,1:t1_max],yerr=Δmeff[2,1:t1_max],label="eigenvalue #1")
+    scatter!(plt,meff[1,1:t2_max],yerr=Δmeff[1,1:t2_max],label="eigenvalue #2")
+    plot!(plt,ylims=(0.2,1.2),xlims=(1.5,T÷2),xticks=2:2:T)
+    for p2 in 1:2
+        label = p2 == 1 ? L"non-interacting $E_{\pi(\mathbf p)\pi(\mathbf 0)}$ with $|p|=1,\sqrt{2}$" : "" 
+        add_mass_band!(plt,non_interacting_energy(mπ,10Δmπ,p2,L)...;label)
+    end
+    return plt
 end
 
-display(plt)
-savefig(plt,joinpath("gevp_$ens.pdf"))
+anim_t0 = Animation()
+for t0 in 1:12
+    meff, Δmeff, h = effective_masses(CorrD1,CorrR1,CorrD2,CorrR3,Corrρ,CorrT1,CorrT2,L;maxhits,t0)
+    plt = plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ)
+    frame(anim_t0,plt)
+end
+webm(anim_t0,"gevp_$(ens)_t0.webm",fps=1)
+
+anim_h  = Animation()
+for maxhits in [2^i for i in 1:7]
+    meff, Δmeff, h = effective_masses(CorrD1,CorrR1,CorrD2,CorrR3,Corrρ,CorrT1,CorrT2,L;maxhits,t0)
+    plt = plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ)
+    frame(anim_h,plt)
+end
+webm(anim_h,"gevp_$(ens)_hits.webm",fps=1)
