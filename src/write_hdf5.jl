@@ -20,7 +20,12 @@ function isospin1_to_hdf5(file,h5file;setup=true,ensemble="")
     Nlabels, Nconf, Nsrc, Nmom, T = size(Re)
     @assert length(labels) == Nlabels
     @assert (Nmom-1)÷2 == pmax 
-    
+    p_external = unique(last.(_splitlabel.(labels)))
+
+    h5write(h5file,joinpath(ensemble,"Nsrc"),Nsrc)
+    h5write(h5file,joinpath(ensemble,"Nconf"),Nconf)
+    h5write(h5file,joinpath(ensemble,"p_external"),p_external)
+
     for i in 1:Nlabels
         channel, P_tot =_splitlabel(labels[i])
         # only the 'd' diagram has negative momenta being measured in HiRep

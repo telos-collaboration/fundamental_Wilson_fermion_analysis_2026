@@ -1,7 +1,7 @@
 using Pkg; Pkg.activate(".")
 using ScatteringI1
 
-h5file = "data/isospin1.hdf5"
+h5file = "data/isospin1_new3.hdf5"
 path   = "/home/fabian/Dokumente/Physics/Data/DataVSC/measurements/"
 path   = "/home/fabian/Documents/Physics/Data/DataVSC/measurements/"
 log    = "out/out_scattering_I1"
@@ -18,6 +18,7 @@ names  = [
     "Pusan/Lt32Ls24beta6.9m1-0.924m2-0.924",
     "runsSp4/Lt48Ls16beta7.4m1-0.75m2-0.75",
     "runsSp4/Lt32Ls16beta7.2m1-0.794m2-0.794",
+    "runsSp4/Lt36Ls24beta7.05m1-0.867m2-0.867",
 ]
 
 for name in names
