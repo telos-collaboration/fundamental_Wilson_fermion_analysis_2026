@@ -31,8 +31,8 @@ function effective_masses(Corr;t0,maxhits=typemax(Int))
 
     return meff, Δmeff, h
 end
-function plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ)
-    plt = plot(ylabel="effective mass",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), \mathbf p=(0,0,1), n_{src}=%$h, t_0 = %$(t0)$")
+function plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ, p)
+    plt = plot(ylabel="effective mass",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), %$(p), n_{src}=%$h, t_0 = %$(t0)$")
     scatter!(plt,meff[2,1:t1_max],yerr=Δmeff[2,1:t1_max],label="eigenvalue #1")
     scatter!(plt,meff[1,1:t2_max],yerr=Δmeff[1,1:t2_max],label="eigenvalue #2")
     plot!(plt,ylims=(0.2,1.5),xlims=(1.5,T÷2),xticks=2:2:T)
@@ -60,28 +60,31 @@ ens = "Lt36Ls24beta7.05m1-0.867m2-0.867" # t0=8; deriv
 mπ,Δmπ =  0.14810, 0.00090
 ens = "Lt36Ls16beta7.2m1-0.76m2-0.76"    # t0=8; deriv (bad signal,larger L?)
 mπ,Δmπ = 0.45700, 0.00130
-ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"    # t0=8; deriv
 ens = "Lt32Ls16beta6.9m1-0.92m2-0.92"    # t0=8; deriv (bad signal,larger L?)
 ens = "Lt24Ls14beta6.9m1-0.92m2-0.92"    # t0=7; deriv (ok signal, better meff)
+ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"    # t0=8; deriv
 mπ,Δmπ = 0.38649, 0.00051
 
-hdf5file = "data/isospin1_corr_p001.hdf5"
+hdf5file = "data/isospin1_corr.hdf5"
 h5dset = h5open(hdf5file)
 t1_max  = 18 
 t2_max  = 15
 maxhits = 64
 t0      = 8
 
-p    = "p(0,0,1)"
+p    = "p(1,1,0)"
 T, L = h5dset["$ens/lattice"][1:2]
 m0   = -parse(Float64,last(split(ens,'-')))
 Corr = h5dset[joinpath(ens,p,"correlation_matrix")][]
 
+s = split(p,"_")
+p = length(s) > 1 ? "$(s[1])_{$(s[2])}" : p
+
 meff, Δmeff, h = effective_masses(Corr;maxhits,t0)
-plt = plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ)
+plt = plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ, p)
 plot!(plt,legend=:outerright)
 display(plt)
-savefig(plt,"gevp_$(ens).pdf")
+savefig(plt,"gevp_$(ens)_$p.pdf")
 
 #=
 anim_t0 = Animation()
