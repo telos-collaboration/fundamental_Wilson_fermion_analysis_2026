@@ -44,10 +44,17 @@ function write_p001_correlation_matrix(file_in,file_out)
             Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2, CorrD1_old = correlatorsp001(fid,ens;p=1)
             Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
             Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
+            
+            h5write(file_out,joinpath(ens,"p(0,0,1)","correlation_matrix"),Corr)
+            h5write(file_out,joinpath(ens,"p(0,0,1)","correlator_pion"),Corrπ)
         end
-        h5write(file_out,joinpath(ens,"p(0,0,1)","correlation_matrix"),Corr)
+        if "p(0,0,0)" ∈ p_external
+            Corrπ0, Corrρ0 = correlatorsp000(fid,ens;p=1)
+            h5write(file_out,joinpath(ens,"p(0,0,0)","correlator_pion"),Corrπ0)
+            h5write(file_out,joinpath(ens,"p(0,0,0)","correlator_rho") ,Corrρ0)
+        end
     end
 end
 file_in  = "data/isospin1.hdf5"
-file_out = "data/isospin1_corr_p001_V2.hdf5"
+file_out = "data/isospin1_corr_p001_V3.hdf5"
 write_p001_correlation_matrix(file_in,file_out)
