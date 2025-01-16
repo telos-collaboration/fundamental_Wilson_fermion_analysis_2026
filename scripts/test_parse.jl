@@ -21,10 +21,20 @@ names  = [
     "runsSp4/Lt36Ls24beta7.05m1-0.867m2-0.867",
 ]
 
+single_file = true
+
 for name in names
     file = joinpath(path,"$name/$log")
     ens  = basename(name)
     @show name
-    h5file == "test.hdf5" && isfile(h5file) && rm(h5file)
-    isospin1_to_hdf5(file,h5file;ensemble=ens,setup=true)
+
+    if single_file 
+        h5file == "test.hdf5" && isfile(h5file) && rm(h5file)
+        isospin1_to_hdf5(file,h5file;ensemble=ens,setup=true)
+    else
+        dir = joinpath(dirname(h5file),"ensembles")
+        ispath(dir) || mkpath(dir) 
+        f = joinpath(dir,ens*".hdf5")
+        isospin1_to_hdf5(file,f;ensemble="",setup=true)
+    end
 end
