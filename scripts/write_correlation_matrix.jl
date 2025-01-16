@@ -31,26 +31,23 @@ function _copy_lattice_parameters(outfile,infile;group="")
     end
 end
 function write_p001_correlation_matrix(file_in,file_out)
-
     isfile(file_out) && rm(file_out)
-
     fid       = h5open(file_in) 
     ensembles = keys(fid)
 
     @showprogress desc="Write correlation matrices" for ens in ensembles
-        
         _copy_lattice_parameters(file_out,file_in;group=ens)
-        
         T, L = fid["$ens/lattice"][1:2]
+        p_external = fid["$ens/p_external"][1:2]
         
-        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2, CorrD1_old = correlatorsp001(fid,ens;p=1)
-        Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
-        Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
-
+        if "p(0,0,1)" ∈ p_external
+            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2, CorrD1_old = correlatorsp001(fid,ens;p=1)
+            Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
+            Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
+        end
         h5write(file_out,joinpath(ens,"p(0,0,1)","correlation_matrix"),Corr)
-
     end
 end
-write_p001_correlation_matrix(file_in,file_out)
 file_in  = "data/isospin1.hdf5"
-file_out = "data/isospin1_corr_p001.hdf5"
+file_out = "data/isospin1_corr_p001_V2.hdf5"
+write_p001_correlation_matrix(file_in,file_out)
