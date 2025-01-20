@@ -16,9 +16,11 @@ function correlatorsp001(h5dset,ens;p=1)
     CorrD1 =  h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
     CorrD2 =  h5dset["$ens/p$p1/d/p_diag(0,0,0)/C_re"][]
     Corrπ  =  h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
-    Corrρ  =  h5dset["$ens/p$p1/rho_g33/p_diag$p1/C_re"][]
-    CorrT1 =  h5dset["$ens/p$p1/t1_g3/p_diag$p1/C_im"][]
-    CorrT2 =  h5dset["$ens/p$p1/t2_g3/p_diag$p1/C_im"][]
+    try
+        Corrρ  =  h5dset["$ens/p$p1/rho_g33/p_diag$p1/C_re"][]
+    catch
+        Corrρ  =  h5dset["$ens/p$p1/rho_g3_g3/p_diag$p1/C_re"][]
+    end
     CorrR1 =  h5dset["$ens/p$p1/r1/p_diag$p1/C_re"][]
     CorrR2 =  h5dset["$ens/p$p1/r2/p_diag$p1/C_re"][]
     CorrR3 =  h5dset["$ens/p$p1/r3/p_diag$p1/C_re"][]
