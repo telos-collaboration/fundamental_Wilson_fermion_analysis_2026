@@ -61,8 +61,8 @@ mπ,Δmπ =  0.14810, 0.00090
 ens = "Lt36Ls16beta7.2m1-0.76m2-0.76"    # t0=8; deriv (bad signal,larger L?)
 mπ,Δmπ = 0.45700, 0.00130
 ens = "Lt32Ls16beta6.9m1-0.92m2-0.92"    # t0=8; deriv (bad signal,larger L?)
-ens = "Lt24Ls14beta6.9m1-0.92m2-0.92"    # t0=7; deriv (ok signal, better meff)
 ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"    # t0=8; deriv
+ens = "Lt24Ls14beta6.9m1-0.92m2-0.92"    # t0=7; deriv (ok signal, better meff)
 mπ,Δmπ = 0.38649, 0.00051
 
 hdf5file = "data/isospin1_corr.hdf5"
@@ -70,9 +70,10 @@ h5dset = h5open(hdf5file)
 t1_max  = 18 
 t2_max  = 15
 maxhits = 64
-t0      = 8
+t0      = 3
 
 p    = "p(1,1,0)"
+p    = "p(0,0,1)"
 T, L = h5dset["$ens/lattice"][1:2]
 m0   = -parse(Float64,last(split(ens,'-')))
 Corr = h5dset[joinpath(ens,p,"correlation_matrix")][]
@@ -83,6 +84,9 @@ p = length(s) > 1 ? "$(s[1])_{$(s[2])}" : p
 meff, Δmeff, h = effective_masses(Corr;maxhits,t0)
 plt = plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ, p)
 plot!(plt,legend=:outerright)
+add_mass_band!(plt,0.756,0.001;label="")
+add_mass_band!(plt,0.984,0.012;label="")
+
 display(plt)
 savefig(plt,"gevp_$(ens)_$p.pdf")
 

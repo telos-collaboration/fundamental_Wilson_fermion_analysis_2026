@@ -37,7 +37,7 @@ def print_fit_param(fit):
     print('chi2/dof = ', chi2/dof, '\n')
 
 
-def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,plotname="test",plotdir="./output/plots/",plotting=True,printing=False,antisymmetric=False):
+def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname="test",plotdir="./output/plots/",plotting=False,printing=False):
     T = - abs(T) if antisymmetric else abs(T) 
     fitter = cf.CorrFitter(models=make_models(T,tmin,tmax))
     p0 = None
@@ -76,7 +76,6 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsiz
         ev       = get_hdf5_value(fid,group+"/eigvals")
         Delta_ev = get_hdf5_value(fid,group+"/Delta_eigvals")
 
-        print(ev.shape)
         Nops = ev.shape[1]
         eig1 = dict(Gab=gv.gvar(ev[:,Nops-1],Delta_ev[:,Nops-1]))
         eig2 = dict(Gab=gv.gvar(ev[:,Nops-2],Delta_ev[:,Nops-2]))
@@ -84,17 +83,15 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsiz
         # data needed for the pion decay constant
         # (normalisation of correlator is important here!)
         plotname = "beta{}_m{}_L{}_T{}".format(beta,m,L,T)
-
-        antisymmetric = False
+        antisymmetric = True
         plotdir = "./output/plots/"
         Nmax = 10
 
-        #fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,tp,plotting=False,printing=False):
-        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,plotname,plotdir,antisymmetric)
-        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,plotname,plotdir,antisymmetric)
+        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir)
+        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir)
         print(group)
-        print(E1[0])
-        print(E2[0])
+        print(E1[0],chi2_1/dof1)
+        print(E2[0],chi2_2/dof2)
 
 
 def read_filelist_fitparam(parameterfile):
