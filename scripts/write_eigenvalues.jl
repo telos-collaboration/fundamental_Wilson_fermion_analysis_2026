@@ -19,8 +19,11 @@ function variational_analysis(Corr;t0,maxhits=typemax(Int),deriv=true)
     end
 
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
+
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
-    return eigvals, Δeigvals
+    eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
+
+    return eigvals, Δeigvals, eigvals_cov
 end
 function _copy_lattice_parameters(outfile,infile;group="")
     file = h5open(infile)[group]
@@ -47,7 +50,7 @@ ensembles = keys(h5dset)
     for p in p_external
         p == "p(0,0,0)" && continue
         Corr = h5dset[joinpath(ens,p,"correlation_matrix")][]
-        eigvals, Δeigvals = variational_analysis(Corr;t0,maxhits,deriv=true)
+        eigvals, Δeigvals, eigvals_cov = variational_analysis(Corr;t0,maxhits,deriv=true)
         eigvals, Δeigvals = real.(eigvals), real.(Δeigvals)
 
         plt = plot()
@@ -58,5 +61,6 @@ ensembles = keys(h5dset)
 
         h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
         h5write(outfile,joinpath(ens,p,"Delta_eigvals"),Δeigvals)
+        h5write(outfile,joinpath(ens,p,"cov_eigvals"),eigvals_cov)
     end
 end

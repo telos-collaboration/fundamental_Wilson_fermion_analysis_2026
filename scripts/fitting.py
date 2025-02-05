@@ -75,10 +75,13 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsiz
         # read the data from the hdf5 file
         ev       = get_hdf5_value(fid,group+"/eigvals")
         Delta_ev = get_hdf5_value(fid,group+"/Delta_eigvals")
+        cov_ev   = get_hdf5_value(fid,group+"/cov_eigvals")
 
         Nops = ev.shape[1]
-        eig1 = dict(Gab=gv.gvar(ev[:,Nops-1],Delta_ev[:,Nops-1]))
-        eig2 = dict(Gab=gv.gvar(ev[:,Nops-2],Delta_ev[:,Nops-2]))
+        #eig1 = dict(Gab=gv.gvar(ev[:,Nops-1],Delta_ev[:,Nops-1]))
+        #eig2 = dict(Gab=gv.gvar(ev[:,Nops-2],Delta_ev[:,Nops-2]))
+        eig1 = dict(Gab=gv.gvar(ev[:,Nops-1],cov_ev[:,:,Nops-1]))
+        eig2 = dict(Gab=gv.gvar(ev[:,Nops-2],cov_ev[:,:,Nops-2]))
 
         # data needed for the pion decay constant
         # (normalisation of correlator is important here!)
