@@ -5,8 +5,8 @@ using HDF5
 using Statistics
 using LaTeXStrings
 using LatticeUtils
-include("read_rhopipi_diagrams.jl")
 pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
+
 function non_interacting_energy(mπ,Δmπ,p2,L)
     E1  = sqrt(mπ^2 + p2*(2*pi/L)^2)
     ΔE1 = Δmπ*mπ/E1

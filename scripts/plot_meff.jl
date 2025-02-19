@@ -6,7 +6,6 @@ using Statistics
 using LaTeXStrings
 using LatticeUtils
 gr(frame=:box,markersize=5,markeralpha=0.75)
-include("read_rhopipi_diagrams.jl")
 
 hdf5file = "data/isospin1.hdf5"
 h5dset = h5open(hdf5file)

@@ -4,7 +4,6 @@ using HDF5
 using Statistics
 using LatticeUtils
 using ProgressMeter
-include("read_rhopipi_diagrams.jl")
 
 function pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
     L3, L6 = L^3, L^6

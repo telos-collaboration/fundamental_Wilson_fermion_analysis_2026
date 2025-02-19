@@ -4,8 +4,6 @@ using HDF5
 using Statistics
 using LatticeUtils
 using ProgressMeter
-include("read_rhopipi_diagrams.jl")
-
 
 function variational_analysis(Corr;t0,maxhits=typemax(Int),deriv=true)
 

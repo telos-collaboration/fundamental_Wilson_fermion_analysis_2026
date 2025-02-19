@@ -1,10 +1,3 @@
-function _average_correlator(Corr)
-    N, nhits, T = size(Corr)
-    CorrAvg = dropdims(mean(Corr,dims=2),dims=2)
-    C  = dropdims(mean(CorrAvg,dims=1),dims=1)
-    ΔC = dropdims(std(CorrAvg,dims=1),dims=1)./sqrt(N)
-    return C, ΔC
-end
 function D1(h5dset,p,ens)
     πp =  h5dset["$ens/p$p/pi/p_diag$p/C_re"][]
     π0 =  h5dset["$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
@@ -60,16 +53,4 @@ function correlatorsp000(h5dset,ens;p=1)
     Corrπ  = h5dset["$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
     Corrρ  = h5dset["$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re"][]
     return Corrπ, Corrρ
-end
-function read_hdf5_file(file,ens,p1,p)
-    h5dset = h5open(file)
-    T, L = h5dset["$ens/lattice"][1:2]
-    if p1 == "(0,0,0)"
-        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2, CorrD1_old = correlatorsp000(h5dset,ens)
-    elseif p1 ∈ [ "(0,0,1)" , "(0,0,2)" , "(0,0,3)"]
-        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2, CorrD1_old = correlatorsp001(h5dset,ens;p)
-    elseif p1 ∈ [ "(1,1,0)" , "(2,2,0)" , "(3,3,0)"]
-        Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2, CorrD1_old = correlatorsp110(h5dset,ens;p)
-    end
-    return T, L, Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2, CorrD1_old
 end
