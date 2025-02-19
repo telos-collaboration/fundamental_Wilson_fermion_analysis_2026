@@ -13,8 +13,6 @@ for (name,dir,file,run) in eachrow(info)
     file = joinpath(path,dir,name,file)
     ens  = joinpath(name,run)
 
-    @show file
-    
     if single_file 
         h5file == "test.hdf5" && isfile(h5file) && rm(h5file)
         isospin1_to_hdf5(file,h5file;ensemble=ens,setup=true)

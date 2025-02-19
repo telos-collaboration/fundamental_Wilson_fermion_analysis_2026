@@ -82,7 +82,7 @@ function _find_pmax(file)
         end
     end
 end
-function parse_isospin_one(file)
+function parse_isospin_one(file;desc="Progress:")
     T = first(latticesize(file))
     cut  = length("[IO][0]")
     # The measured  momenta are currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
@@ -104,7 +104,7 @@ function parse_isospin_one(file)
     Im = fill(NaN,(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T))
 
     nlines = countlines(file)
-    p = Progress(nlines)
+    p = Progress(nlines; desc)
 
     labels = label_list(file)
     for line in eachline(file)
