@@ -1,21 +1,21 @@
 using Pkg; Pkg.activate(".")
 using HDF5
-function check_matching_runs(file,name,key)
-    fid  = h5open(file)[name]
+function check_matching_runs(file,ensemble,key)
+    fid  = h5open(file)[ensemble]
     runs = keys(fid)
     vals = read.(Ref(fid),joinpath.(runs,key))
-    @assert allequal(vals)
+    @assert allequal(vals) "mismatch in $ensemble for $key"
 end
-function check_lattice_params(file,name)
+function check_lattice_params(file,ensemble)
     for l in ["beta", "gauge group", "lattice", "quarkmasses", "Nconf", "configurations", "plaquette"]
-        check_matching_runs(file,name,l)
+        check_matching_runs(file,ensemble,l)
     end
 end
-function copy_lattice_params(h5file_in,h5file_out,name)
-    fid = h5open(h5file_in)[name]
+function copy_lattice_params(h5file_in,h5file_out,ensemble)
+    fid = h5open(h5file_in)[ensemble]
     run_label = first(keys(fid))
     for l in ["beta", "gauge group", "lattice", "quarkmasses", "Nconf", "configurations", "plaquette"]
-        h5write(h5file_out,joinpath(name,l),read(fid,joinpath(run_label,l)))
+        h5write(h5file_out,joinpath(ensemble,l),read(fid,joinpath(run_label,l)))
     end
 end
 function update_key(key)
@@ -26,15 +26,14 @@ function old_key(key)
     m = match(r"rho_g(?<g1>[1-3])_g(?<g2>[1-3])",key)
     return isnothing(m) ? key : "rho_g$(m.captures[1])$(m.captures[2])"
 end
-function merge_runs(h5file,name)
-    check_lattice_params(h5file,name)
+function merge_runs(h5file,ensemble)
+    check_lattice_params(h5file,ensemble)
 end
-function merge_runs(h5file_in, h5file_out, name )
-    isfile(h5file_out) && rm(h5file_out)
-    check_lattice_params(h5file_in,name)
-    copy_lattice_params(h5file_in,h5file_out,name)
+function merge_runs(h5file_in, h5file_out, ensemble )
+    check_lattice_params(h5file_in,ensemble)
+    copy_lattice_params(h5file_in,h5file_out,ensemble)
 
-    fid  = h5open(h5file_in)[name]
+    fid  = h5open(h5file_in)[ensemble]
     runs = keys(fid)
 
     p_ext = read.(Ref(fid),joinpath.(runs,"p_external"))
@@ -73,15 +72,19 @@ function merge_runs(h5file_in, h5file_out, name )
                         nsrc += read(r,"Nsrc")
                     end
                 end
-                h5write(h5file_out,joinpath(name,p,l,p_i,"C_re"),tmp_re)
-                h5write(h5file_out,joinpath(name,p,l,p_i,"C_im"),tmp_im)
-                h5write(h5file_out,joinpath(name,p,l,p_i,"Nsrc"),nsrc)
+                h5write(h5file_out,joinpath(ensemble,p,l,p_i,"C_re"),tmp_re)
+                h5write(h5file_out,joinpath(ensemble,p,l,p_i,"C_im"),tmp_im)
+                h5write(h5file_out,joinpath(ensemble,p,l,p_i,"Nsrc"),nsrc)
             end
         end
     end
-    h5write(h5file_out,joinpath(name,"p_external"),p_ext_unique)
+    h5write(h5file_out,joinpath(ensemble,"p_external"),p_ext_unique)
 end
 h5file_in  = "data/isospin1_v2.hdf5"
 h5file_out = "data/isospin1_merged.hdf5"
-name   = "Lt24Ls14beta7.05m1-0.85m2-0.85"
-merge_runs(h5file_in, h5file_out, name )
+ensembles  = keys(h5open(h5file_in))
+isfile(h5file_out) && rm(h5file_out)
+
+for ensemble in ensembles
+    merge_runs(h5file_in, h5file_out, ensemble )
+end
