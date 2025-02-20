@@ -15,11 +15,11 @@ for (name,dir,file,run) in eachrow(info)
 
     if single_file 
         h5file == "test.hdf5" && isfile(h5file) && rm(h5file)
-        isospin1_to_hdf5(file,h5file;ensemble=ens,setup=true)
+        isospin1_to_hdf5(file,h5file;ensemble=ens,setup=true,sort=true)
     else
         dir = joinpath(dirname(h5file),"ensembles")
         ispath(dir) || mkpath(dir) 
         f = joinpath(dir,name*".hdf5")
-        isospin1_to_hdf5(file,f;ensemble=run,setup=true)
+        isospin1_to_hdf5(file,f;ensemble=run,setup=true,sort=true)
     end
 end
