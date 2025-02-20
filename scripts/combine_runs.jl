@@ -65,7 +65,7 @@ function merge_runs(h5file_in, h5file_out, ensemble )
     p_ext_unique, unique_labels, p_internal_unique = unique_labels_momenta(fid)
 
     for p in p_ext_unique
-        for l in unique_labels
+        for l in update_key.(unique_labels)
             for p_i in p_internal_unique
                 tmp_re = nothing 
                 tmp_im = nothing 
