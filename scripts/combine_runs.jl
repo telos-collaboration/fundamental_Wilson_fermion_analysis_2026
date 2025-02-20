@@ -29,28 +29,44 @@ end
 function merge_runs(h5file,ensemble)
     check_lattice_params(h5file,ensemble)
 end
+# This obatins any internal momenta, external momenta or diagram labels present in the hdf5 file
+function unique_labels_momenta(file_id)
+    runs = keys(file_id)
+    # Arrays that store all labels & momenta encountered
+    all_p_internal = AbstractString[]
+    all_labels = AbstractString[] 
+    # First get all external momenta
+    p_external = read.(Ref(file_id),joinpath.(runs,"p_external"))
+    p_external_unique = unique(vcat(p_external...))
+    # Then find all momenta & labels 
+    for r in runs
+        for p_e in p_external_unique
+            l1 = joinpath(r,p_e)
+            if haskey(file_id,l1)
+                labels = keys(file_id[l1])
+                append!(all_labels,labels)
+                for lab in labels
+                    l2 = joinpath(r,p_e,lab)
+                    p_internal = keys(file_id[l2])
+                    append!(all_p_internal,p_internal)
+                end
+            end
+        end
+    end
+    return p_external_unique, unique(all_labels), unique(all_p_internal)
+end
 function merge_runs(h5file_in, h5file_out, ensemble )
     check_lattice_params(h5file_in,ensemble)
     copy_lattice_params(h5file_in,h5file_out,ensemble)
 
     fid  = h5open(h5file_in)[ensemble]
     runs = keys(fid)
-
-    p_ext = read.(Ref(fid),joinpath.(runs,"p_external"))
-    p_ext_unique = unique(vcat(p_ext...))
+    rids = getindex.(Ref(fid),joinpath.(runs))
+    p_ext_unique, unique_labels, p_internal_unique = unique_labels_momenta(fid)
 
     for p in p_ext_unique
-
-        rids   = getindex.(Ref(fid),joinpath.(runs))
-        labels = keys.(getindex.(rids,p))
-        unique_labels = unique(vcat(labels...))
-
         for l in unique_labels
-
-            # TODO: Check that the internal momenta always match
-            p_internal = keys(first(rids)[joinpath(p,l)])
-
-            for p_i in p_internal
+            for p_i in p_internal_unique
                 tmp_re = nothing 
                 tmp_im = nothing 
                 nsrc   = 0
@@ -58,31 +74,37 @@ function merge_runs(h5file_in, h5file_out, ensemble )
                     # The if-statement takes care of the labels for the off-diagonal
                     # vector meson correlators, since we have changed their label when
                     # we introduced the γiγ0 correlators 
-                    if l ∈ keys(r[p]) 
-                        re = read(r,joinpath(p,l,p_i,"C_re"))
-                        im = read(r,joinpath(p,l,p_i,"C_im"))
-                        tmp_re = isnothing(tmp_re) ? re : cat(tmp_re,re,dims=2)
-                        tmp_im = isnothing(tmp_im) ? re : cat(tmp_im,im,dims=2)
-                        nsrc += read(r,"Nsrc")
-                    elseif old_key(l) in keys(r[p])
-                        re = read(r,joinpath(p,old_key(l),p_i,"C_re"))
-                        im = read(r,joinpath(p,old_key(l),p_i,"C_im"))  
-                        tmp_re = isnothing(tmp_re) ? re : cat(tmp_re,re,dims=2)
-                        tmp_im = isnothing(tmp_im) ? re : cat(tmp_im,im,dims=2)
-                        nsrc += read(r,"Nsrc")
+                    if haskey(r,p) && haskey(r[p],l)
+                        if  p_i in keys(r[joinpath(p,l)])
+                            re = read(r,joinpath(p,l,p_i,"C_re"))
+                            im = read(r,joinpath(p,l,p_i,"C_im"))
+                            tmp_re = isnothing(tmp_re) ? re : cat(tmp_re,re,dims=2)
+                            tmp_im = isnothing(tmp_im) ? re : cat(tmp_im,im,dims=2)
+                            nsrc += read(r,"Nsrc")
+                        end
+                    elseif haskey(r,p) && haskey(r[p],old_key(l)) 
+                        if  p_i in keys(r[joinpath(p,old_key(l))])
+                            re = read(r,joinpath(p,old_key(l),p_i,"C_re"))
+                            im = read(r,joinpath(p,old_key(l),p_i,"C_im"))  
+                            tmp_re = isnothing(tmp_re) ? re : cat(tmp_re,re,dims=2)
+                            tmp_im = isnothing(tmp_im) ? re : cat(tmp_im,im,dims=2)
+                            nsrc += read(r,"Nsrc")
+                        end
                     end
                 end
-                h5write(h5file_out,joinpath(ensemble,p,l,p_i,"C_re"),tmp_re)
-                h5write(h5file_out,joinpath(ensemble,p,l,p_i,"C_im"),tmp_im)
-                h5write(h5file_out,joinpath(ensemble,p,l,p_i,"Nsrc"),nsrc)
+                if !isnothing(tmp_re) && !isnothing(tmp_im) && nsrc > 0
+                    h5write(h5file_out,joinpath(ensemble,p,l,p_i,"C_re"),tmp_re)
+                    h5write(h5file_out,joinpath(ensemble,p,l,p_i,"C_im"),tmp_im)
+                    h5write(h5file_out,joinpath(ensemble,p,l,p_i,"Nsrc"),nsrc)
+                end
             end
         end
     end
     h5write(h5file_out,joinpath(ensemble,"p_external"),p_ext_unique)
 end
-h5file_in  = "data/isospin1_v2.hdf5"
+h5file_in  = "data/isospin1_sorted.hdf5"
 h5file_out = "data/isospin1_merged.hdf5"
-ensembles  = keys(h5open(h5file_in))
+ensembles  = keys(h5open(h5file_in))[4:end]
 isfile(h5file_out) && rm(h5file_out)
 
 for ensemble in ensembles
