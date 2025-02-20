@@ -2,7 +2,7 @@ using Pkg; Pkg.activate(".")
 using ScatteringI1
 using DelimitedFiles
 
-h5file = "data/isospin1.hdf5"
+h5file = "data/isospin1_sorted.hdf5"
 path   = "/home/fabian/Documents/Physics/Data/DataVSC/measurements/"
 path   = "/home/fabian/Dokumente/Physics/Data/DataVSC/measurements/"
 info   = readdlm("input/input_files.csv",',',skipstart=1)

@@ -11,13 +11,19 @@ function _splitlabel(label)
         return l, p
     end
 end
-function isospin1_to_hdf5(file,h5file;setup=true,ensemble="")
-    setup &&  HiRepParsing._write_lattice_setup(file,h5file;h5group=ensemble,smearing=false)
+function isospin1_to_hdf5(file,h5file;setup=true,ensemble="",sort=true)
+    setup &&  HiRepParsing._write_lattice_setup(file,h5file;h5group=ensemble,smearing=false,sort)
     Re, Im = parse_isospin_one(file;desc=ensemble)
+    if sort 
+        names = confignames(file)
+        perm  = HiRepParsing.permutation_names(names)
+        Re = Re[:,perm,:,:,:,:,:] 
+        Im = Im[:,perm,:,:,:,:,:] 
+    end
     labels = label_list(file)
     pmax  = _find_pmax(file)
     
-    Nlabels, Nconf, Nsrc, Nmom, T = size(Re)
+    Nlabels, Nconf, Nsrc, Nmom, Nmom, Nmom, T = size(Re)
     @assert length(labels) == Nlabels
     @assert (Nmom-1)÷2 == pmax 
     p_external = unique(last.(_splitlabel.(labels)))
