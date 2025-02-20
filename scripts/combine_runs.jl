@@ -104,9 +104,14 @@ function merge_runs(h5file_in, h5file_out, ensemble )
 end
 h5file_in  = "data/isospin1_sorted.hdf5"
 h5file_out = "data/isospin1_merged.hdf5"
-ensembles  = keys(h5open(h5file_in))[4:end]
-isfile(h5file_out) && rm(h5file_out)
+ensembles  = keys(h5open(h5file_in))
 
+isfile(h5file_out) && rm(h5file_out)
 for ensemble in ensembles
-    merge_runs(h5file_in, h5file_out, ensemble )
+    try 
+        merge_runs(h5file_in, h5file_out, ensemble )
+    catch
+        @warn "Ensemble $ensemble cannot be merged"
+        continue
+    end
 end
