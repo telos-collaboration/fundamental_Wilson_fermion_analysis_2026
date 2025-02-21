@@ -52,10 +52,6 @@ def result_sampled(info,N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,num_resample=50,
             res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi)
             for key, val in res_tmp.items():
                 res_sample[key].append(val)
-    # for key, val in res.items():
-    #     print(key, val)
-    
-    # res["beta"],res["m_1"],res["m_2"], res["mpi"], res["mrho"], res["en_lv"],res["resampling"], res["num_resample"] = [beta,m0,m0,mpi,mrho, en_lv,resampling,num_resample]
     return res, res_sample
 
 
@@ -64,13 +60,7 @@ def cot_delta_000(q2,N_L):
 def cot_delta_001(q2,N_L):
     return wlm(0,0,0,0,1,1,1,q2,int(N_L)) + 2*wlm(2,0,0,0,1,1,1,q2,int(N_L))
 def cot_delta_110(q2,N_L):
-    # print(complex(0,1) * (wlm(2,2,1,1,0,1,1,q2,int(N_L)) - wlm(2,-2,1,1,0,1,1,q2,int(N_L))))
-    # print(-2*np.imag(wlm(2,2,1,1,0,1,1,q2,int(N_L))))
-    # third = wlm(2,2,1,1,0,1,1,q2,int(N_L)) - wlm(2,-2,1,1,0,1,1,q2,int(N_L))
-    # if np.absolute(third) > 1e-10:
-    #     print(third, q2, N_L)
     return wlm(0,0,1,1,0,1,1,q2,int(N_L)) - wlm(2,0,1,1,0,1,1,q2,int(N_L)) + np.sqrt(3/2) * complex(0,1) * (wlm(2,2,1,1,0,1,1,q2,int(N_L)) - wlm(2,-2,1,1,0,1,1,q2,int(N_L)))
-    # return wlm(0,0,1,1,0,1,1,q2,int(N_L)) - wlm(2,0,1,1,0,1,1,q2,int(N_L)) - np.sqrt(3/2) * (wlm(2,2,1,1,0,1,1,q2,int(N_L)) - wlm(2,-2,1,1,0,1,1,q2,int(N_L)))
 
 def cot_delta_mom(dvec):
     if list(dvec) == [0,0,0]:
@@ -155,128 +145,8 @@ def get_rizz(E_pipis, N_Ls, dvecs, mpi):
 
             for key, val in tmp.items():
                 result[key].append(tmp[key])
-
-
-
-
-            # result["E_cm_prime"].append(Ecm_prime(E_pipis[i]/mpi,P_prime))
-            # result["E_cm"].append(result["E_cm_prime"][i]*mpi)
-            # result["s_prime"].append(result["E_cm_prime"][i]**2)
-            # result["s"].append(result["E_cm"][i]**2)
-            # result["E_cm_ld"].append(Ecm_lat_disp(E_pipis[i],Pvec))
-            # result["E_cm_ld_prime"].append(result["E_cm_ld"][i]/mpi)
-            # result["s_ld"].append(result["E_cm_ld"][i]**2)
-            # result["s_ld_prime"].append(result["E_cm_ld_prime"][i]**2)
-            # result["pstar_prime"].append(np.sqrt(result["s_prime"][i]/4-1))
-            # result["p2star_prime"].append(result["pstar_prime"][i]**2)
-            # result["pstar"].append(result["pstar_prime"][i]*mpi)
-            # result["p2star"].append(result["p2star_prime"][i]*mpi**2)
-            # result["pstar_ld"].append(pstar_lat_disp(result["E_cm_ld"][i],mpi))
-            # result["pstar_ld_prime"].append(result["pstar_ld"][i]/mpi)
-            # result["p2star_ld"].append(result["pstar_ld"][i]**2)
-            # result["p2star_ld_prime"].append(result["pstar_ld_prime"][i]**2)
-            # q2 = result["p2star"][i]*(N_Ls[i]/(2*np.pi))**2
-            # q2_ld = result["p2star_ld"][i]*(N_Ls[i]/(2*np.pi))**2
-            # result["q2"].append(q2)
-            # result["q2_ld"].append(q2_ld)
-            # cot_PS = cot_delta_mom(dvecs[i])(q2, N_Ls[i])
-            # cot_PS_ld = cot_delta_mom(dvecs[i])(q2_ld, N_Ls[i])
-            # result["cot_PS"].append(cot_PS)
-            # result["cot_PS_ld"].append(cot_PS_ld)
-            # result["tan_PS"].append(1/cot_PS)
-            # result["tan_PS_ld"].append(1/cot_PS_ld)
-            # PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
-            # result["PS"].append(complex(PS.real%180,PS.imag%180))
-            # PS_ld = 360*np.arctan(1/cot_PS_ld)/(2*np.pi)
-            # result["PS_ld"].append(complex(PS_ld.real%180,PS_ld.imag%180))
-            # result["p3cotPS"].append(result["pstar"][i]**3*cot_PS)
-            # result["p3cotPS_prime"].append(result["pstar_prime"][i]**3*cot_PS)
-            # result["p3cotPS_ld"].append(result["pstar_ld"][i]**3*cot_PS_ld)
-            # result["p3cotPS_ld_prime"].append(result["pstar_ld_prime"][i]**3*cot_PS_ld)
-            # result["p3cotPS_Ecm"].append(result["pstar"][i]**3/result["E_cm"][i]*cot_PS)
-            # result["p3cotPS_Ecm_prime"].append(result["pstar_prime"][i]**3/result["E_cm_prime"][i]*cot_PS)
-            # result["p3cotPS_Ecm_ld"].append(result["pstar_ld"][i]**3/result["E_cm_ld"][i]*cot_PS_ld)
-            # result["p3cotPS_Ecm_ld_prime"].append(result["pstar_ld_prime"][i]**3/result["E_cm_ld_prime"][i]*cot_PS_ld)
     return result
 
-
-
-# def get_rizz(E_pipis, N_Ls, dvecs, mpi):
-#     result = {}
-
-#     E_prime = []
-#     d = []
-#     L_prime = []
-#     P_prime = []
-#     E_cm_prime = []
-#     s_prime = []
-#     pstar_prime = []
-#     pstar_2_prime = []
-#     q = []
-#     q2 = []
-#     cot_PS = []
-#     tan_PS = []
-#     PS = []
-#     P_cot_PS_prime = []
-#     P3_cot_PS_prime = []
-
-#     for i in range(len(E_pipis)):
-#         E_prime_tmp = E_pipis[i]/mpi
-#         d_tmp = np.sqrt(np.dot(dvecs[i],dvecs[i]))
-#         L_prime_tmp = N_Ls[i]*mpi                               # L*mpi (removes lattice const)
-#         P_prime_tmp = 2*np.pi*d_tmp/L_prime_tmp
-        
-#         if E_prime_tmp**2 - P_prime_tmp**2 < 4:
-#             E_cm_prime_tmp,s_prime_tmp,pstar_prime_tmp,pstar_2_prime_tmp,q_tmp,q2_tmp,cot_PS_tmp,tan_PS_tmp,PS_tmp,P_cot_PS_prime_tmp,P3_cot_PS_prime_tmp =  [0,0,0,0,0,0,0,0,0,0,0]
-#         else:
-#             E_cm_prime_tmp = Ecm(E_prime_tmp,P_prime_tmp)
-#             s_prime_tmp = E_cm_prime_tmp**2
-#             pstar_prime_tmp = pstar(E_cm_prime_tmp)
-#             pstar_2_prime_tmp = pstar_prime_tmp**2
-#             q_tmp = pstar_prime_tmp*L_prime_tmp/(2*np.pi)
-#             q2_tmp = q_tmp**2
-#             cot_PS_tmp = cot_delta_mom(dvecs[i])(q2_tmp,N_Ls[i])
-#             tan_PS_tmp = 1/cot_PS_tmp
-#             PS_tmp = complex((360*np.arctan(tan_PS_tmp)/(2*np.pi)).real%180,(360*np.arctan(tan_PS_tmp)/(2*np.pi)).imag%180)
-#             P_cot_PS_prime_tmp = cot_PS_tmp*pstar_prime_tmp
-#             P3_cot_PS_prime_tmp = cot_PS_tmp*pstar_prime_tmp**3
-        
-#         E_prime.append(E_prime_tmp)
-#         d.append(d_tmp)
-#         L_prime.append(L_prime_tmp)
-#         E_cm_prime.append(E_cm_prime_tmp)
-#         s_prime.append(s_prime_tmp)
-#         pstar_prime.append(pstar_prime_tmp)
-#         pstar_2_prime.append(pstar_2_prime_tmp)
-#         q.append(q_tmp)
-#         q2.append(q2_tmp)
-#         cot_PS.append(cot_PS_tmp)
-#         tan_PS.append(tan_PS_tmp)
-#         PS.append(PS_tmp)
-#         P_cot_PS_prime.append(P_cot_PS_prime_tmp)
-#         P3_cot_PS_prime.append(P3_cot_PS_prime_tmp)
-
-#     result["mpi"] = [mpi,]
-#     result["level"] = en_lvs
-#     result["E_pure"] = E_pipis
-#     result["E_prime"] = E_prime
-#     result["dvecs"] = dvecs
-#     result["d"] = d
-#     result["d2"] = d
-#     result["N_Ls"] = N_Ls
-#     result["E_cm_prime"] = E_cm_prime
-#     result["s_prime"] = s_prime
-#     result["pstar_prime"] = pstar_prime
-#     result["pstar_2_prime"] = pstar_2_prime
-#     result["L_prime"] = L_prime
-#     result["q"] = q
-#     result["q2"] = q2
-#     result["cot_PS"] = cot_PS
-#     result["tan_PS"] = tan_PS
-#     result["PS"] = PS
-#     result["P_cot_PS_prime"] = P_cot_PS_prime
-#     result["P3_cot_PS_prime"] = P3_cot_PS_prime
-#     return result
 
 def calc_PS(name):
     info={}
