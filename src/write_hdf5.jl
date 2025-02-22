@@ -11,14 +11,24 @@ function _splitlabel(label)
         return l, p
     end
 end
-function isospin1_to_hdf5(file,h5file;setup=true,ensemble="",sort=true)
+unique_indices(v) = unique(i -> v[i], eachindex(v))
+function isospin1_to_hdf5(file,h5file;setup=true,ensemble="",sort=true,deduplicate=true)
     setup &&  HiRepParsing._write_lattice_setup(file,h5file;h5group=ensemble,smearing=false,sort)
     Re, Im = parse_isospin_one(file;desc=ensemble)
-    if sort 
+    if sort || deduplicate
         names = confignames(file)
+        @assert length(names) == size(Re)[2] == size(Im)[2]
+    end
+    if sort 
         perm  = HiRepParsing.permutation_names(names)
-        Re = Re[:,perm,:,:,:,:,:] 
-        Im = Im[:,perm,:,:,:,:,:] 
+        Re    = Re[:,perm,:,:,:,:,:] 
+        Im    = Im[:,perm,:,:,:,:,:] 
+        names = names[perm]
+    end
+    if deduplicate
+        inds = unique_indices(names)
+        Re = Re[:,inds,:,:,:,:,:] 
+        Im = Im[:,inds,:,:,:,:,:] 
     end
     labels = label_list(file)
     pmax  = _find_pmax(file)
