@@ -1,29 +1,53 @@
 function correlatorsp001(h5dset,ens;p=1)
-    p1 = "(0,0,$p)"
-    CorrD1 =  h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
-    CorrD2 =  h5dset["$ens/p$p1/d/p_diag(0,0,0)/C_re"][]
-    Corrπ  =  h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
-    Corrρ  =  h5dset["$ens/p$p1/rho_g3_g3/p_diag$p1/C_re"][]
-    CorrT1 =  h5dset["$ens/p$p1/t1_g3/p_diag$p1/C_im"][]
-    CorrT2 =  h5dset["$ens/p$p1/t2_g3/p_diag$p1/C_im"][]
-    CorrR1 =  h5dset["$ens/p$p1/r1/p_diag$p1/C_re"][]
-    CorrR2 =  h5dset["$ens/p$p1/r2/p_diag$p1/C_re"][]
-    CorrR3 =  h5dset["$ens/p$p1/r3/p_diag$p1/C_re"][]
-    CorrR4 =  h5dset["$ens/p$p1/r4/p_diag$p1/C_re"][]
+    p_e = "(0,0,$p)"
+    p_i = "p_diag$p_e"
+    p_0 = "p_diag(0,0,0)"
+    group  = h5dset["$ens/p$p_e"]
+    CorrD1 = read(group,"d/$p_i/C_re")
+    CorrD2 = read(group,"d/$p_0/C_re")
+    Corrπ  = read(group,"pi/$p_i/C_re")
+    Corrρ  = read(group,"rho_g3_g3/$p_i/C_re")
+    CorrT1 = read(group,"t1_g3/$p_i/C_im")
+    CorrT2 = read(group,"t2_g3/$p_i/C_im")
+    CorrR1 = read(group,"r1/$p_i/C_re")
+    CorrR2 = read(group,"r2/$p_i/C_re")
+    CorrR3 = read(group,"r3/$p_i/C_re")
+    CorrR4 = read(group,"r4/$p_i/C_re")
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
 function correlatorsp110(h5dset,ens;p=1)
-    p1 = "($p,$p,0)"
-    CorrD1 =  h5dset["$ens/p$p1/d/p_diag$p1/C_re"][]
-    CorrD2 =  h5dset["$ens/p$p1/d/p_diag(0,0,0)/C_re"][]
-    Corrπ  = h5dset["$ens/p$p1/pi/p_diag$p1/C_re"][]
-    Corrρ  =  (h5dset["$ens/p$p1/rho_g1_g1/p_diag$p1/C_re"][] + h5dset["$ens/p$p1/rho_g1_g2/p_diag$p1/C_re"][] - h5dset["$ens/p$p1/rho_g2_g1/p_diag$p1/C_re"][] - h5dset["$ens/p$p1/rho_g2_g2/p_diag$p1/C_re"][])/2
-    CorrT1 =  (h5dset["$ens/p$p1/t1_g1/p_diag$p1/C_im"][]   + h5dset["$ens/p$p1/t1_g2/p_diag$p1/C_im"][])/sqrt(2)
-    CorrT2 =  (h5dset["$ens/p$p1/t2_g1/p_diag$p1/C_im"][]   + h5dset["$ens/p$p1/t2_g2/p_diag$p1/C_im"][])/sqrt(2)
-    CorrR1 =   h5dset["$ens/p$p1/r1/p_diag$p1/C_re"][]
-    CorrR2 =   h5dset["$ens/p$p1/r2/p_diag$p1/C_re"][]
-    CorrR3 =   h5dset["$ens/p$p1/r3/p_diag$p1/C_re"][]
-    CorrR4 =   h5dset["$ens/p$p1/r4/p_diag$p1/C_re"][]
+    p_e = "($p,$p,0)"
+    p_i = "p_diag$p_e"
+    p_0 = "p_diag(0,0,0)"
+    group  = h5dset["$ens/p$p_e"]
+    CorrD1 =  read(group,"d/$p_i/C_re")
+    CorrD2 =  read(group,"d/$p_0/C_re")
+    Corrπ  =  read(group,"pi/$p_i/C_re")
+    Corrρ  = (read(group,"rho_g1_g1/$p_i/C_re") + read(group,"rho_g1_g2/$p_i/C_re") - read(group,"rho_g2_g1/$p_i/C_re") - read(group,"rho_g2_g2/$p_i/C_re"))/2
+    CorrT1 = (read(group,"t1_g1/$p_i/C_im") + read(group,"t1_g2/$p_i/C_im"))/sqrt(2)
+    CorrT2 = (read(group,"t2_g1/$p_i/C_im") + read(group,"t2_g2/$p_i/C_im"))/sqrt(2)
+    CorrR1 =  read(group,"r1/$p_i/C_re")
+    CorrR2 =  read(group,"r2/$p_i/C_re")
+    CorrR3 =  read(group,"r3/$p_i/C_re")
+    CorrR4 =  read(group,"r4/$p_i/C_re")
+    return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
+end
+function correlatorsp011(h5dset,ens;p=1)
+    p_e = "(0,$p,$p)"
+    p_i = "p_diag$p_e"
+    p_0 = "p_diag(0,0,0)"
+    group  = h5dset["$ens/p$p_e"]
+    CorrD1 =  read(group,"d/$p_i/C_re")
+    CorrD2 =  read(group,"d/$p_0/C_re")
+    Corrπ  =  read(group,"pi/$p_i/C_re")
+    # TODO: Visually inspect sign of the individual components
+    Corrρ  = (read(group,"rho_g3_g3/$p_i/C_re") + read(group,"rho_g3_g2/$p_i/C_re") - read(group,"rho_g2_g3/$p_i/C_re") - read(group,"rho_g2_g2/$p_i/C_re"))/2
+    CorrT1 = (read(group,"t1_g3/$p_i/C_im") + read(group,"t1_g2/$p_i/C_im"))/sqrt(2)
+    CorrT2 = (read(group,"t2_g3/$p_i/C_im") + read(group,"t2_g2/$p_i/C_im"))/sqrt(2)
+    CorrR1 =  read(group,"r1/$p_i/C_re")
+    CorrR2 =  read(group,"r2/$p_i/C_re")
+    CorrR3 =  read(group,"r3/$p_i/C_re")
+    CorrR4 =  read(group,"r4/$p_i/C_re")
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
 function correlatorsp000(h5dset,ens;p=1)
