@@ -1,9 +1,12 @@
 using Pkg; Pkg.activate(".")
 using HDF5
-function check_matching_runs(file,ensemble,key)
+function check_matching_runs(file,ensemble,key;verbose=true)
     fid  = h5open(file)[ensemble]
     runs = keys(fid)
     vals = read.(Ref(fid),joinpath.(runs,key))
+    if !allequal(vals) && verbose
+        @warn "mismatch in $ensemble for $key"
+    end
     @assert allequal(vals) "mismatch in $ensemble for $key"
 end
 function check_lattice_params(file,ensemble)
