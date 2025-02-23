@@ -8,3 +8,4 @@ data/
 plots/
 !input/pipi_fitintervals.csv
 !input/input_files.csv
+!input/infinite_volume.csv

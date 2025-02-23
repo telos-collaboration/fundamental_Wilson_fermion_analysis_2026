@@ -25,13 +25,12 @@ function effective_masses(Corr;t0,maxhits=typemax(Int))
     Corr   = correlator_derivative(Corr;t_dim=4)
     sign   = -1
 
-    #eigvals, Δeigvals = eigenvalues(Corr;t0)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
     meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
 
     return meff, Δmeff, h
 end
-function plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ, p)
+function plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, p; t1_max=T÷2, t2_max=T÷2)
     plt = plot(ylabel="effective mass",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), %$(p), n_{src}=%$h, t_0 = %$(t0)$")
     scatter!(plt,meff[2,1:t1_max],yerr=Δmeff[2,1:t1_max],label="eigenvalue #1")
     scatter!(plt,meff[1,1:t2_max],yerr=Δmeff[1,1:t2_max],label="eigenvalue #2")
@@ -43,45 +42,28 @@ function plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ
     return plt
 end
 
-ens = "Lt48Ls16beta7.4m1-0.74m2-0.74"   # (more hits)
-ens = "Lt48Ls16beta7.4m1-0.75m2-0.75"   # (more hits)
-ens = "Lt32Ls16beta7.2m1-0.794m2-0.794" # (more configs?)
-mπ,Δmπ = 0.2532, 0.0007
-
-ens = "Lt32Ls16beta7.2m1-0.78m2-0.78"    # t0=8; deriv (below?) 
-mπ,Δmπ = 0.36963, 0.00039
-
-ens = "Lt32Ls16beta6.9m1-0.92m2-0.92"    # t0=8; deriv (bad signal,larger L?)
-ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"    # t0=8; deriv
-ens = "Lt24Ls14beta6.9m1-0.92m2-0.92"    # t0=7; deriv (ok signal, better meff)
-mπ,Δmπ = 0.38649, 0.00051
-ens = "Lt36Ls16beta7.2m1-0.76m2-0.76"    # t0=8; deriv (bad signal,larger L?)
-mπ,Δmπ = 0.45700, 0.00130
-ens = "Lt36Ls20beta7.05m1-0.835m2-0.835" # t0=8; deriv
-mπ,Δmπ = 0.43800, 0.00100
-ens = "Lt36Ls24beta7.05m1-0.867m2-0.867" # t0=8; deriv
-mπ,Δmπ =  0.14810, 0.00090
-ens = "Lt24Ls14beta7.05m1-0.85m2-0.85"   # t0=8; deriv; (bad signal,larger L?)
-ens = "Lt32Ls16beta7.05m1-0.85m2-0.85"   # t0=8; deriv; (bad signal,larger L?)
-mπ,Δmπ = 0.33076, 0.00097
-ens = "Lt32Ls24beta6.9m1-0.924m2-0.924"
-mπ,Δmπ = 0.33880, 0.00120
-
 hdf5file = "data/isospin1_corr.hdf5"
 h5dset = h5open(hdf5file)
 maxhits = 100
-t0      = 1
+t0      = 5
+ens = "Lt24Ls14beta6.9m1-0.92m2-0.92"
+ens = "Lt32Ls16beta6.9m1-0.92m2-0.92"
+ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"
 
+p    = "p(1,1,0)"
+p    = "p(0,1,1)"
 p    = "p(0,0,1)"
 T, L = h5dset["$ens/lattice"][1:2]
-m0   = -parse(Float64,last(split(ens,'-')))
+m0   = h5dset["$ens/quarkmasses"][1]
+β    = h5dset["$ens/beta"][]
 Corr = h5dset[joinpath(ens,p,"correlation_matrix")][]
 
-t1_max  = T÷2
-t2_max  = T÷2
+using DelimitedFiles    
+inf_vol = readdlm("input/infinite_volume.csv",',')
+mπ, Δmπ = NaN, NaN
 
 meff, Δmeff, h = effective_masses(Corr;maxhits,t0)
-plt = plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, t1_max,t2_max, mπ, Δmπ, p)
+plt = plot_effective_masses(meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, p; t1_max=T÷2,t2_max=T÷2)
 plot!(plt,legend=:outerright)
 display(plt)
 
