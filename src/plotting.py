@@ -174,18 +174,22 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
     lvls = res["en_lv"] 
     N_Ls = res["N_L"]    
     plt.grid()
-    mpi_pr_s = "/m_{\pi}"
+
+    mpi_pr_s = ""
+    if not prime == "":
+        mpi_pr_s = "/m_{\pi}"
 
     if x_ax == "sqrt_s":
         plt.xlabel("$E_{CM}"+mpi_pr_s+"$")
         x_plot = res["E_cm"+ld+prime]
         x_plot_sam = np.transpose(res_sample["E_cm"+ld+prime])
-        ax.set_xlim([2,3])
+        # ax.set_xlim([2,3])
     elif x_ax == "s":
-        plt.xlabel("$E_{CM}^2"+mpi_pr_s+"^2$")
+        plt.xlabel("$E_{CM}^2"+mpi_pr_s)                                    # needs fix
         x_plot = res["s"+ld+prime]
         x_plot_sam = np.transpose(res_sample["s"+ld+prime])
-        ax.set_xlim([4,7])
+        ax.set_xlim([0.1,0.4])
+        # ax.set_xlim([4,7])
     elif x_ax == "pstar2":
         plt.xlabel("$p^{\star^2}"+mpi_pr_s+"^2$")
         x_plot = res["p2star"+ld+prime]
@@ -211,7 +215,8 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
         y_plot = np.real(res["p3cotPS_Ecm"+ld+prime])
         y_plot_sam = np.transpose(np.real(res_sample["p3cotPS_Ecm"+ld+prime]))
         plt.ylabel("$p^3\, \cot(\delta)"+mpi_pr_s+"^3$")    
-        ax.set_ylim([-2,2])
+        # ax.set_ylim([-0.15,0.05])
+        # ax.set_ylim([-0.2,0.2])
     elif y_ax == "cot_PS":
         y_plot = np.real(res["cot_PS"+ld])
         y_plot_sam = np.transpose(np.real(res_sample["cot_PS"+ld]))
@@ -240,11 +245,14 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
         ax.scatter(x_plot[i],y_plot[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],d2s[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
         if bytes.decode(res["resampling"]) == "gauss":
             sorted_indices = np.argsort(x_plot_sam[i])  
-            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            # ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         elif bytes.decode(res["resampling"]) == "lin":
             ax.plot(x_plot_sam[i],delete_steps(y_plot_sam[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            # ax.plot(x_plot_sam[i],y_plot_sam[i], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
 
     ax.legend(loc="best")
+    # ax.legend(loc="lower left")
     if save:
         fig.savefig("output/plots/%s_%s"%(y_ax,x_ax)+ld+prime+pref+".pdf", bbox_inches='tight')
     if show:
@@ -262,33 +270,43 @@ def print_plymouth_table(file):
     for i in range(len(res["En"])):
         print("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n"%(res["En"][i],E_pipi_err[1][i],res["E_cm_prime"][i]*mpi,E_cm_pipi_err[1][i]*mpi,res["q2"][i],q2_err[1][i],res["P3_cot_PS_prime"][i]/res["E_cm_prime"][i]*mpi**2,res["PS"][i].real,res["PS"][i].imag))
 
-def print_Lang_Prelovsek_table(file):
+def print_Lang_Prelovsek_table(file, ld = ""):
     res,  res_sample = read_from_hdf(file)
     mpi = res["mpi"]
     E_n = res["En"]
-    p_star = res["pstar_prime"]*mpi
-    s = res["s_prime"]*mpi**2
-    PS = res["PS"]
-    PS_sample = res_sample["PS"]
+    p_star = res["pstar"+ld]
+    s = res["s"+ld]
+    PS = res["PS"+ld]
+    p3cotPS_Ecm_ld = res["p3cotPS_Ecm"+ld]
+    # PS_sample = res_sample["PS"]
     for i in range(len(res["En"])):
-        print("%f\t%f\t%f\t%f\t%f\n"%(E_n[i],p_star[i],s[i],PS[i].real,PS[i].imag))
+        print("%f\t%f\t%f\t%f\t%f"%(E_n[i],p_star[i],s[i],PS[i].real,PS[i].imag))
+    for i in range(len(res["En"])):
+        print("%f\t%f"%(s[i],p3cotPS_Ecm_ld[i]))
 
 
 if __name__ == "__main__":
     # p3_cot_PS("PS_69_092", x_ax="sqrt_s", y_ax="PS", save=True, show=False)
 
-    name="PS_69_092"
-    # name="Plymouth"
-    # name="Lang_Prelovsek"
+    pref = ""
+    # pref = "_test_imag"
+    # pref = "_test_subtract"
+    # pref = "_test"
+    pref = "_perhaps"
 
-    # print_Lang_Prelovsek_table(name)
+    name="PS_69_092"+pref
+    # name="Plymouth"+pref
+    # name="Lang_Prelovsek"+pref
+
+    # print_Lang_Prelovsek_table(name, ld = "_ld")
+    # p3_cot_PS(name, x_ax="s", save=False, show=True,ld="_ld")
 
     # p3_cot_PS(name, x_ax="aE", save=True, show=False,prime="_prime")
-    # p3_cot_PS(name, x_ax="s", save=True, show=False,prime="_prime")
+    # p3_cot_PS(name, x_ax="s", save=True, show=True,prime="_prime")
     # p3_cot_PS(name, x_ax="aE", save=True, show=False, ld = "_ld",prime="_prime")
     # p3_cot_PS(name, x_ax="s", save=True, show=True, ld = "_ld",prime="_prime")
-    p3_cot_PS(name, x_ax="pstar2", save=True, show=False,prime="_prime")
-    p3_cot_PS(name, x_ax="pstar2", save=True, show=False, ld = "_ld",prime="_prime")
+    p3_cot_PS(name, x_ax="pstar2", save=True, show=True, ld = "_ld",prime="_prime", pref=pref)
+    p3_cot_PS(name, x_ax="pstar2", save=True, show=True,prime="_prime", pref=pref)
 
     # plot_E(name, which="aE", save=True, show=True)
     # plot_E(name, which="sqrt_s", save=True, show=True)

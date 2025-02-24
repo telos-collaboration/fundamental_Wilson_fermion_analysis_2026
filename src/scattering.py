@@ -10,6 +10,7 @@ def save_to_hdf(res,res_sample, filename):
         for key, val in res.items():
             hfile.create_dataset("orig_"+key, data = val)
         for key, val in res_sample.items():
+            print(key)
             hfile.create_dataset("sample_"+key, data = val)
 
 def read_from_hdf(filename):
@@ -55,14 +56,128 @@ def result_sampled(info,N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,num_resample=50,
     return res, res_sample
 
 
-def cot_delta_000(q2,N_L):
-    return wlm(0,0,0,0,0,1,1,q2,int(N_L))
-def cot_delta_001(q2,N_L):
-    return wlm(0,0,0,0,1,1,1,q2,int(N_L)) + 2*wlm(2,0,0,0,1,1,1,q2,int(N_L))
-def cot_delta_110(q2,N_L):
-    return wlm(0,0,1,1,0,1,1,q2,int(N_L)) - wlm(2,0,1,1,0,1,1,q2,int(N_L)) + np.sqrt(3/2) * complex(0,1) * (wlm(2,2,1,1,0,1,1,q2,int(N_L)) - wlm(2,-2,1,1,0,1,1,q2,int(N_L)))
+def cot_delta_000(q2,N_L,mpi):
+    return wlm(0,0,0,0,0,mpi,mpi,q2,int(N_L))
+def cot_delta_001(q2,N_L,mpi):
+    # p = [1,0,0]
+    # p = [0,1,0]
+    p = [0,0,1]
+    first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    second = 2*wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    # print(first, second)
+    # print()
+    return first + second
+    # return wlm(0,0,1,0,0,1,1,q2,int(N_L)) - 2*wlm(2,0,1,0,0,1,1,q2,int(N_L))
+def cot_delta_110(q2,N_L,mpi):    
+    # p = [0,1,1]   
+    # p = [1,0,1]   
+    p = [1,1,0]
+    first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    second = wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    # third = np.sqrt(3/2) * complex(0,1) * (wlm(2,2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))+wlm(2,-2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L)))
+    third2 = np.sqrt(6) * wlm(2,2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L)).imag
+    # print(first, second, third, third2)
+    return first - second + third2
+
+
+    # return wlm(0,0,0,1,1,1,1,q2,int(N_L)) - wlm(2,0,0,1,1,1,1,q2,int(N_L)) + np.sqrt(6) * wlm(2,2,0,1,1,1,1,q2,int(N_L)).imag    
+    # return wlm(0,0,1,1,0,1,1,q2,int(N_L)) - wlm(2,0,1,1,0,1,1,q2,int(N_L)) + np.sqrt(3/2) * complex(0,1) * (wlm(2,2,1,1,0,1,1,q2,int(N_L))-wlm(2,-2,1,1,0,1,1,q2,int(N_L)))
+    # return wlm(0,0,0,1,1,1,1,q2,int(N_L)) - wlm(2,0,0,1,1,1,1,q2,int(N_L)) + np.sqrt(3/2) * complex(0,1) * (wlm(2,2,0,1,1,1,1,q2,int(N_L))-wlm(2,-2,0,1,1,1,1,q2,int(N_L)))
+
+
+    # print(wlm(2,0,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,1,1,0,1,1,q2,int(N_L)))
+    # exit()
+
+
+    # print(wlm(2,2,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,-2,0,1,1,1,1,q2,int(N_L)))
+    # exit()
+
+    # return wlm(0,0,0,1,1,1,1,q2,int(N_L)) - wlm(2,0,0,1,1,1,1,q2,int(N_L)) + np.sqrt(6) * wlm(2,2,0,1,1,1,1,q2,int(N_L)).imag
+
+    # print(-( np.sqrt(3/2) * complex(0,1) * (wlm(2,2,1,1,0,1,1,q2,int(N_L)) - wlm(2,-2,1,1,0,1,1,q2,int(N_L)))).real)
+    # print(-(np.sqrt(6) * wlm(2,2,1,1,0,1,1,q2,int(N_L))).imag)
+    # print((np.sqrt(3/2) * complex(0,1) * (wlm(2,2,1,1,0,1,1,q2,int(N_L)) - wlm(2,-2,1,1,0,1,1,q2,int(N_L)))).real)
+    # print()
+    # print(wlm(2,2,1,0,0,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,1,0,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,0,1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,2,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,1,1,0,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,2,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,1,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,-1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,-1,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,2,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,-2,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,-1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,-2,0,-1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,1,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,-2,0,1,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,-1,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,-2,0,-1,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,2,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,-2,1,0,1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,2,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,1,0,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,-1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,-1,0,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,2,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,1,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,-1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,0,-1,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,0,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,1,0,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,-1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,-1,0,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,0,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,0,1,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,0,-1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,0,-1,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(0,0,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(0,0,1,0,-1,1,1,q2,int(N_L)))
+    # print(wlm(0,0,-1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(0,0,-1,0,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(0,0,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(0,0,0,1,-1,1,1,q2,int(N_L)))
+    # print(wlm(0,0,0,-1,1,1,1,q2,int(N_L)))
+    # print(wlm(0,0,0,-1,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,0,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,0,1,-1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,0,-1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,0,-1,-1,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(0,0,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(0,0,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(0,0,1,1,0,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,0,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,0,1,1,0,1,1,q2,int(N_L)))
+    # print()
+    # print(wlm(2,2,0,1,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,1,0,1,1,1,q2,int(N_L)))
+    # print(wlm(2,2,1,1,0,1,1,q2,int(N_L)))
+    # exit()
+    # return wlm(0,0,1,1,0,1,1,q2,int(N_L)) - wlm(2,0,1,1,0,1,1,q2,int(N_L)) + np.sqrt(3/2) * complex(0,1) * (wlm(2,2,1,1,0,1,1,q2,int(N_L)) - wlm(2,-2,1,1,0,1,1,q2,int(N_L)))
+    # return wlm(0,0,1,1,0,1,1,q2,int(N_L)) - wlm(2,0,1,1,0,1,1,q2,int(N_L)) + np.sqrt(6) * wlm(2,2,1,1,0,1,1,q2,int(N_L)).imag
 
 def cot_delta_mom(dvec):
+    # print(dvec)
     if list(dvec) == [0,0,0]:
         return cot_delta_000
     if list(dvec) == [0,0,1]:
@@ -113,7 +228,7 @@ def get_rizz(E_pipis, N_Ls, dvecs, mpi):
             tmp["p2star"] = tmp["p2star_prime"]*mpi**2
             q2 = tmp["p2star"]*(N_Ls[i]/(2*np.pi))**2
             tmp["q2"] = q2
-            cot_PS = cot_delta_mom(dvecs[i])(q2, N_Ls[i])
+            cot_PS = cot_delta_mom(dvecs[i])(q2, N_Ls[i],mpi)
             tmp["cot_PS"] = cot_PS
             tmp["tan_PS"] = 1/cot_PS
             PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
@@ -133,14 +248,14 @@ def get_rizz(E_pipis, N_Ls, dvecs, mpi):
             tmp["p2star_ld_prime"] = tmp["pstar_ld_prime"]**2
             q2_ld = tmp["p2star_ld"]*(N_Ls[i]/(2*np.pi))**2
             tmp["q2_ld"] = q2_ld
-            cot_PS_ld = cot_delta_mom(dvecs[i])(q2_ld, N_Ls[i])
+            cot_PS_ld = cot_delta_mom(dvecs[i])(q2_ld, N_Ls[i],mpi)
             tmp["cot_PS_ld"] = cot_PS_ld
             tmp["tan_PS_ld"] = 1/cot_PS_ld
             PS_ld = 360*np.arctan(1/cot_PS_ld)/(2*np.pi)
             tmp["PS_ld"] = complex(PS_ld.real%180,PS_ld.imag%180)
             tmp["p3cotPS_ld"] = tmp["pstar_ld"]**3*cot_PS_ld
             tmp["p3cotPS_ld_prime"] = tmp["pstar_ld_prime"]**3*cot_PS_ld
-            tmp["p3cotPS_Ecm_ld"] = tmp["pstar_ld"]**3/tmp["E_cm_ld"]*cot_PS_ld
+            tmp["p3cotPS_Ecm_ld"] = tmp["pstar_ld"]**3*cot_PS_ld/tmp["E_cm_ld"]
             tmp["p3cotPS_Ecm_ld_prime"] = tmp["pstar_ld_prime"]**3/tmp["E_cm_ld_prime"]*cot_PS_ld
 
             for key, val in tmp.items():
@@ -148,7 +263,7 @@ def get_rizz(E_pipis, N_Ls, dvecs, mpi):
     return result
 
 
-def calc_PS(name):
+def calc_PS(name, pref = ""):
     info={}
     data = np.transpose(np.genfromtxt("data/%s.dat"%name))
     NL_arr = data[0]
@@ -161,10 +276,12 @@ def calc_PS(name):
     mrho = data[9][0]
     info["beta"],info["m_1"],info["m_2"], info["mrho"], info["en_lv"] = [6.9,-0.92,-0.92,mrho,en_lv_arr]
 
-    res, res_sampled = result_sampled(info,NL_arr, en_arr, en_m_arr, en_p_arr, dvec_arr, mpi, resampling="lin")
-    save_to_hdf(res, res_sampled, name)
+    res, res_sampled = result_sampled(info,NL_arr, en_arr, en_m_arr, en_p_arr, dvec_arr, mpi, resampling="lin", num_resample=5)
+    save_to_hdf(res, res_sampled, name+pref)
 
 if __name__ == "__main__":
-    calc_PS("PS_69_092")
-    # calc_PS("Plymouth")
-    # calc_PS("Lang_Prelovsek")
+    pref = ""
+
+    # calc_PS("PS_69_092",pref=pref)
+    calc_PS("Plymouth",pref=pref)
+    # calc_PS("Lang_Prelovsek",pref=pref)
