@@ -6,7 +6,11 @@ function correlatorsp001(h5dset,ens;p=1)
     CorrD1 = read(group,"d/$p_i/C_re")
     CorrD2 = read(group,"d/$p_0/C_re")
     Corrπ  = read(group,"pi/$p_i/C_re")
-    Corrρ  = read(group,"rho_g3_g3/$p_i/C_re")
+    Corrρ = try
+        read(group,"rho_g3_g3/$p_i/C_re")
+    catch
+        read(group,"rho_g33/$p_i/C_re")
+    end
     CorrT1 = read(group,"t1_g3/$p_i/C_im")
     CorrT2 = read(group,"t2_g3/$p_i/C_im")
     CorrR1 = read(group,"r1/$p_i/C_re")
@@ -23,7 +27,11 @@ function correlatorsp110(h5dset,ens;p=1)
     CorrD1 =  read(group,"d/$p_i/C_re")
     CorrD2 =  read(group,"d/$p_0/C_re")
     Corrπ  =  read(group,"pi/$p_i/C_re")
-    Corrρ  = (read(group,"rho_g1_g1/$p_i/C_re") + read(group,"rho_g1_g2/$p_i/C_re") - read(group,"rho_g2_g1/$p_i/C_re") - read(group,"rho_g2_g2/$p_i/C_re"))/2
+    Corrρ = try
+         (read(group,"rho_g1_g1/$p_i/C_re") + read(group,"rho_g1_g2/$p_i/C_re") - read(group,"rho_g2_g1/$p_i/C_re") - read(group,"rho_g2_g2/$p_i/C_re"))/2
+    catch
+        (read(group,"rho_g11/$p_i/C_re") + read(group,"rho_g12/$p_i/C_re") - read(group,"rho_g21/$p_i/C_re") - read(group,"rho_g22/$p_i/C_re"))/2
+    end
     CorrT1 = (read(group,"t1_g1/$p_i/C_im") + read(group,"t1_g2/$p_i/C_im"))/sqrt(2)
     CorrT2 = (read(group,"t2_g1/$p_i/C_im") + read(group,"t2_g2/$p_i/C_im"))/sqrt(2)
     CorrR1 =  read(group,"r1/$p_i/C_re")
@@ -41,7 +49,11 @@ function correlatorsp011(h5dset,ens;p=1)
     CorrD2 =  read(group,"d/$p_0/C_re")
     Corrπ  =  read(group,"pi/$p_i/C_re")
     # TODO: Visually inspect sign of the individual components
-    Corrρ  = (read(group,"rho_g3_g3/$p_i/C_re") + read(group,"rho_g3_g2/$p_i/C_re") - read(group,"rho_g2_g3/$p_i/C_re") - read(group,"rho_g2_g2/$p_i/C_re"))/2
+    Corrρ = try
+        (read(group,"rho_g3_g3/$p_i/C_re") + read(group,"rho_g3_g2/$p_i/C_re") - read(group,"rho_g2_g3/$p_i/C_re") - read(group,"rho_g2_g2/$p_i/C_re"))/2
+    catch
+        (read(group,"rho_g33/$p_i/C_re") + read(group,"rho_g32/$p_i/C_re") - read(group,"rho_g23/$p_i/C_re") - read(group,"rho_g22/$p_i/C_re"))/2
+    end
     CorrT1 = (read(group,"t1_g3/$p_i/C_im") + read(group,"t1_g2/$p_i/C_im"))/sqrt(2)
     CorrT2 = (read(group,"t2_g3/$p_i/C_im") + read(group,"t2_g2/$p_i/C_im"))/sqrt(2)
     CorrR1 =  read(group,"r1/$p_i/C_re")
