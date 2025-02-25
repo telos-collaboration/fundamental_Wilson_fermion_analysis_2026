@@ -82,7 +82,7 @@ function merge_runs(h5file_in, h5file_out, ensemble )
                             re = read(r,joinpath(p,l,p_i,"C_re"))
                             im = read(r,joinpath(p,l,p_i,"C_im"))
                             tmp_re = isnothing(tmp_re) ? re : cat(tmp_re,re,dims=2)
-                            tmp_im = isnothing(tmp_im) ? re : cat(tmp_im,im,dims=2)
+                            tmp_im = isnothing(tmp_im) ? im : cat(tmp_im,im,dims=2)
                             nsrc += read(r,"Nsrc")
                         end
                     elseif haskey(r,p) && haskey(r[p],old_key(l)) 
@@ -90,7 +90,7 @@ function merge_runs(h5file_in, h5file_out, ensemble )
                             re = read(r,joinpath(p,old_key(l),p_i,"C_re"))
                             im = read(r,joinpath(p,old_key(l),p_i,"C_im"))  
                             tmp_re = isnothing(tmp_re) ? re : cat(tmp_re,re,dims=2)
-                            tmp_im = isnothing(tmp_im) ? re : cat(tmp_im,im,dims=2)
+                            tmp_im = isnothing(tmp_im) ? im : cat(tmp_im,im,dims=2)
                             nsrc += read(r,"Nsrc")
                         end
                     end
