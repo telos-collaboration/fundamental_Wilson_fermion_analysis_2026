@@ -19,6 +19,12 @@ function non_interacting_energy_1π(mπ,Δmπ,p2,L)
     ΔE1 = Δmπ*mπ/E1
     return E1, ΔE1
 end
+function swap_eigval_numbering(old,swap)
+    new = copy(old)
+    @. new[1,:,1:swap] = old[2,:,1:swap]
+    @. new[2,:,1:swap] = old[1,:,1:swap]
+    return new
+end
 function effective_masses(Corr;t0,maxhits=typemax(Int))
 
     nhits = size(Corr)[4]
@@ -31,6 +37,7 @@ function effective_masses(Corr;t0,maxhits=typemax(Int))
     sign   = -1
 
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
+    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0 -1 )
     meff1, Δmeff1 = LatticeUtils.implicit_meff_jackknife(real.(eigvals_resamples);sign)
     meff2, Δmeff2 = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
     
@@ -67,20 +74,10 @@ function meff_from_gevp(h5dset,ens,p,t0)
     mπ, Δmπ, mρ, Δmρ = inf_vol[ind,3:6]
 
     meff, Δmeff, meff2, Δmeff2, h = effective_masses(Corr;maxhits=typemax(Int),t0)
-    meff = swap_meff_numbering(meff, t0)
-    Δmeff = swap_meff_numbering(Δmeff, t0)
-    meff2 = swap_meff_numbering(meff2, t0)
-    Δmeff2 = swap_meff_numbering(Δmeff2, t0)
 
     plt = plot(legend=:outerright)
     plot_effective_masses!(plt, meff2, Δmeff2, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg; t1_max=T÷2,t2_max=T÷2)
     return plt
-end
-function swap_meff_numbering(old, t0)
-    new = copy(old)
-    @. new[1,1:t0-1] = old[2,1:t0-1]
-    @. new[2,1:t0-1] = old[1,1:t0-1]
-    return new
 end
 
 hdf5file = "data/isospin1_corr.hdf5"
