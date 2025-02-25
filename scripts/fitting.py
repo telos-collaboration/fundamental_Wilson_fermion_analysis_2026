@@ -51,13 +51,13 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname
             print(fit)
 
     E, a, chi2, dof = first_fit_parameters(fit) 
-    if True:
+    if plotting:
         os.makedirs(plotdir+plotname, exist_ok=True)
         fit.show_plots(view='ratio',save=plotdir+plotname+'/ratio.pdf')
         fit.show_plots(view='log'  ,save=plotdir+plotname+'/data.pdf')
     return E, a, chi2, dof
 
-def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsize=1):
+def fit_all_files(infile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsize=1):
 
     fid = h5py.File(infile,'r')
     
@@ -77,22 +77,24 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsiz
         Delta_ev = get_hdf5_value(fid,group+"/Delta_eigvals")
         cov_ev   = get_hdf5_value(fid,group+"/cov_eigvals")
 
-        Nops = ev.shape[1]
-        #eig1 = dict(Gab=gv.gvar(ev[:,Nops-1],Delta_ev[:,Nops-1]))
-        #eig2 = dict(Gab=gv.gvar(ev[:,Nops-2],Delta_ev[:,Nops-2]))
-        eig1 = dict(Gab=gv.gvar(ev[:,Nops-1],cov_ev[:,:,Nops-1]))
-        eig2 = dict(Gab=gv.gvar(ev[:,Nops-2],cov_ev[:,:,Nops-2]))
+        # Rescale data such that eig(t=0)=1
+        # Note: There is an issue when t_min < t0
+        #       C(t0) ihas no variance and destabilises the fit
+        # Todo: Use full covariance matrix
+        eig1 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],Delta_ev[:,0]/ev[0,0]))
+        eig2 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],Delta_ev[:,1]/ev[0,1]))
 
-        # data needed for the pion decay constant
-        # (normalisation of correlator is important here!)
         plotname = "beta{}_m{}_L{}_T{}".format(beta,m,L,T)
         antisymmetric = True
+        printing=False
+        plotting=True
         plotdir = "./output/plots/"
         Nmax = 10
 
-        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir)
-        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir)
+        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
         print(group)
+        print(plotname)
         print(E1[0],chi2_1/dof1)
         print(E2[0],chi2_2/dof2)
 
@@ -123,6 +125,5 @@ def read_filelist_fitparam(parameterfile):
 parameterfile  = './input/pipi_fitintervals.csv'
 betas, m0s, Ls, Ts, groups, tmins, tmaxs = read_filelist_fitparam(parameterfile)
 
-infile  = './data/isospin1_eigenvalues_t0_8.hdf5'
-outfile = './data/isospin1_test.hdf5'
-fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs)
+infile  = './data/isospin1_eigenvalues_t0_3_deriv.hdf5'
+fit_all_files(infile,betas, m0s, Ls, Ts, groups, tmins, tmaxs)

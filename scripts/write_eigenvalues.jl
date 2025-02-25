@@ -5,15 +5,17 @@ using Statistics
 using LatticeUtils
 using ProgressMeter
 
-function swap_eigval_numbering(old,swap)
+function swap_eigval_numbering(old,t0,T)
     new = copy(old)
-    @. new[1,:,1:swap] = old[2,:,1:swap]
-    @. new[2,:,1:swap] = old[1,:,1:swap]
+    @. new[1,:,1:t0-1] = old[2,:,1:t0-1]
+    @. new[2,:,1:t0-1] = old[1,:,1:t0-1]
+    @. new[1,:,T-t0+2:T] = old[2,:,T-t0+2:T]
+    @. new[2,:,T-t0+2:T] = old[1,:,T-t0+2:T]
     return new
 end
 function variational_analysis(Corr;t0,maxhits=typemax(Int),deriv=true)
 
-    nhits = size(Corr)[4]
+    nhits, T = size(Corr)[4:5]
     h     = min(nhits,maxhits)
     Corr  = dropdims(mean(Corr[:,:,:,1:h,:],dims=4),dims=4)
     Corr  = correlator_folding(Corr;t_dim=4,sign=+1)
@@ -23,7 +25,7 @@ function variational_analysis(Corr;t0,maxhits=typemax(Int),deriv=true)
     end
 
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
-    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0 -1 )
+    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0, T)
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
 
@@ -50,7 +52,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int))
             p == "p(0,0,0)" && continue
             Corr = h5dset[joinpath(ens,p,"correlation_matrix")][]
             eigvals, Δeigvals, eigvals_cov = variational_analysis(Corr;t0,maxhits,deriv)
-            eigvals, Δeigvals = real.(eigvals), real.(Δeigvals)
+            eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
 
             h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
             h5write(outfile,joinpath(ens,p,"Delta_eigvals"),Δeigvals)
@@ -59,8 +61,8 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int))
     end
 end
 
-outfile = "data/isospin1_eigenvalues_t0_8_deriv.hdf5"
+outfile = "data/isospin1_eigenvalues_t0_3_deriv.hdf5"
 infile  = "data/isospin1_corr.hdf5"
-t0      = 8
-deriv   = true 
+t0      = 3
+deriv   = true
 write_all_eigenvalues(infile,outfile; t0, deriv)
