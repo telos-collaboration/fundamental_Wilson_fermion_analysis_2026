@@ -40,7 +40,7 @@ function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, 
     plot!(plt,ylabel=L"effective mass $[a^{-1}]$",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), %$(p), n_{src}=%$h, n_{cfg}=%$ncfg, t_0 = %$(t0)$")
     scatter!(plt,meff[2,1:t1_max],yerr=Δmeff[2,1:t1_max],label="eigenvalue #1")
     scatter!(plt,meff[1,1:t2_max],yerr=Δmeff[1,1:t2_max],label="eigenvalue #2")
-    plot!(plt,ylims=(0.2,1.5),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
+    plot!(plt,ylims=(0.0,π/2),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
     p2 = sum(x->x^2,[parse(Int,c) for c in filter(isdigit,p)])
     label2π  = L"n.i. $E[\pi(\mathbf p)\pi(\mathbf 0)]$ (err x10)" 
     add_mass_band!(plt,non_interacting_energy_2π(mπ,10Δmπ,p2,L)...;label=label2π)
@@ -67,20 +67,30 @@ function meff_from_gevp(h5dset,ens,p,t0)
     mπ, Δmπ, mρ, Δmρ = inf_vol[ind,3:6]
 
     meff, Δmeff, meff2, Δmeff2, h = effective_masses(Corr;maxhits=typemax(Int),t0)
+    meff = swap_meff_numbering(meff, t0)
+    Δmeff = swap_meff_numbering(Δmeff, t0)
+    meff2 = swap_meff_numbering(meff2, t0)
+    Δmeff2 = swap_meff_numbering(Δmeff2, t0)
 
     plt = plot(legend=:outerright)
     plot_effective_masses!(plt, meff2, Δmeff2, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg; t1_max=T÷2,t2_max=T÷2)
     return plt
 end
+function swap_meff_numbering(old, t0)
+    new = copy(old)
+    @. new[1,1:t0-1] = old[2,1:t0-1]
+    @. new[2,1:t0-1] = old[1,1:t0-1]
+    return new
+end
 
 hdf5file = "data/isospin1_corr.hdf5"
 h5dset   = h5open(hdf5file)
-t0       = 6
+t0       = 8
 
-for ens in keys(h5dset) 
-    for p in read(h5dset[ens],"p_external")
-        p == "p(0,0,0)" && continue
-        plt = meff_from_gevp(h5dset,ens,p,t0)
-        display(plt)
-    end
+gevp_input = readdlm("input/gevp_params.csv",';',skipstart=1)
+for (i,row) in enumerate(eachrow(gevp_input))
+    ens, p = row 
+    p == "p(0,0,0)" && continue
+    plt = meff_from_gevp(h5dset,ens,p,t0)
+    display(plt)
 end

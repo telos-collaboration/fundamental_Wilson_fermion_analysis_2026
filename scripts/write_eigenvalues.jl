@@ -17,7 +17,6 @@ function variational_analysis(Corr;t0,maxhits=typemax(Int),deriv=true)
     end
 
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
-
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
 
@@ -35,9 +34,9 @@ end
 
 outfile  = "data/isospin1_eigenvalues_t0_8.hdf5"
 hdf5file = "data/isospin1_corr.hdf5"
-h5dset = h5open(hdf5file)
-maxhits = 64
-t0      = 3
+h5dset   = h5open(hdf5file)
+maxhits  = typemax(Int)
+t0       = 8
 
 isfile(outfile) && rm(outfile)
 
@@ -50,12 +49,6 @@ ensembles = keys(h5dset)
         Corr = h5dset[joinpath(ens,p,"correlation_matrix")][]
         eigvals, Δeigvals, eigvals_cov = variational_analysis(Corr;t0,maxhits,deriv=true)
         eigvals, Δeigvals = real.(eigvals), real.(Δeigvals)
-
-        plt = plot()
-        T = size(eigvals)[2]
-        plot_correlator!(plt,1:T,eigvals[1,:],Δeigvals[1,:],yscale=:log10)
-        plot_correlator!(plt,1:T,eigvals[2,:],Δeigvals[2,:],yscale=:log10)
-        display(plt)
 
         h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
         h5write(outfile,joinpath(ens,p,"Delta_eigvals"),Δeigvals)
