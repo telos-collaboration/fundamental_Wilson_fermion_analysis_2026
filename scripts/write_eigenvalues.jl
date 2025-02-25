@@ -45,7 +45,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int))
     isfile(outfile) && rm(outfile)
 
     ensembles = keys(h5dset)
-    @showprogress for ens in ensembles
+    @showprogress desc="write eigenvalues:" for ens in ensembles
         _copy_lattice_parameters(outfile,infile;group=ens)
         p_external = h5dset["$ens/p_external"][]
         for p in p_external

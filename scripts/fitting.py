@@ -57,7 +57,7 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname
         fit.show_plots(view='log'  ,save=plotdir+plotname+'/data.pdf')
     return E, a, chi2, dof
 
-def fit_all_files(infile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsize=1):
+def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsize=1):
 
     fid = h5py.File(infile,'r')
     
@@ -80,21 +80,40 @@ def fit_all_files(infile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsize=1):
         # Rescale data such that eig(t=0)=1
         # Note: There is an issue when t_min < t0
         #       C(t0) ihas no variance and destabilises the fit
-        # Todo: Use full covariance matrix
         eig1 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],Delta_ev[:,0]/ev[0,0]))
         eig2 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],Delta_ev[:,1]/ev[0,1]))
+        # Use full covariance matrix estimator
+        eig1 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],cov_ev[:,:,0]/ev[0,0]/ev[0,0]))
+        eig2 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],cov_ev[:,:,1]/ev[0,1]/ev[0,1]))
 
         plotname = "beta{}_m{}_L{}_T{}".format(beta,m,L,T)
         antisymmetric = True
         printing=False
-        plotting=True
+        plotting=False
         plotdir = "./output/plots/"
         Nmax = 10
 
         E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
         E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        
+        f = h5py.File(outfile, "a")
+        f.create_dataset(group+"/tmin", data=tmin)
+        f.create_dataset(group+"/tmax", data=tmax)
+        f.create_dataset(group+"/antisymmetric", data=antisymmetric)
+        f.create_dataset(group+"/E0", data=[E_i.mean for E_i in E1])
+        f.create_dataset(group+"/E1", data=[E_i.mean for E_i in E2])
+        f.create_dataset(group+"/Delta_E0", data=[E_i.sdev for E_i in E1])
+        f.create_dataset(group+"/Delta_E1", data=[E_i.sdev for E_i in E2])
+        f.create_dataset(group+"/a0", data=[a_i.mean for a_i in a1])
+        f.create_dataset(group+"/a1", data=[a_i.mean for a_i in a2])
+        f.create_dataset(group+"/Delta_a0", data=[a_i.sdev for a_i in a1])
+        f.create_dataset(group+"/Delta_a1", data=[a_i.sdev for a_i in a2])
+        f.create_dataset(group+"/chi2_0", data=chi2_1)
+        f.create_dataset(group+"/chi2_1", data=chi2_2)
+        f.create_dataset(group+"/dof0", data=dof1)
+        f.create_dataset(group+"/dof1", data=dof2)
+        f.close()
         print(group)
-        print(plotname)
         print(E1[0],chi2_1/dof1)
         print(E2[0],chi2_2/dof2)
 
@@ -126,4 +145,9 @@ parameterfile  = './input/pipi_fitintervals.csv'
 betas, m0s, Ls, Ts, groups, tmins, tmaxs = read_filelist_fitparam(parameterfile)
 
 infile  = './data/isospin1_eigenvalues_t0_3_deriv.hdf5'
-fit_all_files(infile,betas, m0s, Ls, Ts, groups, tmins, tmaxs)
+outfile = './data/isospin1_fitresults_t0_3_deriv.hdf5'
+
+if os.path.exists(outfile):
+    os.remove(outfile)
+
+fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs)
