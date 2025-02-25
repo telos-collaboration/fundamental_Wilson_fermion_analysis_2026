@@ -80,11 +80,11 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsiz
         # Rescale data such that eig(t=0)=1
         # Note: There is an issue when t_min < t0
         #       C(t0) ihas no variance and destabilises the fit
-        eig1 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],Delta_ev[:,0]/ev[0,0]))
-        eig2 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],Delta_ev[:,1]/ev[0,1]))
+        eig2 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],Delta_ev[:,0]/ev[0,0]))
+        eig1 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],Delta_ev[:,1]/ev[0,1]))
         # Use full covariance matrix estimator
-        eig1 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],cov_ev[:,:,0]/ev[0,0]/ev[0,0]))
-        eig2 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],cov_ev[:,:,1]/ev[0,1]/ev[0,1]))
+        eig2 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],cov_ev[:,:,0]/ev[0,0]/ev[0,0]))
+        eig1 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],cov_ev[:,:,1]/ev[0,1]/ev[0,1]))
 
         plotname = "beta{}_m{}_L{}_T{}".format(beta,m,L,T)
         antisymmetric = True
