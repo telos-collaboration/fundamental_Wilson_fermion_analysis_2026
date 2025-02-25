@@ -43,14 +43,16 @@ function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, 
 end
 
 hdf5file = "data/isospin1_corr.hdf5"
+hdf5file = "data/isospin1_corr_allruns.hdf5"
 h5dset = h5open(hdf5file)
-ens = "Lt32Ls24beta6.9m1-0.92m2-0.92"
+ens = "Lt24Ls14beta6.9m1-0.92m2-0.92/"
+ens = "Lt24Ls14beta6.9m1-0.92m2-0.92/run1"
 t0 = 1
 
 p    = "p(0,0,1)"
-T, L = h5dset["$ens/lattice"][1:2]
-m0   = h5dset["$ens/quarkmasses"][1]
-β    = h5dset["$ens/beta"][]
+T, L = h5dset[joinpath("$ens","lattice")][1:2]
+m0   = h5dset[joinpath("$ens","quarkmasses")][1]
+β    = h5dset[joinpath("$ens","beta")][]
 Corr = h5dset[joinpath(ens,p,"correlation_matrix")][]
 
 inf_vol = readdlm("input/infinite_volume.csv",',')
