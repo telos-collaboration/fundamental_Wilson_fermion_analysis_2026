@@ -30,11 +30,19 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_correlation_matrix(file_in,file_out)
+function write_correlation_matrix(file_in,file_out;combined=true)
     isfile(file_out) && rm(file_out)
-    fid       = h5open(file_in) 
-    ensembles = keys(fid)
-
+    fid = h5open(file_in)
+    
+    if combined
+        ensembles = keys(fid)
+    else
+        ensembles = AbstractString[]
+        for e in keys(fid)
+            append!(ensembles,joinpath.(e,keys(fid[e])))
+        end
+    end
+    
     for ens in ensembles
         _copy_lattice_parameters(file_out,file_in;group=ens)
         T, L = fid["$ens/lattice"][1:2]
@@ -82,5 +90,8 @@ function write_correlation_matrix(file_in,file_out)
     end
 end
 file_in  = "data/isospin1_merged.hdf5"
+file_in2 = "data/isospin1_sorted.hdf5"
 file_out = "data/isospin1_corr.hdf5"
+file_out2= "data/isospin1_corr_allruns.hdf5"
 write_correlation_matrix(file_in,file_out)
+write_correlation_matrix(file_in2,file_out2;combined=false)
