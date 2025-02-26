@@ -103,19 +103,18 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             end
             
             display(plt)
-            @show "$(ens)_$p.pdf"
             savefig(joinpath(plotpath,"$(ens)_$p.pdf"))
         end
     end
 end
 
 corr_file  = "data/isospin1_corr.hdf5"
-fitresults = "data/isospin1_fitresults_t0_3_deriv.hdf5"
+fitresults = "data/isospin1_fitresults_t0_8_deriv.hdf5"
 plotpath   = "plots/effective_masses"
 infvolfile = "input/infinite_volume.csv"
 fitparam   = "input/pipi_fitintervals.csv"
 
 deriv = true
-t0    = 3
+t0    = 8
 
 plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv)
