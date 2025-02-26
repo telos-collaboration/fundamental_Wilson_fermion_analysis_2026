@@ -30,6 +30,14 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
+function _parse_momentum(p0)
+    rx = r"\(([0-9]),([0-9]),([0-9])\)"
+    m = match(rx,p0)
+    return parse.(Int,m.captures) 
+end
+function _are_permutations(p0,p1)
+    return sort(p0) == sort(p1) 
+end
 function write_correlation_matrix(file_in,file_out;combined=true)
     isfile(file_out) && rm(file_out)
     fid = h5open(file_in)
@@ -47,6 +55,7 @@ function write_correlation_matrix(file_in,file_out;combined=true)
         _copy_lattice_parameters(file_out,file_in;group=ens)
         T, L = fid["$ens/lattice"][1:2]
         p_external = fid["$ens/p_external"][]
+        p_external_parsed = _parse_momentum.(p_external)
         @show ens
         @show p_external
         
