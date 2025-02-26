@@ -11,13 +11,25 @@ function _splitlabel(label)
         return l, p
     end
 end
-function isospin1_to_hdf5(file,h5file;setup=true,ensemble="")
-    setup &&  HiRepParsing._write_lattice_setup(file,h5file;h5group=ensemble)
-    Re, Im = parse_isospin_one(file)
+unique_indices(v) = unique(i -> v[i], eachindex(v))
+function isospin1_to_hdf5(file,h5file;setup=true,ensemble="",sort=true,deduplicate=true)
+    setup &&  HiRepParsing._write_lattice_setup(file,h5file;h5group=ensemble,smearing=false,sort,deduplicate)
+    Re, Im = parse_isospin_one(file;desc=ensemble)
+    Nlabels, Nconf, Nsrc, Nmom, Nmom, Nmom, T = size(Re)
+    
+    if sort || deduplicate
+        names = confignames(file)
+        @assert length(names) == Nconf
+    end
+    perm  = sort ? HiRepParsing.permutation_names(names) : 1:Nconf
+    names = names[perm]
+    inds  = deduplicate ? unique_indices(names) : 1:Nconf
+    inds  = perm[inds]
+    Nconf = length(inds)
+
     labels = label_list(file)
     pmax  = _find_pmax(file)
     
-    Nlabels, Nconf, Nsrc, Nmom, T = size(Re)
     @assert length(labels) == Nlabels
     @assert (Nmom-1)÷2 == pmax 
     p_external = unique(last.(_splitlabel.(labels)))
@@ -26,6 +38,8 @@ function isospin1_to_hdf5(file,h5file;setup=true,ensemble="")
     h5write(h5file,joinpath(ensemble,"Nconf"),Nconf)
     h5write(h5file,joinpath(ensemble,"p_external"),p_external)
 
+    tmpRe = zeros(Nconf,Nsrc,T)
+    tmpIm = zeros(Nconf,Nsrc,T)
     for i in 1:Nlabels
         channel, P_tot =_splitlabel(labels[i])
         # only the 'd' diagram has negative momenta being measured in HiRep
@@ -36,8 +50,10 @@ function isospin1_to_hdf5(file,h5file;setup=true,ensemble="")
             h5label_re = joinpath(ensemble,P_tot,channel,p_diag,"C_re")
             h5label_im = joinpath(ensemble,P_tot,channel,p_diag,"C_im")
             
-            h5write(h5file,h5label_re,Re[i,:,:,px,py,pz,:])
-            h5write(h5file,h5label_im,Im[i,:,:,px,py,pz,:])
+            @. tmpRe = Re[i,inds,:,px,py,pz,:]
+            @. tmpIm = Im[i,inds,:,px,py,pz,:]
+            h5write(h5file,h5label_re,tmpRe)
+            h5write(h5file,h5label_im,tmpIm)
         end
     end
 end

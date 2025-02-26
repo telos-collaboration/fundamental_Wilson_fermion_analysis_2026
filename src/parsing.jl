@@ -82,7 +82,7 @@ function _find_pmax(file)
         end
     end
 end
-function parse_isospin_one(file)
+function parse_isospin_one(file;desc="Progress:")
     T = first(latticesize(file))
     cut  = length("[IO][0]")
     # The measured  momenta are currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
@@ -96,6 +96,7 @@ function parse_isospin_one(file)
     conf = 0 
     src  = 0
     li   = 0
+    label = ""
     # fill arrays with NaNs. The idea is that not all momentum indices are used for all diagrams
     # All available entries will be replaced by finite Float64 numbers, the rest remains a NaN rather 
     # than a zero. 
@@ -103,7 +104,7 @@ function parse_isospin_one(file)
     Im = fill(NaN,(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T))
 
     nlines = countlines(file)
-    p = Progress(nlines)
+    p = Progress(nlines; desc)
 
     labels = label_list(file)
     for line in eachline(file)
@@ -122,6 +123,9 @@ function parse_isospin_one(file)
             else
                 _parse_data!(tmp, l)
                 px, py, pz, t, re, im = tmp
+                if any(isnothing,tmp) || isnothing(src) || isnothing(li)
+                    @error "line could not be parsed correctly" line label li src conf
+                end  
                 px, py, pz, t = Int(px), Int(py), Int(pz), Int(t)
                 offset = pmax + 1
                 # increase indices by pmax+1, to have one-based indexing
