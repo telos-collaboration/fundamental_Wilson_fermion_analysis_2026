@@ -10,9 +10,28 @@ from tqdm import tqdm
 def get_hdf5_value(hdf5file,key):
     return hdf5file[key][()]
 
-def make_models(T,tmin,tmax):
-    """ Create corrfitter model for G(t). """
-    return [cf.Corr2(datatag='Gab', tp=T, tmin=tmin, tmax=tmax, a='a', b='a', dE='dE')]
+def make_models(T,tmin,tmax,t0):
+    """ 
+    Create corrfitter model for G(t).
+
+    Here I provide a dedicated range of timeslices to be used in fitting
+    Using simply (tmin,tmax) is not sufficient if t0 is in (tmin,tmax) 
+    because at t=t0 the correlation matrix has a vanishing variance which 
+    destabilises the fit.
+
+    Therefore, I create a list 'tfit' of timslices to be included, such that
+    t0 is excluded. 
+
+    Furthermore, if T is provided (i.e. it is not 'None') then the symmetry 
+    of the correlator is included specifically and the largest t needed is T/2
+    
+    """
+    tfit = range(tmin,tmax+1)
+    tfit = list(filter(lambda x: x != t0,tfit))
+    if T is not None:
+        tfit = list(filter(lambda x: x < abs(T)//2,tfit))
+
+    return [cf.Corr2(datatag='Gab', tp=T, tfit=tfit, a='a', b='a', dE='dE')]
 
 def make_prior(N):
     prior = gv.BufferDict()
@@ -37,9 +56,9 @@ def print_fit_param(fit):
     print('chi2/dof = ', chi2/dof, '\n')
 
 
-def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname="test",plotdir="./output/plots/",plotting=False,printing=False):
+def fit_correlator_without_bootstrap(avg,T,tmin,tmax,t0,Nmax,antisymmetric,plotname="test",plotdir="./output/plots/",plotting=False,printing=False):
     T = - abs(T) if antisymmetric else abs(T) 
-    fitter = cf.CorrFitter(models=make_models(T,tmin,tmax))
+    fitter = cf.CorrFitter(models=make_models(T,tmin,tmax,t0))
     p0 = None
     for N in range(1,Nmax+1):
         prior = make_prior(N)
@@ -57,7 +76,7 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname
         fit.show_plots(view='log'  ,save=plotdir+plotname+'/data.pdf')
     return E, a, chi2, dof
 
-def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsize=1):
+def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s):
 
     fid = h5py.File(infile,'r')
     
@@ -71,6 +90,7 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsiz
         group = groups[i] 
         tmin = tmins[i]
         tmax = tmaxs[i]
+        t0 = t0s[i]
 
         # read the data from the hdf5 file
         ev       = get_hdf5_value(fid,group+"/eigvals")
@@ -79,9 +99,7 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsiz
 
         # Rescale data such that eig(t=0)=1
         # Note: There is an issue when t_min < t0
-        #       C(t0) ihas no variance and destabilises the fit
-        eig2 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],Delta_ev[:,0]/ev[0,0]))
-        eig1 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],Delta_ev[:,1]/ev[0,1]))
+        #       C(t0) has no variance and destabilises the fit
         # Use full covariance matrix estimator
         eig2 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],cov_ev[:,:,0]/ev[0,0]/ev[0,0]))
         eig1 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],cov_ev[:,:,1]/ev[0,1]/ev[0,1]))
@@ -93,8 +111,8 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs,binsiz
         plotdir = "./output/plots/"
         Nmax = 10
 
-        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
-        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,t0,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,t0,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
         
         f = h5py.File(outfile, "a")
         f.create_dataset(group+"/tmin", data=tmin)
@@ -128,6 +146,7 @@ def read_filelist_fitparam(parameterfile):
     tmins  = []
     tmaxs  = []
     groups = []
+    t0s    = []
     # skip line containing headers
     next(reader, None)
     for row in reader:
@@ -138,16 +157,17 @@ def read_filelist_fitparam(parameterfile):
         groups.append(row[4])
         tmins.append(int(row[5]))
         tmaxs.append(int(row[6]))
+        t0s.append(int(row[7]))
 
-    return beta, m0, L, T, groups, tmins, tmaxs
+    return beta, m0, L, T, groups, tmins, tmaxs, t0s
 
 parameterfile  = './input/pipi_fitintervals.csv'
-betas, m0s, Ls, Ts, groups, tmins, tmaxs = read_filelist_fitparam(parameterfile)
+betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s = read_filelist_fitparam(parameterfile)
 
-infile  = './data/isospin1_eigenvalues_t0_3_deriv.hdf5'
-outfile = './data/isospin1_fitresults_t0_3_deriv.hdf5'
+infile  = './data/isospin1_eigenvalues_t0_8_deriv.hdf5'
+outfile = './data/isospin1_fitresults_t0_8_deriv.hdf5'
 
 if os.path.exists(outfile):
     os.remove(outfile)
 
-fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs)
+fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s)
