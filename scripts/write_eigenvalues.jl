@@ -3,7 +3,10 @@ using ScatteringI1
 using HDF5
 using Statistics
 using LatticeUtils
+using Plots
+using LaTeXStrings
 using ProgressMeter
+pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 
 function swap_eigval_numbering(old,t0,T)
     new = copy(old)
@@ -29,7 +32,7 @@ function variational_analysis(Corr;t0,maxhits=typemax(Int),deriv=true)
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
 
-    return eigvals, Δeigvals, eigvals_cov
+    return eigvals, Δeigvals, eigvals_cov, h
 end
 function _copy_lattice_parameters(outfile,infile;group="")
     file = h5open(infile)[group]
@@ -39,20 +42,41 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int))
+function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, plotpath=joinpath("./plots/eigenvalues/","t0$(t0)"*(deriv ? "_deriv" : "")))
     
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
+    plotting && ispath(plotpath) || mkpath(plotpath)
 
     ensembles = keys(h5dset)
-    @showprogress desc="write eigenvalues:" for ens in ensembles
+    @showprogress desc="write eigenvalues:" enabled=false for ens in ensembles
         _copy_lattice_parameters(outfile,infile;group=ens)
         p_external = h5dset["$ens/p_external"][]
         for p in p_external
             p == "p(0,0,0)" && continue
-            Corr = h5dset[joinpath(ens,p,"correlation_matrix")][]
-            eigvals, Δeigvals, eigvals_cov = variational_analysis(Corr;t0,maxhits,deriv)
+            Corr = read(h5dset,joinpath(ens,p,"correlation_matrix"))
+            eigvals, Δeigvals, eigvals_cov, h = variational_analysis(Corr;t0,maxhits,deriv)
             eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
+
+            # Save plots of eigenvalues so that they can be visually examined for violations of convexity
+            if plotting 
+                T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
+                m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
+                ncfg  = read(h5dset,joinpath(ens,"Nconf"))
+                title = L"${%$T} \times {%$L}^3: am^f_0={%$m0} \mathbf p = %$(p), n_{src}=%$h, n_{cfg}=%$ncfg, t_0 = %$(t0)$"
+                
+                t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
+                t1 = filter(x->!iszero(eigvals[1,x]),t)
+                t2 = filter(x->!iszero(eigvals[2,x]),t)
+                f  = deriv ? abs : identity
+                
+                plt = plot(yscale=:log10)
+                plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
+                plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
+                plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
+                savefig(plt,joinpath(plotpath,"$(ens)_$(p).pdf"))
+                display(plt)
+            end
 
             h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
             h5write(outfile,joinpath(ens,p,"Delta_eigvals"),Δeigvals)
@@ -61,8 +85,8 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int))
     end
 end
 
-outfile = "data/isospin1_eigenvalues_t0_3_deriv.hdf5"
+outfile = "data/isospin1_eigenvalues_t0_8_deriv.hdf5"
 infile  = "data/isospin1_corr.hdf5"
-t0      = 3
+t0      = 8
 deriv   = true
 write_all_eigenvalues(infile,outfile; t0, deriv)
