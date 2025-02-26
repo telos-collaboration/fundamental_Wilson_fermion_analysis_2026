@@ -98,8 +98,9 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s):
         cov_ev   = get_hdf5_value(fid,group+"/cov_eigvals")
 
         # Rescale data such that eig(t=0)=1
-        # Note: There is an issue when t_min < t0
+        # Note: There was an issue when t_min < t0
         #       C(t0) has no variance and destabilises the fit
+        #          t0 is now excluded from the fir
         # Use full covariance matrix estimator
         eig2 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],cov_ev[:,:,0]/ev[0,0]/ev[0,0]))
         eig1 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],cov_ev[:,:,1]/ev[0,1]/ev[0,1]))
@@ -117,6 +118,7 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s):
         f = h5py.File(outfile, "a")
         f.create_dataset(group+"/tmin", data=tmin)
         f.create_dataset(group+"/tmax", data=tmax)
+        f.create_dataset(group+"/Nmax", data=Nmax)
         f.create_dataset(group+"/antisymmetric", data=antisymmetric)
         f.create_dataset(group+"/E0", data=[E_i.mean for E_i in E1])
         f.create_dataset(group+"/E1", data=[E_i.mean for E_i in E2])
