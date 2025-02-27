@@ -1,4 +1,4 @@
-using Pkg; Pkg.activate(".")
+using Pkg; Pkg.activate(".",io=devnull)
 using HDF5
 using Plots
 using ScatteringI1
@@ -33,7 +33,7 @@ function plot_meff_from_gevp(h5dset,ens,p,t0,deriv,inf_vol;average_equivalent_mo
     ncfg = read(h5dset,joinpath(ens,"Nconf"))
 
     Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equivalent_momenta)
-    meff, Δmeff = ScatteringI1.effective_masses(Corr;maxhits=typemax(Int),t0,deriv)
+    meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
     
     ind = findfirst(i -> [β,m0] == inf_vol[i,1:2],1:first(size(inf_vol)))
     mπ, Δmπ, mρ, Δmρ = inf_vol[ind,3:6]
@@ -56,7 +56,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
         p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)
         for p in p_external
             
-            joinpath(ens,p) ∉ fittable[:,5] && continue
+            joinpath(ens,p) ∉ fittable && continue
             p == "p(0,0,0)" && continue
 
             plt = plot_meff_from_gevp(h5dset,ens,p,t0,deriv,inf_vol;average_equivalent_momenta)

@@ -1,4 +1,4 @@
-using Pkg; Pkg.activate(".")
+using Pkg; Pkg.activate(".",io=devnull)
 using ScatteringI1
 using HDF5
 
@@ -30,7 +30,7 @@ function write_correlation_matrix(file_in,file_out;combined=true)
 
         for p0 in p_external 
             if p0 == "p(0,0,0)"
-                Corrπ0, Corrρ0 = correlatorsp000(fid,ens;p=1)
+                Corrπ0, Corrρ0 = correlatorsp000(fid,ens)
                 h5write(file_out,joinpath(ens,p0,"correlator_pion"),Corrπ0)
                 h5write(file_out,joinpath(ens,p0,"correlator_rho") ,Corrρ0)
                 h5write(file_out,joinpath(ens,p0,"Nsrc") ,size(Corrπ0)[2])
@@ -47,7 +47,7 @@ function write_correlation_matrix(file_in,file_out;combined=true)
     end
 end
 file_in  = "data/isospin1_merged.hdf5"
-file_out = "data/isospin1_corr_pol_avg.hdf5"
+file_out = "data/isospin1_corr.hdf5"
 write_correlation_matrix(file_in,file_out)
 
 #file_in2 = "data/isospin1_sorted.hdf5"

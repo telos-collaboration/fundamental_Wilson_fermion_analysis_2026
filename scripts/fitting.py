@@ -66,8 +66,7 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,t0,Nmax,antisymmetric,plotn
         p0 = fit.pmean
 
         if printing:
-            print('nterm =', N, 30 * '=')
-            print(fit)
+            print_fit_param(fit)
 
     E, a, chi2, dof = first_fit_parameters(fit) 
     if plotting:
@@ -76,23 +75,17 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,t0,Nmax,antisymmetric,plotn
         fit.show_plots(view='log'  ,save=plotdir+plotname+'/data.pdf')
     return E, a, chi2, dof
 
-def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s):
+def fit_all_files(infile,outfile,parameterfile):
 
     fid = h5py.File(infile,'r')
+    reader = csv.reader(open(parameterfile))
+    next(reader, None) # skip line containing headers
     
     print("Fitting correlators.... ")
-    for i in tqdm(range(0,len(groups)),disable=True):
+    for row in tqdm((reader),disable=False):
 
-        beta = betas[i] 
-        m = m0s[i] 
-        L = Ls[i]
-        T = Ts[i] 
-        group = groups[i] 
-        tmin = tmins[i]
-        tmax = tmaxs[i]
-        t0 = t0s[i]
+        group, tmin, tmax = row[0], int(row[1]), int(row[2]) 
 
-        # only proceed if corresponding data is in the input hdf5 file
         if group not in fid:
             continue 
 
@@ -100,20 +93,22 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s):
         ev       = get_hdf5_value(fid,group+"/eigvals")
         Delta_ev = get_hdf5_value(fid,group+"/Delta_eigvals")
         cov_ev   = get_hdf5_value(fid,group+"/cov_eigvals")
+        t0       = get_hdf5_value(fid,group+"/t0") - 1 # offset for 1-indexing in julia 
+        T        = ev.shape[0]
+        antisymmetric = get_hdf5_value(fid,group+"/deriv") 
 
         # Rescale data such that eig(t=0)=1
         # Note: There was an issue when t_min < t0
         #       C(t0) has no variance and destabilises the fit
-        #          t0 is now excluded from the fir
+        #         t0  is now excluded from the fir
         # Use full covariance matrix estimator
         eig2 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],cov_ev[:,:,0]/ev[0,0]/ev[0,0]))
         eig1 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],cov_ev[:,:,1]/ev[0,1]/ev[0,1]))
 
-        plotname = "beta{}_m{}_L{}_T{}".format(beta,m,L,T)
-        antisymmetric = True
-        printing=False
-        plotting=False
-        plotdir = "./output/plots/"
+        plotname = group
+        plotdir  = "./output/plots/"
+        printing = False
+        plotting = False
         Nmax = 10
 
         E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,t0,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
@@ -137,43 +132,13 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s):
         f.create_dataset(group+"/dof0", data=dof1)
         f.create_dataset(group+"/dof1", data=dof2)
         f.close()
-        print(group)
-        print(E1[0],chi2_1/dof1)
-        print(E2[0],chi2_2/dof2)
 
 
-def read_filelist_fitparam(parameterfile):
-    reader = csv.reader(open(parameterfile))
-    # create list that contain the fitting information
-    beta  = []
-    m0  = []
-    L = []
-    T = []
-    tmins  = []
-    tmaxs  = []
-    groups = []
-    t0s    = []
-    # skip line containing headers
-    next(reader, None)
-    for row in reader:
-        beta.append(row[0])
-        m0.append(row[1])
-        L.append(int(row[2]))
-        T.append(int(row[3]))
-        groups.append(row[4])
-        tmins.append(int(row[5]))
-        tmaxs.append(int(row[6]))
-        t0s.append(int(row[7]))
-
-    return beta, m0, L, T, groups, tmins, tmaxs, t0s
-
+infile         = './data/isospin1_eigenvalues_t0_8_deriv.hdf5'
+outfile        = './data/isospin1_fitresults_t0_8_deriv.hdf5'
 parameterfile  = './input/pipi_fitintervals.csv'
-betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s = read_filelist_fitparam(parameterfile)
-
-infile  = './data/isospin1_eigenvalues_t0_8_deriv.hdf5'
-outfile = './data/isospin1_fitresults_t0_8_deriv.hdf5'
 
 if os.path.exists(outfile):
     os.remove(outfile)
 
-fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s)
+fit_all_files(infile,outfile,parameterfile)

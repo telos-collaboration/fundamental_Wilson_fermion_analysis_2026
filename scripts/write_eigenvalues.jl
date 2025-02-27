@@ -1,4 +1,4 @@
-using Pkg; Pkg.activate(".")
+using Pkg; Pkg.activate(".",io=devnull)
 using ScatteringI1
 using HDF5
 using LatticeUtils
@@ -30,7 +30,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
             p == "p(0,0,0)" && continue
 
             Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equivalent_momenta)
-            eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,maxhits,deriv)
+            eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv)
             eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
 
             # Save plots of eigenvalues so that they can be visually examined for violations of convexity
@@ -59,6 +59,9 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
             h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
             h5write(outfile,joinpath(ens,p,"Delta_eigvals"),Δeigvals)
             h5write(outfile,joinpath(ens,p,"cov_eigvals"),eigvals_cov)
+            h5write(outfile,joinpath(ens,p,"t0"),t0)
+            h5write(outfile,joinpath(ens,p,"deriv"),deriv)
+            h5write(outfile,joinpath(ens,p,"average_equivalent_momenta"),average_equivalent_momenta)
         end
     end
 end

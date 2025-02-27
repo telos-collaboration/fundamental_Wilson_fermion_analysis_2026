@@ -1,4 +1,4 @@
-using Pkg; Pkg.activate(".")
+using Pkg; Pkg.activate(".",io=devnull)
 using HDF5
 function check_matching_runs(file,ensemble,key;verbose=true)
     fid  = h5open(file)[ensemble]

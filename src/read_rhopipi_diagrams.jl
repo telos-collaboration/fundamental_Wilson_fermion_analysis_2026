@@ -36,8 +36,8 @@ function correlators_xyz(h5dset,ens;p::Vector{Int})
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
 
-function correlatorsp000(h5dset,ens;p=1)
-    Corrπ  = h5dset["$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re"][]
-    Corrρ  = h5dset["$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re"][]
+function correlatorsp000(h5dset,ens)
+    Corrπ  = read(h5dset,"$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re")
+    Corrρ  = read(h5dset,"$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re")
     return Corrπ, Corrρ
 end
