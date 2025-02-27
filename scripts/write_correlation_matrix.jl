@@ -1,8 +1,3 @@
-using Pkg; Pkg.activate(".",io=devnull)
-using ScatteringI1
-using ProgressMeter
-using HDF5
-
 function _copy_lattice_parameters(outfile,infile;group="")
     file = h5open(infile)[group]
     entries = filter(!contains(r"p\([0-9],[0-9],[0-9]\)") ,keys(file))
@@ -47,10 +42,3 @@ function write_correlation_matrix(file_in,file_out;combined=true)
         end
     end
 end
-file_in  = "data/isospin1_merged.hdf5"
-file_out = "data/isospin1_corr.hdf5"
-write_correlation_matrix(file_in,file_out)
-
-#file_in2 = "data/isospin1_sorted.hdf5"
-#file_out2= "data/isospin1_corr_allruns.hdf5"
-#write_correlation_matrix(file_in2,file_out2;combined=false)

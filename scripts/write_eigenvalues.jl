@@ -1,13 +1,3 @@
-using Pkg; Pkg.activate(".",io=devnull)
-using ScatteringI1
-using HDF5
-using LatticeUtils
-using Plots
-using LaTeXStrings
-using ProgressMeter
-using PDFmerger
-pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
-
 function _copy_lattice_parameters(outfile,infile;group="")
     file = h5open(infile)[group]
     entries = filter(!contains(r"p\([0-9],[0-9],[0-9]\)") ,keys(file))
@@ -75,10 +65,3 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
         end
     end
 end
-
-t0      = 8
-deriv   = true
-plotpath="./plots/"
-infile  = "data/isospin1_corr.hdf5"
-outfile = ifelse(deriv,"data/isospin1_eigenvalues_t0_$(t0)_deriv.hdf5","data/isospin1_eigenvalues_t0_$t0.hdf5")
-write_all_eigenvalues(infile,outfile; t0, deriv)

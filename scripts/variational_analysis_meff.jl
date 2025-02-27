@@ -1,14 +1,3 @@
-using Pkg; Pkg.activate(".",io=devnull)
-using HDF5
-using Plots
-using ScatteringI1
-using LaTeXStrings
-using LatticeUtils
-using DelimitedFiles
-using ProgressMeter
-using PDFmerger
-pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
-
 function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg, p_label; t1_max=T÷2, t2_max=T÷2,all_non_interacting=false)
     plot!(plt,ylabel=L"effective mass $[a^{-1}]$",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), \mathbf p = %$(p_label), n_{src}=%$(h), n_{cfg}=%$ncfg, t_0 = %$(t0)$")
     scatter!(plt,meff[2,1:t1_max],yerr=Δmeff[2,1:t1_max],label="eigenvalue #1")
@@ -82,14 +71,3 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
         end
     end
 end
-
-corr_file  = "data/isospin1_corr.hdf5"
-fitresults = "data/isospin1_fitresults_t0_8_deriv.hdf5"
-plotpath   = "plots/"
-infvolfile = "input/infinite_volume.csv"
-fitparam   = "input/pipi_fitintervals.csv"
-
-deriv = true
-t0    = 8
-
-plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv)
