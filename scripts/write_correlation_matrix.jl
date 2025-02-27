@@ -55,14 +55,14 @@ function write_correlation_matrix(file_in,file_out;combined=true)
     for ens in ensembles
         _copy_lattice_parameters(file_out,file_in;group=ens)
         T, L = fid["$ens/lattice"][1:2]
-        p_external = read(fid,"$ens/p_external")
-        @show p_external
+        p_external    = read(fid,"$ens/p_external")
 
         for p0 in p_external 
             if p0 == "p(0,0,0)"
                 Corrπ0, Corrρ0 = correlatorsp000(fid,ens;p=1)
-                h5write(file_out,joinpath(ens,"p(0,0,0)","correlator_pion"),Corrπ0)
-                h5write(file_out,joinpath(ens,"p(0,0,0)","correlator_rho") ,Corrρ0)
+                h5write(file_out,joinpath(ens,p0,"correlator_pion"),Corrπ0)
+                h5write(file_out,joinpath(ens,p0,"correlator_rho") ,Corrρ0)
+                h5write(file_out,joinpath(ens,p0,"Nsrc") ,size(Corrπ0)[2])
             else 
                 Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlators_xyz(fid,ens;p=_parse_momentum(p0))            
                 Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
@@ -70,13 +70,15 @@ function write_correlation_matrix(file_in,file_out;combined=true)
                 
                 h5write(file_out,joinpath(ens,p0,"correlation_matrix"),Corr)
                 h5write(file_out,joinpath(ens,p0,"correlator_pion"),Corrπ)
+                h5write(file_out,joinpath(ens,p0,"Nsrc"),size(Corr2π)[2])
             end
         end
     end
 end
 file_in  = "data/isospin1_merged.hdf5"
-file_in2 = "data/isospin1_sorted.hdf5"
-file_out = "data/isospin1_corr.hdf5"
-file_out2= "data/isospin1_corr_allruns.hdf5"
+file_out = "data/isospin1_corr_pol_avg.hdf5"
 write_correlation_matrix(file_in,file_out)
-write_correlation_matrix(file_in2,file_out2;combined=false)
+
+#file_in2 = "data/isospin1_sorted.hdf5"
+#file_out2= "data/isospin1_corr_allruns.hdf5"
+#write_correlation_matrix(file_in2,file_out2;combined=false)
