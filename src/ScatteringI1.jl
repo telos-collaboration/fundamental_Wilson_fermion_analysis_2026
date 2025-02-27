@@ -5,13 +5,14 @@ using HDF5
 using ProgressMeter
 using HiRepParsing
 using LatticeUtils
+using LinearAlgebra
 
 include("parsing.jl")
 export parse_isospin_one
 include("write_hdf5.jl")
 export isospin1_to_hdf5
 include("read_rhopipi_diagrams.jl")
-export correlatorsp000, correlatorsp001, correlatorsp110, correlatorsp011
+export correlators_xyz
 
 # reexports from LatticeUtils
 export eigenvalues, eigenvalues_jackknife_samples

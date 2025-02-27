@@ -4,6 +4,7 @@ using HDF5
 using Statistics
 using LatticeUtils
 using ProgressMeter
+using LinearAlgebra
 
 # TODO: Average over sources here, so that the code deals with differing number of sources
 function pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
@@ -56,16 +57,15 @@ function write_correlation_matrix(file_in,file_out;combined=true)
         T, L = fid["$ens/lattice"][1:2]
         p_external = fid["$ens/p_external"][]
         p_external_parsed = _parse_momentum.(p_external)
-        @show ens
-        @show p_external
-        
+        p_external_uniqe_dir = unique(p-> sort(p)/norm(p), p_external_parsed)
+
         if "p(0,0,0)" ∈ p_external
             Corrπ0, Corrρ0 = correlatorsp000(fid,ens;p=1)
             h5write(file_out,joinpath(ens,"p(0,0,0)","correlator_pion"),Corrπ0)
             h5write(file_out,joinpath(ens,"p(0,0,0)","correlator_rho") ,Corrρ0)
         end
         if "p(0,0,1)" ∈ p_external
-            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(fid,ens;p=1)
+            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = ScatteringI1.correlators_xyz(fid,ens;p=[0,0,1])            
             Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
             Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
             
@@ -73,7 +73,7 @@ function write_correlation_matrix(file_in,file_out;combined=true)
             h5write(file_out,joinpath(ens,"p(0,0,1)","correlator_pion"),Corrπ)
         end
         if "p(0,0,2)" ∈ p_external
-            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp001(fid,ens;p=2)
+            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = ScatteringI1.correlators_xyz(fid,ens;p=[0,0,2])
             Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
             Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
             
@@ -81,7 +81,7 @@ function write_correlation_matrix(file_in,file_out;combined=true)
             h5write(file_out,joinpath(ens,"p(0,0,2)","correlator_pion"),Corrπ)
         end
         if "p(0,1,1)" ∈ p_external
-            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp011(fid,ens;p=1)
+            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = ScatteringI1.correlators_xyz(fid,ens;p=[0,1,1])
             Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
             Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
             
@@ -89,7 +89,7 @@ function write_correlation_matrix(file_in,file_out;combined=true)
             h5write(file_out,joinpath(ens,"p(0,1,1)","correlator_pion"),Corrπ)
         end
         if "p(1,1,0)" ∈ p_external
-            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlatorsp110(fid,ens;p=1)
+            Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = ScatteringI1.correlators_xyz(fid,ens;p=[1,1,0])
             Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
             Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
             
