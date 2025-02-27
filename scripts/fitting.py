@@ -78,11 +78,11 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,t0,Nmax,antisymmetric,plotn
 def fit_all_files(infile,outfile,parameterfile):
 
     fid = h5py.File(infile,'r')
+    lines  = sum(1 for row in csv.reader(open(parameterfile))) - 1
     reader = csv.reader(open(parameterfile))
     next(reader, None) # skip line containing headers
     
-    print("Fitting correlators.... ")
-    for row in tqdm((reader),disable=False):
+    for row in tqdm((reader), total=lines , desc="Fit eigenvalues", disable=False):
 
         group, tmin, tmax = row[0], int(row[1]), int(row[2]) 
 

@@ -4,7 +4,8 @@ using Plots
 using ScatteringI1
 using LaTeXStrings
 using LatticeUtils
-using DelimitedFiles    
+using DelimitedFiles
+using ProgressMeter
 pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 
 function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg, p_label; t1_max=T÷2, t2_max=T÷2,all_non_interacting=false)
@@ -51,7 +52,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
 
     ispath(plotpath) || mkpath(plotpath)
 
-    for ens in keys(h5dset)
+    @showprogress desc="Plot effective masses" for ens in keys(h5dset)
         p0 = read(h5dset,"$ens/p_external")
         p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)
         for p in p_external

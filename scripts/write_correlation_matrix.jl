@@ -1,5 +1,6 @@
 using Pkg; Pkg.activate(".",io=devnull)
 using ScatteringI1
+using ProgressMeter
 using HDF5
 
 function _copy_lattice_parameters(outfile,infile;group="")
@@ -23,7 +24,7 @@ function write_correlation_matrix(file_in,file_out;combined=true)
         end
     end
     
-    for ens in ensembles
+    @showprogress desc="Construct correlation matrices" for ens in ensembles
         _copy_lattice_parameters(file_out,file_in;group=ens)
         T, L = fid["$ens/lattice"][1:2]
         p_external    = read(fid,"$ens/p_external")

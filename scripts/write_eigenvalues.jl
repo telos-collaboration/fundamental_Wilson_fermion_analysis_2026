@@ -22,7 +22,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
     plotting && ispath(plotpath) || mkpath(plotpath)
 
     ensembles = keys(h5dset)
-    @showprogress desc="write eigenvalues:" enabled=false for ens in ensembles
+    @showprogress desc="Write eigenvalues:" enabled=true for ens in ensembles
         _copy_lattice_parameters(outfile,infile;group=ens)
         p0 = read(h5dset,"$ens/p_external")
         p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)

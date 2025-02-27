@@ -8,6 +8,7 @@ path   = "/home/fabian/Documents/Physics/Data/DataVSC/measurements/"
 info   = readdlm("input/input_files.csv",',',skipstart=1)
 single_file = true
 
+println("Parse correlator data from raw log:")
 for (name,dir,file,run) in eachrow(info)
 
     file = joinpath(path,dir,name,file)
