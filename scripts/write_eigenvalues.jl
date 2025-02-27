@@ -74,6 +74,9 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
                 plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
                 plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
+                plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
+                plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
+                #annotate!(plt,[t0 + 1,T-t0-3] .+ 1,[ylims(plt)[2]/10,ylims(plt)[2]/10],[L"t_0",L"T - t_0"])
                 savefig(plt,joinpath(plotpath,"$(ens)_$(p).pdf"))
                 display(plt)
             end
