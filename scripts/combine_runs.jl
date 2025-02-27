@@ -100,3 +100,14 @@ function merge_runs(h5file_in, h5file_out, ensemble )
     end
     h5write(h5file_out,joinpath(ensemble,"p_external"),p_ext_unique)
 end
+function merge_all_runs(h5file_in, h5file_out)
+    isfile(h5file_out) && rm(h5file_out)
+    for ensemble in ensembles
+        try 
+            merge_runs(h5file_in, h5file_out, ensemble )
+        catch
+            @warn "Ensemble $ensemble cannot be merged"
+            continue
+        end
+    end
+end
