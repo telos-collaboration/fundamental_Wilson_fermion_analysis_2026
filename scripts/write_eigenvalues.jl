@@ -23,6 +23,8 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
 
     if plotting
         plotname = "eigenvalues_t0$(t0)_deriv_$deriv.pdf"
+        texpath  = joinpath(plotpath,"eigenvalues_tex")
+        ispath(texpath)  || mkpath(texpath)
         ispath(plotpath) || mkpath(plotpath)
         isfile(plotname) && rm(plotname)
     end
@@ -59,6 +61,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
                 #annotate!(plt,[t0 + 1,T-t0-3] .+ 1,[ylims(plt)[2]/10,ylims(plt)[2]/10],[L"t_0",L"T - t_0"])
                 savefig(plt,"temp.pdf")
+                savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
                 append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
                 isinteractive() && display(plt)
             end

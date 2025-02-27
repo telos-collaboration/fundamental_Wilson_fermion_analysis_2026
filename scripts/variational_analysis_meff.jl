@@ -52,6 +52,8 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
     inf_vol  = readdlm(infvolfile,',',skipstart=1)
     fittable = readdlm(fitparam,',',skipstart=1)
 
+    texpath  = joinpath(plotpath,"effective_masses_tex")
+    ispath(texpath)  || mkpath(texpath)
     ispath(plotpath) || mkpath(plotpath)
     isfile(plotname) && rm(plotname)
 
@@ -75,6 +77,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             
             isinteractive() && display(plt)
             savefig(plt,"temp.pdf")
+            savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
             append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
         end
     end
