@@ -5,6 +5,7 @@ using LatticeUtils
 using Plots
 using LaTeXStrings
 using ProgressMeter
+using PDFmerger
 pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 
 function _copy_lattice_parameters(outfile,infile;group="")
@@ -15,11 +16,16 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta=true, plotpath=joinpath("./plots/eigenvalues/","t0$(t0)"*(deriv ? "_deriv" : "")))
+function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta=true, plotpath="./plots/")
     
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
-    plotting && ispath(plotpath) || mkpath(plotpath)
+
+    if plotting
+        plotname = "eigenvalues_t0$(t0)_deriv_$deriv.pdf"
+        ispath(plotpath) || mkpath(plotpath)
+        isfile(plotname) && rm(plotname)
+    end
 
     ensembles = keys(h5dset)
     @showprogress desc="Write eigenvalues:" enabled=true for ens in ensembles
@@ -29,7 +35,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
         for p in p_external
             p == "p(0,0,0)" && continue
 
-            Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equivalent_momenta)
+            Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p;maxhits,average_equivalent_momenta)
             eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv)
             eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
 
@@ -52,7 +58,8 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
                 plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
                 #annotate!(plt,[t0 + 1,T-t0-3] .+ 1,[ylims(plt)[2]/10,ylims(plt)[2]/10],[L"t_0",L"T - t_0"])
-                savefig(plt,joinpath(plotpath,"$(ens)_$(p).pdf"))
+                savefig(plt,"temp.pdf")
+                append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
                 isinteractive() && display(plt)
             end
 
@@ -66,8 +73,9 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
     end
 end
 
-outfile = "data/isospin1_eigenvalues_t0_8_deriv.hdf5"
-infile  = "data/isospin1_corr.hdf5"
 t0      = 8
 deriv   = true
+plotpath="./plots/"
+infile  = "data/isospin1_corr.hdf5"
+outfile = ifelse(deriv,"data/isospin1_eigenvalues_t0_$(t0)_deriv.hdf5","data/isospin1_eigenvalues_t0_$t0.hdf5")
 write_all_eigenvalues(infile,outfile; t0, deriv)

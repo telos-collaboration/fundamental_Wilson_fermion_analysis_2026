@@ -6,6 +6,7 @@ using LaTeXStrings
 using LatticeUtils
 using DelimitedFiles
 using ProgressMeter
+using PDFmerger
 pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 
 function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg, p_label; t1_max=T÷2, t2_max=T÷2,all_non_interacting=false)
@@ -47,10 +48,12 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
     h5dset  = h5open(corr_file)
     res     = h5open(fitresults)
 
+    plotname = "effective_masses_t0$(t0)_deriv_$deriv.pdf"
     inf_vol  = readdlm(infvolfile,',',skipstart=1)
     fittable = readdlm(fitparam,',',skipstart=1)
 
     ispath(plotpath) || mkpath(plotpath)
+    isfile(plotname) && rm(plotname)
 
     @showprogress desc="Plot effective masses" for ens in keys(h5dset)
         p0 = read(h5dset,"$ens/p_external")
@@ -71,14 +74,15 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             end
             
             isinteractive() && display(plt)
-            savefig(joinpath(plotpath,"$(ens)_$p.pdf"))
+            savefig(plt,"temp.pdf")
+            append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
         end
     end
 end
 
 corr_file  = "data/isospin1_corr.hdf5"
 fitresults = "data/isospin1_fitresults_t0_8_deriv.hdf5"
-plotpath   = "plots/effective_masses"
+plotpath   = "plots/"
 infvolfile = "input/infinite_volume.csv"
 fitparam   = "input/pipi_fitintervals.csv"
 
