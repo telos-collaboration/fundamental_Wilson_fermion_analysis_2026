@@ -92,6 +92,10 @@ def fit_all_files(infile,outfile,betas, m0s, Ls, Ts, groups, tmins, tmaxs, t0s):
         tmax = tmaxs[i]
         t0 = t0s[i]
 
+        # only proceed if corresponding data is in the input hdf5 file
+        if group not in fid:
+            continue 
+
         # read the data from the hdf5 file
         ev       = get_hdf5_value(fid,group+"/eigvals")
         Delta_ev = get_hdf5_value(fid,group+"/Delta_eigvals")

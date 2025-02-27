@@ -15,7 +15,7 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, plotpath=joinpath("./plots/eigenvalues/","t0$(t0)"*(deriv ? "_deriv" : "")))
+function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta=true, plotpath=joinpath("./plots/eigenvalues/","t0$(t0)"*(deriv ? "_deriv" : "")))
     
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
@@ -24,11 +24,12 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
     ensembles = keys(h5dset)
     @showprogress desc="write eigenvalues:" enabled=false for ens in ensembles
         _copy_lattice_parameters(outfile,infile;group=ens)
-        p_external = h5dset["$ens/p_external"][]
+        p0 = read(h5dset,"$ens/p_external")
+        p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)
         for p in p_external
             p == "p(0,0,0)" && continue
 
-            Corr, h = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_momenta=false)
+            Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equivalent_momenta)
             eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,maxhits,deriv)
             eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
 
@@ -37,7 +38,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
                 m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
                 ncfg  = read(h5dset,joinpath(ens,"Nconf"))
-                title = L"${%$T} \times {%$L}^3: am^f_0={%$m0} \mathbf p = %$(p), n_{src}=%$h, n_{cfg}=%$ncfg, t_0 = %$(t0)$"
+                title = L"${%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf p = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)$"
                 
                 t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
                 t1 = filter(x->!iszero(eigvals[1,x]),t)

@@ -7,6 +7,7 @@ using HiRepParsing
 using LatticeUtils
 using LinearAlgebra
 using Statistics
+using Combinatorics
 
 include("parsing.jl")
 export parse_isospin_one
@@ -15,7 +16,7 @@ export isospin1_to_hdf5
 include("read_rhopipi_diagrams.jl")
 export correlators_xyz, correlatorsp000
 include("utils.jl")
-export non_interacting_energy_1P, non_interacting_energy_2P, read_correlation_matrix
+export non_interacting_energy_1P, non_interacting_energy_2P, read_correlation_matrix, unique_momenta
 include("variational_analysis.jl")
 export pipi_correlator, pipi_rho_matrix
 

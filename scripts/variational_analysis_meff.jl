@@ -7,8 +7,8 @@ using LatticeUtils
 using DelimitedFiles    
 pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 
-function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg; t1_max=T÷2, t2_max=T÷2,all_non_interacting=false)
-    plot!(plt,ylabel=L"effective mass $[a^{-1}]$",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), %$(p), n_{src}=%$h, n_{cfg}=%$ncfg, t_0 = %$(t0)$")
+function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg, p_label; t1_max=T÷2, t2_max=T÷2,all_non_interacting=false)
+    plot!(plt,ylabel=L"effective mass $[a^{-1}]$",xlabel=L"t",title=L"${%$T} \times {%$L}^3: am^f_0={%$m0}, J^P = 1^-$, ops$ = \pi(\mathbf p)\pi(\mathbf 0), \rho(\mathbf p), \mathbf p = %$(p_label), n_{src}=%$(h), n_{cfg}=%$ncfg, t_0 = %$(t0)$")
     scatter!(plt,meff[2,1:t1_max],yerr=Δmeff[2,1:t1_max],label="eigenvalue #1")
     scatter!(plt,meff[1,1:t2_max],yerr=Δmeff[1,1:t2_max],label="eigenvalue #2")
     plot!(plt,ylims=(0.0,π/2),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
@@ -26,23 +26,23 @@ function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, 
         add_mass_band!(plt,non_interacting_energy_1P(mρ,Δmρ,0 ,L)...;color=:black,label=label1ρ0)
     end
 end
-function plot_meff_from_gevp(h5dset,ens,p,t0,deriv,inf_vol)
+function plot_meff_from_gevp(h5dset,ens,p,t0,deriv,inf_vol;average_equivalent_momenta=true)
     T, L = read(h5dset,joinpath(ens,"lattice"))[1:2]
     m0   = only(read(h5dset,joinpath(ens,"quarkmasses")))
     β    = read(h5dset,joinpath(ens,"beta"))
     ncfg = read(h5dset,joinpath(ens,"Nconf"))
 
-    Corr, h = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_momenta=false)
+    Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equivalent_momenta)
     meff, Δmeff = ScatteringI1.effective_masses(Corr;maxhits=typemax(Int),t0,deriv)
     
     ind = findfirst(i -> [β,m0] == inf_vol[i,1:2],1:first(size(inf_vol)))
     mπ, Δmπ, mρ, Δmρ = inf_vol[ind,3:6]
     
     plt = plot(legend=:outerright)
-    plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg; t1_max=T÷2,t2_max=T÷2)
+    plot_effective_masses!(plt, meff, Δmeff, sources, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg, momenta; t1_max=T÷2,t2_max=T÷2)
     return plt
 end
-function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv)
+function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv, average_equivalent_momenta=true)
     h5dset  = h5open(corr_file)
     res     = h5open(fitresults)
 
@@ -52,12 +52,14 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
     ispath(plotpath) || mkpath(plotpath)
 
     for ens in keys(h5dset)
-        for p in read(h5dset[ens],"p_external")
+        p0 = read(h5dset,"$ens/p_external")
+        p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)
+        for p in p_external
             
             joinpath(ens,p) ∉ fittable[:,5] && continue
             p == "p(0,0,0)" && continue
 
-            plt = plot_meff_from_gevp(h5dset,ens,p,t0,deriv,inf_vol)
+            plt = plot_meff_from_gevp(h5dset,ens,p,t0,deriv,inf_vol;average_equivalent_momenta)
             
             if haskey(res,joinpath(ens,p))
                 r = res[joinpath(ens,p)]
