@@ -31,12 +31,13 @@ function plot_meff_from_gevp(h5dset,ens,p,t0,deriv,inf_vol)
     m0   = only(read(h5dset,joinpath(ens,"quarkmasses")))
     β    = read(h5dset,joinpath(ens,"beta"))
     ncfg = read(h5dset,joinpath(ens,"Nconf"))
-    Corr = read(h5dset,joinpath(ens,p,"correlation_matrix"))
 
+    Corr, h = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_momenta=false)
+    meff, Δmeff = ScatteringI1.effective_masses(Corr;maxhits=typemax(Int),t0,deriv)
+    
     ind = findfirst(i -> [β,m0] == inf_vol[i,1:2],1:first(size(inf_vol)))
     mπ, Δmπ, mρ, Δmρ = inf_vol[ind,3:6]
-    meff, Δmeff, h = ScatteringI1.effective_masses(Corr;maxhits=typemax(Int),t0,deriv)
-
+    
     plt = plot(legend=:outerright)
     plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, mρ, Δmρ, p, ncfg; t1_max=T÷2,t2_max=T÷2)
     return plt

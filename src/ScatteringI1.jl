@@ -15,7 +15,7 @@ export isospin1_to_hdf5
 include("read_rhopipi_diagrams.jl")
 export correlators_xyz, correlatorsp000
 include("utils.jl")
-export non_interacting_energy_1P, non_interacting_energy_2P
+export non_interacting_energy_1P, non_interacting_energy_2P, read_correlation_matrix
 include("variational_analysis.jl")
 export pipi_correlator, pipi_rho_matrix
 

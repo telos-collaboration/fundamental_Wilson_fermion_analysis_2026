@@ -27,8 +27,9 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
         p_external = h5dset["$ens/p_external"][]
         for p in p_external
             p == "p(0,0,0)" && continue
-            Corr = read(h5dset,joinpath(ens,p,"correlation_matrix"))
-            eigvals, Δeigvals, eigvals_cov, h = ScatteringI1.variational_analysis(Corr;t0,maxhits,deriv)
+
+            Corr, h = read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_momenta=false)
+            eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,maxhits,deriv)
             eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
 
             # Save plots of eigenvalues so that they can be visually examined for violations of convexity

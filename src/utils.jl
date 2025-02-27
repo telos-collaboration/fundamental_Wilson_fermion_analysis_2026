@@ -17,3 +17,12 @@ function non_interacting_energy_1P(mπ,Δmπ,p2,L)
     ΔE1 = Δmπ*mπ/E1
     return E1, ΔE1
 end
+function read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_momenta=false)
+    px,py,pz = _parse_momentum(p)
+    Corr = read(h5dset,joinpath(ens,"p($px,$py,$pz)","correlation_matrix"))
+
+    nhits = size(Corr)[4]
+    h     = min(nhits,maxhits)
+    Corr  = dropdims(mean(Corr[:,:,:,1:h,:],dims=4),dims=4)
+    return Corr, h
+end

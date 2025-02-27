@@ -24,28 +24,25 @@ function swap_eigval_numbering(old,t0)
     return new
 end
 function _preprocess_correlator(Corr;deriv,maxhits,sign = +1)
-    nhits, T = size(Corr)[4:5]
-    h     = min(nhits,maxhits)
-    Corr  = dropdims(mean(Corr[:,:,:,1:h,:],dims=4),dims=4)
     Corr  = correlator_folding(Corr;t_dim=4,sign=+1)
     if deriv
         Corr = correlator_derivative(Corr;t_dim=4)
         sign = -1
     end
-    return Corr, h, sign
+    return Corr, sign
 end
 function variational_analysis(Corr;t0,maxhits=typemax(Int),deriv=true)
-    Corr, h, sign = _preprocess_correlator(Corr;deriv,maxhits)
+    Corr, sign = _preprocess_correlator(Corr;deriv,maxhits)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
     eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
-    return eigvals, Δeigvals, eigvals_cov, h
+    return eigvals, Δeigvals, eigvals_cov
 end
 function effective_masses(Corr;t0,deriv,maxhits=typemax(Int))
-    Corr, h, sign = _preprocess_correlator(Corr;deriv,maxhits)
+    Corr, sign = _preprocess_correlator(Corr;deriv,maxhits)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
     eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
     meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
-    return meff, Δmeff, h
+    return meff, Δmeff
 end
