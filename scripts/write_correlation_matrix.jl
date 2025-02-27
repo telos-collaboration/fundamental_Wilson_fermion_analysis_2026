@@ -1,28 +1,7 @@
 using Pkg; Pkg.activate(".")
 using ScatteringI1
 using HDF5
-using Statistics
-using LatticeUtils
-using ProgressMeter
-using LinearAlgebra
 
-# TODO: Average over sources here, so that the code deals with differing number of sources
-function pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
-    L3, L6 = L^3, L^6
-    Corr2π = @. (CorrD1 - CorrD2)/L6 + (CorrR1 + CorrR2 - CorrR3 - CorrR4)/L3
-    return Corr2π 
-end
-function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
-    N, nhits, T = size(Corr2π)
-    L3, L6 = L^3, L^6
-    corr = zeros(ComplexF64,(2,2,N,nhits,T))
-    @assert size(Corr2π) == size(Corrρ) == size(CorrT1) == size(CorrT2) 
-    corr[1,1,:,:,:] =  @. Corrρ/L3 + 0*im
-    corr[1,2,:,:,:] =  @. 0        + im*(CorrT1-CorrT2)/L3
-    corr[2,1,:,:,:] =  @. 0        + im*(CorrT2-CorrT1)/L3
-    corr[2,2,:,:,:] =  @. Corr2π   + 0*im
-    return corr
-end
 function _copy_lattice_parameters(outfile,infile;group="")
     file = h5open(infile)[group]
     entries = filter(!contains(r"p\([0-9],[0-9],[0-9]\)") ,keys(file))
@@ -30,14 +9,6 @@ function _copy_lattice_parameters(outfile,infile;group="")
         label = joinpath(group,entry)
         h5write(outfile,label,read(file,entry))
     end
-end
-function _parse_momentum(p0)
-    rx = r"\(([0-9]),([0-9]),([0-9])\)"
-    m = match(rx,p0)
-    return parse.(Int,m.captures) 
-end
-function _are_permutations(p0,p1)
-    return sort(p0) == sort(p1) 
 end
 function write_correlation_matrix(file_in,file_out;combined=true)
     isfile(file_out) && rm(file_out)
@@ -64,7 +35,7 @@ function write_correlation_matrix(file_in,file_out;combined=true)
                 h5write(file_out,joinpath(ens,p0,"correlator_rho") ,Corrρ0)
                 h5write(file_out,joinpath(ens,p0,"Nsrc") ,size(Corrπ0)[2])
             else 
-                Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlators_xyz(fid,ens;p=_parse_momentum(p0))            
+                Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlators_xyz(fid,ens;p=ScatteringI1._parse_momentum(p0))            
                 Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
                 Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
                 
