@@ -51,7 +51,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
                 #annotate!(plt,[t0 + 1,T-t0-3] .+ 1,[ylims(plt)[2]/10,ylims(plt)[2]/10],[L"t_0",L"T - t_0"])
                 savefig(plt,joinpath(plotpath,"$(ens)_$(p).pdf"))
-                display(plt)
+                isinteractive() && display(plt)
             end
 
             h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
