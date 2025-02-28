@@ -102,6 +102,7 @@ function merge_runs(h5file_in, h5file_out, ensemble )
 end
 function merge_all_runs(h5file_in, h5file_out)
     isfile(h5file_out) && rm(h5file_out)
+    ensembles  = keys(h5open(h5file_in))
     for ensemble in ensembles
         try 
             merge_runs(h5file_in, h5file_out, ensemble )

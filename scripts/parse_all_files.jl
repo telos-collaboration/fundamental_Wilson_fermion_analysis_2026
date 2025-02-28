@@ -1,11 +1,14 @@
-function parse_all_file(path,h5file,info;single_file = true) 
+function parse_all_file(path,h5file,inputfiles;single_file = true)
     println("Parse correlator data from raw log:")
+    info  = readdlm(inputfiles,',',skipstart=1)
     for (name,dir,file,run) in eachrow(info)
 
         file = joinpath(path,dir,name,file)
         ens  = joinpath(name,run)
 
-        if single_file 
+        if single_file
+            dir = dirname(h5file)
+            ispath(dir) || mkpath(dir) 
             isospin1_to_hdf5(file,h5file;ensemble=ens,setup=true,sort=true,deduplicate=true)
         else
             dir = joinpath(dirname(h5file),"ensembles")

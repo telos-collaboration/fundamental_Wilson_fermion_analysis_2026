@@ -5,6 +5,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import csv
+import sys
 from tqdm import tqdm
 
 def get_hdf5_value(hdf5file,key):
@@ -133,10 +134,10 @@ def fit_all_files(infile,outfile,parameterfile):
         f.create_dataset(group+"/dof1", data=dof2)
         f.close()
 
-
-infile         = './data/isospin1_eigenvalues_t0_8_deriv.hdf5'
-outfile        = './data/isospin1_fitresults_t0_8_deriv.hdf5'
-parameterfile  = './input/pipi_fitintervals.csv'
+args = sys.argv
+infile         = args[1]
+outfile        = args[2]
+parameterfile  = args[3]
 
 if os.path.exists(outfile):
     os.remove(outfile)
