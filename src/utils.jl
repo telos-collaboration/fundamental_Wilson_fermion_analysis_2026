@@ -9,13 +9,25 @@ function unique_momenta(p0)
 end
 function non_interacting_energy_2P(mπ,Δmπ,p2,L)
     E1, ΔE1 = non_interacting_energy_1P(mπ,Δmπ,p2,L)
-    E   = E1 + mπ
-    ΔE  = sqrt(Δmπ^2 + ΔE1^2)
+    E  = E1 + mπ
+    ΔE = sqrt(Δmπ^2 + ΔE1^2)
     return E, ΔE
 end
 function non_interacting_energy_1P(mπ,Δmπ,p2,L)
     E1  = sqrt(mπ^2 + p2*(2*pi/L)^2)
     ΔE1 = Δmπ*mπ/E1
+    return E1, ΔE1
+end
+function non_interacting_energy_2P_lattice(mπ,Δmπ,px,py,pz,L)
+    E1, ΔE1 = non_interacting_energy_1P_lattice(mπ,Δmπ,px,py,pz,L)
+    E  = E1 + mπ
+    ΔE = sqrt(Δmπ^2 + ΔE1^2)
+    return E, ΔE
+end
+function non_interacting_energy_1P_lattice(mπ,Δmπ,px,py,pz,L)
+    xyz = 2*(sin(px*pi/L)^2 + sin(py*pi/L)^2 + sin(pz*pi/L)^2)
+    E1  = acosh(cosh(mπ) + xyz )
+    ΔE1 = Δmπ*sinh(mπ)/(sqrt(-1 + xyz + cosh(mπ))*sqrt(1 + xyz + cosh(mπ)))
     return E1, ΔE1
 end
 function _avg_sources(Corr;maxhits=typemax(Int))
