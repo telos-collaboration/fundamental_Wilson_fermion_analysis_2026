@@ -1,0 +1,3 @@
+[submodule "rho_pipi_scattering_analysis"]
+	path = rho_pipi_scattering_analysis
+	url = https://github.com/yannickdengler/rho_pipi_scattering_analysis
