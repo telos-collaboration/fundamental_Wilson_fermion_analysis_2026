@@ -2,3 +2,5 @@
 *.pdf
 *.pyc
 data/Lang_Prelovsek_p3cotPS_s
+output/*
+*.so
