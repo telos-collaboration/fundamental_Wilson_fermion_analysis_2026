@@ -189,7 +189,6 @@ def calc_PS(name, pref = "", resampling="lin", num_resample=5):
 if __name__ == "__main__":
     pref = ""
     # pref = "_lin"
-    # pref = "_diff_mass"
 
     # calc_PS("fitresults_Feb26",pref=pref, resampling="lin", num_resample=200)
     calc_PS("Plymouth",pref=pref, resampling="lin", num_resample=5)
