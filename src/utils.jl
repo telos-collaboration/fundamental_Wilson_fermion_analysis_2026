@@ -47,7 +47,7 @@ function read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equiv
     if average_equivalent_momenta
         norm  = 1
         perms = unique(permutations(p0))
-        # remove the do-nothin permutation because we already covered it 
+        # remove the do-nothing permutation because we already covered it 
         for perm in filter!(!isequal(p0),perms)
             key = "p($(perm[1]),$(perm[2]),$(perm[3]))"
             if haskey(h5dset[ens],key)
