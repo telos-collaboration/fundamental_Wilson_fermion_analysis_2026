@@ -31,7 +31,15 @@ function write_correlation_matrix(file_in,file_out;combined=true)
                 h5write(file_out,joinpath(ens,p0,"correlator_rho") ,Corrρ0)
                 h5write(file_out,joinpath(ens,p0,"Nsrc") ,size(Corrπ0)[2])
             else 
-                Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlators_xyz(fid,ens;p=ScatteringI1._parse_momentum(p0))
+                pv = ScatteringI1._parse_momentum(p0)
+                # Check if the correlators for the 3x3 correlation matrix have been measured by 
+                # checking if the parsed data contains the first relevant dataset
+                three_by_three = haskey(fid,"$ens/p($(pv[1]),$(pv[2]),$(pv[3]))/rho_g0g1_g1/p_diag($(pv[1]),$(pv[2]),$(pv[3]))/C_re")
+                Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlators_xyz(fid,ens;p=pv)
+                if three_by_three
+                    Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ0γi_γ0γi, Corrγ0γiT1, Corrγ0γiT2 = correlators_xyz_3x3(fid,ens;p=pv)
+                end
+                
                 # TODO: Average over sources here         
                 Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
                 Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)

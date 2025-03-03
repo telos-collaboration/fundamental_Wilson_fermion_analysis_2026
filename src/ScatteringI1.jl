@@ -14,7 +14,7 @@ export parse_isospin_one
 include("write_hdf5.jl")
 export isospin1_to_hdf5
 include("read_rhopipi_diagrams.jl")
-export correlators_xyz, correlatorsp000
+export correlators_xyz, correlatorsp000, correlators_xyz_3x3
 include("utils.jl")
 export non_interacting_energy_1P, non_interacting_energy_2P, read_correlation_matrix, unique_momenta
 export non_interacting_energy_1P_lattice, non_interacting_energy_2P_lattice

@@ -36,6 +36,37 @@ function correlators_xyz(h5dset,ens;p::Vector{Int})
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
 end
 
+function correlators_xyz_3x3(h5dset,ens;p::Vector{Int})
+    p_e = "($(p[1]),$(p[2]),$(p[3]))"
+    p_i = "p_diag$p_e"
+    p_0 = "p_diag(0,0,0)"
+    group  = h5dset["$ens/p$p_e"]
+
+    # The operators that result from inclusion of vector-meson operators depend on the external momentum which determines the required polarizations
+    normρ  = dot(p,p)
+    normT  = norm(p)
+    shape  = size(read(group,"rho_g0g1_g1/$p_i/C_re"))
+
+    Corr_γ0γi_γi = zeros(shape)
+    Corr_γi_γ0γi = zeros(shape)
+    Corr_γ0γi_γ0γi = zeros(shape)
+    Corrγ0γiT1 = zeros(shape)
+    Corrγ0γiT2 = zeros(shape)
+    
+    for i in 1:3, j in 1:3
+        sign  = ifelse(i == 2 , -1 , +1)
+        Corr_γ0γi_γi   = Corr_γ0γi_γi   + p[i]*p[j]*sign*read(group,"rho_g0g$(i)_g$(j)/$p_i/C_re")/normρ
+        Corr_γi_γ0γi   = Corr_γi_γ0γi   + p[i]*p[j]*sign*read(group,"rho_g$(i)_g0g$(j)/$p_i/C_re")/normρ
+        Corr_γ0γi_γ0γi = Corr_γ0γi_γ0γi + p[i]*p[j]*sign*read(group,"rho_g0g$(i)_g0g$(j)/$p_i/C_re")/normρ
+    end
+    for i in 1:3
+        Corrγ0γiT1 = Corrγ0γiT1 + p[i]*read(group,"t1_g0g$(i)/$p_i/C_im")/normT
+        Corrγ0γiT2 = Corrγ0γiT2 + p[i]*read(group,"t2_g0g$(i)/$p_i/C_im")/normT
+    end
+
+    return Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ0γi_γ0γi, Corrγ0γiT1, Corrγ0γiT2
+end
+
 function correlatorsp000(h5dset,ens)
     Corrπ  = read(h5dset,"$ens/p(0,0,0)/pi/p_diag(0,0,0)/C_re")
     Corrρ  = read(h5dset,"$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re")
