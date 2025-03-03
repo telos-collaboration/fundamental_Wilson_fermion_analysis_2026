@@ -253,7 +253,7 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
         fig.savefig("output/plots/%s_%s"%(y_ax,x_ax)+ld+prime+"_"+pref+".pdf", bbox_inches='tight')
     if show:
         plt.show()
-    fig.clf()
+    plt.close(fig)
 
 def print_plymouth_table(file, ld = "_ld"):
     res,  res_sample = read_from_hdf(file)
