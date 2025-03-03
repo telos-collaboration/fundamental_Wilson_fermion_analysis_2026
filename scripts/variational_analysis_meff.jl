@@ -3,16 +3,16 @@ function plot_effective_masses!(plt, meff, Δmeff, h, T, L, m0, t0, mπ, Δmπ, 
     scatter!(plt,meff[2,1:t1_max],yerr=Δmeff[2,1:t1_max],label="eigenvalue #1")
     scatter!(plt,meff[1,1:t2_max],yerr=Δmeff[1,1:t2_max],label="eigenvalue #2")
     plot!(plt,ylims=(0.0,π/2),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
-    p2 = sum(x->x^2,[parse(Int,c) for c in filter(isdigit,p)])
+    px,py,pz = [parse(Int,c) for c in filter(isdigit,p)]
     label2π  = L"n.i. $E[\pi(\mathbf p)\pi(\mathbf 0)]$" 
     label1ρ  = L"n.i. $E[\rho(\mathbf p)]$" 
-    add_mass_band!(plt,non_interacting_energy_2P(mπ,Δmπ,p2,L)...;color=:black,label=label2π)
-    add_mass_band!(plt,non_interacting_energy_1P(mρ,Δmρ,p2,L)... ;color=:black,label=label1ρ)
+    add_mass_band!(plt,non_interacting_energy_2P_lattice(mπ,Δmπ,px,py,pz,L)...;color=:black,label=label2π)
+    add_mass_band!(plt,non_interacting_energy_1P_lattice(mρ,Δmρ,px,py,pz,L)... ;color=:black,label=label1ρ)
     if all_non_interacting
         label1π  = L"n.i. $E[\pi(\mathbf p)]$" 
         label1π0 = L"n.i. $E[\pi(\mathbf 0)]$" 
         label1ρ0 = L"n.i. $E[\rho(\mathbf 0)]$" 
-        add_mass_band!(plt,non_interacting_energy_1P(mπ,Δmπ,p2,L)...;color=:black,label=label1π)
+        add_mass_band!(plt,non_interacting_energy_1P_lattice(mπ,Δmπ,px,py,pz,L)...;color=:black,label=label1π)
         add_mass_band!(plt,non_interacting_energy_1P(mπ,Δmπ,0 ,L)...;color=:black,label=label1π0)
         add_mass_band!(plt,non_interacting_energy_1P(mρ,Δmρ,0 ,L)...;color=:black,label=label1ρ0)
     end
