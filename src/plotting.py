@@ -3,6 +3,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import h5py
 import math
+import sys
+import os.path
 
 def read_from_hdf(filename):
     res, res_tmp = [{},{}]
@@ -279,16 +281,10 @@ def print_Lang_Prelovsek_table(file, ld = ""):
 
 
 if __name__ == "__main__":
-    pref = ""
-
-    name="fitresults_Feb26"+pref
-
+    args = sys.argv
+    name = args[1]    
+    
     p3_cot_PS(name, x_ax="pstar2", y_ax="p3cotPS", save=True, show=True, ld = "_ld",prime="_prime", pref=name)
     p3_cot_PS(name, x_ax="pstar2", y_ax="p3cotPS", save=True, show=True, prime="_prime", pref=name)
     p3_cot_PS(name, x_ax="sqrt_s", y_ax="sigma", save=True, show=True, ld = "_ld",prime="_prime", pref=name,delete=False)
     p3_cot_PS(name, x_ax="sqrt_s", y_ax="sigma", save=True, show=True, prime="_prime", pref=name,delete=False)
-
-    name="Plymouth"+pref
-    print_plymouth_table(name, ld="_ld")
-    name="Lang_Prelovsek"+pref
-    print_Lang_Prelovsek_table(name, ld="_ld")
