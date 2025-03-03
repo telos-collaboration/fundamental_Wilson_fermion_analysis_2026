@@ -237,16 +237,16 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
 
 
     num_perc = math.erf(1/np.sqrt(2))
-    for i in [1,3,5,7,9]:
-    # for i in range(len(N_Ls)):
-        ax.scatter(x_plot[i],y_plot[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],d2s[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
-        if bytes.decode(res["resampling"]) == "gauss":
-            sorted_indices = np.argsort(x_plot_sam[i])  
-            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=delete)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-            # ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-        elif bytes.decode(res["resampling"]) == "lin":
-            ax.plot(x_plot_sam[i],delete_steps(y_plot_sam[i],delete=delete), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-            # ax.plot(x_plot_sam[i],y_plot_sam[i], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+    for i in range(len(N_Ls)):
+        if lvls[i] != 1:
+            ax.scatter(x_plot[i],y_plot[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],d2s[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
+            if bytes.decode(res["resampling"]) == "gauss":
+                sorted_indices = np.argsort(x_plot_sam[i])  
+                ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=delete)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+                # ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            elif bytes.decode(res["resampling"]) == "lin":
+                ax.plot(x_plot_sam[i],delete_steps(y_plot_sam[i],delete=delete), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+                # ax.plot(x_plot_sam[i],y_plot_sam[i], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
 
     ax.legend(loc="best")
     if save:
