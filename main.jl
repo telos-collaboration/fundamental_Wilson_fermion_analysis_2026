@@ -27,7 +27,7 @@ infvolfile = "input/infinite_volume.csv"
 fitparam   = "input/pipi_fitintervals.csv"
 
 overview_table    = joinpath(tablepath,"all_runs.csv")
-yannick_fmt_table = joinpath(tablepath,"yannick_format.dat")
+yannick_fmt_table = joinpath(tablepath,"yannick_format_t0_$(t0)_deriv_$deriv.dat")
 
 include("scripts/parse_all_files.jl")
 include("scripts/combine_runs.jl")
@@ -39,8 +39,14 @@ include("scripts/write_tables.jl")
 parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 merge_all_runs(h5file_raw, h5file_com)
 write_correlation_matrix(h5file_com,h5file_cor)
+all_runs_table(h5file_raw,overview_table)
+
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath)
 run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
 plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv)
-all_runs_table(h5file_raw,overview_table)
 table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
+
+cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
+cd("rho_pipi_scattering_analysis")
+run(`python3 src/scattering.py $(first(splitext(basename(yannick_fmt_table))))`)
+run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)
