@@ -169,7 +169,7 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
 
     mpi_pr_s = ""
     if not prime == "":
-        mpi_pr_s = "/m_{\pi}"
+        mpi_pr_s = r"/m_{\pi}"
 
     if x_ax == "sqrt_s":
         plt.xlabel("$E_{CM}"+mpi_pr_s+"$")
@@ -183,7 +183,7 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
         ax.set_xlim([0.1,0.4])
         # ax.set_xlim([4,7])
     elif x_ax == "pstar2":
-        plt.xlabel("$p^{\star^2}"+mpi_pr_s+"^2$")
+        plt.xlabel(r"$p^{\star^2}"+mpi_pr_s+"^2$")
         x_plot = res["p2star"+ld+prime]
         x_plot_sam = np.transpose(res_sample["p2star"+ld+prime])
         ax.set_xlim([0,0.5])
@@ -201,23 +201,23 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
     if y_ax == "p3cotPS":
         y_plot = np.real(res["p3cotPS"+ld+prime])
         y_plot_sam = np.transpose(np.real(res_sample["p3cotPS"+ld+prime]))
-        plt.ylabel("$p^3\, \cot(\delta)"+mpi_pr_s+"^3$")    
+        plt.ylabel(r"$p^3\, \cot(\delta)"+mpi_pr_s+"^3$")    
         ax.set_ylim([-5,5])
     elif y_ax == "p3cotPS_Ecm":
         y_plot = np.real(res["p3cotPS_Ecm"+ld+prime])
         y_plot_sam = np.transpose(np.real(res_sample["p3cotPS_Ecm"+ld+prime]))
-        plt.ylabel("$p^3\, \cot(\delta)/E_CM"+mpi_pr_s+"^3$")    
+        plt.ylabel(r"$p^3\, \cot(\delta)/E_CM"+mpi_pr_s+"^3$")    
         # ax.set_ylim([-0.15,0.05])
         ax.set_ylim([-1,0])
     elif y_ax == "sigma":
         y_plot = np.real(res["sigma"+ld+prime])
         y_plot_sam = np.transpose(np.real(res_sample["sigma"+ld+prime]))
-        plt.ylabel("$\sigma_1*"+mpi_pr_s+"^2$")    
+        plt.ylabel(r"$\sigma_1*"+mpi_pr_s+"^2$")    
         # ax.set_ylim([-0.15,0.05])
     elif y_ax == "cot_PS":
         y_plot = np.real(res["cot_PS"+ld])
         y_plot_sam = np.transpose(np.real(res_sample["cot_PS"+ld]))
-        plt.ylabel("cot($\delta$)")      
+        plt.ylabel(r"cot($\delta$)")      
         ax.set_ylim([-100,100])
     elif y_ax == "PS":
         y_plot = np.real(res["PS+ld"])
