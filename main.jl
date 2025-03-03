@@ -12,8 +12,9 @@ pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsiz
 t0    = 8
 deriv = true
 path  = "/home/fabian/Dokumente/Physics/Data/DataVSC/measurements/"
-plotpath = "./output/plots/"
-datapath = "./output/data/"
+plotpath  = "./output/plots/"
+datapath  = "./output/data/"
+tablepath = "./output/tables/"
 
 h5file_raw = joinpath(datapath,"isospin1_sorted.hdf5")
 h5file_com = joinpath(datapath,"isospin1_merged.hdf5")
@@ -25,15 +26,21 @@ inputfiles = "input/input_files.csv"
 infvolfile = "input/infinite_volume.csv"
 fitparam   = "input/pipi_fitintervals.csv"
 
+overview_table    = joinpath(tablepath,"all_runs.csv")
+yannick_fmt_table = joinpath(tablepath,"yannick_format.dat")
+
 include("scripts/parse_all_files.jl")
 include("scripts/combine_runs.jl")
 include("scripts/write_correlation_matrix.jl")
 include("scripts/write_eigenvalues.jl")
 include("scripts/variational_analysis_meff.jl")
+include("scripts/write_tables.jl")
 
-#parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 merge_all_runs(h5file_raw, h5file_com)
-#write_correlation_matrix(h5file_com,h5file_cor)
-#write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath)
-#run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
-#plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv)
+write_correlation_matrix(h5file_com,h5file_cor)
+write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath)
+run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
+plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv)
+all_runs_table(h5file_raw,overview_table)
+table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
