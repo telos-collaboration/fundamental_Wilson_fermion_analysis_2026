@@ -36,9 +36,9 @@ function _avg_sources(Corr;maxhits=typemax(Int))
     Corr_avg = dropdims(mean(Corr[:,:,:,1:h,:],dims=4),dims=4)
     return Corr_avg, h
 end
-function read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equivalent_momenta=true)
+function read_correlation_matrix(h5dset,ens,p,label="correlation_matrix";maxhits=typemax(Int),average_equivalent_momenta=true)
     p0   = _parse_momentum(p)
-    Corr = read(h5dset,joinpath(ens,p,"correlation_matrix"))
+    Corr = read(h5dset,joinpath(ens,p,label))
     
     Corr_avg, h = _avg_sources(Corr;maxhits)
     sources = [h]
@@ -50,8 +50,8 @@ function read_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equiv
         # remove the do-nothing permutation because we already covered it 
         for perm in filter!(!isequal(p0),perms)
             key = "p($(perm[1]),$(perm[2]),$(perm[3]))"
-            if haskey(h5dset[ens],key)
-                Corr = read(h5dset,joinpath(ens,key,"correlation_matrix"))
+            if haskey(h5dset[ens],joinpath(key,label))
+                Corr = read(h5dset,joinpath(ens,key,label))
                 Corr_tmp, h = _avg_sources(Corr;maxhits)
 
                 @. Corr_avg = Corr_avg + Corr_tmp

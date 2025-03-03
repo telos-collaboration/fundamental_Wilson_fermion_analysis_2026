@@ -30,12 +30,21 @@ function pipi_rho_matrix_3x3_extension(Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ
     return corr_ext
 end
 function swap_eigval_numbering(old,t0)
-    T   = size(old)[3]
+    Nops, T   = size(old)[2:3]
     new = copy(old)
-    @. new[1,:,1:t0-1] = old[2,:,1:t0-1]
-    @. new[2,:,1:t0-1] = old[1,:,1:t0-1]
-    @. new[1,:,T-t0+2:T] = old[2,:,T-t0+2:T]
-    @. new[2,:,T-t0+2:T] = old[1,:,T-t0+2:T]
+    r1 = 1:t0-1
+    r2 = T-t0+2:T
+    if Nops == 2
+        @. new[1,:,r1] = old[2,:,r1]
+        @. new[2,:,r1] = old[1,:,r1]
+        @. new[1,:,r2] = old[2,:,r2]
+        @. new[2,:,r2] = old[1,:,r2]
+    elseif Nops == 3
+        @. new[1,:,r1] = old[3,:,r1]
+        @. new[3,:,r1] = old[1,:,r1]
+        @. new[1,:,r2] = old[3,:,r2]
+        @. new[3,:,r2] = old[1,:,r2]
+    end
     return new
 end
 function _preprocess_correlator(Corr;deriv)
