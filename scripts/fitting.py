@@ -12,27 +12,8 @@ def get_hdf5_value(hdf5file,key):
     return hdf5file[key][()]
 
 def make_models(T,tmin,tmax,t0):
-    """ 
-    Create corrfitter model for G(t).
-
-    Here I provide a dedicated range of timeslices to be used in fitting
-    Using simply (tmin,tmax) is not sufficient if t0 is in (tmin,tmax) 
-    because at t=t0 the correlation matrix has a vanishing variance which 
-    destabilises the fit.
-
-    Therefore, I create a list 'tfit' of timslices to be included, such that
-    t0 is excluded. 
-
-    Furthermore, if T is provided (i.e. it is not 'None') then the symmetry 
-    of the correlator is included specifically and the largest t needed is T/2
-    
-    """
-    tfit = range(tmin,tmax+1)
-    tfit = list(filter(lambda x: x != t0,tfit))
-    if T is not None:
-        tfit = list(filter(lambda x: x < abs(T)//2,tfit))
-
-    return [cf.Corr2(datatag='Gab', tp=T, tfit=tfit, a='a', b='a', dE='dE')]
+    """  Create corrfitter model for G(t). """
+    return [cf.Corr2(datatag='Gab', tp=T, tmin=tmin, tmax=tmax, a='a', b='a', dE='dE')]
 
 def make_prior(N):
     prior = gv.BufferDict()
@@ -66,8 +47,8 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,t0,Nmax,antisymmetric,plotn
         fit = fitter.lsqfit(data=avg, prior=prior, p0=p0)
         p0 = fit.pmean
 
-        if printing:
-            print_fit_param(fit)
+    if printing:
+        print_fit_param(fit)
 
     E, a, chi2, dof = first_fit_parameters(fit) 
     if plotting:
@@ -98,13 +79,11 @@ def fit_all_files(infile,outfile,parameterfile):
         T        = ev.shape[0]
         antisymmetric = get_hdf5_value(fid,group+"/deriv") 
 
-        # Rescale data such that eig(t=0)=1
-        # Note: There was an issue when t_min < t0
-        #       C(t0) has no variance and destabilises the fit
-        #         t0  is now excluded from the fir
-        # Use full covariance matrix estimator
-        eig2 = dict(Gab=gv.gvar(ev[:,0]/ev[0,0],cov_ev[:,:,0]/ev[0,0]/ev[0,0]))
-        eig1 = dict(Gab=gv.gvar(ev[:,1]/ev[0,1],cov_ev[:,:,1]/ev[0,1]/ev[0,1]))
+        # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
+        var2 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
+        var1 = gv.gvar(ev[:,1],cov_ev[:,:,1]/1)
+        eig2 = dict(Gab=var2/var2[0])
+        eig1 = dict(Gab=var1/var1[0])
 
         plotname = group
         plotdir  = "./output/plots/"
@@ -114,7 +93,7 @@ def fit_all_files(infile,outfile,parameterfile):
 
         E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,t0,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
         E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,t0,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
-        
+
         f = h5py.File(outfile, "a")
         f.create_dataset(group+"/tmin", data=tmin)
         f.create_dataset(group+"/tmax", data=tmax)
