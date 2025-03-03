@@ -13,8 +13,8 @@ function parse_all_file(path,h5file,inputfiles;single_file = true)
         else
             dir = joinpath(dirname(h5file),"ensembles")
             ispath(dir) || mkpath(dir) 
-            f = joinpath(dir,name*".hdf5")
-            isospin1_to_hdf5(file,f;ensemble=run,setup=true,sort=true,deduplicate=true)
+            f = joinpath(dir,"$(name)_$run.hdf5")
+            isospin1_to_hdf5(file,f;ensemble="",setup=true,sort=true,deduplicate=true)
         end
     end
 end
