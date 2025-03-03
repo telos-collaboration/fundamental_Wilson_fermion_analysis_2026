@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from pylink_wlm import wlm_func_c as wlm
 from tqdm import tqdm
 import h5py
-
+import sys
 
 def save_to_hdf(res,res_sample, filename):
     with h5py.File("output/hdf5/"+filename+".hdf5","w") as hfile:
@@ -187,9 +187,8 @@ def calc_PS(name, pref = "", resampling="lin", num_resample=5):
     save_to_hdf(res, res_sampled, name+pref)
 
 if __name__ == "__main__":
-    pref = ""
-    # pref = "_lin"
+    
+    args = sys.argv
+    name = args[1]
 
-    # calc_PS("fitresults_Feb26",pref=pref, resampling="lin", num_resample=200)
-    calc_PS("Plymouth",pref=pref, resampling="lin", num_resample=5)
-    calc_PS("Lang_Prelovsek",pref=pref, resampling="lin", num_resample=5)
+    calc_PS(name,pref="", resampling="lin", num_resample=50)
