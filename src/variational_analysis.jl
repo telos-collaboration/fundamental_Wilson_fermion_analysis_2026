@@ -30,7 +30,7 @@ function pipi_rho_matrix_3x3_extension(Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ
     return corr_ext
 end
 function swap_eigval_numbering(old,t0)
-    Nops, T   = size(old)[2:3]
+    Nops, T   = size(old)[1], size(old)[3]
     new = copy(old)
     r1 = 1:t0-1
     r2 = T-t0+2:T
