@@ -3,6 +3,9 @@ function pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
     Corr2π = @. (CorrD1 - CorrD2)/L6 + (CorrR1 + CorrR2 - CorrR3 - CorrR4)/L3
     return Corr2π 
 end
+# Note, I only include here the non-vanishing imaginary and real parts, respectively. 
+# The reason is, that I do not want to include noisy matrix elements if I know that the diagram 
+# must vanish analytically.  
 function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
     N, nhits, T = size(Corr2π)
     L3, L6 = L^3, L^6
@@ -13,6 +16,18 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
     corr[2,1,:,:,:] =  @. 0        + im*(CorrT2-CorrT1)/L3
     corr[2,2,:,:,:] =  @. Corr2π   + 0*im
     return corr
+end
+function pipi_rho_matrix_3x3_extension(Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ0γi_γ0γi, Corrγ0γiT1, Corrγ0γiT2,L)
+    @assert size(Corr_γ0γi_γi) == size(Corr_γi_γ0γi) == size(Corr_γ0γi_γ0γi) == size(Corrγ0γiT1) == size(Corrγ0γiT2)
+    N, nhits, T = size(Corr_γ0γi_γi)
+    L3, L6 = L^3, L^6
+    corr_ext = zeros(ComplexF64,(3,3,N,nhits,T))
+    corr_ext[1,3,:,:,:] = @. (Corrγ0γiT1-Corrγ0γiT2)/L3 
+    corr_ext[3,1,:,:,:] = @. (Corrγ0γiT2-Corrγ0γiT1)/L3 
+    corr_ext[2,3,:,:,:] = @. im*Corr_γi_γ0γi/L3
+    corr_ext[3,2,:,:,:] = @. im*Corr_γ0γi_γi/L3
+    corr_ext[3,3,:,:,:] = @. Corr_γ0γi_γ0γi/L3
+    return corr_ext
 end
 function swap_eigval_numbering(old,t0)
     T   = size(old)[3]
