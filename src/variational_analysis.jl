@@ -11,10 +11,10 @@ function pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
     L3, L6 = L^3, L^6
     corr = zeros(ComplexF64,(2,2,N,nhits,T))
     @assert size(Corr2π) == size(Corrρ) == size(CorrT1) == size(CorrT2) 
-    corr[1,1,:,:,:] =  @. Corrρ/L3 + 0*im
-    corr[1,2,:,:,:] =  @. 0        + im*(CorrT1-CorrT2)/L3
-    corr[2,1,:,:,:] =  @. 0        + im*(CorrT2-CorrT1)/L3
-    corr[2,2,:,:,:] =  @. Corr2π   + 0*im
+    corr[2,2,:,:,:] =  @. Corrρ/L3 + 0*im
+    corr[2,1,:,:,:] =  @. 0        + im*(CorrT1-CorrT2)/L3
+    corr[1,2,:,:,:] =  @. 0        + im*(CorrT2-CorrT1)/L3
+    corr[1,1,:,:,:] =  @. Corr2π   + 0*im
     return corr
 end
 function pipi_rho_matrix_3x3_extension(Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ0γi_γ0γi, Corrγ0γiT1, Corrγ0γiT2,L)
@@ -22,10 +22,10 @@ function pipi_rho_matrix_3x3_extension(Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ
     N, nhits, T = size(Corr_γ0γi_γi)
     L3, L6 = L^3, L^6
     corr_ext = zeros(ComplexF64,(3,3,N,nhits,T))
-    corr_ext[1,3,:,:,:] = @. (Corrγ0γiT1-Corrγ0γiT2)/L3 
-    corr_ext[3,1,:,:,:] = @. (Corrγ0γiT2-Corrγ0γiT1)/L3 
-    corr_ext[2,3,:,:,:] = @. im*Corr_γi_γ0γi/L3
-    corr_ext[3,2,:,:,:] = @. im*Corr_γ0γi_γi/L3
+    corr_ext[1,3,:,:,:] = @. im*(Corrγ0γiT1-Corrγ0γiT2)/L3 
+    corr_ext[3,1,:,:,:] = @. im*(Corrγ0γiT2-Corrγ0γiT1)/L3 
+    corr_ext[2,3,:,:,:] = @. Corr_γi_γ0γi/L3
+    corr_ext[3,2,:,:,:] = @. Corr_γ0γi_γi/L3
     corr_ext[3,3,:,:,:] = @. Corr_γ0γi_γ0γi/L3
     return corr_ext
 end
