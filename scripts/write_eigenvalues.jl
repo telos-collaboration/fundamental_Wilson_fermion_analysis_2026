@@ -34,7 +34,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
             three_by_three = use3x3 && haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
             if three_by_three
                 Corr3x3, sources3x3, momenta3x3 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix_3x3_ext";maxhits,average_equivalent_momenta)
-                Corr3x3[1:2,1:2,:,:] = Corr
+                Corr3x3[1:2,1:2,:,:] .= Corr
                 eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv)
                 eigvals_3x3, Δeigvals_3x3 = real.(eigvals_3x3), real.(Δeigvals_3x3), real.(eigvals_cov_3x3)
             end
@@ -74,6 +74,10 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
             h5write(outfile,joinpath(ens,p,"t0"),t0)
             h5write(outfile,joinpath(ens,p,"deriv"),deriv)
             h5write(outfile,joinpath(ens,p,"average_equivalent_momenta"),average_equivalent_momenta)
+            h5write(outfile,joinpath(ens,p,"Corr2x2"),Corr)
+            if three_by_three
+                h5write(outfile,joinpath(ens,p,"Corr3x3"),Corr3x3)
+            end
         end
     end
 end
