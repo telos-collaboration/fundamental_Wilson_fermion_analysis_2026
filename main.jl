@@ -37,9 +37,12 @@ include("scripts/write_eigenvalues.jl")
 include("scripts/variational_analysis_meff.jl")
 include("scripts/write_tables.jl")
 
+only_ens = nothing
+only_ens = ["Lt32Ls24beta6.9m1-0.92m2-0.92"]
+
 parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 merge_all_runs(h5file_raw, h5file_com)
-write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting=true)
+write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting=true,only_ens)
 all_runs_table(h5file_raw,overview_table)
 
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath)

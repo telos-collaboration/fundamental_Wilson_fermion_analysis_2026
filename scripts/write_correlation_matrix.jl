@@ -7,7 +7,7 @@ function _copy_lattice_parameters(outfile,infile;group="")
     end
 end
 pseudolog10(x) = sign(x) * log10(abs(x) + 1)
-function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,plotpath="")
+function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,plotpath="",only_ens=nothing)
     isfile(file_out) && rm(file_out)
     fid = h5open(file_in)
     
@@ -29,8 +29,12 @@ function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,p
         isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
         isfile(joinpath(plotpath,plotname3x3)) && rm(joinpath(plotpath,plotname3x3))
     end
+
+    # Restrict ourselves to only the specified ensembles in the optional keyword argument
+    ensembles = isnothing(only_ens) ? ensembles : intersect(ensembles,only_ens)
     
     @showprogress desc="Construct correlation matrices" for ens in ensembles
+
         _copy_lattice_parameters(file_out,file_in;group=ens)
         T, L = fid["$ens/lattice"][1:2]
         p_external    = read(fid,"$ens/p_external")
