@@ -7,6 +7,7 @@ using LatticeUtils
 using Plots
 using LaTeXStrings
 using PDFmerger
+using Statistics
 pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 
 t0    = 8
@@ -38,7 +39,7 @@ include("scripts/write_tables.jl")
 
 parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 merge_all_runs(h5file_raw, h5file_com)
-write_correlation_matrix(h5file_com,h5file_cor)
+write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting=true)
 all_runs_table(h5file_raw,overview_table)
 
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath)

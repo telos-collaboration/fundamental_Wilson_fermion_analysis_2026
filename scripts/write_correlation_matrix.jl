@@ -6,7 +6,8 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_correlation_matrix(file_in,file_out;combined=true)
+pseudolog10(x) = sign(x) * log10(abs(x) + 1)
+function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,plotpath="")
     isfile(file_out) && rm(file_out)
     fid = h5open(file_in)
     
@@ -17,6 +18,16 @@ function write_correlation_matrix(file_in,file_out;combined=true)
         for e in keys(fid)
             append!(ensembles,joinpath.(e,keys(fid[e])))
         end
+    end
+
+    if plotting
+        plotname = "diagrams_t0$(t0)_deriv_$deriv.pdf"
+        plotname3x3 = "diagrams_t0$(t0)_deriv_$(deriv)_3x3.pdf"
+        texpath  = joinpath(plotpath,"diagrams_tex")
+        ispath(texpath) || mkpath(texpath)
+        ispath(plotpath) || mkpath(plotpath)
+        isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
+        isfile(joinpath(plotpath,plotname3x3)) && rm(joinpath(plotpath,plotname3x3))
     end
     
     @showprogress desc="Construct correlation matrices" for ens in ensembles
@@ -49,7 +60,58 @@ function write_correlation_matrix(file_in,file_out;combined=true)
                     h5write(file_out,joinpath(ens,p0,"Nsrc_3x3"),size(Corr_3x3_ext)[2])
                     h5write(file_out,joinpath(ens,p0,"correlation_matrix_3x3_ext"),Corr_3x3_ext)
                 end
-                
+
+                if plotting
+                    T, L = read(fid,joinpath(ens,"lattice"))[1:2]
+                    m0   = only(read(fid,joinpath(ens,"quarkmasses")))
+                    
+                    corrs  = [Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2] 
+                    labels = ["Corrπ", "Corrρ", "CorrT1", "CorrT2", "CorrR1", "CorrR2", "CorrR3", "CorrR4", "CorrD1", "CorrD2"]
+                    markers = [:circle, :diamond, :dtriangle, :pentagon, :rect, :rtriangle, :utriangle, :star6, :xcross, :vline]
+                    
+                    mi = 1
+                    plt  = plot(ylabel=L"${\rm pseudolog}_{10} C_(t)$",xlabel=L"t",legend=:outerright)
+                    for (C_tmp,l) in zip(corrs,labels)
+                        C_tmp .= pseudolog10.(C_tmp)
+                        ncfg = first(size(C_tmp))
+                        C  = dropdims(mean(C_tmp,dims=(1,2)),dims=(1,2))
+                        ΔC = dropdims(std(mean(C_tmp,dims=(2)),dims=1),dims=(1,2))/sqrt(ncfg)
+                        
+                        title = L"${%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf p = %$(p0), n_{cfg}=%$ncfg, t_0 = %$(t0)$"   
+                        scatter!(plt,1:T,C,yerr=ΔC,label=l,marker=markers[mi],title=title)
+                        mi += 1
+                    end
+
+                    savefig(plt,"temp.pdf")
+                    savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p0.tex") )
+                    append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
+                    isinteractive() && display(plt)
+
+                    if three_by_three
+                        corrs  = [Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ0γi_γ0γi, Corrγ0γiT1, Corrγ0γiT2]
+                        labels = ["Corr_γ0γi_γi","Corr_γi_γ0γi", "Corr_γ0γi_γ0γi", "Corrγ0γiT1", "Corrγ0γiT2"]
+
+                        mi = 1
+                        plt  = plot(ylabel=L"${\rm pseudolog}_{10} C_(t)$",xlabel=L"t",legend=:outerright)
+                        for (C_tmp,l) in zip(corrs,labels)
+                            C_tmp .= pseudolog10.(C_tmp)
+                            ncfg = first(size(C_tmp))
+                            C  = dropdims(mean(C_tmp,dims=(1,2)),dims=(1,2))
+                            ΔC = dropdims(std(mean(C_tmp,dims=(2)),dims=1),dims=(1,2))/sqrt(ncfg)
+                            
+                            title = L"${%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf p = %$(p0), n_{cfg}=%$ncfg, t_0 = %$(t0)$"   
+                            scatter!(plt,1:T,C,yerr=ΔC,label=l,marker=markers[mi],title=title)
+                            mi += 1
+                        end
+    
+                        savefig(plt,"temp.pdf")
+                        savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$(p0)_3by3.tex") )
+                        append_pdf!(joinpath(plotpath,plotname3x3),"temp.pdf",cleanup=true)
+                        isinteractive() && display(plt)    
+                    end
+
+
+                end
             end
         end
     end
