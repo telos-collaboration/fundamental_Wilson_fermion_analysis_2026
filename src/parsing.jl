@@ -136,7 +136,7 @@ function parse_isospin_one(file,Nconf;desc="Progress:")
                     re, im = _parse_reim(io,opts) 
                     Re[li,conf,src+1,1,t+1] = re
                     Im[li,conf,src+1,1,t+1] = im
-                elseif px == p_ext[1] && py == p_ext[2] && pz == p_ext[1] 
+                elseif px == p_ext[1] && py == p_ext[2] && pz == p_ext[3] 
                     t = Parsers.parse(Int64,io,opts)
                     re, im = _parse_reim(io,opts) 
                     Re[li,conf,src+1,2,t+1] = re
