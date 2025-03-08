@@ -33,12 +33,12 @@ MDIR = ../modules
 VPATH = .:$(MDIR)/lorentz:$(MDIR)/spherical_harmonic:$(MDIR)/gen-zeta
 
 # additional include directories
-INCPATH = ../include /usr/include/gsl/ ./ 
+INCPATH = ../include /usr/include/gsl/ ./ ${CONDA_PREFIX}/include/gsl/ ${CONDA_PREFIX}/include/
 
 
 # additional libraries
 LIBS = gsl gslcblas m 
-LIBPATH = /usr/lib64/
+LIBPATH = /usr/lib64/ ${CONDA_PREFIX}/lib/
 
 
 CFLAGS = -std=c11 -O2 -fPIC
