@@ -100,15 +100,14 @@ function parse_isospin_one(file,Nconf;desc="Progress:")
 
     # set up options for Parsers
     opts = Parsers.Options(delim=' ', ignorerepeated=true)
-
-    nlines = countlines(file)
-    p = Progress(nlines; desc)
+    p = Progress(Nconf; desc)
 
     labels = label_list(file)
     for line in eachline(file)
         if startswith(line,"[IO][0]Configuration")
             if occursin("read",line)
                 conf += 1
+                next!(p)
             end
             continue
         end
@@ -122,9 +121,14 @@ function parse_isospin_one(file,Nconf;desc="Progress:")
             else
                 # create IO buffer from current line
                 io = IOBuffer(l)
+                # Parsing the following integers is the most expensive part of the entire parsing step 
+                # Here, I check after every momentum component if we can continue before parsing additional momentum components
                 px = Parsers.parse(Int64, io, opts)
+                px != p_ext[1] && px != 0 && continue
                 py = Parsers.parse(Int64, io, opts)
+                py != p_ext[2] && py != 0 && continue
                 pz = Parsers.parse(Int64, io, opts)
+                pz != p_ext[3] && pz != 0 && continue
                 # (px,py,pz) == (0,0,0) save in index (1)
                 # (px,py,pz) == p_ext   save in index (2)
                 if px==0 && py==0 && pz==0
@@ -140,7 +144,6 @@ function parse_isospin_one(file,Nconf;desc="Progress:")
                 end
             end
         end
-        next!(p)
     end
     finish!(p)
     return Re, Im
