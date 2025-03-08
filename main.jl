@@ -51,7 +51,9 @@ plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0
 table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
 
 cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
-redirect_stdio(run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`), stdout="make.log",stderr="make.log") 
+redirect_stdio(stdout="make.log",stderr="make.log") do 
+    run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
+end
 cd("rho_pipi_scattering_analysis")
 run(`python3 src/scattering.py $(first(splitext(basename(yannick_fmt_table))))`)
 run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)
