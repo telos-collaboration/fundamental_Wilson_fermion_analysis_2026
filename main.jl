@@ -38,10 +38,10 @@ include("scripts/variational_analysis_meff.jl")
 include("scripts/write_tables.jl")
 
 only_ens = nothing
-only_ens = ["Lt32Ls24beta6.9m1-0.92m2-0.92"]
+only_ens = ["Lt32Ls24beta6.9m1-0.92m2-0.92" "Lt32Ls16beta6.9m1-0.92m2-0.92" "Lt24Ls14beta6.9m1-0.92m2-0.92"]
 
-parse_all_file(path,h5file_raw,inputfiles;single_file = true)
-merge_all_runs(h5file_raw, h5file_com)
+#parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+#merge_all_runs(h5file_raw, h5file_com)
 write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting=true,only_ens)
 all_runs_table(h5file_raw,overview_table)
 
@@ -51,7 +51,7 @@ plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0
 table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
 
 cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
+redirect_stdio(run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`), stdout="make.log",stderr="make.log") 
 cd("rho_pipi_scattering_analysis")
-run(`bash zeta/compile.sh`)
 run(`python3 src/scattering.py $(first(splitext(basename(yannick_fmt_table))))`)
 run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)

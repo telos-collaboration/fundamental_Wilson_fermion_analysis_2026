@@ -3,6 +3,7 @@
 *.csv
 *.svg
 *.webm
+*.log
 output/
 data/
 plots/
