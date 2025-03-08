@@ -20,17 +20,22 @@ function correlators_xyz(h5dset,ens;p::Vector{Int})
     CorrT1 = zero(Corrπ)
     CorrT2 = zero(Corrπ)
 
+    # temporary array for reading data from hdf5 with fewer allocation
+    tmp = zero(Corrπ)
+
     for i in 1:3, j in 1:3
-        sign  = ifelse(i == 2 , -1 , +1)
+        sign = ifelse(i == 2 , -1 , +1)
+        pref = p[i]*p[j]*sign/normρ
         try
-            Corrρ = Corrρ + p[i]*p[j]*sign*read(group,"rho_g$(i)_g$(j)/$p_i/C_re")/normρ
+            Corrρ .= Corrρ .+ pref .* copyto!(tmp,group["rho_g$(i)_g$(j)/$p_i/C_re"])
         catch
-            Corrρ = Corrρ + p[i]*p[j]*sign*read(group,"rho_g$(i)$(j)/$p_i/C_re")/normρ
+            Corrρ .= Corrρ .+ pref .* copyto!(tmp,group["rho_g$(i)$(j)/$p_i/C_re"])
         end
     end
     for i in 1:3
-        CorrT1 = CorrT1 + p[i]*read(group,"t1_g$(i)/$p_i/C_im")/normT
-        CorrT2 = CorrT2 + p[i]*read(group,"t2_g$(i)/$p_i/C_im")/normT
+        pref = p[i]/normT
+        CorrT1 .= CorrT1 .+ pref .* copyto!(tmp,group["t1_g$(i)/$p_i/C_im"])
+        CorrT2 .= CorrT2 .+ pref .* copyto!(tmp,group["t2_g$(i)/$p_i/C_im"])
     end
 
     return Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2
@@ -52,16 +57,21 @@ function correlators_xyz_3x3(h5dset,ens;p::Vector{Int})
     Corr_γ0γi_γ0γi = zeros(shape)
     Corrγ0γiT1 = zeros(shape)
     Corrγ0γiT2 = zeros(shape)
+
+    # temporary array for reading data from hdf5 with fewer allocation
+    tmp = zeros(shape)
     
     for i in 1:3, j in 1:3
-        sign  = ifelse(i == 2 , -1 , +1)
-        Corr_γ0γi_γi   = Corr_γ0γi_γi   + p[i]*p[j]*sign*read(group,"rho_g0g$(i)_g$(j)/$p_i/C_re")/normρ
-        Corr_γi_γ0γi   = Corr_γi_γ0γi   + p[i]*p[j]*sign*read(group,"rho_g$(i)_g0g$(j)/$p_i/C_re")/normρ
-        Corr_γ0γi_γ0γi = Corr_γ0γi_γ0γi + p[i]*p[j]*sign*read(group,"rho_g0g$(i)_g0g$(j)/$p_i/C_re")/normρ
+        sign = ifelse(i == 2 , -1 , +1)
+        pref = p[i]*p[j]*sign/normρ
+        Corr_γ0γi_γi   .= Corr_γ0γi_γi   .+ pref .* copyto!(tmp,group["rho_g0g$(i)_g$(j)/$p_i/C_re"])
+        Corr_γi_γ0γi   .= Corr_γi_γ0γi   .+ pref .* copyto!(tmp,group["rho_g$(i)_g0g$(j)/$p_i/C_re"])
+        Corr_γ0γi_γ0γi .= Corr_γ0γi_γ0γi .+ pref .* copyto!(tmp,group["rho_g0g$(i)_g0g$(j)/$p_i/C_re"])
     end
     for i in 1:3
-        Corrγ0γiT1 = Corrγ0γiT1 + p[i]*read(group,"t1_g0g$(i)/$p_i/C_im")/normT
-        Corrγ0γiT2 = Corrγ0γiT2 + p[i]*read(group,"t2_g0g$(i)/$p_i/C_im")/normT
+        pref = p[i]/normT
+        Corrγ0γiT1 .= Corrγ0γiT1 .+ pref .* copyto!(tmp,group["t1_g0g$(i)/$p_i/C_im"])
+        Corrγ0γiT2 .= Corrγ0γiT2 .+ pref .* copyto!(tmp,group["t2_g0g$(i)/$p_i/C_im"])
     end
 
     return Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ0γi_γ0γi, Corrγ0γiT1, Corrγ0γiT2
