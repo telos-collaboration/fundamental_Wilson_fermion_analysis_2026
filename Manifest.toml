@@ -608,7 +608,7 @@ version = "0.16.6"
 
 [[deps.LatticeUtils]]
 deps = ["LinearAlgebra", "LsqFit", "NaNStatistics", "Plots", "Roots", "Statistics"]
-git-tree-sha1 = "8a41fe7f08d4ede1d4b11abc39f1524ba3d3f93a"
+git-tree-sha1 = "408731e6de32c07383230f52213a600c560d34b5"
 repo-rev = "main"
 repo-url = "https://github.com/fzierler/LatticeUtils"
 uuid = "faef5128-6048-4e09-bb0e-6a325a68fa81"
