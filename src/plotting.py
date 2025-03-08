@@ -284,7 +284,7 @@ if __name__ == "__main__":
     args = sys.argv
     name = args[1]    
     
-    p3_cot_PS(name, x_ax="pstar2", y_ax="p3cotPS", save=True, show=True, ld = "_ld",prime="_prime", pref=name)
-    p3_cot_PS(name, x_ax="pstar2", y_ax="p3cotPS", save=True, show=True, prime="_prime", pref=name)
-    p3_cot_PS(name, x_ax="sqrt_s", y_ax="sigma", save=True, show=True, ld = "_ld",prime="_prime", pref=name,delete=False)
-    p3_cot_PS(name, x_ax="sqrt_s", y_ax="sigma", save=True, show=True, prime="_prime", pref=name,delete=False)
+    p3_cot_PS(name, x_ax="pstar2", y_ax="p3cotPS", save=True, show=plt.isinteractive(), ld = "_ld",prime="_prime", pref=name)
+    p3_cot_PS(name, x_ax="pstar2", y_ax="p3cotPS", save=True, show=plt.isinteractive(), prime="_prime", pref=name)
+    p3_cot_PS(name, x_ax="sqrt_s", y_ax="sigma",   save=True, show=plt.isinteractive(), ld = "_ld",prime="_prime", pref=name,delete=False)
+    p3_cot_PS(name, x_ax="sqrt_s", y_ax="sigma",   save=True, show=plt.isinteractive(), prime="_prime", pref=name,delete=False)
