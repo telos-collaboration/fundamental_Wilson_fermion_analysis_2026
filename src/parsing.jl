@@ -1,7 +1,7 @@
-function _parse_data!(array::Array{T},io,opts;n) where T 
-    for i in 1:n
-        array[i] = Parsers.parse(T, io, opts)
-    end
+function _parse_reim(io,opts) 
+    re = Parsers.parse(Float64,io, opts)
+    im = Parsers.parse(Float64,io, opts)
+    return re, im
 end
 function _parse_channel_name(string)
     # split name at '_src_'. Everything before labels the measurement 
@@ -86,8 +86,6 @@ function parse_isospin_one(file,Nconf;desc="Progress:")
     Nsrc = _sources(file)
     conf = 0 
     src  = 0
-    tmpInt = zeros(Int64,4) # temporary array for parsing result
-    tmpFlt = zeros(2) # temporary array for parsing result
 
     # fill arrays with NaNs. The idea is that not all momentum indices are used for all diagrams
     # All available entries will be replaced by finite Float64 numbers, the rest remains a NaN rather 
@@ -115,29 +113,28 @@ function parse_isospin_one(file,Nconf;desc="Progress:")
             continue
         end
         if startswith(line,"[IO][0]")
-            l = line[cut+1:end]
+            l = SubString(line,cut+1)
             # first line that starts here encodes the channel, source and configuration name
             if isletter(line[cut+1])
                 label, src = _parse_channel_name(l)
                 li = findfirst(isequal(label),labels)
                 p_ext = _mom_from_label(label)
             else
-                io = IOBuffer(l) # create IO buffer from current line
-                _parse_data!(tmpInt,io,opts;n=4) 
-                px, py, pz, t = tmpInt
-                if any(isnothing,tmpInt) || isnothing(src) || isnothing(li)
-                    @error "line could not be parsed correctly" line label li src conf
-                end  
+                # create IO buffer from current line
+                io = IOBuffer(l)
+                px = Parsers.parse(Int64, io, opts)
+                py = Parsers.parse(Int64, io, opts)
+                pz = Parsers.parse(Int64, io, opts)
                 # (px,py,pz) == (0,0,0) save in index (1)
                 # (px,py,pz) == p_ext   save in index (2)
-                if (px,py,pz) == (0,0,0)
-                    _parse_data!(tmpFlt,io,opts;n=2)
-                    re, im = tmpFlt 
+                if px==0 && py==0 && pz==0
+                    t = Parsers.parse(Int64,io,opts)
+                    re, im = _parse_reim(io,opts) 
                     Re[li,conf,src+1,1,t+1] = re
                     Im[li,conf,src+1,1,t+1] = im
-                elseif [px,py,pz] == p_ext
-                    _parse_data!(tmpFlt,io,opts;n=2)
-                    re, im = tmpFlt 
+                elseif px == p_ext[1] && py == p_ext[2] && pz == p_ext[1] 
+                    t = Parsers.parse(Int64,io,opts)
+                    re, im = _parse_reim(io,opts) 
                     Re[li,conf,src+1,2,t+1] = re
                     Im[li,conf,src+1,2,t+1] = im
                 end
