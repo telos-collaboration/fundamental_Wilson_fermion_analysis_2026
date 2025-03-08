@@ -52,5 +52,6 @@ table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
 
 cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
 cd("rho_pipi_scattering_analysis")
+run(`bash zeta/compile.sh`)
 run(`python3 src/scattering.py $(first(splitext(basename(yannick_fmt_table))))`)
 run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)
