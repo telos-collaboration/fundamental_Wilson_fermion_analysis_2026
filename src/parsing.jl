@@ -70,16 +70,12 @@ function _sources(file)
         end
     end
 end
-function _find_pmax(file)
-    p_max = typemin(Int)
-    for line in eachline(file)
-        if startswith(line,"[MAIN][0]The momenta are: ")
-            for m in eachmatch(r"[0-9]+",line)
-                p_max = max( parse(Int,m.match) , p_max)
-            end
-            @assert p_max > 0
-            return p_max
-        end
+function _mom_from_label(label)
+    label == "pi" && (return [0,0,0])
+    if contains(label,"p0") 
+        return [0,0,0]
+    else 
+        return _parse_momentum(label)
     end
 end
 function parse_isospin_one(file;desc="Progress:")
@@ -87,21 +83,23 @@ function parse_isospin_one(file;desc="Progress:")
     cut  = length("[IO][0]")
     # The measured  momenta are currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
     # plus negative momenta are allowed for the 4-point functions 
-    pmax  = _find_pmax(file)
-    Nmom  = 2pmax + 1 #(allowed values -pmax,...,0,...pmax) 
     Nconf = _nconfs(file)
     Nlab = _count_labels(file)
     Nsrc = _sources(file)
     tmp  = zeros(6) # temporary array for parsing result
     conf = 0 
     src  = 0
-    li   = 0
-    label = ""
+
     # fill arrays with NaNs. The idea is that not all momentum indices are used for all diagrams
     # All available entries will be replaced by finite Float64 numbers, the rest remains a NaN rather 
     # than a zero. 
-    Re = fill(NaN,(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T))
-    Im = fill(NaN,(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T))
+    Re = fill(NaN,(Nlab,Nconf,Nsrc,2,T))
+    Im = fill(NaN,(Nlab,Nconf,Nsrc,2,T))
+    
+    # store the current label, its index among all labels and the associated external momentum
+    li    = 0
+    label = ""
+    p_ext = [0,0,0]
 
     nlines = countlines(file)
     p = Progress(nlines; desc)
@@ -120,6 +118,7 @@ function parse_isospin_one(file;desc="Progress:")
             if isletter(line[cut+1])
                 label, src = _parse_channel_name(l)
                 li = findfirst(isequal(label),labels)
+                p_ext = _mom_from_label(label)
             else
                 _parse_data!(tmp, l)
                 px, py, pz, t, re, im = tmp
@@ -127,13 +126,15 @@ function parse_isospin_one(file;desc="Progress:")
                     @error "line could not be parsed correctly" line label li src conf
                 end  
                 px, py, pz, t = Int(px), Int(py), Int(pz), Int(t)
-                offset = pmax + 1
-                # increase indices by pmax+1, to have one-based indexing
-                # e.g. for pmax=1: index 1: p = -1
-                #                  index 2: p =  0
-                #                  index 3: p =  1
-                Re[li,conf,src+1,px+offset,py+offset,pz+offset,t+1] = re
-                Im[li,conf,src+1,px+offset,py+offset,pz+offset,t+1] = im
+                # (px,py,pz) == (0,0,0) save in index (1)
+                # (px,py,pz) == p_ext   save in index (2)
+                if (px,py,pz) == (0,0,0)
+                    Re[li,conf,src+1,1,t+1] = re
+                    Im[li,conf,src+1,1,t+1] = im
+                elseif [px,py,pz] == p_ext
+                    Re[li,conf,src+1,2,t+1] = re
+                    Im[li,conf,src+1,2,t+1] = im
+                end
             end
         end
         next!(p)
