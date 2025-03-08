@@ -44,7 +44,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
                 m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
                 ncfg  = read(h5dset,joinpath(ens,"Nconf"))
-                title = L"${%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf p = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)$"
+                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)"
                 
                 t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
                 t1 = filter(x->!iszero(eigvals[1,x]),t)
@@ -63,7 +63,9 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
                 plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
                 savefig(plt,"temp.pdf")
-                savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
+                if backend_name() == :pgfplotsx
+                    savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
+                end
                 append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
                 isinteractive() && display(plt)
             end

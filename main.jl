@@ -8,7 +8,8 @@ using Plots
 using LaTeXStrings
 using PDFmerger
 using Statistics
-pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
+#pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
+gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
 t0    = 8
 deriv = true
@@ -37,17 +38,20 @@ include("scripts/write_eigenvalues.jl")
 include("scripts/variational_analysis_meff.jl")
 include("scripts/write_tables.jl")
 
-only_ens = nothing
 only_ens = ["Lt32Ls24beta6.9m1-0.92m2-0.92" "Lt32Ls16beta6.9m1-0.92m2-0.92" "Lt24Ls14beta6.9m1-0.92m2-0.92"]
+only_ens = nothing
 
-#parse_all_file(path,h5file_raw,inputfiles;single_file = true)
-#merge_all_runs(h5file_raw, h5file_com)
-write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting=true,only_ens)
+plotting = true
+use3x3   = false
+
+parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+merge_all_runs(h5file_raw, h5file_com)
+write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting,only_ens)
 all_runs_table(h5file_raw,overview_table)
 
-write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath)
+write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3)
 run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
-plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv)
+plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, use3x3)
 table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
 
 cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
