@@ -1,5 +1,4 @@
-function _parse_data!(array::Array{T},io;n) where T 
-    opts = Parsers.Options(delim=' ', ignorerepeated=true)
+function _parse_data!(array::Array{T},io,opts;n) where T 
     for i in 1:n
         array[i] = Parsers.parse(T, io, opts)
     end
@@ -77,12 +76,12 @@ function _mom_from_label(label)
         return _parse_momentum(label)
     end
 end
-function parse_isospin_one(file;desc="Progress:")
+parse_isospin_one(file;kws...) = parse_isospin_one(file,_nconfs(file);desc="Progress:")
+function parse_isospin_one(file,Nconf;desc="Progress:")
     T = first(latticesize(file))
     cut  = length("[IO][0]")
     # The measured  momenta are currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
     # plus negative momenta are allowed for the 4-point functions 
-    Nconf = _nconfs(file)
     Nlab = _count_labels(file)
     Nsrc = _sources(file)
     conf = 0 
@@ -100,6 +99,9 @@ function parse_isospin_one(file;desc="Progress:")
     li    = 0
     label = ""
     p_ext = [0,0,0]
+
+    # set up options for Parsers
+    opts = Parsers.Options(delim=' ', ignorerepeated=true)
 
     nlines = countlines(file)
     p = Progress(nlines; desc)
@@ -121,7 +123,7 @@ function parse_isospin_one(file;desc="Progress:")
                 p_ext = _mom_from_label(label)
             else
                 io = IOBuffer(l) # create IO buffer from current line
-                _parse_data!(tmpInt,io;n=4) 
+                _parse_data!(tmpInt,io,opts;n=4) 
                 px, py, pz, t = tmpInt
                 if any(isnothing,tmpInt) || isnothing(src) || isnothing(li)
                     @error "line could not be parsed correctly" line label li src conf
@@ -129,12 +131,12 @@ function parse_isospin_one(file;desc="Progress:")
                 # (px,py,pz) == (0,0,0) save in index (1)
                 # (px,py,pz) == p_ext   save in index (2)
                 if (px,py,pz) == (0,0,0)
-                    _parse_data!(tmpFlt,io;n=2)
+                    _parse_data!(tmpFlt,io,opts;n=2)
                     re, im = tmpFlt 
                     Re[li,conf,src+1,1,t+1] = re
                     Im[li,conf,src+1,1,t+1] = im
                 elseif [px,py,pz] == p_ext
-                    _parse_data!(tmpFlt,io;n=2)
+                    _parse_data!(tmpFlt,io,opts;n=2)
                     re, im = tmpFlt 
                     Re[li,conf,src+1,2,t+1] = re
                     Im[li,conf,src+1,2,t+1] = im
