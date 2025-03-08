@@ -1,8 +1,7 @@
-function _parse_data!(array,string;n=6) 
+function _parse_data!(array::Array{T},io;n) where T 
     opts = Parsers.Options(delim=' ', ignorerepeated=true)
-    io = IOBuffer(string)
     for i in 1:n
-        array[i] = Parsers.parse(Float64, io, opts)
+        array[i] = Parsers.parse(T, io, opts)
     end
 end
 function _parse_channel_name(string)
@@ -86,9 +85,10 @@ function parse_isospin_one(file;desc="Progress:")
     Nconf = _nconfs(file)
     Nlab = _count_labels(file)
     Nsrc = _sources(file)
-    tmp  = zeros(6) # temporary array for parsing result
     conf = 0 
     src  = 0
+    tmpInt = zeros(Int64,4) # temporary array for parsing result
+    tmpFlt = zeros(2) # temporary array for parsing result
 
     # fill arrays with NaNs. The idea is that not all momentum indices are used for all diagrams
     # All available entries will be replaced by finite Float64 numbers, the rest remains a NaN rather 
@@ -120,18 +120,22 @@ function parse_isospin_one(file;desc="Progress:")
                 li = findfirst(isequal(label),labels)
                 p_ext = _mom_from_label(label)
             else
-                _parse_data!(tmp, l)
-                px, py, pz, t, re, im = tmp
-                if any(isnothing,tmp) || isnothing(src) || isnothing(li)
+                io = IOBuffer(l) # create IO buffer from current line
+                _parse_data!(tmpInt,io;n=4) 
+                px, py, pz, t = tmpInt
+                if any(isnothing,tmpInt) || isnothing(src) || isnothing(li)
                     @error "line could not be parsed correctly" line label li src conf
                 end  
-                px, py, pz, t = Int(px), Int(py), Int(pz), Int(t)
                 # (px,py,pz) == (0,0,0) save in index (1)
                 # (px,py,pz) == p_ext   save in index (2)
                 if (px,py,pz) == (0,0,0)
+                    _parse_data!(tmpFlt,io;n=2)
+                    re, im = tmpFlt 
                     Re[li,conf,src+1,1,t+1] = re
                     Im[li,conf,src+1,1,t+1] = im
                 elseif [px,py,pz] == p_ext
+                    _parse_data!(tmpFlt,io;n=2)
+                    re, im = tmpFlt 
                     Re[li,conf,src+1,2,t+1] = re
                     Im[li,conf,src+1,2,t+1] = im
                 end
