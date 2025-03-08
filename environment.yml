@@ -5,8 +5,9 @@ dependencies:
   - _libgcc_mutex=0.1=main
   - _openmp_mutex=5.1=1_gnu
   - bzip2=1.0.8=h5eee18b_6
-  - ca-certificates=2024.12.31=h06a4308_0
+  - ca-certificates=2025.2.25=h06a4308_0
   - expat=2.6.4=h6a678d5_0
+  - gsl=2.7.1=h6e86dc7_1
   - ld_impl_linux-64=2.40=h12ee557_0
   - libffi=3.4.4=h6a678d5_1
   - libgcc-ng=11.2.0=h1234567_1
@@ -15,7 +16,7 @@ dependencies:
   - libstdcxx-ng=11.2.0=h1234567_1
   - libuuid=1.41.5=h5eee18b_0
   - ncurses=6.4=h6a678d5_0
-  - openssl=3.0.15=h5eee18b_0
+  - openssl=3.0.16=h5eee18b_0
   - pip=25.0=py313h06a4308_0
   - python=3.13.2=hf623796_100_cp313
   - python_abi=3.13=0_cp313
