@@ -25,16 +25,26 @@ function construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int))
     Corr3x3[1:2,1:2,:,:] = Corr2x2
     return Corr3x3, sources3x3, momenta3x3
 end
-function plot_meff_from_gevp!(plot2x2,h5dset,ens,p,t0,deriv;use3x3=true)
+function plot_meff_from_gevp!(plot2x2,h5dset,ens,p,t0,deriv;use3x3=true,half_sources=false)
     three_by_three = haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
     if three_by_three && use3x3
         Corr, sources, momenta = construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int))
         meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
         plot_effective_masses!(plot2x2, meff, Δmeff, sources; markershape=:rect)
+        if half_sources
+            Corr, sources, momenta = construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=maximum(sources)÷2)
+            meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
+            plot_effective_masses!(plot2x2, meff, Δmeff, sources; markershape=:rect)    
+        end
     elseif !use3x3
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits=typemax(Int))
         meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
         plot_effective_masses!(plot2x2, meff, Δmeff, sources)
+        if half_sources
+            Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits=maximum(sources)÷2)
+            meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
+            plot_effective_masses!(plot2x2, meff, Δmeff, sources)    
+        end
     end
 end
 function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv, average_equivalent_momenta=true, use3x3=true)
@@ -64,26 +74,30 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             β      = read(h5dset,joinpath(ens,"beta"))
             ncfg   = read(h5dset,joinpath(ens,"Nconf"))
             title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, t_0 = %$(t0)"
-            plt = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+            plt1  = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+            plt2 = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
         
-            plot_meff_from_gevp!(plt,h5dset,ens,p,t0,deriv;use3x3=false)
-            plot_meff_from_gevp!(plt,h5dset,ens,p,t0,deriv;use3x3)
-            plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
+            plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3=false)
+            plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3)
+            plot_non_interacting_levels!(plt1,h5dset,ens,p,inf_vol)
+            plot_meff_from_gevp!(plt2,h5dset,ens,p,t0,deriv;use3x3=false,half_sources=true)
             
-            if haskey(res,joinpath(ens,p))
-                r = res[joinpath(ens,p)]
-                E0, ΔE0 = read(r,"E0")[1], read(r,"Delta_E0")[1] 
-                E1, ΔE1 = read(r,"E1")[1], read(r,"Delta_E1")[1]
-                add_mass_band!(plt,E0, ΔE0;label="fit #1")
-                add_mass_band!(plt,E1, ΔE1;label="fit #2")
+            for plt in [plt1,plt2]
+                if haskey(res,joinpath(ens,p))
+                    r = res[joinpath(ens,p)]
+                    E0, ΔE0 = read(r,"E0")[1], read(r,"Delta_E0")[1] 
+                    E1, ΔE1 = read(r,"E1")[1], read(r,"Delta_E1")[1]
+                    add_mass_band!(plt,E0, ΔE0;label="fit #1")
+                    add_mass_band!(plt,E1, ΔE1;label="fit #2")
+                end
+                
+                isinteractive() && display(plt)
+                savefig(plt,"temp.pdf")
+                if backend_name() == :pgfplotsx
+                    savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
+                end
+                append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
             end
-            
-            isinteractive() && display(plt)
-            savefig(plt,"temp.pdf")
-            if backend_name() == :pgfplotsx
-                savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
-            end
-            append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
         end
     end
 end
