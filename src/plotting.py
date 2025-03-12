@@ -169,7 +169,7 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
 
     mpi_pr_s = ""
     if not prime == "":
-        mpi_pr_s = "/m_{\pi}"
+        mpi_pr_s = r"/m_{\pi}"
 
     if x_ax == "sqrt_s":
         plt.xlabel("$E_{CM}"+mpi_pr_s+"$")
@@ -183,7 +183,7 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
         ax.set_xlim([0.1,0.4])
         # ax.set_xlim([4,7])
     elif x_ax == "pstar2":
-        plt.xlabel("$p^{\star^2}"+mpi_pr_s+"^2$")
+        plt.xlabel(r"$p^{\star^2}"+mpi_pr_s+"^2$")
         x_plot = res["p2star"+ld+prime]
         x_plot_sam = np.transpose(res_sample["p2star"+ld+prime])
         ax.set_xlim([0,0.5])
@@ -201,23 +201,23 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
     if y_ax == "p3cotPS":
         y_plot = np.real(res["p3cotPS"+ld+prime])
         y_plot_sam = np.transpose(np.real(res_sample["p3cotPS"+ld+prime]))
-        plt.ylabel("$p^3\, \cot(\delta)"+mpi_pr_s+"^3$")    
+        plt.ylabel(r"$p^3\, \cot(\delta)"+mpi_pr_s+"^3$")    
         ax.set_ylim([-5,5])
     elif y_ax == "p3cotPS_Ecm":
         y_plot = np.real(res["p3cotPS_Ecm"+ld+prime])
         y_plot_sam = np.transpose(np.real(res_sample["p3cotPS_Ecm"+ld+prime]))
-        plt.ylabel("$p^3\, \cot(\delta)/E_CM"+mpi_pr_s+"^3$")    
+        plt.ylabel(r"$p^3\, \cot(\delta)/E_CM"+mpi_pr_s+"^3$")    
         # ax.set_ylim([-0.15,0.05])
         ax.set_ylim([-1,0])
     elif y_ax == "sigma":
         y_plot = np.real(res["sigma"+ld+prime])
         y_plot_sam = np.transpose(np.real(res_sample["sigma"+ld+prime]))
-        plt.ylabel("$\sigma_1*"+mpi_pr_s+"^2$")    
+        plt.ylabel(r"$\sigma_1*"+mpi_pr_s+"^2$")    
         # ax.set_ylim([-0.15,0.05])
     elif y_ax == "cot_PS":
         y_plot = np.real(res["cot_PS"+ld])
         y_plot_sam = np.transpose(np.real(res_sample["cot_PS"+ld]))
-        plt.ylabel("cot($\delta$)")      
+        plt.ylabel(r"cot($\delta$)")      
         ax.set_ylim([-100,100])
     elif y_ax == "PS":
         y_plot = np.real(res["PS+ld"])
@@ -237,23 +237,23 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
 
 
     num_perc = math.erf(1/np.sqrt(2))
-    for i in [1,3,5,7,9]:
-    # for i in range(len(N_Ls)):
-        ax.scatter(x_plot[i],y_plot[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],d2s[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
-        if bytes.decode(res["resampling"]) == "gauss":
-            sorted_indices = np.argsort(x_plot_sam[i])  
-            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=delete)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-            # ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-        elif bytes.decode(res["resampling"]) == "lin":
-            ax.plot(x_plot_sam[i],delete_steps(y_plot_sam[i],delete=delete), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-            # ax.plot(x_plot_sam[i],y_plot_sam[i], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+    for i in range(len(N_Ls)):
+        if lvls[i] != 1:
+            ax.scatter(x_plot[i],y_plot[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],d2s[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
+            if bytes.decode(res["resampling"]) == "gauss":
+                sorted_indices = np.argsort(x_plot_sam[i])  
+                ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=delete)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+                # ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            elif bytes.decode(res["resampling"]) == "lin":
+                ax.plot(x_plot_sam[i],delete_steps(y_plot_sam[i],delete=delete), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+                # ax.plot(x_plot_sam[i],y_plot_sam[i], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
 
     ax.legend(loc="best")
     if save:
         fig.savefig("output/plots/%s_%s"%(y_ax,x_ax)+ld+prime+"_"+pref+".pdf", bbox_inches='tight')
     if show:
         plt.show()
-    fig.clf()
+    plt.close(fig)
 
 def print_plymouth_table(file, ld = "_ld"):
     res,  res_sample = read_from_hdf(file)
