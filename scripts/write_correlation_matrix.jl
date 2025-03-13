@@ -6,7 +6,8 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-pseudolog10(x) = sign(x) * log10(abs(x) + 1)
+#pseudolog10(x) = sign(x) * log10(abs(x) + 1)
+pseudolog10(x,C=1E+4) = sign(x)*log10(abs(C*x)+1)
 function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,plotpath="",only_ens=nothing)
     isfile(file_out) && rm(file_out)
     fid = h5open(file_in)
