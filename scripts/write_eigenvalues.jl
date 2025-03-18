@@ -62,6 +62,23 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 end
                 plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
                 plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
+                
+                if three_by_three
+                    plt2 = plot(yscale=:log10,legend=:top)
+                    markers = [:circle, :diamond, :dtriangle, :pentagon, :rect, :rtriangle, :utriangle, :star6, :xcross, :vline] 
+                    mi = 1
+                    for i in 1:3, j in i:3
+                        C_tmp = abs.(Corr3x3[i,j,:,:])
+                        C  = dropdims(mean(C_tmp,dims=(1)),dims=(1))
+                        ΔC = dropdims(std(C_tmp,dims=(1)),dims=(1))/sqrt(ncfg)
+                        scatter!(plt2,1:T,C,yerr=ΔC,label=L"C_{%$i,%$j}(t)",marker=markers[mi])
+                        mi += 1
+                    end
+                    savefig(plt2,"temp.pdf")
+                    append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
+                end
+
+                
                 savefig(plt,"temp.pdf")
                 if backend_name() == :pgfplotsx
                     savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
