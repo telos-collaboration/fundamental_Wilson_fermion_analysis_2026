@@ -1,39 +1,3 @@
-using Pkg; Pkg.activate(".")
-using ScatteringI1
-using HDF5
-using Statistics
-using LatticeUtils
-using Plots
-using LaTeXStrings
-using ProgressMeter
-pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
-
-function swap_eigval_numbering(old,t0,T)
-    new = copy(old)
-    @. new[1,:,1:t0-1] = old[2,:,1:t0-1]
-    @. new[2,:,1:t0-1] = old[1,:,1:t0-1]
-    @. new[1,:,T-t0+2:T] = old[2,:,T-t0+2:T]
-    @. new[2,:,T-t0+2:T] = old[1,:,T-t0+2:T]
-    return new
-end
-function variational_analysis(Corr;t0,maxhits=typemax(Int),deriv=true)
-
-    nhits, T = size(Corr)[4:5]
-    h     = min(nhits,maxhits)
-    Corr  = dropdims(mean(Corr[:,:,:,1:h,:],dims=4),dims=4)
-    Corr  = correlator_folding(Corr;t_dim=4,sign=+1)
-
-    if deriv
-        Corr = correlator_derivative(Corr;t_dim=4)
-    end
-
-    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
-    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0, T)
-    eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
-    eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
-
-    return eigvals, Δeigvals, eigvals_cov, h
-end
 function _copy_lattice_parameters(outfile,infile;group="")
     file = h5open(infile)[group]
     entries = filter(!contains(r"p\([0-9],[0-9],[0-9]\)") ,keys(file))
@@ -42,28 +6,45 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, plotpath=joinpath("./plots/eigenvalues/","t0$(t0)"*(deriv ? "_deriv" : "")))
+function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta=true, use3x3=true, plotpath)
     
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
-    plotting && ispath(plotpath) || mkpath(plotpath)
+
+    if plotting
+        plotname = "eigenvalues_t0$(t0)_deriv_$deriv.pdf"
+        texpath  = joinpath(plotpath,"eigenvalues_tex")
+        ispath(texpath)  || mkpath(texpath)
+        ispath(plotpath) || mkpath(plotpath)
+        isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
+    end
 
     ensembles = keys(h5dset)
-    @showprogress desc="write eigenvalues:" enabled=false for ens in ensembles
+    @showprogress desc="Write eigenvalues:" enabled=true for ens in ensembles
         _copy_lattice_parameters(outfile,infile;group=ens)
-        p_external = h5dset["$ens/p_external"][]
+        p0 = read(h5dset,"$ens/p_external")
+        p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)
         for p in p_external
             p == "p(0,0,0)" && continue
-            Corr = read(h5dset,joinpath(ens,p,"correlation_matrix"))
-            eigvals, Δeigvals, eigvals_cov, h = variational_analysis(Corr;t0,maxhits,deriv)
+
+            Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)           
+            eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv)
             eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
+
+            three_by_three = use3x3 && haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
+            if three_by_three
+                Corr3x3, sources3x3, momenta3x3 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix_3x3_ext";maxhits,average_equivalent_momenta)
+                Corr3x3[1:2,1:2,:,:] .= Corr
+                eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv)
+                eigvals_3x3, Δeigvals_3x3 = real.(eigvals_3x3), real.(Δeigvals_3x3), real.(eigvals_cov_3x3)
+            end
 
             # Save plots of eigenvalues so that they can be visually examined for violations of convexity
             if plotting 
                 T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
                 m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
                 ncfg  = read(h5dset,joinpath(ens,"Nconf"))
-                title = L"${%$T} \times {%$L}^3: am^f_0={%$m0} \mathbf p = %$(p), n_{src}=%$h, n_{cfg}=%$ncfg, t_0 = %$(t0)$"
+                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)"
                 
                 t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
                 t1 = filter(x->!iszero(eigvals[1,x]),t)
@@ -74,19 +55,48 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
                 plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
                 plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
-                savefig(plt,joinpath(plotpath,"$(ens)_$(p).pdf"))
-                display(plt)
+                if three_by_three
+                    plot_correlator!(plt,t,f.(eigvals_3x3[1,t1]),Δeigvals_3x3[1,t1],markersize=3,markershape=:rect,label="eigval #1 (3x3)")
+                    plot_correlator!(plt,t,f.(eigvals_3x3[2,t2]),Δeigvals_3x3[2,t2],markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
+                    plot_correlator!(plt,t,f.(eigvals_3x3[3,t2]),Δeigvals_3x3[3,t2],markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
+                end
+                plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
+                plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
+                
+                if three_by_three
+                    plt2 = plot(yscale=:log10,legend=:top)
+                    markers = [:circle, :diamond, :dtriangle, :pentagon, :rect, :rtriangle, :utriangle, :star6, :xcross, :vline] 
+                    mi = 1
+                    for i in 1:3, j in i:3
+                        C_tmp = abs.(Corr3x3[i,j,:,:])
+                        C  = dropdims(mean(C_tmp,dims=(1)),dims=(1))
+                        ΔC = dropdims(std(C_tmp,dims=(1)),dims=(1))/sqrt(ncfg)
+                        scatter!(plt2,1:T,C,yerr=ΔC,label=L"C_{%$i,%$j}(t)",marker=markers[mi])
+                        mi += 1
+                    end
+                    savefig(plt2,"temp.pdf")
+                    append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
+                end
+
+                
+                savefig(plt,"temp.pdf")
+                if backend_name() == :pgfplotsx
+                    savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
+                end
+                append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
+                isinteractive() && display(plt)
             end
 
             h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
             h5write(outfile,joinpath(ens,p,"Delta_eigvals"),Δeigvals)
             h5write(outfile,joinpath(ens,p,"cov_eigvals"),eigvals_cov)
+            h5write(outfile,joinpath(ens,p,"t0"),t0)
+            h5write(outfile,joinpath(ens,p,"deriv"),deriv)
+            h5write(outfile,joinpath(ens,p,"average_equivalent_momenta"),average_equivalent_momenta)
+            h5write(outfile,joinpath(ens,p,"Corr2x2"),Corr)
+            if three_by_three
+                h5write(outfile,joinpath(ens,p,"Corr3x3"),Corr3x3)
+            end
         end
     end
 end
-
-outfile = "data/isospin1_eigenvalues_t0_8_deriv.hdf5"
-infile  = "data/isospin1_corr.hdf5"
-t0      = 8
-deriv   = true
-write_all_eigenvalues(infile,outfile; t0, deriv)

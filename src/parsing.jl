@@ -1,9 +1,7 @@
-function _parse_data!(array,string;n=6) 
-    opts = Parsers.Options(delim=' ', ignorerepeated=true)
-    io = IOBuffer(string)
-    for i in 1:n
-        array[i] = Parsers.parse(Float64, io, opts)
-    end
+function _parse_reim(io,opts) 
+    re = Parsers.parse(Float64,io, opts)
+    im = Parsers.parse(Float64,io, opts)
+    return re, im
 end
 function _parse_channel_name(string)
     # split name at '_src_'. Everything before labels the measurement 
@@ -70,73 +68,82 @@ function _sources(file)
         end
     end
 end
-function _find_pmax(file)
-    p_max = typemin(Int)
-    for line in eachline(file)
-        if startswith(line,"[MAIN][0]The momenta are: ")
-            for m in eachmatch(r"[0-9]+",line)
-                p_max = max( parse(Int,m.match) , p_max)
-            end
-            @assert p_max > 0
-            return p_max
-        end
+function _mom_from_label(label)
+    label == "pi" && (return [0,0,0])
+    if contains(label,"p0") 
+        return [0,0,0]
+    else 
+        return _parse_momentum(label)
     end
 end
-function parse_isospin_one(file;desc="Progress:")
+parse_isospin_one(file;kws...) = parse_isospin_one(file,_nconfs(file);desc="Progress:")
+function parse_isospin_one(file,Nconf;desc="Progress:")
     T = first(latticesize(file))
     cut  = length("[IO][0]")
     # The measured  momenta are currently hard-coded in HiRep, i.e. the momenta are (0,0,0),(0,0,1),(0,1,1),(1,1,1) and permutations
     # plus negative momenta are allowed for the 4-point functions 
-    pmax  = _find_pmax(file)
-    Nmom  = 2pmax + 1 #(allowed values -pmax,...,0,...pmax) 
-    Nconf = _nconfs(file)
     Nlab = _count_labels(file)
     Nsrc = _sources(file)
-    tmp  = zeros(6) # temporary array for parsing result
     conf = 0 
     src  = 0
-    li   = 0
-    label = ""
+
     # fill arrays with NaNs. The idea is that not all momentum indices are used for all diagrams
     # All available entries will be replaced by finite Float64 numbers, the rest remains a NaN rather 
     # than a zero. 
-    Re = fill(NaN,(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T))
-    Im = fill(NaN,(Nlab,Nconf,Nsrc,Nmom,Nmom,Nmom,T))
+    Re = fill(NaN,(Nlab,Nconf,Nsrc,2,T))
+    Im = fill(NaN,(Nlab,Nconf,Nsrc,2,T))
+    
+    # store the current label, its index among all labels and the associated external momentum
+    li    = 0
+    label = ""
+    p_ext = [0,0,0]
 
-    nlines = countlines(file)
-    p = Progress(nlines; desc)
+    # set up options for Parsers
+    opts = Parsers.Options(delim=' ', ignorerepeated=true)
+    p = Progress(Nconf; desc)
 
     labels = label_list(file)
     for line in eachline(file)
         if startswith(line,"[IO][0]Configuration")
             if occursin("read",line)
                 conf += 1
+                next!(p)
             end
             continue
         end
         if startswith(line,"[IO][0]")
-            l = line[cut+1:end]
+            l = SubString(line,cut+1)
             # first line that starts here encodes the channel, source and configuration name
             if isletter(line[cut+1])
                 label, src = _parse_channel_name(l)
                 li = findfirst(isequal(label),labels)
+                p_ext = _mom_from_label(label)
             else
-                _parse_data!(tmp, l)
-                px, py, pz, t, re, im = tmp
-                if any(isnothing,tmp) || isnothing(src) || isnothing(li)
-                    @error "line could not be parsed correctly" line label li src conf
-                end  
-                px, py, pz, t = Int(px), Int(py), Int(pz), Int(t)
-                offset = pmax + 1
-                # increase indices by pmax+1, to have one-based indexing
-                # e.g. for pmax=1: index 1: p = -1
-                #                  index 2: p =  0
-                #                  index 3: p =  1
-                Re[li,conf,src+1,px+offset,py+offset,pz+offset,t+1] = re
-                Im[li,conf,src+1,px+offset,py+offset,pz+offset,t+1] = im
+                # create IO buffer from current line
+                io = IOBuffer(l)
+                # Parsing the following integers is the most expensive part of the entire parsing step 
+                # Here, I check after every momentum component if we can continue before parsing additional momentum components
+                px = Parsers.parse(Int64, io, opts)
+                px != p_ext[1] && px != 0 && continue
+                py = Parsers.parse(Int64, io, opts)
+                py != p_ext[2] && py != 0 && continue
+                pz = Parsers.parse(Int64, io, opts)
+                pz != p_ext[3] && pz != 0 && continue
+                # (px,py,pz) == (0,0,0) save in index (1)
+                # (px,py,pz) == p_ext   save in index (2)
+                if px==0 && py==0 && pz==0
+                    t = Parsers.parse(Int64,io,opts)
+                    re, im = _parse_reim(io,opts) 
+                    Re[li,conf,src+1,1,t+1] = re
+                    Im[li,conf,src+1,1,t+1] = im
+                elseif px == p_ext[1] && py == p_ext[2] && pz == p_ext[3] 
+                    t = Parsers.parse(Int64,io,opts)
+                    re, im = _parse_reim(io,opts) 
+                    Re[li,conf,src+1,2,t+1] = re
+                    Im[li,conf,src+1,2,t+1] = im
+                end
             end
         end
-        next!(p)
     end
     finish!(p)
     return Re, Im

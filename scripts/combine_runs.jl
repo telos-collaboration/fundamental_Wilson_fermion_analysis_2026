@@ -1,5 +1,3 @@
-using Pkg; Pkg.activate(".")
-using HDF5
 function check_matching_runs(file,ensemble,key;verbose=true)
     fid  = h5open(file)[ensemble]
     runs = keys(fid)
@@ -28,9 +26,6 @@ end
 function old_key(key)
     m = match(r"rho_g(?<g1>[1-3])_g(?<g2>[1-3])",key)
     return isnothing(m) ? key : "rho_g$(m.captures[1])$(m.captures[2])"
-end
-function merge_runs(h5file,ensemble)
-    check_lattice_params(h5file,ensemble)
 end
 # This obatins any internal momenta, external momenta or diagram labels present in the hdf5 file
 function unique_labels_momenta(file_id)
@@ -105,16 +100,15 @@ function merge_runs(h5file_in, h5file_out, ensemble )
     end
     h5write(h5file_out,joinpath(ensemble,"p_external"),p_ext_unique)
 end
-h5file_in  = "data/isospin1_sorted.hdf5"
-h5file_out = "data/isospin1_merged.hdf5"
-ensembles  = keys(h5open(h5file_in))
-
-isfile(h5file_out) && rm(h5file_out)
-for ensemble in ensembles
-    try 
-        merge_runs(h5file_in, h5file_out, ensemble )
-    catch
-        @warn "Ensemble $ensemble cannot be merged"
-        continue
+function merge_all_runs(h5file_in, h5file_out)
+    isfile(h5file_out) && rm(h5file_out)
+    ensembles  = keys(h5open(h5file_in))
+    for ensemble in ensembles
+        try 
+            merge_runs(h5file_in, h5file_out, ensemble )
+        catch
+            @warn "Ensemble $ensemble cannot be merged"
+            continue
+        end
     end
 end
