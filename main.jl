@@ -14,6 +14,7 @@ gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 t0    = 8
 deriv = true
 path  = "/home/fabian/Dokumente/Physics/Data/DataVSC/measurements/"
+path  = "/home/fabian/Documents/Physics/Data/DataVSC/measurements/"
 plotpath  = "./output/plots/"
 datapath  = "./output/data/"
 tablepath = "./output/tables/"

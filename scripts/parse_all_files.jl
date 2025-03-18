@@ -1,9 +1,9 @@
 function parse_all_file(path,h5file,inputfiles;single_file = true)
     println("Parse correlator data from raw log:")
     info  = readdlm(inputfiles,',',skipstart=1)
-    for (name,dir,file,run) in eachrow(info)
+    for (name,file,run) in eachrow(info)
 
-        file = joinpath(path,dir,name,file)
+        file = joinpath(path,file)
         ens  = joinpath(name,run)
 
         if single_file
