@@ -12,12 +12,14 @@ function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
     β    = read(h5dset,joinpath(ens,"beta"))
     
     ind = findfirst(i -> [β,m0] == inf_vol[i,1:2],1:first(size(inf_vol)))
-    mπ, Δmπ, mρ, Δmρ = inf_vol[ind,3:6]
-    px,py,pz = [parse(Int,c) for c in filter(isdigit,p)]
-    label2π  = L"\textrm{n.i.} E[\pi(\mathbf{p})\pi(\mathbf{p})]" 
-    label1ρ  = L"\textrm{n.i.} E[\rho(\mathbf{p})]" 
-    add_mass_band!(plt,non_interacting_energy_2P_lattice(mπ,Δmπ,px,py,pz,L)...;color=:black,label=label2π)
-    add_mass_band!(plt,non_interacting_energy_1P_lattice(mρ,Δmρ,px,py,pz,L)... ;color=:black,label=label1ρ)
+    if !isnothing(ind)
+        mπ, Δmπ, mρ, Δmρ = inf_vol[ind,3:6]
+        px,py,pz = [parse(Int,c) for c in filter(isdigit,p)]
+        label2π  = L"\textrm{n.i.} E[\pi(\mathbf{p})\pi(\mathbf{p})]" 
+        label1ρ  = L"\textrm{n.i.} E[\rho(\mathbf{p})]" 
+        add_mass_band!(plt,non_interacting_energy_2P_lattice(mπ,Δmπ,px,py,pz,L)...;color=:black,label=label2π)
+        add_mass_band!(plt,non_interacting_energy_1P_lattice(mρ,Δmρ,px,py,pz,L)... ;color=:black,label=label1ρ)
+    end
 end
 function construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int))
     Corr2x2, sources2x2, momenta2x2 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits)
@@ -40,17 +42,18 @@ function plot_meff_from_gevp!(plot2x2,h5dset,ens,p,t0,deriv;use3x3=true,half_sou
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits=typemax(Int))
         meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
         plot_effective_masses!(plot2x2, meff, Δmeff, sources)
-        if half_sources
+        if half_sources && minimum(sources) > 2
             Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits=maximum(sources)÷2)
             meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
             plot_effective_masses!(plot2x2, meff, Δmeff, sources)    
         end
     end
 end
-function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv, average_equivalent_momenta=true, use3x3=true)
+function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv, average_equivalent_momenta=true, use3x3=true, half_sources=true)
     h5dset  = h5open(corr_file)
-    res     = h5open(fitresults)
-
+    if isfile(fitresults)
+        res = h5open(fitresults)
+    end
     plotname = "effective_masses_t0$(t0)_deriv_$deriv.pdf"
     inf_vol  = readdlm(infvolfile,',',skipstart=1)
     fittable = readdlm(fitparam,',',skipstart=1)
@@ -80,10 +83,15 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3=false)
             plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3)
             plot_non_interacting_levels!(plt1,h5dset,ens,p,inf_vol)
-            plot_meff_from_gevp!(plt2,h5dset,ens,p,t0,deriv;use3x3=false,half_sources=true)
+            if half_sources
+                plot_meff_from_gevp!(plt2,h5dset,ens,p,t0,deriv;use3x3=false,half_sources=true)
+                all_plots = [plt1,plt2]
+            else
+                all_plots = [plt1]
+            end
             
-            for plt in [plt1,plt2]
-                if haskey(res,joinpath(ens,p))
+            for plt in all_plots
+                if isfile(fitresults) && haskey(res,joinpath(ens,p))
                     r = res[joinpath(ens,p)]
                     E0, ΔE0 = read(r,"E0")[1], read(r,"Delta_E0")[1] 
                     E1, ΔE1 = read(r,"E1")[1], read(r,"Delta_E1")[1]
