@@ -40,10 +40,7 @@ function swap_eigval_numbering(old,t0)
         @. new[1,:,r2] = old[2,:,r2]
         @. new[2,:,r2] = old[1,:,r2]
     elseif Nops == 3
-        @. new[1,:,r1] = old[3,:,r1]
-        @. new[3,:,r1] = old[1,:,r1]
-        @. new[1,:,r2] = old[3,:,r2]
-        @. new[3,:,r2] = old[1,:,r2]
+
     end
     return new
 end
@@ -57,7 +54,7 @@ end
 function variational_analysis(Corr;t0,deriv=true)
     Corr = _preprocess_correlator(Corr;deriv)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
-    #eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
+    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
     return eigvals, Δeigvals, eigvals_cov
@@ -65,7 +62,7 @@ end
 function effective_masses(Corr;t0,deriv)
     Corr = _preprocess_correlator(Corr;deriv)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
-    #eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
+    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
     meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
     return meff, Δmeff
 end
