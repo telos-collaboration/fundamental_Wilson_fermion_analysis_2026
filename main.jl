@@ -11,7 +11,7 @@ using Statistics
 #pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
-t0    = 8
+t0    = 5
 deriv = true
 path  = "/home/fabian/Dokumente/Physics/Data/DataVSC/measurements/"
 path  = "/home/fabian/Documents/Physics/Data/DataVSC/measurements/"
@@ -39,12 +39,13 @@ include("scripts/write_eigenvalues.jl")
 include("scripts/variational_analysis_meff.jl")
 include("scripts/write_tables.jl")
 
-only_ens = ["Lt32Ls24beta6.9m1-0.92m2-0.92" "Lt32Ls16beta6.9m1-0.92m2-0.92" "Lt24Ls14beta6.9m1-0.92m2-0.92"]
+only_ens = ["Lt32Ls24beta6.9m-0.92" "Lt32Ls16beta6.9m-0.92" "Lt24Ls14beta6.9m-0.92"]
+only_ens = ["Lt36Ls24beta7.05m-0.863", "Lt36Ls36beta7.05m-0.863"]
 only_ens = nothing
 
 plotting = true
 use3x3   = false
-
+half_sources=false
 parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 merge_all_runs(h5file_raw, h5file_com)
 write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting,only_ens)
@@ -52,13 +53,13 @@ all_runs_table(h5file_raw,overview_table)
 
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3)
 run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
-plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, use3x3)
-table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
+plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, use3x3, half_sources)
 
-cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
-redirect_stdio(stdout="make.log",stderr="make.log") do 
-    run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
-end
-cd("rho_pipi_scattering_analysis")
-run(`python3 src/scattering.py $(first(splitext(basename(yannick_fmt_table))))`)
-run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)
+#table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
+#cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
+#redirect_stdio(stdout="make.log",stderr="make.log") do 
+#    run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
+#end
+#cd("rho_pipi_scattering_analysis")
+#run(`python3 src/scattering.py $(first(splitext(basename(yannick_fmt_table))))`)
+#run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)
