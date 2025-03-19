@@ -61,30 +61,35 @@ def result_sampled(info,N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,num_resample=50,
 def cot_delta_000(q2,N_L,mpi):
     return wlm(0,0,0,0,0,mpi,mpi,q2,int(N_L))
 def cot_delta_001(q2,N_L,mpi):
-    # p = [1,0,0]
-    # p = [0,1,0]
     p = [0,0,1]
     first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     second = 2*wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     return first + second
-def cot_delta_110(q2,N_L,mpi):    
-    # p = [0,1,1]   
-    # p = [1,0,1]   
+def cot_delta_110(q2,N_L,mpi):   
     p = [1,1,0]
     first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     second = wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     third = np.sqrt(6) * wlm(2,2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L)).imag
     return first - second + third
+def cot_delta_111(q2,N_L,mpi):   
+    p = [1,1,1]
+    first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    second = complex(0,1)*np.sqrt(8/3)*wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    term = wlm(2,1,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    third = np.sqrt(8/3)*(term.real+term.imag)
+    return first - second - third
 
 def cot_delta_mom(dvec):
     if list(dvec) == [0,0,0]:
         return cot_delta_000
-    elif list(dvec) == [0,0,1]:
+    elif list(dvec) == [0,0,1] or  list(dvec) == [0,0,2]:
         return cot_delta_001
     elif list(dvec) == [1,1,0]:
         return cot_delta_110
     elif list(dvec) == [0,1,1]:
         return cot_delta_110
+    elif list(dvec) == [1,1,1]:
+        return cot_delta_111
     else:
         print("wrong momentum")
         exit()
