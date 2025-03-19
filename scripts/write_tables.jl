@@ -37,7 +37,7 @@ function table_yannick(h5fitresults,infvolumefile,outfile)
     csv_io = open(outfile,"w")
 
     fid = h5open(h5fitresults)
-    rex = r"Lt([0-9]+)Ls([0-9]+)beta([0-9]+.[0-9]+)m1(-[0-9]+.[0-9]+)m2"
+    rex = r"Lt([0-9]+)Ls([0-9]+)beta([0-9]+.[0-9]+)m(-[0-9]+.[0-9]+)"
     inf_vol  = readdlm(infvolumefile,',',skipstart=1)
 
     for ens in keys(fid)
