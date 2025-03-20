@@ -65,19 +65,203 @@ def cot_delta_001(q2,N_L,mpi):
     first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     second = 2*wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     return first + second
+def cot_delta_002(q2,N_L,mpi):
+    p = [0,0,2]
+    first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    second = 2*wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    return first + second
 def cot_delta_110(q2,N_L,mpi):   
     p = [1,1,0]
     first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     second = wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     third = np.sqrt(6) * wlm(2,2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L)).imag
+    # print()
+    # print(first.real,first.imag)
+    # print(second.real,second.imag)
+    # print(third.real,third.imag)
+    # print()
     return first - second + third
 def cot_delta_111(q2,N_L,mpi):   
     p = [1,1,1]
     first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
-    second = complex(0,1)*np.sqrt(8/3)*wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    second = complex(0,1)*np.sqrt(8/3)*wlm(2,2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     term = wlm(2,1,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     third = np.sqrt(8/3)*(term.real+term.imag)
+    # print()
+    # print(first.real,first.imag)
+    # print(second.real,second.imag)
+    # print(term.real,term.imag)
+    # print()
     return first - second - third
+
+
+# pstar = np.sqrt(0.00398)
+# L = 64
+# q = pstar*L/(2*np.pi)
+# mpi = 0.0752661
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+# pstar = np.sqrt(0.02691)
+# L = 64
+# q = pstar*L/(2*np.pi)
+# mpi = 0.0752661
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+
+# pstar = np.sqrt(0.00835)
+# L = 40
+# q = pstar*L/(2*np.pi)
+# mpi = 0.106412
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+# pstar = np.sqrt(0.02181)
+# L = 40
+# q = pstar*L/(2*np.pi)
+# mpi = 0.106412
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+
+# pstar = np.sqrt(0.00830)
+# L = 40
+# q = pstar*L/(2*np.pi)
+# mpi = 0.106842
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+# pstar = np.sqrt(0.02307)
+# L = 40
+# q = pstar*L/(2*np.pi)
+# mpi = 0.106842
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+
+# pstar = np.sqrt(0.0108)
+# L = 32
+# q = pstar*L/(2*np.pi)
+# mpi = 0.128722
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+# pstar = np.sqrt(0.0249)
+# L = 32
+# q = pstar*L/(2*np.pi)
+# mpi = 0.128722
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+
+# pstar = np.sqrt(0.0109)
+# L = 28
+# q = pstar*L/(2*np.pi)
+# mpi = 0.150315
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+# pstar = np.sqrt(0.0283)
+# L = 28
+# q = pstar*L/(2*np.pi)
+# mpi = 0.150315
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+
+# pstar = np.sqrt(0.0152)
+# L = 32
+# q = pstar*L/(2*np.pi)
+# mpi = 0.16116
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+# pstar = np.sqrt(0.0370)
+# L = 32
+# q = pstar*L/(2*np.pi)
+# mpi = 0.16116
+# cot_PS = cot_delta_111(q**2,L,mpi*0.95)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# cot_PS = cot_delta_111(q**2,L,mpi*1.05)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+# pstar = np.sqrt(0.01019)
+# L = 40
+# q = pstar*L/(2*np.pi)
+# mpi = 0.105375
+# cot_PS = cot_delta_002(q**2,L,mpi)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+
+# pstar = np.sqrt(0.02359)
+# L = 40
+# q = pstar*L/(2*np.pi)
+# mpi = 0.105375
+# cot_PS = cot_delta_002(q**2,L,mpi)
+# PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
+# print(pstar**2,PS.real%180)
+# print()
+# exit()
 
 def cot_delta_mom(dvec):
     if list(dvec) == [0,0,0]:
@@ -184,7 +368,7 @@ def calc_PS(name, pref = "", resampling="lin", num_resample=5):
     en_arr = data[5]
     en_m_arr = data[6]
     en_p_arr = data[7]
-    mpi = data[8][5]
+    mpi = data[8][0]
     mrho = data[9][0]
     info["beta"],info["m_1"],info["m_2"], info["mrho"], info["en_lv"] = [6.9,-0.92,-0.92,mrho,en_lv_arr]
 
@@ -196,4 +380,4 @@ if __name__ == "__main__":
     args = sys.argv
     name = args[1]
 
-    calc_PS(name,pref="", resampling="lin", num_resample=50)
+    calc_PS(name,pref="", resampling="lin", num_resample=1)
