@@ -3,7 +3,7 @@ function check_matching_runs(file,ensemble,key;verbose=true)
     runs = keys(fid)
     vals = read.(Ref(fid),joinpath.(runs,key))
     if !allequal(vals) && verbose
-        @warn "mismatch in $ensemble for $key"
+        @warn "mismatch in $ensemble for $key: $vals"
     end
     @assert allequal(vals) "mismatch in $ensemble for $key"
 end
