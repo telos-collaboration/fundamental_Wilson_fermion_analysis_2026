@@ -15,7 +15,7 @@ function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
     if !isnothing(ind)
         mπ, Δmπ, mρ, Δmρ = inf_vol[ind,3:6]
         px,py,pz = [parse(Int,c) for c in filter(isdigit,p)]
-        label2π  = L"\textrm{n.i.} E[\pi(\mathbf{p})\pi(\mathbf{p})]" 
+        label2π  = L"\textrm{n.i.} E[\pi(\mathbf{p})\pi(\mathbf{0})]" 
         label1ρ  = L"\textrm{n.i.} E[\rho(\mathbf{p})]" 
         add_mass_band!(plt,non_interacting_energy_2P_lattice(mπ,Δmπ,px,py,pz,L)...;color=:black,label=label2π)
         add_mass_band!(plt,non_interacting_energy_1P_lattice(mρ,Δmρ,px,py,pz,L)... ;color=:black,label=label1ρ)
