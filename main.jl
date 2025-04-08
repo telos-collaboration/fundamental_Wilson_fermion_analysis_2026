@@ -11,10 +11,10 @@ using Statistics
 #pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
-t0    = 5
+t0    = 4
 deriv = true
-path  = "/home/fabian/Dokumente/Physics/Data/DataVSC/measurements/"
-path  = "/home/fabian/Documents/Physics/Data/DataVSC/measurements/"
+path  = "/home/fabian/Dokumente/Physics/Data/"
+path  = "/home/fabian/Documents/Physics/Data/"
 plotpath  = "./output/plots/"
 datapath  = "./output/data/"
 tablepath = "./output/tables/"
@@ -25,7 +25,7 @@ h5file_cor = joinpath(datapath,"isospin1_corr.hdf5")
 h5file_eig = joinpath(datapath,"isospin1_eigenvalues_t0_$(t0)_deriv_$deriv.hdf5")
 h5file_fit = joinpath(datapath,"isospin1_fitresults_t0_$(t0)_deriv_$deriv.hdf5")
 
-inputfiles = "input/input_files.csv"
+inputfiles = "input/input_files_light.csv"
 infvolfile = "input/infinite_volume.csv"
 fitparam   = "input/pipi_fitintervals.csv"
 
@@ -40,17 +40,17 @@ include("scripts/variational_analysis_meff.jl")
 include("scripts/write_tables.jl")
 
 only_ens = nothing
-only_ens = ["Lt32Ls24beta6.9m-0.92" "Lt32Ls16beta6.9m-0.92" "Lt24Ls14beta6.9m-0.92"]
-only_ens = ["Lt36Ls16beta7.05m-0.863", "Lt36Ls24beta7.05m-0.863", "Lt36Ls36beta7.05m-0.863"]
+only_ens = ["Lt36Ls36beta7.05m-0.863" ,"Lt36Ls36beta7.05m-0.867"]
 
 plotting = true
 use3x3   = false
 half_sources=false
-parse_all_file(path,h5file_raw,inputfiles;single_file = true)
-merge_all_runs(h5file_raw, h5file_com)
-write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting,only_ens)
-all_runs_table(h5file_raw,overview_table)
 
+parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+all_runs_table(h5file_raw,overview_table)
+merge_all_runs(h5file_raw, h5file_com)
+
+write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting,only_ens)
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3)
 run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
 plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, use3x3, half_sources)
