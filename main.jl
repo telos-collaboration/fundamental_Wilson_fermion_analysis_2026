@@ -25,7 +25,7 @@ h5file_cor = joinpath(datapath,"isospin1_corr.hdf5")
 h5file_eig = joinpath(datapath,"isospin1_eigenvalues_t0_$(t0)_deriv_$deriv.hdf5")
 h5file_fit = joinpath(datapath,"isospin1_fitresults_t0_$(t0)_deriv_$deriv.hdf5")
 
-inputfiles = "input/input_files_light.csv"
+inputfiles = "input/input_files.csv"
 infvolfile = "input/infinite_volume.csv"
 fitparam   = "input/pipi_fitintervals.csv"
 
@@ -39,8 +39,8 @@ include("scripts/write_eigenvalues.jl")
 include("scripts/variational_analysis_meff.jl")
 include("scripts/write_tables.jl")
 
+only_ens = ["Lt36Ls36beta7.05m-0.863" ,"Lt36Ls36beta7.05m-0.867", "Lt36Ls24beta7.05m-0.863" ,"Lt36Ls24beta7.05m-0.867"]
 only_ens = nothing
-only_ens = ["Lt36Ls36beta7.05m-0.863" ,"Lt36Ls36beta7.05m-0.867"]
 
 plotting = true
 use3x3   = false
