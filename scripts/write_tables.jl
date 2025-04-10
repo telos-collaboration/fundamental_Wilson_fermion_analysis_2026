@@ -33,7 +33,7 @@ function all_runs_table(h5file,outfile)
 end
 function table_yannick(h5fitresults,infvolumefile,outfile)
 
-    ispath(dirname(outfile)) || mkapth(dirname(outfile))
+    ispath(dirname(outfile)) || mkpath(dirname(outfile))
     csv_io = open(outfile,"w")
 
     fid = h5open(h5fitresults)
