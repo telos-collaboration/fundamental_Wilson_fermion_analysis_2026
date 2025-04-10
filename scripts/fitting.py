@@ -11,7 +11,7 @@ from tqdm import tqdm
 def get_hdf5_value(hdf5file,key):
     return hdf5file[key][()]
 
-def make_models(T,tmin,tmax,t0):
+def make_models(T,tmin,tmax):
     """  Create corrfitter model for G(t). """
     return [cf.Corr2(datatag='Gab', tp=T, tmin=tmin, tmax=tmax, a='a', b='a', dE='dE')]
 
@@ -38,9 +38,9 @@ def print_fit_param(fit):
     print('chi2/dof = ', chi2/dof, '\n')
 
 
-def fit_correlator_without_bootstrap(avg,T,tmin,tmax,t0,Nmax,antisymmetric,plotname="test",plotdir="./output/plots/",plotting=False,printing=False):
+def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname="test",plotdir="./output/plots/",plotting=False,printing=False):
     T = - abs(T) if antisymmetric else abs(T) 
-    fitter = cf.CorrFitter(models=make_models(T,tmin,tmax,t0))
+    fitter = cf.CorrFitter(models=make_models(T,tmin,tmax))
     p0 = None
     for N in range(1,Nmax+1):
         prior = make_prior(N)
@@ -89,10 +89,10 @@ def fit_all_files(infile,outfile,parameterfile):
         plotdir  = "./output/plots/"
         printing = False
         plotting = False
-        Nmax = 10
+        Nmax = 5
 
-        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,t0,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
-        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,t0,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
 
         f = h5py.File(outfile, "a")
         f.create_dataset(group+"/tmin", data=tmin)
