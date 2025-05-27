@@ -7,7 +7,7 @@ function p_label(p0)
     sx = s"(\1\2\3)"
     return replace(p0,rx=>sx)
 end
-function all_runs_table(h5file,outfile)
+function all_runs_table(h5file,outfile;only_ens=nothing)
     fid = h5open(h5file)
     ensembles = keys(fid)
     ispath(dirname(outfile)) || mkpath(dirname(outfile))
@@ -15,6 +15,9 @@ function all_runs_table(h5file,outfile)
     io = open(outfile,"w")
     for ens in ensembles
         for run in keys(fid[ens])
+            if !isnothing(only_ens) && ens ∉ only_ens
+                continue
+            end
             rid  = fid[ens][run]
             T, L = read(rid,"lattice")[1:2]
             beta = read(rid,"beta")
