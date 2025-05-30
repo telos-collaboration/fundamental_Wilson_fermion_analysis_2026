@@ -82,3 +82,116 @@ function correlatorsp000(h5dset,ens)
     Corrρ  = read(h5dset,"$ens/p(0,0,0)/rho_g1/p_diag(0,0,0)/C_re")
     return Corrπ, Corrρ
 end
+
+# check momentum configuration
+function momentum_is_nnn(p)
+    @assert length(p) == 3
+    return (allequal(p) && p[1] > 0) 
+end
+function momentum_is_00n(p)
+    @assert length(p) == 3
+    vanishing_indices = findall(iszero,p)
+    return length(vanishing_indices) == 2
+end
+function momentum_is_0nn(p)
+    @assert length(p) == 3
+    vanishing_indices = findall(iszero,p)
+    nonvanishing_indices = filter( i -> i ∉ vanishing_indices, eachindex(p))
+    if length(vanishing_indices) == 1 # have exactly one vanishing component
+        if p[nonvanishing_indices[1]] == p[nonvanishing_indices[2]] 
+            return true
+        end
+    end
+    return false
+end
+
+# Additional lattice irreps for vector meson for Yannick
+function correlatorE(h5dset,ens;p::Vector{Int})
+    # check that we have either a p=(nnn) momentum configuration 
+    # or a p=(00n) momentum configuration (up to a permutation thereof)
+    if momentum_is_nnn(p)
+        Corrρ = correlatorE_nnn(h5dset,ens;p)
+        return Corrρ
+    elseif momentum_is_00n(p)
+        Corrρ = correlatorE_00n(h5dset,ens;p)
+        return Corrρ
+    end
+    return nothing
+end
+function correlatorE_00n(h5dset,ens;p::Vector{Int})
+    @assert momentum_is_00n(p)
+    z     = only(findall(x->!iszero(x),p))
+    p_e   = "($(p[1]),$(p[2]),$(p[3]))"
+    try
+        Corrρ = read(h5dset,"$ens/p$p_e/rho_g$(z)_g$(z)/p_diag$p_e/C_re")
+        return Corrρ
+    catch
+        Corrρ = read(h5dset,"$ens/p$p_e/rho_g$(z)$(z)/p_diag$p_e/C_re")
+        return Corrρ
+    end
+end
+function correlatorB1(h5dset,ens;p::Vector{Int})
+    if momentum_is_0nn(p)
+        z     = only(findall(x->iszero(x),p))
+        p_e   = "($(p[1]),$(p[2]),$(p[3]))"
+        try 
+            Corrρ = read(h5dset,"$ens/p$p_e/rho_g$(z)$(z)/p_diag$p_e/C_re")
+            return Corrρ
+        catch
+            Corrρ = read(h5dset,"$ens/p$p_e/rho_g$(z)_g$(z)/p_diag$p_e/C_re")
+            return Corrρ
+        end
+    else
+        return nothing
+    end
+end
+function correlatorE_nnn(h5dset,ens;p::Vector{Int})
+    @assert momentum_is_nnn(p)
+    p_e   = "($(p[1]),$(p[2]),$(p[3]))"
+    # TODO: Fix normalization, check signs of i=2
+    try
+        Corrρ = 4read(h5dset,"$ens/p$p_e/rho_g11/p_diag$p_e/C_re")
+        Corrρ = Corrρ .- 2read(h5dset,"$ens/p$p_e/rho_g13/p_diag$p_e/C_re")
+        Corrρ = Corrρ .- 2read(h5dset,"$ens/p$p_e/rho_g12/p_diag$p_e/C_re")
+        Corrρ = Corrρ .- 2read(h5dset,"$ens/p$p_e/rho_g31/p_diag$p_e/C_re")
+        Corrρ = Corrρ .- 2read(h5dset,"$ens/p$p_e/rho_g21/p_diag$p_e/C_re")
+        Corrρ = Corrρ .+  read(h5dset,"$ens/p$p_e/rho_g23/p_diag$p_e/C_re")
+        Corrρ = Corrρ .+  read(h5dset,"$ens/p$p_e/rho_g32/p_diag$p_e/C_re")
+        Corrρ = Corrρ .+  read(h5dset,"$ens/p$p_e/rho_g22/p_diag$p_e/C_re")
+        Corrρ = Corrρ .+  read(h5dset,"$ens/p$p_e/rho_g33/p_diag$p_e/C_re")
+        return Corrρ
+    catch
+        Corrρ = 4read(h5dset,"$ens/p$p_e/rho_g1_g1/p_diag$p_e/C_re")
+        Corrρ = Corrρ .- 2read(h5dset,"$ens/p$p_e/rho_g1_g3/p_diag$p_e/C_re")
+        Corrρ = Corrρ .- 2read(h5dset,"$ens/p$p_e/rho_g1_g2/p_diag$p_e/C_re")
+        Corrρ = Corrρ .- 2read(h5dset,"$ens/p$p_e/rho_g3_g1/p_diag$p_e/C_re")
+        Corrρ = Corrρ .- 2read(h5dset,"$ens/p$p_e/rho_g2_g1/p_diag$p_e/C_re")
+        Corrρ = Corrρ .+  read(h5dset,"$ens/p$p_e/rho_g2_g3/p_diag$p_e/C_re")
+        Corrρ = Corrρ .+  read(h5dset,"$ens/p$p_e/rho_g3_g2/p_diag$p_e/C_re")
+        Corrρ = Corrρ .+  read(h5dset,"$ens/p$p_e/rho_g2_g2/p_diag$p_e/C_re")
+        Corrρ = Corrρ .+  read(h5dset,"$ens/p$p_e/rho_g3_g3/p_diag$p_e/C_re")
+        return Corrρ
+    end
+end
+function correlatorB2(h5dset,ens;p::Vector{Int})
+    if momentum_is_0nn(p)
+        x, y = findall(x->!iszero(x),p)
+        p_e  = "($(p[1]),$(p[2]),$(p[3]))"
+        # TODO: Fix normalization, check signs of i=2
+        try 
+            Corrρ =          read(h5dset,"$ens/p$p_e/rho_g$(x)$(x)/p_diag$p_e/C_re")
+            Corrρ = Corrρ .+ read(h5dset,"$ens/p$p_e/rho_g$(y)$(y)/p_diag$p_e/C_re")
+            Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(x)$(y)/p_diag$p_e/C_re")
+            Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(y)$(x)/p_diag$p_e/C_re")
+            return Corrρ
+        catch
+            Corrρ =          read(h5dset,"$ens/p$p_e/rho_g$(x)_g$(x)/p_diag$p_e/C_re")
+            Corrρ = Corrρ .+ read(h5dset,"$ens/p$p_e/rho_g$(y)_g$(y)/p_diag$p_e/C_re")
+            Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(x)_g$(y)/p_diag$p_e/C_re")
+            Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(y)_g$(x)/p_diag$p_e/C_re")
+            return Corrρ
+        end
+    else
+        return nothing
+    end
+end

@@ -52,6 +52,9 @@ function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,p
                 # checking if the parsed data contains the first relevant dataset
                 three_by_three = haskey(fid,"$ens/p($(pv[1]),$(pv[2]),$(pv[3]))/rho_g0g1_g1/p_diag($(pv[1]),$(pv[2]),$(pv[3]))/C_re")
                 Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2 = correlators_xyz(fid,ens;p=pv)
+                Corrρ_E  = ScatteringI1.correlatorE(fid,ens;p=pv)
+                Corrρ_B1 = ScatteringI1.correlatorB1(fid,ens;p=pv)
+                Corrρ_B2 = ScatteringI1.correlatorB2(fid,ens;p=pv)
                 
                 Corr2π = pipi_correlator(CorrD1,CorrD2,CorrR1,CorrR2,CorrR3,CorrR4,L)
                 Corr   = pipi_rho_matrix(Corr2π,Corrρ,CorrT1,CorrT2,L)
