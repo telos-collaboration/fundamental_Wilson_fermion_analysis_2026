@@ -47,4 +47,3 @@ dependencies:
       - six==1.17.0
       - tqdm==4.67.1
       - vegas==6.2.1
-prefix: /home/fabian/miniconda3/envs/rho-pi-pi
