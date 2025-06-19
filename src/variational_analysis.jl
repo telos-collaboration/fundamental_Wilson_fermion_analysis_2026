@@ -45,7 +45,6 @@ function swap_eigval_numbering(old,t0)
     return new
 end
 function _preprocess_correlator(Corr;deriv)
-    #Corr  = correlator_folding(Corr;t_dim=4,sign=+1)
     if deriv
         Corr = correlator_derivative(Corr;t_dim=4)
     end
