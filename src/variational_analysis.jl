@@ -51,17 +51,17 @@ function _preprocess_correlator(Corr;deriv)
     end
     return Corr
 end
-function variational_analysis(Corr;t0,deriv=true)
+function variational_analysis(Corr;t0,deriv=true,gevp)
     Corr = _preprocess_correlator(Corr;deriv)
-    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
+    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp)
     eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
     return eigvals, Δeigvals, eigvals_cov
 end
-function effective_masses(Corr;t0,deriv)
+function effective_masses(Corr;t0,deriv,gevp)
     Corr = _preprocess_correlator(Corr;deriv)
-    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0)
+    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp)
     eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
     meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
     return meff, Δmeff
