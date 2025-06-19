@@ -24,7 +24,6 @@ export pipi_correlator, pipi_rho_matrix
 # reexports from LatticeUtils
 export eigenvalues, eigenvalues_jackknife_samples
 export implicit_meff
-export correlator_derivative
 export add_mass_band!, add_fit_range!, plot_correlator!
 
 end # module ScatteringI1
