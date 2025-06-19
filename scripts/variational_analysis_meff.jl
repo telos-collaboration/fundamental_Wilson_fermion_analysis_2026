@@ -27,34 +27,34 @@ function construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int))
     Corr3x3[1:2,1:2,:,:] = Corr2x2
     return Corr3x3, sources3x3, momenta3x3
 end
-function plot_meff_from_gevp!(plot2x2,h5dset,ens,p,t0,deriv;use3x3=true,half_sources=false)
+function plot_meff_from_gevp!(plot2x2,h5dset,ens,p,t0,deriv;use3x3=true,gevp=true,half_sources=false)
     three_by_three = haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
     if three_by_three && use3x3
         Corr, sources, momenta = construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int))
-        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
+        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp)
         plot_effective_masses!(plot2x2, meff, Δmeff, sources; markershape=:rect)
         if half_sources
             Corr, sources, momenta = construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=maximum(sources)÷2)
-            meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
+            meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp)
             plot_effective_masses!(plot2x2, meff, Δmeff, sources; markershape=:rect)    
         end
     elseif !use3x3
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits=typemax(Int))
-        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
+        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp)
         plot_effective_masses!(plot2x2, meff, Δmeff, sources)
         if half_sources && minimum(sources) > 2
             Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits=maximum(sources)÷2)
-            meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv)
+            meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp)
             plot_effective_masses!(plot2x2, meff, Δmeff, sources)    
         end
     end
 end
-function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv, average_equivalent_momenta=true, use3x3=true, half_sources=true)
+function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv, gevp, average_equivalent_momenta=true, use3x3=true, half_sources=true)
     h5dset  = h5open(corr_file)
     if isfile(fitresults)
         res = h5open(fitresults)
     end
-    plotname = "effective_masses_t0$(t0)_deriv_$deriv.pdf"
+    plotname = "effective_masses_t0$(t0)_deriv_$(deriv)_gevp_$(gevp).pdf"
     inf_vol  = readdlm(infvolfile,',',skipstart=1)
     fittable = readdlm(fitparam,',',skipstart=1)
 
@@ -80,11 +80,10 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             plt1  = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
             plt2 = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
         
-            #plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3=false)
-            plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3)
+            plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3,gevp)
             plot_non_interacting_levels!(plt1,h5dset,ens,p,inf_vol)
             if half_sources
-                plot_meff_from_gevp!(plt2,h5dset,ens,p,t0,deriv;use3x3=false,half_sources=true)
+                plot_meff_from_gevp!(plt2,h5dset,ens,p,t0,deriv;gevp,use3x3=false,half_sources=true)
                 all_plots = [plt1,plt2]
             else
                 all_plots = [plt1]
