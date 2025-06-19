@@ -80,7 +80,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             plt1  = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
             plt2 = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
         
-            plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3=false)
+            #plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3=false)
             plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3)
             plot_non_interacting_levels!(plt1,h5dset,ens,p,inf_vol)
             if half_sources
