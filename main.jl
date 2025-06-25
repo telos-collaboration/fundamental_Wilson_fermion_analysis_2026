@@ -15,6 +15,7 @@ t0     = 6
 deriv  = false
 gevp   = true
 use3x3 = true
+average_equivalent_momenta = true
 
 path  = "/home/fabian/Dokumente/Physics/Data/"
 path  = "/home/fabian/Documents/Physics/Data/"
@@ -65,9 +66,9 @@ all_runs_table(h5file_raw,analysed_table;only_ens)
 merge_all_runs(h5file_raw, h5file_com)
 
 write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting,only_ens)
-write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3, gevp)
+write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3, gevp, average_equivalent_momenta)
 run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
-plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, half_sources)
+plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, half_sources, average_equivalent_momenta)
 
 table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
 cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)

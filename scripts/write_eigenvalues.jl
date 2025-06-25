@@ -6,7 +6,7 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta=true, use3x3=true, gevp=true, plotpath)    
+function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta, use3x3=true, gevp=true, plotpath)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
 

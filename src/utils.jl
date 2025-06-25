@@ -36,7 +36,7 @@ function _avg_sources(Corr;maxhits=typemax(Int))
     Corr_avg = dropdims(mean(Corr[:,:,:,1:h,:],dims=4),dims=4)
     return Corr_avg, h
 end
-function read_correlation_matrix(h5dset,ens,p,label="correlation_matrix";maxhits=typemax(Int),average_equivalent_momenta=true)
+function read_correlation_matrix(h5dset,ens,p,label="correlation_matrix";maxhits=typemax(Int),average_equivalent_momenta)
     p0   = _parse_momentum(p)
     Corr = read(h5dset,joinpath(ens,p,label))
     
