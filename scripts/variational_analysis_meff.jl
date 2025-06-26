@@ -54,7 +54,11 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
     if isfile(fitresults)
         res = h5open(fitresults)
     end
-    plotname = "effective_masses_t0$(t0)_deriv_$(deriv)_gevp_$(gevp).pdf"
+    if gevp
+        plotname = "effective_masses_gevp_t0$(t0)_deriv_$(deriv).pdf"
+    else
+        plotname = "effective_masses_evp_deriv_$(deriv).pdf"
+    end
     inf_vol  = readdlm(infvolfile,',',skipstart=1)
     fittable = readdlm(fitparam,',',skipstart=1)
 
@@ -76,7 +80,11 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             m0     = only(read(h5dset,joinpath(ens,"quarkmasses")))
             β      = read(h5dset,joinpath(ens,"beta"))
             ncfg   = read(h5dset,joinpath(ens,"Nconf"))
-            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+            if gevp
+                title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+            else
+                title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg"
+            end
             plt1  = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
             plt2 = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
         
