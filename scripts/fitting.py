@@ -78,9 +78,9 @@ def fit_all_files(infile,outfile,parameterfile):
         ev       = get_hdf5_value(fid,group+irreps+"/eigvals")
         Delta_ev = get_hdf5_value(fid,group+irreps+"/Delta_eigvals")
         cov_ev   = get_hdf5_value(fid,group+irreps+"/cov_eigvals")
-        t0       = get_hdf5_value(fid,group+irreps+"/t0") - 1 # offset for 1-indexing in julia 
+        # t0       = get_hdf5_value(fid,group+irreps+"/t0") - 1 # offset for 1-indexing in julia    # excluded for now. see "write_all_eigenvalues"
         T        = ev.shape[0]
-        antisymmetric = get_hdf5_value(fid,group+irreps+"/deriv") 
+        antisymmetric = get_hdf5_value(fid,group+"/deriv") 
 
         # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
         var2 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
@@ -116,7 +116,6 @@ def fit_all_files(infile,outfile,parameterfile):
         f.create_dataset(group+irreps+"/chi2_1", data=chi2_2)
         f.create_dataset(group+irreps+"/dof0", data=dof1)
         f.create_dataset(group+irreps+"/dof1", data=dof2)
-        f.create_dataset(group[:-9]+"/lattice", data=lattice)
         f.close()
 
 args = sys.argv
