@@ -72,6 +72,7 @@ def fit_all_files(infile,outfile,parameterfile):
             continue 
 
         # read the data from the hdf5 file
+        lattice  = get_hdf5_value(fid,group[:-9]+"/lattice")
         ev       = get_hdf5_value(fid,group+"/eigvals")
         Delta_ev = get_hdf5_value(fid,group+"/Delta_eigvals")
         cov_ev   = get_hdf5_value(fid,group+"/cov_eigvals")
@@ -113,6 +114,7 @@ def fit_all_files(infile,outfile,parameterfile):
         f.create_dataset(group+"/chi2_1", data=chi2_2)
         f.create_dataset(group+"/dof0", data=dof1)
         f.create_dataset(group+"/dof1", data=dof2)
+        f.create_dataset(group+"/lattice", data=lattice)
         f.close()
 
 args = sys.argv
