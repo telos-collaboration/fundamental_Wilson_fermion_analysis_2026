@@ -6,6 +6,7 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
+# TODO: include other irreps
 function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta, use3x3=true, gevp=true, plotpath)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
@@ -94,16 +95,16 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 isinteractive() && display(plt)
             end
 
-            h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
-            h5write(outfile,joinpath(ens,p,"Delta_eigvals"),Δeigvals)
-            h5write(outfile,joinpath(ens,p,"cov_eigvals"),eigvals_cov)
-            h5write(outfile,joinpath(ens,p,"t0"),t0)
-            h5write(outfile,joinpath(ens,p,"deriv"),deriv)
-            h5write(outfile,joinpath(ens,p,"average_equivalent_momenta"),average_equivalent_momenta)
-            h5write(outfile,joinpath(ens,p,"Corr2x2"),Corr)
-            if three_by_three
-                h5write(outfile,joinpath(ens,p,"Corr3x3"),Corr3x3)
-            end
+            h5write(outfile,joinpath(ens,p,"A1","eigvals"),eigvals)
+            h5write(outfile,joinpath(ens,p,"A1","Delta_eigvals"),Δeigvals)
+            h5write(outfile,joinpath(ens,p,"A1","cov_eigvals"),eigvals_cov)
+            # h5write(outfile,joinpath(ens,p,"t0"),t0)                                              # commented out for now, as not needed
+            # h5write(outfile,joinpath(ens,p,"deriv"),deriv)
+            # h5write(outfile,joinpath(ens,p,"average_equivalent_momenta"),average_equivalent_momenta)
+            # h5write(outfile,joinpath(ens,p,"Corr2x2"),Corr)
+            # if three_by_three
+            #     h5write(outfile,joinpath(ens,p,"Corr3x3"),Corr3x3)
+            # end
         end
     end
 end
