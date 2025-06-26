@@ -22,8 +22,8 @@ function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,p
     end
 
     if plotting
-        plotname = "diagrams_t0$(t0)_deriv_$deriv.pdf"
-        plotname3x3 = "diagrams_t0$(t0)_deriv_$(deriv)_3x3.pdf"
+        plotname = "diagrams.pdf"
+        plotname3x3 = "diagrams.pdf"
         texpath  = joinpath(plotpath,"diagrams_tex")
         ispath(texpath) || mkpath(texpath)
         ispath(plotpath) || mkpath(plotpath)
@@ -80,7 +80,7 @@ function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,p
                     T, L  = read(fid,joinpath(ens,"lattice"))[1:2]
                     m0    = only(read(fid,joinpath(ens,"quarkmasses")))
                     ncfg  = first(size(Corrπ))
-                    title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(p0), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+                    title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(p0), n_{cfg}=%$ncfg"
                     ylabel= L"\textrm{pseudolog}_{10} C(t)"
                     xlabel= L"t"
                     
@@ -126,8 +126,6 @@ function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,p
                         append_pdf!(joinpath(plotpath,plotname3x3),"temp.pdf",cleanup=true)
                         isinteractive() && display(plt)    
                     end
-
-
                 end
             end
         end
