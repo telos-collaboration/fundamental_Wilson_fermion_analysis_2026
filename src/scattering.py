@@ -228,21 +228,43 @@ def get_rizz(E_pipis, N_Ls, dvecs, mpi, irrep):
                 result[key].append(tmp[key])
     return result
 
-def read_hdf5_fitresults(pref, NTs, NLs, beta, m0, num_lvl=2):
-    NL_arr, dvec_arr, en_arr, en_m_arr, en_p_arr = [[],[],[],[],[]]
-    with h5py.File("output/data/isospin1_fitresults"+pref+".hdf5","r") as hfile:
-        for i in range(len(NTs)):
-            NT=NTs[i]
-            for NL in NLs[i]:
-                hfile_str = "Lt%iLs%ibeta"%(NT, NL)+("%f"%beta).rstrip("0")+"m"+("%f"%m0).rstrip("0")+"/"
-                for key in hfile[hfile_str].keys():
-                    for i in range(num_lvl):
-                        NL_arr.append(float(NL))
-                        dvec_arr.append([int(key[2]),int(key[4]),int(key[6])])
-                        en_arr.append(hfile[hfile_str+key+"/E%i"%i][()][0])
-                        en_m_arr.append(hfile[hfile_str+key+"/Delta_E%i"%i][()][0])
-                        en_p_arr.append(hfile[hfile_str+key+"/Delta_E%i"%i][()][0])
-    return np.asarray(NL_arr), np.asarray(dvec_arr), np.asarray(en_arr), np.asarray(en_m_arr), np.asarray(en_p_arr)
+# def read_hdf5_fitresults_old(pref, NTs, NLs, beta, m0, num_lvl=2):
+#     NL_arr, dvec_arr, en_arr, en_m_arr, en_p_arr = [[],[],[],[],[]]
+#     with h5py.File("output/data/isospin1_fitresults"+pref+".hdf5","r") as hfile:
+#         for i in range(len(NTs)):
+#             NT=NTs[i]
+#             for NL in NLs[i]:
+#                 hfile_str = "Lt%iLs%ibeta"%(NT, NL)+("%f"%beta).rstrip("0")+"m"+("%f"%m0).rstrip("0")+"/"
+#                 for key in hfile[hfile_str].keys():
+#                     for i in range(num_lvl):
+#                         NL_arr.append(float(NL))
+#                         dvec_arr.append([int(key[2]),int(key[4]),int(key[6])])
+#                         en_arr.append(hfile[hfile_str+key+"/E%i"%i][()][0])
+#                         en_m_arr.append(hfile[hfile_str+key+"/Delta_E%i"%i][()][0])
+#                         en_p_arr.append(hfile[hfile_str+key+"/Delta_E%i"%i][()][0])
+#     return np.asarray(NL_arr), np.asarray(dvec_arr), np.asarray(en_arr), np.asarray(en_m_arr), np.asarray(en_p_arr)
+
+def read_hdf5_fitresults(name, NTs, NLs, beta, m0, num_lvl=2):
+    NL_arr, dvec_arr, irrep_arr, en_arr, en_m_arr, en_p_arr = [[],[],[],[],[],[]]
+    with h5py.File("output/data/"+name+".hdf5","r") as hfile:
+        hfile.visit(print)
+
+
+
+
+
+    #     for i in range(len(NTs)):
+    #         NT=NTs[i]
+    #         for NL in NLs[i]:
+    #             hfile_str = "Lt%iLs%ibeta"%(NT, NL)+("%f"%beta).rstrip("0")+"m"+("%f"%m0).rstrip("0")+"/"
+    #             for key in hfile[hfile_str].keys():
+    #                 for i in range(num_lvl):
+    #                     NL_arr.append(float(NL))
+    #                     dvec_arr.append([int(key[2]),int(key[4]),int(key[6])])
+    #                     en_arr.append(hfile[hfile_str+key+"/E%i"%i][()][0])
+    #                     en_m_arr.append(hfile[hfile_str+key+"/Delta_E%i"%i][()][0])
+    #                     en_p_arr.append(hfile[hfile_str+key+"/Delta_E%i"%i][()][0])
+    # return np.asarray(NL_arr), np.asarray(dvec_arr), np.asarray(en_arr), np.asarray(en_m_arr), np.asarray(en_p_arr)
     
 def mpi_m0(m0):
     if m0 == -0.92:
