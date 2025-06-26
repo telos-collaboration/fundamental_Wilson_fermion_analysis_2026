@@ -66,7 +66,7 @@ def fit_all_files(infile,outfile,parameterfile):
     
     for row in tqdm((reader), total=lines , desc="Fit eigenvalues", disable=False):
 
-        group, tmin, tmax = row[0], int(row[1]), int(row[2]) 
+        group, tmin1, tmax1, tmin2, tmax2 = row[0], int(row[1]), int(row[2]), int(row[3]), int(row[4]) 
 
         if group not in fid:
             continue 
@@ -91,12 +91,14 @@ def fit_all_files(infile,outfile,parameterfile):
         plotting = False
         Nmax = 5
 
-        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
-        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin1,tmax1,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin2,tmax2,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
 
         f = h5py.File(outfile, "a")
-        f.create_dataset(group+"/tmin", data=tmin)
-        f.create_dataset(group+"/tmax", data=tmax)
+        f.create_dataset(group+"/tmin1", data=tmin1)
+        f.create_dataset(group+"/tmax1", data=tmax1)
+        f.create_dataset(group+"/tmin2", data=tmin2)
+        f.create_dataset(group+"/tmax2", data=tmax2)
         f.create_dataset(group+"/Nmax", data=Nmax)
         f.create_dataset(group+"/antisymmetric", data=antisymmetric)
         f.create_dataset(group+"/E0", data=[E_i.mean for E_i in E1])
