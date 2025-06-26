@@ -99,7 +99,7 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
             h5write(outfile,joinpath(ens,p,"A1","Delta_eigvals"),Δeigvals)
             h5write(outfile,joinpath(ens,p,"A1","cov_eigvals"),eigvals_cov)
             # h5write(outfile,joinpath(ens,p,"t0"),t0)                                              # commented out for now, as not needed
-            # h5write(outfile,joinpath(ens,p,"deriv"),deriv)
+            h5write(outfile,joinpath(ens,p,"deriv"),deriv)
             # h5write(outfile,joinpath(ens,p,"average_equivalent_momenta"),average_equivalent_momenta)
             # h5write(outfile,joinpath(ens,p,"Corr2x2"),Corr)
             # if three_by_three
