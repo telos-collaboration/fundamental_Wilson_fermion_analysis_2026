@@ -2,6 +2,7 @@ using Pkg; Pkg.activate(".")
 using HDF5
 using Statistics
 using Plots
+using LatticeUtils
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.6,ms=6,titlefontsize=11)
 SHAPES = [:circle, :pentagon, :diamond, :hexagon, :rect, :octagon, :star4, :dtriangle,:star5, :ltriangle, :star6, :rtriangle, :star7, :utriangle, :star8]
 
@@ -20,7 +21,9 @@ function symmetry_ratio(Corr;t_dim)
     ratio  = @. Cleft/Cright
     return left, ratio
 end
-function symmetrise_correlator(Corr;t_dim,sign)
+# This allocates more than LatticeUtils.correlatorfolding() but is 
+# much shorter and a bit faster in exchange.
+function correlator_folding_alt(Corr;t_dim,sign)
     T      = size(Corr,t_dim)
     left   = 2:T÷2
     right  = T÷2+2:T
@@ -61,6 +64,16 @@ function plot_3x3_matrix_elements!(plt,C;conf_dim,avg_dims=conf_dim)
     end
     return plt
 end  
+function fold_3x3_correlator(c)
+    c_folded = similar(c)
+    c_folded[1:2,1:2,:,:] .= correlator_folding(c[1:2,1:2,:,:];t_dim=4,sign=+1)
+    c_folded[1,3,:,:] .= correlator_folding(c[1,3,:,:];t_dim=2,sign=-1)
+    c_folded[3,1,:,:] .= correlator_folding(c[3,1,:,:];t_dim=2,sign=-1)
+    c_folded[2,3,:,:] .= correlator_folding(c[2,3,:,:];t_dim=2,sign=-1)
+    c_folded[3,2,:,:] .= correlator_folding(c[3,2,:,:];t_dim=2,sign=-1)
+    c_folded[3,3,:,:] .= correlator_folding(c[3,3,:,:];t_dim=2,sign=+1)
+    return c_folded
+end
 
 h5file1  = "output/data/isospin1_eigenvalues_t0_6_deriv_false.hdf5"
 fid1     = h5open(h5file1)
@@ -70,10 +83,7 @@ conf_dim = 3
 avg_dims = 3
 
 t1, r1, Δr1, t_dim1 = symmetry_ratio_avg(Corr1;t_dim,conf_dim,avg_dims)
-Corr1_sym = symmetrise_correlator(Corr1;t_dim,sign=+1)
+Corr1_sym           = fold_3x3_correlator(Corr1)
 ts, rs, Δrs, t_dim1 = symmetry_ratio_avg(Corr1_sym;t_dim,conf_dim,avg_dims)
 plt1 = plot_3x3_matrix_elements!(plot(),Corr1;conf_dim,avg_dims)
 plt2 = plot_3x3_matrix_elements!(plot(),Corr1_sym;conf_dim,avg_dims)
-
-plot!(plt1;legend=:top)
-plot!(plt2;legend=:top)
