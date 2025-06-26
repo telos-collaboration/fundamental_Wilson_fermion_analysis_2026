@@ -2,8 +2,15 @@ using Pkg; Pkg.activate(".")
 using HDF5
 using Statistics
 using Plots
-gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
+gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.6,ms=6,titlefontsize=11)
+SHAPES = [:circle, :pentagon, :diamond, :hexagon, :rect, :octagon, :star4, :dtriangle,:star5, :ltriangle, :star6, :rtriangle, :star7, :utriangle, :star8]
 
+function avg_corr(corr;conf_dim,avg_dims=conf_dim)
+    Nconf = size(corr,conf_dim)
+    C  = dropdims(mean(corr,dims=avg_dims),dims=avg_dims)
+    ΔC = dropdims(std(corr,dims=avg_dims),dims=avg_dims)/sqrt(Nconf)
+    return C, ΔC
+end
 function symmetry_ratio(Corr;t_dim)
     T      = size(Corr,t_dim)
     left   = 2:T÷2
@@ -27,31 +34,46 @@ function symmetrise_correlator(Corr;t_dim,sign)
     return C_symmetric
 end
 function symmetry_ratio_avg(Corr;t_dim,conf_dim,avg_dims)
-    Nconf = size(Corr,conf_dim)
     t, r  = symmetry_ratio(Corr;t_dim)
-    R     = dropdims(mean(r,dims=avg_dims),dims=avg_dims)
-    ΔR    = dropdims(std(r,dims=avg_dims),dims=avg_dims)/sqrt(Nconf)
+    R, ΔR = avg_corr(r;conf_dim,avg_dims)
     t_dim = t_dim - count(d -> isless(d,t_dim), avg_dims)
     return t, R, ΔR, t_dim
 end
+pseudolog10(x,C=1E+4) = sign(x)*log10(abs(C*x)+1)
+function plot_3x3_matrix_elements!(plt,C;conf_dim,avg_dims=conf_dim)
+    Cpl, ΔCpl = avg_corr(pseudolog10.(C);conf_dim,avg_dims)
+    si = 1
+    for i in 1:3, j in i:3
+        Cij  = Cpl[i,j,:]
+        ΔCij = ΔCpl[i,j,:]
+        Cji  = Cpl[i,j,:]
+        ΔCji = ΔCpl[i,j,:]
+        # Plot only real or imaginary part, depending on which one is non-zero 
+        plot_real = sum(abs∘real,Cij) > sum(abs∘imag,Cij)
+        if plot_real
+            plot!(plt,real.(Cij),yerr=real.(ΔCij),marker=SHAPES[si],label="real part of ($i,$j)")
+            si += 1
+        else
+            plot!(plt,imag.(Cij),yerr=imag.(ΔCij), marker=SHAPES[si],label="imag part of ($i,$j)")
+            plot!(plt,imag.(Cji),yerr=imag.(ΔCji), marker=SHAPES[si+1],label="imag part of ($j,$i)")
+            si += 2
+        end
+    end
+    return plt
+end  
 
+h5file1  = "output/data/isospin1_eigenvalues_t0_6_deriv_false.hdf5"
+fid1     = h5open(h5file1)
+Corr1    = read(fid1[(first(keys(fid1)))],"p(0,0,1)/Corr3x3")
+t_dim    = 4
+conf_dim = 3
+avg_dims = 3
 
-h5file1 = "output/data/isospin1_eigenvalues_t0_6_deriv_false.hdf5"
-h5file2 = "output/data/isospin1_merged.hdf5"
-fid1  = h5open(h5file1)
-fid2  = h5open(h5file2)
-Corr1 = read(fid1[(first(keys(fid1)))],"p(0,0,1)/Corr3x3")
-Corr2 = read(fid2[(first(keys(fid2)))],"p(0,0,0)/pi/p_diag(0,0,0)/C_re")
+t1, r1, Δr1, t_dim1 = symmetry_ratio_avg(Corr1;t_dim,conf_dim,avg_dims)
+Corr1_sym = symmetrise_correlator(Corr1;t_dim,sign=+1)
+ts, rs, Δrs, t_dim1 = symmetry_ratio_avg(Corr1_sym;t_dim,conf_dim,avg_dims)
+plt1 = plot_3x3_matrix_elements!(plot(),Corr1;conf_dim,avg_dims)
+plt2 = plot_3x3_matrix_elements!(plot(),Corr1_sym;conf_dim,avg_dims)
 
-t1, r1, Δr1, t_dim1 = symmetry_ratio_avg(Corr1;t_dim=4,conf_dim=3,avg_dims=(3))
-t2, r2, Δr2, t_dim2 = symmetry_ratio_avg(Corr2;t_dim=3,conf_dim=1,avg_dims=(1,2))
-
-
-Corr1_sym = symmetrise_correlator(Corr1;t_dim=4,sign=+1)
-
-Corr1_sym
-
-t1, r1, Δr1, t_dim1 = symmetry_ratio_avg(Corr1_sym;t_dim=4,conf_dim=3,avg_dims=(3))
-scatter(t1,real.(r1[1,1,:]),yerr=real.(Δr1[1,1,:]))
-
-
+plot!(plt1;legend=:top)
+plot!(plt2;legend=:top)
