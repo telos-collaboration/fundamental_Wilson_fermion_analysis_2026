@@ -98,6 +98,9 @@ def fit_all_files(infile,outfile,parameterfile):
         E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin2,tmax2,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
 
         f = h5py.File(outfile, "a")
+        lattice_key = group[:-9]+"/lattice"
+        if not lattice_key in f.keys():
+            f.create_dataset(lattice_key, data=lattice)
         f.create_dataset(group+irreps+"/tmin1", data=tmin1)
         f.create_dataset(group+irreps+"/tmax1", data=tmax1)
         f.create_dataset(group+irreps+"/tmin2", data=tmin2)
