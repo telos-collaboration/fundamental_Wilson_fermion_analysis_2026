@@ -11,7 +11,11 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
     isfile(outfile) && rm(outfile)
 
     if plotting
-        plotname = "eigenvalues_t0$(t0)_deriv_$deriv.pdf"
+        if gevp
+            plotname = "eigenvalues_gevp_t0$(t0)_deriv_$deriv.pdf"
+        else
+            plotname = "eigenvalues_evp_deriv_$deriv.pdf"
+        end
         texpath  = joinpath(plotpath,"eigenvalues_tex")
         ispath(texpath)  || mkpath(texpath)
         ispath(plotpath) || mkpath(plotpath)
@@ -43,7 +47,11 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
                 m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
                 ncfg  = read(h5dset,joinpath(ens,"Nconf"))
-                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+                if gevp
+                    title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+                else
+                    title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg"
+                end
                 
                 t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
                 t1 = filter(x->!iszero(eigvals[1,x]),t)
