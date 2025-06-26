@@ -10,7 +10,7 @@ def save_to_hdf(res,res_sample, filename):
     with h5py.File("rho_pipi_scattering_analysis/output/hdf5/"+filename+".hdf5","w") as hfile:
     # with h5py.File("output/hdf5/"+filename+".hdf5","w") as hfile:
         for key, val in res.items():
-            hfile.create_dataset("orig_"+key, data = val)
+            hfile.create_dataset("mean_"+key, data = val)
         for key, val in res_sample.items():
             hfile.create_dataset("sample_"+key, data = val)
 
@@ -18,13 +18,13 @@ def read_from_hdf(filename):
     res, res_tmp = [{},{}]
     with h5py.File("output/hdf5/"+filename+".hdf5","r") as hfile:
         for key in hfile.keys():
-            if key[:5] == "orig_":
+            if key[:5] == "mean_":
                 res[key[5:]] = hfile[key][()]
             if key[:7] == "sample_":
                 res_tmp[key[7:]] = hfile[key][()]
     return res, res_tmp
 
-def result_sampled(info,N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,num_resample=50, resampling = "gauss"):
+def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep, resampling = "gauss",num_resample=50):
     res = {}
     res_sample = {}
     res["resampling"] = resampling
@@ -244,15 +244,6 @@ def get_rizz(E_pipis, N_Ls, dvecs, mpi, irrep):
 #                         en_p_arr.append(hfile[hfile_str+key+"/Delta_E%i"%i][()][0])
 #     return np.asarray(NL_arr), np.asarray(dvec_arr), np.asarray(en_arr), np.asarray(en_m_arr), np.asarray(en_p_arr)
 
-def read_hdf5_fitresults(name, NTs, NLs, beta, m0, num_lvl=2):
-    NL_arr, dvec_arr, irrep_arr, en_arr, en_m_arr, en_p_arr = [[],[],[],[],[],[]]
-    with h5py.File("output/data/"+name+".hdf5","r") as hfile:
-        hfile.visit(print)
-
-
-
-
-
     #     for i in range(len(NTs)):
     #         NT=NTs[i]
     #         for NL in NLs[i]:
@@ -282,12 +273,38 @@ def mrho_m0(m0):
     elif m0 == -0.867:
         return 0.3530
 
-def calc_PS_Fabian(fitresname,NTs,NLs,beta,m0,pref = "",resampling="lin",num_resample=5):
-    NL_arr, dvec_arr, en_arr, en_m_arr, en_p_arr = read_hdf5_fitresults(fitresname,NTs,NLs,beta,m0,num_lvl=2)
-    mpi = mpi_m0(m0)
-    mrho = mrho_m0(m0)
-    info={}
-    info["beta"],info["m_1"],info["m_2"], info["mrho"], info["mpi"], info["en_lv"] = [beta,m0,m0,mrho,mpi,2]
+def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=5):
+    infile = np.transpose(np.genfromtxt("../input/scattering_input.csv",delimiter=";",skip_header=1,dtype=str))
+    infile[3] = [float(infile[3,i]) for i in range(len(infile[0]))]
+    infile[4] = [ bool(infile[4,i]) for i in range(len(infile[0]))]
+    # exit()
+    with h5py.File("../output/data/"+corrfitname+".hdf5","r") as hfile:
+        for ens in hfile:
+            print(ens)
+            for P in hfile[ens]:
+                if P[0] == "p":
+                    print(P)
+                    for irrep in hfile[ens][P]:
+                        beta, m0, mpi, ld = infile[1:,infile[0] == ens+P+irrep]
+                        NL = hfile[ens]["lattice"][()][3]
+                        E0 = hfile[ens][P][irrep]["E0"][()][0]
+                        E0_m = hfile[ens][P][irrep]["Delta_E0"][()][0]
+                        E0_p = hfile[ens][P][irrep]["Delta_E0"][()][0]
+                        E1 = hfile[ens][P][irrep]["E1"][()][0]
+                        E1_m = hfile[ens][P][irrep]["Delta_E1"][()][0]
+                        E1_p = hfile[ens][P][irrep]["Delta_E1"][()][0]
+                        dvec = [int(P[2]),int(P[4]),int(P[6])]
+                        res, res_sampled = result_sampled(NL, E0, E0_m, E0_p, dvec, mpi, irrep, resampling=resampling, num_resample=num_resample)
+                        # print(NL, E0, E0_m, E0_p, E1, E1_m, E1_p, dvec)
+
+
+
+    # NL_arr, dvec_arr, en_arr, en_m_arr, en_p_arr = 
+    # read_hdf5_fitresults(corrfitname,num_lvl=2)
+    # mpi = mpi_m0(m0)
+    # mrho = mrho_m0(m0)
+    # info={}
+    # info["beta"],info["m_1"],info["m_2"], info["mrho"], info["mpi"], info["en_lv"] = [beta,m0,m0,mrho,mpi,2]
 
 if __name__ == "__main__":
-    calc_PS_Fabian("fit_non_res", "non_res", resampling="lin", num_resample=100)
+    calc_all_phaseshifts("isospin1_fitresults_evp_deriv_false", "non_res", resampling="lin", num_resample=100)
