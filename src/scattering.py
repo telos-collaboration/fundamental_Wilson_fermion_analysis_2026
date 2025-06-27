@@ -6,38 +6,62 @@ import h5py
 import sys
 import os
 
-def save_to_hdf(res,res_sample, filename):
-    with h5py.File("rho_pipi_scattering_analysis/output/hdf5/"+filename+".hdf5","w") as hfile:
-    # with h5py.File("output/hdf5/"+filename+".hdf5","w") as hfile:
+# def save_to_hdf_old(res,res_sample, info, filename):
+#     directory = "../output/scattering/"
+#     fpathname = directory+filename+".hdf5"
+#     if not os.path.exists(directory):
+#         os.makedirs(directory)
+#     with h5py.File(fpathname,"w") as hfile:
+#     # with h5py.File("output/hdf5/"+filename+".hdf5","w") as hfile:
+#         for key, val in res.items():
+#             hfile.create_dataset("mean/"+key, data = val)
+#         for key, val in res_sample.items():
+#             hfile.create_dataset("sample/"+key, data = val)
+#         for key, val in info.items():
+#             hfile.create_dataset("info/"+key, data = val)
+
+def save_to_hdf(res,res_sample, info, ens, P, irrep, filename):
+    group = ens+"/"+P+"/"+irrep+"/"
+    # directory = "../output/scattering/"
+    # fpathname = directory+filename+".hdf5"
+    # if not os.path.exists(directory):
+    #     os.makedirs(directory)
+    print("../output/scattering/isospin1_scattering"+filename+".hdf5")
+    with h5py.File("../output/scattering/isospin1_scattering"+filename+".hdf5","a") as hfile:
         for key, val in res.items():
-            hfile.create_dataset("mean_"+key, data = val)
+            hfile.create_dataset(group+"mean/"+key, data = val)
         for key, val in res_sample.items():
-            hfile.create_dataset("sample_"+key, data = val)
+            hfile.create_dataset(group+"sample/"+key, data = val)
+        for key, val in info.items():
+            hfile.create_dataset(group+"info/"+key, data = val)
 
-def read_from_hdf(filename):
-    res, res_tmp = [{},{}]
-    with h5py.File("output/hdf5/"+filename+".hdf5","r") as hfile:
-        for key in hfile.keys():
-            if key[:5] == "mean_":
-                res[key[5:]] = hfile[key][()]
-            if key[:7] == "sample_":
-                res_tmp[key[7:]] = hfile[key][()]
-    return res, res_tmp
+# def read_from_hdf(filename):                  # not needed for now
+#     res, res_tmp, info = [{},{},{}]
+#     with h5py.File("../output/scattering/"+filename+".hdf5","r") as hfile:
+#         for key in hfile.keys():
+#             if key[:5] == "mean/":
+#                 res[key[5:]] = hfile[key][()]
+#             if key[:7] == "sample/":
+#                 res_tmp[key[7:]] = hfile[key][()]
+#             if key[:5] == "info/":
+#                 info[key[5:]] = hfile[key][()]
+#     return res, res_tmp, info
 
-def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld, resampling = "gauss",num_resample=50):
+def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld,resampling="gauss",num_resample=50):
     res = {}
+    info = {}
     res_sample = {}
-    res["resampling"] = resampling
-    res["num_resample"] = num_resample
-    res["mpi"] = mpi
+    info["resampling"] = resampling
+    info["num_resample"] = num_resample
+    info["mpi"] = mpi
     # res["N_L"] = N_L
     # print(type(N_L), type(mpi))
     # print(N_L, mpi)
     print(N_L,mpi)
-    res["L_prime"] = N_L*mpi
-    res["dvec"] = dvec
-    res["d"] = [np.sqrt(np.dot(dvec[i],dvec[i])) for i in range(len(dvec))]
-    res["d2"] = [np.dot(dvec[i],dvec[i]) for i in range(len(dvec))]
+    info["L_prime"] = N_L*mpi
+    info["dvec"] = dvec
+    info["d"] = [np.sqrt(np.dot(dvec[i],dvec[i])) for i in range(len(dvec))]
+    info["d2"] = [np.dot(dvec[i],dvec[i]) for i in range(len(dvec))]
 
     # for key, val in info.items():
     #     res[key] = val
@@ -45,6 +69,10 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld, resampling 
         res[key] = val
     for key in res.keys():
         res_sample[key] = []
+
+    # print("res:  ", res.keys())
+    # print(res_sample.keys())
+    # exit()
 
     if resampling == "gauss":
         for i in tqdm(range(num_resample)):
@@ -58,9 +86,11 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld, resampling 
     elif resampling == "lin":
         for E_pipi_tmp in tqdm(np.linspace(E_pipi-E_pipi_em,E_pipi+E_pipi_ep, num_resample)):
             res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep,ld)
+            # print("res_tmp:  ", res_tmp.keys())
             for key, val in res_tmp.items():
+                # print(key)
                 res_sample[key].append(val)
-    return res, res_sample
+    return res, res_sample, info
 
 
 def cot_delta_000_T1(q2,N_L,mpi):
@@ -206,34 +236,34 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     P_prime = 2*np.pi*np.sqrt(np.dot(dvec,dvec))/(N_L*mpi)
     En_prime = E_pipi/mpi
     res["En_prime"] = En_prime
-    print("\t\t", En_prime**2, P_prime**2, En_prime**2 - P_prime**2)
+    # print("\t\t", En_prime**2, P_prime**2, En_prime**2 - P_prime**2)
     if En_prime**2 - P_prime**2 < 4:
-        for key in key_list[2:]:
+        for key in key_list:
             res[key] = 0
     else:
-        tmp = {}
-        tmp["E_cm"] = Ecm(ld)(E_pipi,Pvec)
-        tmp["E_cm_prime"] = tmp["E_cm"]/mpi
-        tmp["s_prime"] = tmp["E_cm_prime"]**2
-        tmp["s"] = tmp["E_cm"]**2
-        tmp["pstar"] = pstar(ld)(tmp["E_cm"],mpi)    # np.sqrt(tmp["s_prime"]/4-1)
-        tmp["pstar_prime"] = tmp["pstar"]/mpi
-        tmp["p2star"] = tmp["pstar"]**2
-        tmp["p2star_prime"] = tmp["pstar_prime"]**2
-        q2 = tmp["p2star"]*(N_L/(2*np.pi))**2
-        tmp["q"] = np.sqrt(q2)
-        tmp["q2"] = q2
+        # res = {}
+        res["E_cm"] = Ecm(ld)(E_pipi,Pvec)
+        res["E_cm_prime"] = res["E_cm"]/mpi
+        res["s_prime"] = res["E_cm_prime"]**2
+        res["s"] = res["E_cm"]**2
+        res["pstar"] = pstar(ld)(res["E_cm"],mpi)    # np.sqrt(res["s_prime"]/4-1)
+        res["pstar_prime"] = res["pstar"]/mpi
+        res["p2star"] = res["pstar"]**2
+        res["p2star_prime"] = res["pstar_prime"]**2
+        q2 = res["p2star"]*(N_L/(2*np.pi))**2
+        res["q"] = np.sqrt(q2)
+        res["q2"] = q2
         cot_PS = cot_delta_mom(dvec,irrep)(q2, N_L,mpi)
-        tmp["cot_PS"] = cot_PS
-        tmp["tan_PS"] = 1/cot_PS
+        res["cot_PS"] = cot_PS
+        res["tan_PS"] = 1/cot_PS
         PS = 360*np.arctan(1/cot_PS)/(2*np.pi)
-        tmp["PS"] = complex(PS.real%180,PS.imag%180)
-        tmp["p3cotPS"] = tmp["pstar"]**3*cot_PS
-        tmp["p3cotPS_prime"] = tmp["pstar_prime"]**3*cot_PS
-        tmp["p3cotPS_Ecm"] = tmp["pstar"]**3/tmp["E_cm"]*cot_PS
-        tmp["p3cotPS_Ecm_prime"] = tmp["pstar_prime"]**3/tmp["E_cm_prime"]*cot_PS
-        tmp["sigma"] = 4*np.pi*3/(cot_PS**2+1)/tmp["p2star"]
-        tmp["sigma_prime"] = 4*np.pi*3/(cot_PS**2+1)/tmp["p2star_prime"]
+        res["PS"] = complex(PS.real%180,PS.imag%180)
+        res["p3cotPS"] = res["pstar"]**3*cot_PS
+        res["p3cotPS_prime"] = res["pstar_prime"]**3*cot_PS
+        res["p3cotPS_Ecm"] = res["pstar"]**3/res["E_cm"]*cot_PS
+        res["p3cotPS_Ecm_prime"] = res["pstar_prime"]**3/res["E_cm_prime"]*cot_PS
+        res["sigma"] = 4*np.pi*3/(cot_PS**2+1)/res["p2star"]
+        res["sigma_prime"] = 4*np.pi*3/(cot_PS**2+1)/res["p2star_prime"]
 
             # tmp["E_cm_ld"] = Ecm_lat_disp(E_pipis[i],Pvec)
             # tmp["E_cm_ld_prime"] = tmp["E_cm_ld"]/mpi
@@ -309,16 +339,17 @@ def mrho_m0(m0):
         return 0.3530
 
 def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=5,num_lv=2):
+    info = {}
     infile = np.transpose(np.genfromtxt("../input/scattering_input.csv",delimiter=";",skip_header=1,dtype=str))
     infile[3] = [float(infile[3,i]) for i in range(len(infile[0]))]
     infile[4] = [ bool(infile[4,i]) for i in range(len(infile[0]))]
     # exit()
-    with h5py.File("../output/data/"+corrfitname+".hdf5","r") as hfile:
+    with h5py.File("../output/data/isospin1_fitresults"+corrfitname+".hdf5","r") as hfile:
         for ens in hfile:
-            print(ens)
+            # print(ens)
             for P in hfile[ens]:
                 if P[0] == "p":
-                    print(P)
+                    # print(P)
                     dvec = [int(P[2]),int(P[4]),int(P[6])]
                     for irrep in hfile[ens][P]:
                         beta, m0, mpi, ld = infile[1:,infile[0] == ens+P+irrep]
@@ -329,14 +360,19 @@ def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=
                         # for x in [beta, m0, mpi, ld]:
                         #     print(type(x),x)
                         NL = hfile[ens]["lattice"][()][3]
+                        # print(beta,m0,NL,dvec)
                         for i in range(num_lv):
+                            # print("E=",i)
                             E = hfile[ens][P][irrep]["E%i"%i][()][0]
                             E_m = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
                             E_p = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
-                            res, res_sampled = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
+                            res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
+                            for key, val in info_tmp.items():
+                                info[key] = val
+                        save_to_hdf(res, res_sampled, info, ens, P, irrep, corrfitname)
                             # print(res)
-                            for key, val in res.items():
-                                print(key, val)
+                            # for key, val in res.items():
+                            #     print(key, val)
                         # E0 = hfile[ens][P][irrep]["E0"][()][0]
                         # E0_m = hfile[ens][P][irrep]["Delta_E0"][()][0]
                         # E0_p = hfile[ens][P][irrep]["Delta_E0"][()][0]
@@ -356,4 +392,4 @@ def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=
     # info["beta"],info["m_1"],info["m_2"], info["mrho"], info["mpi"], info["en_lv"] = [beta,m0,m0,mrho,mpi,2]
 
 if __name__ == "__main__":
-    calc_all_phaseshifts("isospin1_fitresults_evp_deriv_false", "non_res", resampling="lin", num_resample=100)
+    calc_all_phaseshifts("_evp_deriv_false", "non_res", resampling="lin", num_resample=3)
