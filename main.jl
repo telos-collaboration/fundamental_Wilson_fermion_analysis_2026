@@ -72,7 +72,7 @@ half_sources=false
 
 # write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting,only_ens)
 # write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3, gevp, average_equivalent_momenta)
-run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
+# run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
 # plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, half_sources, average_equivalent_momenta)
 
 # table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
@@ -80,6 +80,6 @@ run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
 # redirect_stdio(stdout="make.log",stderr="make.log") do 
 #     run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
 # end
-# cd("rho_pipi_scattering_analysis")
-# run(`python3 src/scattering.py $(first(splitext(basename(yannick_fmt_table))))`)
+cd("rho_pipi_scattering_analysis")
+run(`python3 src/scattering.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
 # run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)
