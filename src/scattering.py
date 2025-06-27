@@ -53,7 +53,7 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld,resampling="
     res_sample = {}
     info["resampling"] = resampling
     info["num_resample"] = num_resample
-    info["mpi"] = mpi
+    # info["mpi"] = mpi
     # res["N_L"] = N_L
     # print(type(N_L), type(mpi))
     # print(N_L, mpi)
@@ -322,27 +322,27 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     #                     en_p_arr.append(hfile[hfile_str+key+"/Delta_E%i"%i][()][0])
     # return np.asarray(NL_arr), np.asarray(dvec_arr), np.asarray(en_arr), np.asarray(en_m_arr), np.asarray(en_p_arr)
     
-def mpi_m0(m0):
-    if m0 == -0.92:
-        return 0.38649
-    elif m0 == -0.863:
-        return 0.20590
-    elif m0 == -0.867:
-        return 0.14810
+# def mpi_m0(m0):
+#     if m0 == -0.92:
+#         return 0.38649
+#     elif m0 == -0.863:
+#         return 0.20590
+#     elif m0 == -0.867:
+#         return 0.14810
 
-def mrho_m0(m0):
-    if m0 == -0.92:
-        return 0.5494
-    elif m0 == -0.863:
-        return 0.3773
-    elif m0 == -0.867:
-        return 0.3530
+# def mrho_m0(m0):
+#     if m0 == -0.92:
+#         return 0.5494
+#     elif m0 == -0.863:
+#         return 0.3773
+#     elif m0 == -0.867:
+#         return 0.3530
 
 def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=5,num_lv=2):
     info = {}
     infile = np.transpose(np.genfromtxt("../input/scattering_input.csv",delimiter=";",skip_header=1,dtype=str))
-    infile[3] = [float(infile[3,i]) for i in range(len(infile[0]))]
-    infile[4] = [ bool(infile[4,i]) for i in range(len(infile[0]))]
+    # infile[3] = [float(infile[3,i]) for i in range(len(infile[0]))]
+    # infile[4] = [ bool(infile[4,i]) for i in range(len(infile[0]))]
     # exit()
     with h5py.File("../output/data/isospin1_fitresults"+corrfitname+".hdf5","r") as hfile:
         for ens in hfile:
@@ -352,13 +352,16 @@ def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=
                     # print(P)
                     dvec = [int(P[2]),int(P[4]),int(P[6])]
                     for irrep in hfile[ens][P]:
-                        beta, m0, mpi, ld = infile[1:,infile[0] == ens+P+irrep]
+                        beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]
                         beta = float(beta)
                         m0 = float(m0)
                         mpi = float(mpi)
+                        mrho = float(mrho)
                         ld = bool(ld)
                         info["beta"] = beta
                         info["m0"] = m0
+                        info["mpi"] = mpi
+                        info["mrho"] = mrho
                         # for x in [beta, m0, mpi, ld]:
                         #     print(type(x),x)
                         NL = hfile[ens]["lattice"][()][3]
