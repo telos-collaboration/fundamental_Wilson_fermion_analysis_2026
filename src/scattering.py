@@ -26,7 +26,7 @@ def save_to_hdf(res,res_sample, info, ens, P, irrep, filename):
     # fpathname = directory+filename+".hdf5"
     # if not os.path.exists(directory):
     #     os.makedirs(directory)
-    print("../output/scattering/isospin1_scattering"+filename+".hdf5")
+    # print("../output/scattering/isospin1_scattering"+filename+".hdf5")
     with h5py.File("../output/scattering/isospin1_scattering"+filename+".hdf5","a") as hfile:
         for key, val in res.items():
             hfile.create_dataset(group+"mean/"+key, data = val)
@@ -57,7 +57,7 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld,resampling="
     # res["N_L"] = N_L
     # print(type(N_L), type(mpi))
     # print(N_L, mpi)
-    print(N_L,mpi)
+    # print(N_L,mpi)
     info["L_prime"] = N_L*mpi
     info["dvec"] = dvec
     info["d"] = [np.sqrt(np.dot(dvec[i],dvec[i])) for i in range(len(dvec))]
@@ -357,6 +357,8 @@ def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=
                         m0 = float(m0)
                         mpi = float(mpi)
                         ld = bool(ld)
+                        info["beta"] = beta
+                        info["m0"] = m0
                         # for x in [beta, m0, mpi, ld]:
                         #     print(type(x),x)
                         NL = hfile[ens]["lattice"][()][3]
