@@ -33,6 +33,7 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld, resampling 
     # res["N_L"] = N_L
     # print(type(N_L), type(mpi))
     # print(N_L, mpi)
+    print(N_L,mpi)
     res["L_prime"] = N_L*mpi
     res["dvec"] = dvec
     res["d"] = [np.sqrt(np.dot(dvec[i],dvec[i])) for i in range(len(dvec))]
@@ -51,12 +52,12 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld, resampling 
                 E_pipi_tmp = E_pipi+abs(np.random.normal(0,E_pipi_ep))
             else:
                 E_pipi_tmp = E_pipi-abs(np.random.normal(0,E_pipi_em))
-            res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep)
+            res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep,ld)
             for key, val in res_tmp.items():
                 res_sample[key].append(val)
     elif resampling == "lin":
         for E_pipi_tmp in tqdm(np.linspace(E_pipi-E_pipi_em,E_pipi+E_pipi_ep, num_resample)):
-            res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep)
+            res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep,ld)
             for key, val in res_tmp.items():
                 res_sample[key].append(val)
     return res, res_sample
@@ -171,7 +172,7 @@ def pstar(ld):
         return pstar_cont
 
 def pstar_cont(Ecm, mpi):
-    return np.sqrt(E**2/4-mpi**2)
+    return np.sqrt(Ecm**2/4-mpi**2)
 
 def pstar_ld(Ecm, mpi):
     return 2*np.arcsin(np.sqrt(0.5*(np.cosh(Ecm/2)-np.cosh(mpi))))
@@ -195,20 +196,27 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
 
     # for i in range(len(E_pipis)):
     # res["En"].append(E_pipis[i])
-    Pvec = 2*np.pi*dvec/N_L
+
+    # for x in [dvec,N_L]:
+    #     print(type(x),x)
+
+    Pvec = [2*np.pi*x/N_L for x in dvec]
+    # for x in [Pvec,]:
+    #     print(type(x),x)
     P_prime = 2*np.pi*np.sqrt(np.dot(dvec,dvec))/(N_L*mpi)
     En_prime = E_pipi/mpi
-    res["En_prime"].append(En_prime)
+    res["En_prime"] = En_prime
+    print("\t\t", En_prime**2, P_prime**2, En_prime**2 - P_prime**2)
     if En_prime**2 - P_prime**2 < 4:
         for key in key_list[2:]:
             res[key] = 0
     else:
         tmp = {}
-        tmp["E_cm"] = Ecm(ld)(E_pipi,Pvec,ld)
+        tmp["E_cm"] = Ecm(ld)(E_pipi,Pvec)
         tmp["E_cm_prime"] = tmp["E_cm"]/mpi
         tmp["s_prime"] = tmp["E_cm_prime"]**2
         tmp["s"] = tmp["E_cm"]**2
-        tmp["pstar"] = pstar(ld)(tmp["s_prime"])    # np.sqrt(tmp["s_prime"]/4-1)
+        tmp["pstar"] = pstar(ld)(tmp["E_cm"],mpi)    # np.sqrt(tmp["s_prime"]/4-1)
         tmp["pstar_prime"] = tmp["pstar"]/mpi
         tmp["p2star"] = tmp["pstar"]**2
         tmp["p2star_prime"] = tmp["pstar_prime"]**2
@@ -300,7 +308,7 @@ def mrho_m0(m0):
     elif m0 == -0.867:
         return 0.3530
 
-def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=5):
+def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=5,num_lv=2):
     infile = np.transpose(np.genfromtxt("../input/scattering_input.csv",delimiter=";",skip_header=1,dtype=str))
     infile[3] = [float(infile[3,i]) for i in range(len(infile[0]))]
     infile[4] = [ bool(infile[4,i]) for i in range(len(infile[0]))]
@@ -311,17 +319,31 @@ def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=
             for P in hfile[ens]:
                 if P[0] == "p":
                     print(P)
+                    dvec = [int(P[2]),int(P[4]),int(P[6])]
                     for irrep in hfile[ens][P]:
                         beta, m0, mpi, ld = infile[1:,infile[0] == ens+P+irrep]
+                        beta = float(beta)
+                        m0 = float(m0)
+                        mpi = float(mpi)
+                        ld = bool(ld)
+                        # for x in [beta, m0, mpi, ld]:
+                        #     print(type(x),x)
                         NL = hfile[ens]["lattice"][()][3]
-                        E0 = hfile[ens][P][irrep]["E0"][()][0]
-                        E0_m = hfile[ens][P][irrep]["Delta_E0"][()][0]
-                        E0_p = hfile[ens][P][irrep]["Delta_E0"][()][0]
-                        E1 = hfile[ens][P][irrep]["E1"][()][0]
-                        E1_m = hfile[ens][P][irrep]["Delta_E1"][()][0]
-                        E1_p = hfile[ens][P][irrep]["Delta_E1"][()][0]
-                        dvec = [int(P[2]),int(P[4]),int(P[6])]
-                        res, res_sampled = result_sampled(NL, E0, E0_m, E0_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
+                        for i in range(num_lv):
+                            E = hfile[ens][P][irrep]["E%i"%i][()][0]
+                            E_m = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
+                            E_p = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
+                            res, res_sampled = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
+                            # print(res)
+                            for key, val in res.items():
+                                print(key, val)
+                        # E0 = hfile[ens][P][irrep]["E0"][()][0]
+                        # E0_m = hfile[ens][P][irrep]["Delta_E0"][()][0]
+                        # E0_p = hfile[ens][P][irrep]["Delta_E0"][()][0]
+                        # E1 = hfile[ens][P][irrep]["E1"][()][0]
+                        # E1_m = hfile[ens][P][irrep]["Delta_E1"][()][0]
+                        # E1_p = hfile[ens][P][irrep]["Delta_E1"][()][0]
+                        # res, res_sampled = result_sampled(NL, E1, E1_m, E1_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
                         # print(NL, E0, E0_m, E0_p, E1, E1_m, E1_p, dvec)
 
 
