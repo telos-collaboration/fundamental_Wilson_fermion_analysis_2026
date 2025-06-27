@@ -219,7 +219,7 @@ def pstar_ld(Ecm, mpi):
 def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     res = {}
     # key_list = ["En","En_prime","E_cm","E_cm_prime","E_cm_ld","E_cm_ld_prime","s","s_prime","s_ld","s_ld_prime","pstar","pstar_prime","pstar_ld","pstar_ld_prime","p2star","p2star_prime","p2star_ld","p2star_ld_prime","q","q_ld","q2","q2_ld","cot_PS","cot_PS_ld","tan_PS","tan_PS_ld","PS","PS_ld", "p3cotPS", "p3cotPS_prime", "p3cotPS_ld", "p3cotPS_ld_prime", "p3cotPS_Ecm", "p3cotPS_Ecm_prime", "p3cotPS_Ecm_ld", "p3cotPS_Ecm_ld_prime", "sigma", "sigma_prime", "sigma_ld", "sigma_ld_prime"]
-    key_list = ["En_prime","E_cm","E_cm_prime","s","s_prime","pstar","pstar_prime","p2star","p2star_prime","q","q2","cot_PS","tan_PS","PS", "p3cotPS", "p3cotPS_prime", "p3cotPS_Ecm", "p3cotPS_Ecm_prime", "sigma", "sigma_prime"]
+    key_list = ["aEn","En_prime","E_cm","E_cm_prime","s","s_prime","pstar","pstar_prime","p2star","p2star_prime","q","q2","cot_PS","tan_PS","PS", "p3cotPS", "p3cotPS_prime", "p3cotPS_Ecm", "p3cotPS_Ecm_prime", "sigma", "sigma_prime"]
 
     # for key in key_list:
         # result[key] = []
@@ -235,6 +235,7 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     #     print(type(x),x)
     P_prime = 2*np.pi*np.sqrt(np.dot(dvec,dvec))/(N_L*mpi)
     En_prime = E_pipi/mpi
+    res["aEn"] = E_pipi
     res["En_prime"] = En_prime
     # print("\t\t", En_prime**2, P_prime**2, En_prime**2 - P_prime**2)
     if En_prime**2 - P_prime**2 < 4:
