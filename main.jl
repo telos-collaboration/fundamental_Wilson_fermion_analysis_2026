@@ -21,17 +21,20 @@ path  = "/home/fabian/Dokumente/Physics/Data/"
 path  = "/home/fabian/Documents/Physics/Data/"
 plotpath  = "./output/plots/"
 datapath  = "./output/data/"
+scatpath  = "./output/scattering/"
 tablepath = "./output/tables/"
 
 h5file_raw = joinpath(datapath,"isospin1_sorted.hdf5")
 h5file_com = joinpath(datapath,"isospin1_merged.hdf5")
 h5file_cor = joinpath(datapath,"isospin1_corr.hdf5")
 if gevp
-    h5file_eig = joinpath(datapath,"isospin1_eigenvalues_gevp_t0_$(t0)_deriv_$deriv.hdf5")
-    h5file_fit = joinpath(datapath,"isospin1_fitresults_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_eig  = joinpath(datapath,"isospin1_eigenvalues_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_fit  = joinpath(datapath,"isospin1_fitresults_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_scat = joinpath(scatpath,"isospin1_scattering_gevp_t0_$(t0)_deriv_$deriv.hdf5")
 else
     h5file_eig = joinpath(datapath,"isospin1_eigenvalues_evp_deriv_$deriv.hdf5")
     h5file_fit = joinpath(datapath,"isospin1_fitresults_evp_deriv_$deriv.hdf5")
+    h5file_scat = joinpath(scatpath,"isospin1_scattering_evp_deriv_$deriv.hdf5")
 end
 
 inputfiles = "input/input_files.csv"
@@ -80,6 +83,10 @@ half_sources=false
 # redirect_stdio(stdout="make.log",stderr="make.log") do 
 #     run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
 # end
+# print(h5file_fit)
+# print("\n")
+
 cd("rho_pipi_scattering_analysis")
+cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
 run(`python3 src/scattering.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
-# run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)
+run(`python3 src/plotting.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
