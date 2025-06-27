@@ -6,7 +6,7 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta, use3x3=true, gevp=true, plotpath)    
+function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), plotting=true, average_equivalent_momenta, use3x3, gevp, symmetrise, plotpath)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
 
@@ -27,14 +27,14 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
             p == "p(0,0,0)" && continue
 
             Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)           
-            eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp)
+            eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise)
             eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
 
             three_by_three = use3x3 && haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
             if three_by_three
                 Corr3x3, sources3x3, momenta3x3 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix_3x3_ext";maxhits,average_equivalent_momenta)
                 Corr3x3[1:2,1:2,:,:] .= Corr
-                eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv,gevp)
+                eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv,gevp,symmetrise)
                 eigvals_3x3, Δeigvals_3x3 = real.(eigvals_3x3), real.(Δeigvals_3x3), real.(eigvals_cov_3x3)
             end
 

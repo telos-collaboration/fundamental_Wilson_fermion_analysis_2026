@@ -29,7 +29,8 @@ function pipi_rho_matrix_3x3_extension(Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ
     corr_ext[3,3,:,:,:] = @. Corr_γ0γi_γ0γi/L3
     return corr_ext
 end
-function swap_eigval_numbering(old,t0)
+function swap_eigval_numbering(old,t0,gevp)
+    gevp || return old
     Nops, T   = size(old)[1], size(old)[3]
     new = copy(old)
     r1 = 1:t0-1
@@ -44,24 +45,42 @@ function swap_eigval_numbering(old,t0)
     end
     return new
 end
-function _preprocess_correlator(Corr;deriv)
+function fold_3x3_correlator(c)
+    c_folded = similar(c)
+    c_folded[1:2,1:2,:,:] .= correlator_folding(c[1:2,1:2,:,:];t_dim=4,sign=+1)
+    c_folded[1,3,:,:] .= correlator_folding(c[1,3,:,:];t_dim=2,sign=-1)
+    c_folded[3,1,:,:] .= correlator_folding(c[3,1,:,:];t_dim=2,sign=-1)
+    c_folded[2,3,:,:] .= correlator_folding(c[2,3,:,:];t_dim=2,sign=-1)
+    c_folded[3,2,:,:] .= correlator_folding(c[3,2,:,:];t_dim=2,sign=-1)
+    c_folded[3,3,:,:] .= correlator_folding(c[3,3,:,:];t_dim=2,sign=+1)
+    return c_folded
+end
+function _preprocess_correlator(Corr;deriv,symmetrise)
+    if symmetrise
+        Nops = size(Corr,1)
+        if Nops == 2
+            Corr = correlator_folding(Corr;t_dim=4,sign=+1)
+        elseif Nops == 3
+            Corr = fold_3x3_correlator(Corr)
+        end
+    end
     if deriv
         Corr = correlator_derivative(Corr;t_dim=4)
     end
     return Corr
 end
-function variational_analysis(Corr;t0,deriv=true,gevp)
-    Corr = _preprocess_correlator(Corr;deriv)
+function variational_analysis(Corr;t0,deriv,gevp,symmetrise)
+    Corr = _preprocess_correlator(Corr;deriv,symmetrise)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp)
-    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
+    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0, gevp)
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
     return eigvals, Δeigvals, eigvals_cov
 end
-function effective_masses(Corr;t0,deriv,gevp)
-    Corr = _preprocess_correlator(Corr;deriv)
+function effective_masses(Corr;t0,deriv,gevp,symmetrise)
+    Corr = _preprocess_correlator(Corr;deriv,symmetrise)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp)
-    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0)
+    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0, gevp)
     meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
     return meff, Δmeff
 end
