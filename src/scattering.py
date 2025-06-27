@@ -20,8 +20,8 @@ import os
 #         for key, val in info.items():
 #             hfile.create_dataset("info/"+key, data = val)
 
-def save_to_hdf(res,res_sample, info, ens, P, irrep, filename):
-    group = ens+"/"+P+"/"+irrep+"/"
+def save_to_hdf(res,res_sample, info, ens, P, irrep, lv, filename):
+    group = ens+"/"+P+"/"+irrep+"/"+"lv"+"%i/"%lv
     # directory = "../output/scattering/"
     # fpathname = directory+filename+".hdf5"
     # if not os.path.exists(directory):
@@ -371,7 +371,7 @@ def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=
                             res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
                             for key, val in info_tmp.items():
                                 info[key] = val
-                        save_to_hdf(res, res_sampled, info, ens, P, irrep, corrfitname)
+                            save_to_hdf(res, res_sampled, info, ens, P, irrep, i, corrfitname)
                             # print(res)
                             # for key, val in res.items():
                             #     print(key, val)
