@@ -365,6 +365,7 @@ def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=
                         # for x in [beta, m0, mpi, ld]:
                         #     print(type(x),x)
                         NL = hfile[ens]["lattice"][()][3]
+                        info["NL"] = NL
                         # print(beta,m0,NL,dvec)
                         for i in range(num_lv):
                             # print("E=",i)
