@@ -1,8 +1,9 @@
 import numpy as np
-# import matplotlib
+import matplotlib
 import matplotlib.pyplot as plt
 import h5py
-# import math
+import math
+import fit_scatter
 # import sys
 # import os.path
 
@@ -257,7 +258,7 @@ def get_data_E_L(name, beta, m0, num_lv = 2):
                                 lvs.append(lv)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs
 
-def plot_E_L(name,beta,m0,levels=False,outname=None):
+def plot_E_L(name,beta,m0,levels=False,outname=None,show=False):
     mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(name, beta, m0)
     
     Lmin, Lmax = LminLmax(m0)
@@ -317,6 +318,8 @@ def plot_E_L(name,beta,m0,levels=False,outname=None):
         plt.savefig("../output/plots/scattering/E_L_b%f_m0%f_levels_%r.pdf"%(beta,m0,levels), bbox_inches='tight')
     else:    
         plt.savefig("../output/plots/scattering/E_L_"+outname+"_levels_%r.pdf"%levels, bbox_inches='tight')
+    if show:
+        plt.show()
     plt.clf()
 
 ########################################## Plot com energies unitless ##########################################
@@ -345,7 +348,7 @@ def get_data_E_CM_L(name, beta, m0, num_lv = 2):
                                 lvs.append(lv)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs
 
-def plot_E_CM_L(name,beta,m0,levels=False,outname=None):
+def plot_E_CM_L(name,beta,m0,levels=False,outname=None,show=False):
     mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(name, beta, m0)
 
     Lmin, Lmax = LminLmax(m0)
@@ -408,69 +411,139 @@ def plot_E_CM_L(name,beta,m0,levels=False,outname=None):
         plt.savefig("../output/plots/scattering/E_CM_L_b%f_m0%f_levels_%r.pdf"%(beta,m0,levels), bbox_inches='tight')
     else:    
         plt.savefig("../output/plots/scattering/E_CM_L_"+outname+"_levels_%r.pdf"%levels, bbox_inches='tight')
+    if show:
+        plt.show()
     plt.clf()
 
-# def plot_E_L(name,beta,m0,levels=False,outname=None):
-#     mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(name, beta, m0)
+########################################## Plot p3cotPS ##########################################
+
+def color_NL(NL):
+    if NL == 14:
+        return "red"
+    elif NL == 16:
+        return "green"
+    elif NL == 24:
+        return "c"
+    elif NL == 36:
+        return "m"
+
+def ls_P(dvec):
+    if list(dvec) == [0,0,1]:
+        return "solid"
+    elif list(dvec) == [1,1,0] or list(dvec) == [0,1,1]:
+        return "dashed"
+    elif list(dvec) == [1,1,1]:
+        return "dashdot"
+
+def ms_P(dvec):
+    if list(dvec) == [0,0,1]:
+        return "*"
+    elif list(dvec) == [1,1,0] or list(dvec) == [0,1,1]:
+        return "o"
+    elif list(dvec) == [1,1,1]:
+        return "^"
+
+def delete_steps(arr, sign = 1, delete=True):
+    if delete:
+        for i in range(len(arr)-1):
+            if arr[i+1] < sign*arr[i]: 
+                arr[i] = np.nan
+        return arr
+    else:
+        return arr
+
+def get_data_p3cotPS(name, beta, m0):
+    res = {}
+    res_spl = {}
+
+    with h5py.File("../output/scattering/isospin1_fit_scatter"+name+".hdf5","r") as hfile:
+        for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
+            res[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
+            res_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
+    # for key in res:
+    #     print(key, type(res[key]))
+    return res, res_spl
+
+
+def plot_p3cotPS(name,beta,m0,fit=False,outname=None,show=False):
+    plt.rcParams['figure.figsize'] = [10, 6]
+    fontsize = 14
+    font = {'size'   : fontsize}
+    matplotlib.rc('font', **font)
+    fig, ax = plt.subplots()
+    plt.grid()
+    res, res_smp = get_data_p3cotPS(name, beta, m0)
+    # beta = res["beta"]
+    # m0 = res["m_1"]
+
+    xlim = [0,3]
+    ylim = [-1,0.1]
+    ax.set_xlim(xlim)
+    # ax.set_ylim(ylim)
+
+    plt.xlabel(r"$p^{\star^2}/m_\pi^2$")
+    x_plot = res["p2star_prime"]
+    x_plot_sam = np.transpose(res_smp["p2star_prime"])
+    y_plot = np.real(res["p3cotPS_prime"])
+    y_plot_sam = np.transpose(np.real(res_smp["p3cotPS_prime"]))
+    plt.ylabel(r"$p^3\, \cot(\delta)/m_\pi^3$")
     
-#     Lmin, Lmax = LminLmax(m0)
+    length = len(x_plot_sam[0])
+    num_perc = math.erf(1/np.sqrt(2))
+    N_Ls = res["N_L"]
+    dvecs = res["dvec"]
+    dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
+    d2s = [np.dot(d,d) for d in dvecs]
+
+    # for i in  [4, 16, 10, 13]:
+    for i in  range(14):
+        ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+        sorted_indices = np.argsort(x_plot_sam[i])
+        ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+        
+    # for i in  [1, 7]:
+    # for i in  range(14):
+    #     ax.scatter(x_plot[i],y_plot[i], color = "grey", ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+    #     sorted_indices = np.argsort(x_plot_sam[i])
+    #     ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvecs[i]))
+
+    xarr = np.linspace(xlim[0], xlim[1])
     
-#     for i in range(len(En)):
-#         plt.errorbar([NL_invs[i],],y=[En[i],],yerr=[[En_m_err[i],],[En_p_err[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(d2s[i]), marker = marker(lvs[i]))   
-#     # plt.axhline(mpi,c="black", ls="dotted", label = "$m_\pi$")
-#     plt.axhline(mrho,c="red", ls="dotted", label = "$m_\\rho$")
-#     plt.axhline(2*mpi,c="black",label = "2$m_\pi$")
-#     plt.axhline(4*mpi,c="black",label = "4$m_\pi$")
-#     plt.grid()
-#     plt.title("$\\beta$ = %f, $m_0$ = %f"%(beta,m0))
-#     xarrinv = np.linspace(1/40,1/13)
-#     xarr = [1/x for x in xarrinv]
-#     if levels:
-#         yarr1_1 = [E_rho(mrho,1,x) for x in xarr]
-#         yarr1_2 = [E_pipi(mpi,1,0,x) for x in xarr]
-#         yarr1_3 = [E_pipi(mpi,2,1,x) for x in xarr]
-#         yarr1_4 = [E_pipi(mpi,3,2,x) for x in xarr]
-#         yarr1_5 = [E_pipi(mpi,4,1,x) for x in xarr]
-#         yarr2_1 = [E_rho(mrho,2,x) for x in xarr]
-#         yarr2_2 = [E_pipi(mpi,2,0,x) for x in xarr]
-#         yarr2_3 = [E_pipi(mpi,3,1,x) for x in xarr]
-#         yarr2_4 = [E_pipi(mpi,4,2,x) for x in xarr]
-#         yarr3_1 = [E_rho(mrho,3,x) for x in xarr]
-#         yarr3_2 = [E_pipi(mpi,3,0,x) for x in xarr]
-#         yarr3_3 = [E_pipi(mpi,2,1,x) for x in xarr]
-#         yarr3_4 = [E_pipi(mpi,4,3,x) for x in xarr]
-#         plt.plot(xarrinv,yarr1_1, ls="dashed", c=color(1))
-#         plt.plot(xarrinv,yarr1_2, ls="dashed", c=color(1))
-#         plt.plot(xarrinv,yarr1_3, ls="dashed", c=color(1))
-#         plt.plot(xarrinv,yarr1_4, ls="dashed", c=color(1))
-#         plt.plot(xarrinv,yarr1_5, ls="dashed", c=color(1))
-#         plt.plot(xarrinv,yarr2_1, ls="dashdot", c=color(2))
-#         plt.plot(xarrinv,yarr2_2, ls="dashdot", c=color(2))
-#         plt.plot(xarrinv,yarr2_3, ls="dashdot", c=color(2))
-#         plt.plot(xarrinv,yarr2_4, ls="dashdot", c=color(2))
-#         plt.plot(xarrinv,yarr3_1, ls="solid", c=color(3))
-#         plt.plot(xarrinv,yarr3_2, ls="solid", c=color(3))
-#         plt.plot(xarrinv,yarr3_3, ls="solid", c=color(3))
-#         plt.plot(xarrinv,yarr3_4, ls="solid", c=color(3))
-#     plt.plot([0,0],[0,0],c="grey", label = "non-int")
-#     plt.xlim([1/40,1/13])
-#     plt.ylim([0.3,2])
+    if fit:
+        a1_1 = res["a1_1"]
+        r1_1 = res["r1_1"]
+        
+        # plt.axvline(1/r1_1**2, label = "$r1 p \approx 1$")
 
-#     for i in range(1,max(lvs)+2):
-#         plt.errorbar([0,],y=[0,],yerr=[[0,],[0,]], solid_capstyle="projecting", capsize=5, ls="", color = color(i), marker = "o", label = "|P|=%i"%(i))
-#     for i in range(1,max(lvs)+2):
-#         plt.scatter(x=[0,],y=[0,], color = "grey", marker = marker(i), label = "lv=%i"%(i))
+        a1_1_smp = res_smp["a1_1"]
+        # print(len(a1_1_smp))
+        # print(a1_1_smp)
+        r1_1_smp = res_smp["r1_1"]
 
-#     plt.legend(loc='center right', bbox_to_anchor=(1.24, 0.5))
+        a1_1_em = abs(sorted(a1_1_smp)[math.floor(length*(1-num_perc)/2)]-a1_1)
+        a1_1_ep = abs(sorted(a1_1_smp)[math.ceil(length*(1+num_perc)/2)]-a1_1)
+        r1_1_em = abs(sorted(r1_1_smp)[math.floor(length*(1-num_perc)/2)]-r1_1)
+        r1_1_ep = abs(sorted(r1_1_smp)[math.ceil(length*(1+num_perc)/2)]-r1_1)
 
-#     plt.xticks([1/14,1/16,1/20,1/24,1/36],["1/14","1/16","1/20","1/24","1/36"])
-#     plt.xlabel("1/$N_L$")
-#     plt.ylabel("a$E$")
-#     if outname == None:    
-#         plt.savefig("../output/plots/scattering/E_L_b%f_m0%f_levels_%r.pdf"%(beta,m0,levels), bbox_inches='tight')
-#     else:    
-#         plt.savefig("../output/plots/scattering/E_L_"+outname+"_levels_%r.pdf"%levels, bbox_inches='tight')
-#     plt.clf()
+        yarr = [fit_scatter.ERE_1(x,a1_1,r1_1) for x in xarr]
+        yarr_smp = [sorted([fit_scatter.ERE_1(x,a1_1_smp[i],r1_1_smp[i]) for i in range(len(a1_1_smp))]) for x in xarr]
+
+        yarr_m = [yarr_smp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(yarr_smp))]
+        yarr_p = [yarr_smp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(yarr_smp))]
+
+        plt.plot(xarr,yarr, color = "blue")
+        plt.fill_between(xarr, yarr_m, yarr_p, alpha = 0.3, color = "blue")
+
+    #     plt.title("$\\beta=6.9, m_0 = -0.92$\n$a_1=%1.3f^{+%1.3f}_{-%1.3f}, r_1 = %1.3f^{+%1.3f}_{-%1.3f}$"%(a1_1, a1_1_ep, a1_1_em, r1_1,r1_1_ep, r1_1_em))
+    # plt.title("$\\beta=6.9, m_0 = -0.92$")
+    ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
+    if outname == None:    
+        plt.savefig("../output/plots/scattering/p3cotPS_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit), bbox_inches='tight')
+    else:    
+        plt.savefig("../output/plots/scattering/p3cotPS_"+outname+"_fit_%r.pdf"%fit, bbox_inches='tight')
+    if show:
+        plt.show()
+    plt.close(fig)
 
 if __name__ == "__main__":
     plot_E_L("_evp_deriv_false",6.9,-0.92,True,outname="non_res")
@@ -489,7 +562,9 @@ if __name__ == "__main__":
     # args = sys.argv
     # name = args[1]
     
-    # p3_cot_PS(name, x_ax="pstar2", y_ax="p3cotPS", save=True, show=plt.isinteractive(), ld = "_ld",prime="_prime", pref=name)
+    plot_p3cotPS("_evp_deriv_false",6.9,-0.92,True,outname="non_res",show=True)
+    plot_p3cotPS("_evp_deriv_false",7.05,-0.863,True,outname="close_res",show=True)
+    plot_p3cotPS("_evp_deriv_false",7.05,-0.867,True,outname="res",show=True)
     # p3_cot_PS(name, x_ax="pstar2", y_ax="p3cotPS", save=True, show=plt.isinteractive(), prime="_prime", pref=name)
     # p3_cot_PS(name, x_ax="sqrt_s", y_ax="sigma",   save=True, show=plt.isinteractive(), ld = "_ld",prime="_prime", pref=name,delete=False)
     # p3_cot_PS(name, x_ax="sqrt_s", y_ax="sigma",   save=True, show=plt.isinteractive(), prime="_prime", pref=name,delete=False)

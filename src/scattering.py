@@ -233,18 +233,19 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     Pvec = [2*np.pi*x/N_L for x in dvec]
     # for x in [Pvec,]:
     #     print(type(x),x)
-    P_prime = 2*np.pi*np.sqrt(np.dot(dvec,dvec))/(N_L*mpi)
+    # P_prime = 2*np.pi*np.sqrt(np.dot(dvec,dvec))/(N_L*mpi)
     En_prime = E_pipi/mpi
     res["aEn"] = E_pipi
     res["En_prime"] = En_prime
-    # print("\t\t", En_prime**2, P_prime**2, En_prime**2 - P_prime**2)
-    if En_prime**2 - P_prime**2 < 4:
+    E_cm_prime = Ecm(ld)(E_pipi,Pvec)/mpi
+    # print(E_cm_prime)
+    if E_cm_prime < 2 or E_cm_prime > 4:
         for key in key_list:
             res[key] = float(0)
     else:
-        # res = {}
-        res["E_cm"] = Ecm(ld)(E_pipi,Pvec)
-        res["E_cm_prime"] = res["E_cm"]/mpi
+        # res["E_cm"] = Ecm(ld)(E_pipi,Pvec)
+        res["E_cm_prime"] = E_cm_prime
+        res["E_cm"] = E_cm_prime*mpi
         res["s_prime"] = res["E_cm_prime"]**2
         res["s"] = res["E_cm"]**2
         res["pstar"] = pstar(ld)(res["E_cm"],mpi)    # np.sqrt(res["s_prime"]/4-1)
@@ -265,33 +266,8 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
         res["p3cotPS_Ecm_prime"] = res["pstar_prime"]**3/res["E_cm_prime"]*cot_PS
         res["sigma"] = 4*np.pi*3/(cot_PS**2+1)/res["p2star"]
         res["sigma_prime"] = 4*np.pi*3/(cot_PS**2+1)/res["p2star_prime"]
-
-            # tmp["E_cm_ld"] = Ecm_lat_disp(E_pipis[i],Pvec)
-            # tmp["E_cm_ld_prime"] = tmp["E_cm_ld"]/mpi
-            # tmp["s_ld"] = tmp["E_cm_ld"]**2
-            # tmp["s_ld_prime"] = tmp["E_cm_ld_prime"]**2
-            # tmp["pstar_ld"] = pstar_lat_disp(tmp["E_cm_ld"],mpi).real
-            # tmp["pstar_ld_prime"] = tmp["pstar_ld"]/mpi
-            # tmp["p2star_ld"] = tmp["pstar_ld"]**2
-            # tmp["p2star_ld_prime"] = tmp["pstar_ld_prime"]**2
-            # q2_ld = tmp["p2star_ld"]*(N_Ls[i]/(2*np.pi))**2
-            # tmp["q2_ld"] = q2_ld
-            # tmp["q_ld"] = np.sqrt(q2_ld)
-            # cot_PS_ld = cot_delta_mom(dvecs[i],irrep)(q2_ld, N_Ls[i],mpi).real
-            # tmp["cot_PS_ld"] = cot_PS_ld
-            # tmp["tan_PS_ld"] = 1/cot_PS_ld
-            # PS_ld = 360*np.arctan(1/cot_PS_ld)/(2*np.pi)
-            # tmp["PS_ld"] = complex(PS_ld.real%180,PS_ld.imag%180)
-            # tmp["p3cotPS_ld"] = tmp["pstar_ld"]**3*cot_PS_ld
-            # tmp["p3cotPS_ld_prime"] = tmp["pstar_ld_prime"]**3*cot_PS_ld
-            # tmp["p3cotPS_Ecm_ld"] = tmp["pstar_ld"]**3*cot_PS_ld/tmp["E_cm_ld"]
-            # tmp["p3cotPS_Ecm_ld_prime"] = tmp["pstar_ld_prime"]**3*cot_PS_ld/tmp["E_cm_ld_prime"]
-            # tmp["sigma_ld"] = 12*np.pi/(cot_PS_ld**2+1)/tmp["p2star_ld"]
-            # tmp["sigma_ld_prime"] = 12*np.pi/(cot_PS_ld**2+1)/tmp["p2star_ld_prime"]
-
-
-            # for key, val in tmp.items():
-            #     result[key].append(tmp[key])
+    res["dvec"] = "%i%i%i"%(dvec[0],dvec[1],dvec[2])
+    res["N_L"] = N_L
     return res
 
 # def read_hdf5_fitresults_old(pref, NTs, NLs, beta, m0, num_lvl=2):
@@ -399,4 +375,4 @@ def calc_all_phaseshifts(corrfitname,resampling="lin",num_resample=5,num_lv=2):
     # info["beta"],info["m_1"],info["m_2"], info["mrho"], info["mpi"], info["en_lv"] = [beta,m0,m0,mrho,mpi,2]
 
 if __name__ == "__main__":
-    calc_all_phaseshifts("_evp_deriv_false", resampling="lin", num_resample=3)
+    calc_all_phaseshifts("_evp_deriv_false", resampling="lin", num_resample=200)
