@@ -66,7 +66,7 @@ def fit_all_files(infile,outfile,parameterfile):
     
     for row in tqdm((reader), total=lines , desc="Fit eigenvalues", disable=False):
 
-        group, irrep, tmin1, tmax1, tmin2, tmax2 = row[0], row[1], int(row[2]), int(row[3]), int(row[4]), int(row[5]) 
+        group, irrep, tmin1, tmax1, tmin2, tmax2 = row[0], row[1], int(row[2]), int(row[3]), int(row[4]), int(row[5])
 
         if group not in fid:
             continue 

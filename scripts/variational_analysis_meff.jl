@@ -99,7 +99,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
             
             for plt in all_plots
                 if isfile(fitresults) && haskey(res,joinpath(ens,p))
-                    r = res[joinpath(ens,p)]
+                    r = res[joinpath(ens,p,"A1")]
                     E0, ΔE0 = read(r,"E0")[1], read(r,"Delta_E0")[1] 
                     E1, ΔE1 = read(r,"E1")[1], read(r,"Delta_E1")[1]
                     add_mass_band!(plt,E0, ΔE0;label="fit #1")

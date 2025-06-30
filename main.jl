@@ -85,12 +85,12 @@ plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0
 # redirect_stdio(stdout="make.log",stderr="make.log") do 
 #     run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
 # end
-# print(h5file_fit)
-# print("\n")
+print(h5file_fit)
+print("\n")
 
-# cd("rho_pipi_scattering_analysis")
-# cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
-# run(`python3 src/scattering.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
-# cp("../$(h5file_scat)","../$(h5file_scat_fit)",force=true)
-# run(`python3 src/fit_scatter.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
-# run(`python3 src/plotting.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
+cd("rho_pipi_scattering_analysis")
+cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
+run(`python3 src/scattering.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
+cp("../$(h5file_scat)","../$(h5file_scat_fit)",force=true)
+run(`python3 src/fit_scatter.py`) 
+run(`python3 src/plotting.py`) 
