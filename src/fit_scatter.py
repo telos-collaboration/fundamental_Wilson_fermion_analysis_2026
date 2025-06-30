@@ -1,12 +1,11 @@
 import numpy as np
-from tqdm import tqdm
+# from tqdm import tqdm
 import h5py
 from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 def save_to_hdf(res,res_sample, filename):
     with h5py.File("rho_pipi_scattering_analysis/output/hdf5/"+filename+".hdf5","w") as hfile:
-    # with h5py.File("output/hdf5/"+filename+".hdf5","w") as hfile:
         for key, val in res.items():
             hfile.create_dataset("orig_"+key, data = val)
         for key, val in res_sample.items():
@@ -39,18 +38,6 @@ def ERE_1_lin(p2, a, b):
     return a+b*p2
 def ERE_2_lin(p2, a, b, c):
     return a+b*p2+c*p2**2
-# def ERE_fit(p3cotPS, p2):                                   # all primed
-#     result = {}
-#     popt, pcov = curve_fit(ERE_0, p2, p3cotPS)
-#     result["a1_0"] = popt[0]
-#     popt, pcov = curve_fit(ERE_1_lin, p2, p3cotPS)
-#     result["a1_1"]=-np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
-#     result["r1_1"]=1/(2*popt[1])
-#     popt, pcov = curve_fit(ERE_2_lin, p2, p3cotPS)
-#     result["a1_2"]=-np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
-#     result["r1_2"]=1/(2*popt[1])
-#     result["c1_2"]=popt[2]
-#     return result
 def ERE_fit(p3cotPS, p2):                                   # all primed
     result = {}
     popt = curve_fit_try(ERE_0, p2, p3cotPS,1)
@@ -76,7 +63,6 @@ def RES_Alex_BWII(p, m_R, gVPP2, r0):
     return ECM*gVPP2*p**3*(1+np.sqrt((m_R/2)**2-1))/(6*np.pi*ECM**2*(m_R**2-ECM**2)*(1+(p*r0)**2))
 def RES_fit(p3cotPS_ECM, ECM, tan_PS, p):                                   # all primed
     result = {}
-    # popt, pcov = curve_fit(RES_Drach, ECM, p3cotPS_ECM)
     popt = curve_fit_try(RES_Drach, ECM, p3cotPS_ECM,2)
     result["m_R_D"], result["gVPP2_D"] = popt
     popt = curve_fit_try(RES_Alex_BWI, p, tan_PS,2)
@@ -85,25 +71,10 @@ def RES_fit(p3cotPS_ECM, ECM, tan_PS, p):                                   # al
     result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
     return result
 
-# def w_ind_m0(m0):
-#     return [1,2,3,4,5,6,7,8,9,10,11,12,13]
-#     # if m0 == 0.92:
-#     #     return [4, 10, 13, 16]
-#     # elif m0 == -0.863:
-#     #     return [4,7,10,13,16]
-
-
 def get_fits(res, res_spl):
     res_tmp={}
     res_spl_tmp={}
-    # win_ind = w_ind_m0(m0)
     win_ind = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
-
-    # for key in res:
-    #     print(res[key].shape)
-    #     print(res_spl[key].shape)
-    # exit()
-
     for key, val in ERE_fit(res["p3cotPS_prime"][win_ind],res["p2star_prime"][win_ind]).items():
         res_tmp[key] = val
     for key, val in RES_fit(res["p3cotPS_Ecm_prime"][win_ind],res["E_cm_prime"][win_ind],res["tan_PS"][win_ind],res["pstar_prime"][win_ind]).items():
@@ -117,16 +88,7 @@ def get_fits(res, res_spl):
             res_spl_tmp[key].append(val)
         for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i][win_ind],res_spl["E_cm_prime"][i][win_ind],res_spl["tan_PS"][i][win_ind],res_spl["pstar_prime"][i][win_ind]).items():
             res_spl_tmp[key].append(val)
-    
-    # for key, val in res_tmp.items():
-    #     res[key] = val
-    # for i in range(len(res_spl["p3cotPS_prime"])):
-    #     for key, val in res_spl_tmp.items():
-    #         res_spl[key] = val
-
     return res_tmp, res_spl_tmp
-
-
 
 def fit_one_phaseshift(name, beta, m0):
     res_calc = {}
@@ -135,7 +97,6 @@ def fit_one_phaseshift(name, beta, m0):
     with h5py.File("../output/scattering/isospin1_scattering"+name+".hdf5","r") as hfile:
         for ens in hfile:
             if str(beta) in ens and str(m0) in ens:
-                # the_ens = ens
                 for P in hfile[ens]:
                     if P[0] == "p":
                         dvec = [int(P[2]),int(P[4]),int(P[6])]
@@ -165,81 +126,14 @@ def fit_one_phaseshift(name, beta, m0):
             hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"mean/"+key, data = val)
         for key, val in res_spl_calc.items():
             hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"sample/"+key, data = val)
-                # for key, val in info.items():
-                #     hfile.create_dataset(group+"info/"+key, data = val)
 
-    # for key in res_fit:
-    #     print(key)
-    # print()
-    # for key in res_spl_fit:
-    #     print(key)
-
-    # for key, val in res_fit.items():
-    #     print(key)
-    #     print(val)
-
-                                        
-                                        
-                                        
-                                        
-                                            # print(res_calc)
-    # for key, val in res_calc.items():
-    #     print(key)
-    #     print(val)
-    # for key, val in res_spl_calc.items():
-    #     print(key)
-    #     # print(val)
-    #     print(len(val))
-    #     for tmp in val:
-    #         print(len(tmp))
-    # print(res_spl_calc)
-    
-    # print(num_resample)
-
-
-
-
-                                # asd = hfile[ens][P][irrep][lv]["mean"][()]
-                                # print(type(hfile[ens][P][irrep][lv]["mean"][()]))
-                                # exit()
-                                # res_calc.append()
-
-                            # beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]
-            #             beta = float(beta)
-            #             m0 = float(m0)
-            #             mpi = float(mpi)
-            #             mrho = float(mrho)
-            #             ld = bool(ld)
-            #             info["beta"] = beta
-            #             info["m0"] = m0
-            #             info["mpi"] = mpi
-            #             info["mrho"] = mrho
-            #             NL = hfile[ens]["lattice"][()][3]
-            #             info["NL"] = NL
-            #             # print(beta,m0,NL,dvec)
-            #             for i in range(num_lv):
-            #                 # print("E=",i)
-            #                 E = hfile[ens][P][irrep]["E%i"%i][()][0]
-            #                 E_m = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
-            #                 E_p = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
-            #                 res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
-            #                 for key, val in info_tmp.items():
-            #                     info[key] = val
-            #                 save_to_hdf(res, res_sampled, info, ens, P, irrep, i, corrfitname)
-
-def fit_all_phase_shifts():
-    fit_one_phaseshift("_evp_deriv_false",6.9,-0.92)
-    fit_one_phaseshift("_evp_deriv_false",7.05,-0.863)
-    fit_one_phaseshift("_evp_deriv_false",7.05,-0.867)
+def fit_all_phase_shifts(name):
+    fit_one_phaseshift(name,6.9,-0.92)
+    fit_one_phaseshift(name,7.05,-0.863)
+    fit_one_phaseshift(name,7.05,-0.867)
 
 
 if __name__ == "__main__":
-    fit_all_phase_shifts()
-
-
-    # filename = "close_res_new"
-    # m0 = -0.863
-
-    # res, res_spl = read_from_hdf(filename)
-    # res, res_spl = get_fits(res, res_spl,m0=m0)
-    # save_to_hdf(res, res_spl, filename+"_fit")
+    # name = "_evp_deriv_false"
+    name = "_evp_deriv_true"
+    fit_all_phase_shifts(name)
