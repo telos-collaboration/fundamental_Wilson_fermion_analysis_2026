@@ -322,6 +322,115 @@ def plot_p3cotPS(name,beta,m0,fit=False,outname=None,show=False):
         plt.show()
     plt.close(fig)
 
+########################################## Plot sigma1 ##########################################
+
+
+# def get_data_sigma_1(name, beta, m0):
+#     res = {}
+#     res_spl = {}
+
+#     with h5py.File("../output/scattering/isospin1_fit_scatter"+name+".hdf5","r") as hfile:
+#         for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
+#             res[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
+#             res_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
+#     return res, res_spl
+
+def sigma_ERE_s_wave(s, a, r):
+    p2 = s/4-1
+    cot_PS = (-1/a+p2*r/2)/np.sqrt(p2)
+    return 4*np.pi/(cot_PS**2+1)/p2
+    
+def sigma_of_P3cotPS(P3cotPS, p2):
+    if p2 == 0:
+        return 0
+    else:
+        cot_PS = P3cotPS/(p2**(3/2))
+        return 4*np.pi*3/(cot_PS**2+1)/p2
+
+def plot_sigma_1(name,beta,m0,fit=False,outname=None,show=False):
+    plt.rcParams['figure.figsize'] = [10, 6]
+    fontsize = 14
+    font = {'size'   : fontsize}
+    matplotlib.rc('font', **font)
+    fig, ax = plt.subplots()
+    plt.grid()
+    # res, res_smp = read_from_hdf("non_res_fit")    
+    res, res_smp = get_data_p3cotPS(name, beta, m0)
+    # beta = res["beta"]
+    # m0 = res["m_1"]
+
+    xlim = [4,6.5]
+
+    plt.xlabel(r"$s/m_\pi^2$")
+    x_plot = res["s_prime"]
+    x_plot_sam = np.transpose(res_smp["s_prime"])
+    # ax.set_xlim(xlim)
+    y_plot = np.real(res["sigma_prime"])
+    y_plot_sam = np.transpose(np.real(res_smp["sigma_prime"]))
+    # ax.set_ylim([0,26])
+
+
+
+    plt.ylabel(r"$\sigma m_\pi^2$")        
+    
+    length = len(x_plot_sam[0])
+    num_perc = math.erf(1/np.sqrt(2))
+    # N_Ls = res["N_L"]
+    # dvecs = res["dvec"]
+    # d2s = res["d2"]
+
+    # for i in  [4, 10, 13, 16]:
+    #     ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+    #     sorted_indices = np.argsort(x_plot_sam[i])    
+    #     ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+    # for i in [1,7]:
+    #     ax.scatter(x_plot[i],y_plot[i], color = "grey", ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+    #     sorted_indices = np.argsort(x_plot_sam[i])
+    #     ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvecs[i]))
+
+
+    sarr = np.linspace(xlim[0],xlim[1],5000)
+    p2arr = [x/4-1 for x in sarr]
+
+    yarr_14 = [sigma_ERE_s_wave(s, 0.52, 6.7) for s in sarr]
+
+    plt.plot(sarr, yarr_14, color = "red", label = "2405.06506")
+    
+    a1_1 = res["a1_1"]
+    r1_1 = res["r1_1"]
+    # plt.axvline(1/r1_1**2, label = "$r1 p \approx 1$")
+    print("smax = ", 4*(1+1/r1_1**2))
+    a1_1_smp = res_smp["a1_1"]
+    r1_1_smp = res_smp["r1_1"]
+
+    a1_1_em = abs(sorted(a1_1_smp)[math.floor(length*(1-num_perc)/2)]-a1_1)
+    a1_1_ep = abs(sorted(a1_1_smp)[math.ceil(length*(1+num_perc)/2)] -a1_1)
+    r1_1_em = abs(sorted(r1_1_smp)[math.floor(length*(1-num_perc)/2)]-r1_1)
+    r1_1_ep = abs(sorted(r1_1_smp)[math.ceil(length*(1+num_perc)/2)] -r1_1)
+
+    yarr = [sigma_of_P3cotPS(fit_scatter.ERE_1(x,a1_1,r1_1), x) for x in p2arr]
+    plt.plot(sarr,yarr,label="This work")
+
+    yarr_smp = []
+    for p2 in p2arr:
+        p3cotPS_smp = [fit_scatter.ERE_1(p2,a1_1_smp[i],r1_1_smp[i]) for i in range(len(a1_1_smp))]
+        sorted_indices = np.argsort(p3cotPS_smp)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)]
+        yarr_smp.append(np.asarray([sigma_of_P3cotPS(fit_scatter.ERE_1(p2,a1_1_smp[i],r1_1_smp[i]), p2) for i in range(len(a1_1_smp))])[sorted_indices])
+
+
+    yarr_m = [min(yarr_smp[i]) for i in range(len(yarr_smp))]
+    yarr_p = [max(yarr_smp[i]) for i in range(len(yarr_smp))]
+
+    plt.fill_between(sarr, yarr_m, yarr_p, alpha = 0.3)
+
+    if outname == None:    
+        plt.savefig("../output/plots/scattering/sigma1_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit), bbox_inches='tight')
+    else:    
+        plt.savefig("../output/plots/scattering/sigma1_"+outname+"_fit_%r.pdf"%fit, bbox_inches='tight')
+    if show:
+        plt.show()
+    plt.close(fig)
+
 if __name__ == "__main__":
     # name = "_evp_deriv_false"
     name = "_evp_deriv_true"
@@ -339,6 +448,12 @@ if __name__ == "__main__":
     plot_E_CM_L(name,7.05,-0.867,True,outname="res")
     plot_E_CM_L(name,7.05,-0.867,False,outname="res")
     
-    plot_p3cotPS(name,6.9,-0.92,True,outname="non_res",show=True)
-    plot_p3cotPS(name,7.05,-0.863,True,outname="close_res",show=True)
-    plot_p3cotPS(name,7.05,-0.867,True,outname="res",show=True)
+    plot_p3cotPS(name,6.9,-0.92,True,outname="non_res",show=False)
+    plot_p3cotPS(name,7.05,-0.863,True,outname="close_res",show=False)
+    plot_p3cotPS(name,7.05,-0.867,True,outname="res",show=False)
+    
+    plot_sigma_1(name,6.9,-0.92,True,outname="non_res",show=False)
+    plot_sigma_1(name,7.05,-0.863,True,outname="close_res",show=False)
+    plot_sigma_1(name,7.05,-0.867,True,outname="res",show=False)
+
+    # plot_sigma()
