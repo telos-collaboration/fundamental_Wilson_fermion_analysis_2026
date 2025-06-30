@@ -240,7 +240,7 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     # print("\t\t", En_prime**2, P_prime**2, En_prime**2 - P_prime**2)
     if En_prime**2 - P_prime**2 < 4:
         for key in key_list:
-            res[key] = 0
+            res[key] = float(0)
     else:
         # res = {}
         res["E_cm"] = Ecm(ld)(E_pipi,Pvec)
@@ -339,7 +339,7 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
 #     elif m0 == -0.867:
 #         return 0.3530
 
-def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=5,num_lv=2):
+def calc_all_phaseshifts(corrfitname,resampling="lin",num_resample=5,num_lv=2):
     info = {}
     infile = np.transpose(np.genfromtxt("../input/scattering_input.csv",delimiter=";",skip_header=1,dtype=str))
     # infile[3] = [float(infile[3,i]) for i in range(len(infile[0]))]
@@ -399,4 +399,4 @@ def calc_all_phaseshifts(corrfitname,pref = "std",resampling="lin",num_resample=
     # info["beta"],info["m_1"],info["m_2"], info["mrho"], info["mpi"], info["en_lv"] = [beta,m0,m0,mrho,mpi,2]
 
 if __name__ == "__main__":
-    calc_all_phaseshifts("_evp_deriv_false", "non_res", resampling="lin", num_resample=3)
+    calc_all_phaseshifts("_evp_deriv_false", resampling="lin", num_resample=3)
