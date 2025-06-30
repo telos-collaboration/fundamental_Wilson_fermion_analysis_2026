@@ -11,7 +11,7 @@ using Statistics
 #pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
-deriv  = false
+deriv  = true
 gevp   = false
 t0     = 0
 use3x3 = true
@@ -28,13 +28,15 @@ h5file_raw = joinpath(datapath,"isospin1_sorted.hdf5")
 h5file_com = joinpath(datapath,"isospin1_merged.hdf5")
 h5file_cor = joinpath(datapath,"isospin1_corr.hdf5")
 if gevp
-    h5file_eig  = joinpath(datapath,"isospin1_eigenvalues_gevp_t0_$(t0)_deriv_$deriv.hdf5")
-    h5file_fit  = joinpath(datapath,"isospin1_fitresults_gevp_t0_$(t0)_deriv_$deriv.hdf5")
-    h5file_scat = joinpath(scatpath,"isospin1_scattering_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_eig      = joinpath(datapath,"isospin1_eigenvalues_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_fit      = joinpath(datapath,"isospin1_fitresults_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_scat     = joinpath(scatpath,"isospin1_scattering_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_scat_fit = joinpath(scatpath,"isospin1_fit_scatter_gevp_t0_$(t0)_deriv_$deriv.hdf5")
 else
-    h5file_eig = joinpath(datapath,"isospin1_eigenvalues_evp_deriv_$deriv.hdf5")
-    h5file_fit = joinpath(datapath,"isospin1_fitresults_evp_deriv_$deriv.hdf5")
-    h5file_scat = joinpath(scatpath,"isospin1_scattering_evp_deriv_$deriv.hdf5")
+    h5file_eig      = joinpath(datapath,"isospin1_eigenvalues_evp_deriv_$deriv.hdf5")
+    h5file_fit      = joinpath(datapath,"isospin1_fitresults_evp_deriv_$deriv.hdf5")
+    h5file_scat     = joinpath(scatpath,"isospin1_scattering_evp_deriv_$deriv.hdf5")
+    h5file_scat_fit = joinpath(scatpath,"isospin1_fit_scatter_evp_deriv_$deriv.hdf5")
 end
 
 inputfiles = "input/input_files.csv"
@@ -74,9 +76,9 @@ half_sources=false
 # merge_all_runs(h5file_raw, h5file_com)
 
 # write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting,only_ens)
-# write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3, gevp, average_equivalent_momenta)
-# run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
-# plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, half_sources, average_equivalent_momenta)
+write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3, gevp, average_equivalent_momenta)
+run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
+plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, half_sources, average_equivalent_momenta)
 
 # table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
 # cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
@@ -86,7 +88,9 @@ half_sources=false
 # print(h5file_fit)
 # print("\n")
 
-cd("rho_pipi_scattering_analysis")
-cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
-run(`python3 src/scattering.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
-run(`python3 src/plotting.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
+# cd("rho_pipi_scattering_analysis")
+# cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
+# run(`python3 src/scattering.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
+# cp("../$(h5file_scat)","../$(h5file_scat_fit)",force=true)
+# run(`python3 src/fit_scatter.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
+# run(`python3 src/plotting.py`) # $(first(splitext(basename(yannick_fmt_table))))`)
