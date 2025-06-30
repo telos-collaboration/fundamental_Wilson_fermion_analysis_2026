@@ -57,54 +57,56 @@ def RES_Alex_BWII(p, m_R, gVPP2, r0):
     return ECM*gVPP2*p**3*(1+np.sqrt((m_R/2)**2-1))/(6*np.pi*ECM**2*(m_R**2-ECM**2)*(1+(p*r0)**2))
 def RES_fit(p3cotPS_ECM, ECM, tan_PS, p):                                   # all primed
     result = {}
-    # popt, pcov = curve_fit(RES_Drach, ECM, p3cotPS_ECM)
-    # result["m_R_D"], result["gVPP2_D"] = popt
-    # popt, pcov = curve_fit(RES_Alex_BWI, p, tan_PS)
-    # result["m_R_BWI"], result["gVPP2_BWI"] = popt
-    # popt, pcov = curve_fit(RES_Alex_BWII, p, tan_PS)
-    # result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
+    popt, pcov = curve_fit(RES_Drach, ECM, p3cotPS_ECM)
+    result["m_R_D"], result["gVPP2_D"] = popt
+    popt, pcov = curve_fit(RES_Alex_BWI, p, tan_PS)
+    result["m_R_BWI"], result["gVPP2_BWI"] = popt
+    popt, pcov = curve_fit(RES_Alex_BWII, p, tan_PS)
+    result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
     return result
 
-def w_ind_m0(m0):
-    return [1,2,3,4,5,6,7,8,9,10,11,12,13]
-    # if m0 == 0.92:
-    #     return [4, 10, 13, 16]
-    # elif m0 == -0.863:
-    #     return [4,7,10,13,16]
+# def w_ind_m0(m0):
+#     return [1,2,3,4,5,6,7,8,9,10,11,12,13]
+#     # if m0 == 0.92:
+#     #     return [4, 10, 13, 16]
+#     # elif m0 == -0.863:
+#     #     return [4,7,10,13,16]
 
 
-def get_fits(res, res_spl, ld = "_ld",m0 = -0.92):
+def get_fits(res, res_spl):
     res_tmp={}
     res_spl_tmp={}
-    # win_ind=[]
-    # for i in range(len(res["E_cm"+ld+"_prime"])):
-    #     if res["E_cm"+ld+"_prime"][i] > 2 and res["E_cm"+ld+"_prime"][i] < 4:
-    #         win_ind.append(i)
+    # win_ind = w_ind_m0(m0)
+    win_ind = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
 
-    # win_ind = [4, 10, 13, 16]
-    win_ind = w_ind_m0(m0)
+    for key in res:
+        print(res[key].shape)
+        print(res_spl[key].shape)
+    # exit()
 
-    for key, val in ERE_fit(res["p3cotPS"+ld+"_prime"][win_ind],res["p2star"+ld+"_prime"][win_ind]).items():
+    for key, val in ERE_fit(res["p3cotPS_prime"][win_ind],res["p2star_prime"][win_ind]).items():
         res_tmp[key] = val
-    for key, val in RES_fit(res["p3cotPS_Ecm"+ld+"_prime"][win_ind],res["E_cm"+ld+"_prime"][win_ind],res["tan_PS"+ld][win_ind],res["pstar"+ld+"_prime"][win_ind]).items():
+    for key, val in RES_fit(res["p3cotPS_Ecm_prime"][win_ind],res["E_cm_prime"][win_ind],res["tan_PS"][win_ind],res["pstar_prime"][win_ind]).items():
         res_tmp[key] = val
         
     for key in res_tmp.keys():
         res_spl_tmp[key] = []
 
-    for i in range(len(res_spl["p3cotPS"+ld+"_prime"])):
-        for key, val in ERE_fit(res_spl["p3cotPS"+ld+"_prime"][i][win_ind],res_spl["p2star"+ld+"_prime"][i][win_ind]).items():
+    for i in range(len(res_spl["p3cotPS_prime"])):
+        for key, val in ERE_fit(res_spl["p3cotPS_prime"][i][win_ind],res_spl["p2star_prime"][i][win_ind]).items():
             res_spl_tmp[key].append(val)
-        for key, val in RES_fit(res_spl["p3cotPS_Ecm"+ld+"_prime"][i][win_ind],res_spl["E_cm"+ld+"_prime"][i][win_ind],res_spl["tan_PS"+ld][i][win_ind],res_spl["pstar"+ld+"_prime"][i][win_ind]).items():
+        for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i][win_ind],res_spl["E_cm_prime"][i][win_ind],res_spl["tan_PS"][i][win_ind],res_spl["pstar_prime"][i][win_ind]).items():
             res_spl_tmp[key].append(val)
     
-    for key, val in res_tmp.items():
-        res[key] = val
-    for i in range(len(res_spl["p3cotPS"+ld+"_prime"])):
-        for key, val in res_spl_tmp.items():
-            res_spl[key] = val
+    # for key, val in res_tmp.items():
+    #     res[key] = val
+    # for i in range(len(res_spl["p3cotPS_prime"])):
+    #     for key, val in res_spl_tmp.items():
+    #         res_spl[key] = val
 
-    return res, res_spl
+    return res_tmp, res_spl_tmp
+
+
 
 def fit_one_phaseshift(name, beta, m0):
     res_calc = {}
@@ -112,7 +114,7 @@ def fit_one_phaseshift(name, beta, m0):
 
     with h5py.File("../output/scattering/isospin1_fit_scatter"+name+".hdf5","r") as hfile:
         for ens in hfile:
-            print(ens)
+            # print(ens)
             if str(beta) in ens and str(m0) in ens:
                 for P in hfile[ens]:
                     if P[0] == "p":
@@ -128,6 +130,30 @@ def fit_one_phaseshift(name, beta, m0):
                                     for tmp in hfile[ens][P][irrep][lv]["mean"]:
                                         res_calc[tmp].append(hfile[ens][P][irrep][lv]["mean"][tmp][()])
                                         res_spl_calc[tmp].append(hfile[ens][P][irrep][lv]["sample"][tmp][()])
+
+    for key in res_calc:
+        res_calc[key] = np.asarray(res_calc[key])
+        res_spl_calc[key] = np.transpose(np.asarray(res_spl_calc[key]))
+
+    res_fit, res_spl_fit = get_fits(res_calc,res_spl_calc)
+    with h5py.File("../output/scattering/isospin1_fit_scatter"+name+".hdf5","a") as hfile:
+        for key, val in res_fit.items():
+            hfile.create_dataset(ens+"/fit_scatter/"+"mean/"+key, data = val)
+        for key, val in res_spl_fit.items():
+            hfile.create_dataset(ens+"/fit_scatter/"+"sample/"+key, data = val)
+                # for key, val in info.items():
+                #     hfile.create_dataset(group+"info/"+key, data = val)
+
+    # for key in res_fit:
+    #     print(key)
+    # print()
+    # for key in res_spl_fit:
+    #     print(key)
+
+    # for key, val in res_fit.items():
+    #     print(key)
+    #     print(val)
+
                                         
                                         
                                         
