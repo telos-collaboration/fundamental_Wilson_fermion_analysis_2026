@@ -70,10 +70,10 @@ function write_correlation_matrix(file_in,file_out;combined=true,plotting=true,p
                 if maximum(pv) < 2
                     Corrρ_E  = ScatteringI1.correlatorE(fid,ens;p=pv)
                     Corrρ_B1 = ScatteringI1.correlatorB1(fid,ens;p=pv)
-                    Corrρ_B2 = ScatteringI1.correlatorB2(fid,ens;p=pv)
+                    # Corrρ_B2 = ScatteringI1.correlatorB2(fid,ens;p=pv)
                     isnothing(Corrρ_E)  || h5write(file_out,joinpath(ens,p0,"E"),Corrρ_E)
                     isnothing(Corrρ_B1) || h5write(file_out,joinpath(ens,p0,"B1"),Corrρ_B1)
-                    isnothing(Corrρ_B2) || h5write(file_out,joinpath(ens,p0,"B2"),Corrρ_B2)
+                    # isnothing(Corrρ_B2) || h5write(file_out,joinpath(ens,p0,"B2"),Corrρ_B2)
                 end
 
                 if plotting
