@@ -5,6 +5,7 @@ make clean
 make -f Makefile_shared
 make -f Makefile_orig
 
+mkdir -p ../../out/
 cp get_wlm.so  ../../out/get_wlm.so
 cp get_wlm.exe ../../out/get_wlm.exe
 cd -
