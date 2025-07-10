@@ -208,10 +208,10 @@ def calc_all_phaseshifts(corrfitname,resampling="lin",num_resample=5,num_lv=2):
                     dvec = [int(P[2]),int(P[4]),int(P[6])]
                     for irrep in hfile[ens][P]:
                         beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]
-                        beta = float(beta)
-                        m0 = float(m0)
-                        mpi = float(mpi)
-                        mrho = float(mrho)
+                        beta = float(beta[0])
+                        m0 = float(m0[0])
+                        mpi = float(mpi[0])
+                        mrho = float(mrho[0])
                         ld = bool(ld)
                         info["beta"] = beta
                         info["m0"] = m0

@@ -156,10 +156,10 @@ def plot_E_CM_L(name,beta,m0,levels=False,outname=None,show=False):
     
     for i in range(len(ECMs)):
         plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(d2s[i]), marker = marker(lvs[i]))   
-    plt.axhline(1,c="black", ls="dotted", label = "$m_\pi$")
-    plt.axhline(mrho/mpi,c="red", ls="dotted", label = "$m_\\rho$")
-    plt.axhline(2,c="black",label = "2$m_\pi$")
-    plt.axhline(4,c="black",label = "4$m_\pi$")
+    plt.axhline(1,c="black", ls="dotted", label = r"$m_\pi$")
+    plt.axhline(mrho/mpi,c="red", ls="dotted", label = r"$m_\rho$")
+    plt.axhline(2,c="black",label = r"2$m_\pi$")
+    plt.axhline(4,c="black",label = r"4$m_\pi$")
     plt.grid()
     plt.title("$\\beta$ = %f, $m_0$ = %f"%(beta,m0))
     # xarr = np.linspace(14,38)
