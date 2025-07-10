@@ -3,6 +3,7 @@ import numpy as np
 import h5py
 from scipy.optimize import curve_fit
 # import matplotlib.pyplot as plt
+import os
 
 def save_to_hdf(res,res_sample, filename):
     with h5py.File("rho_pipi_scattering_analysis/output/hdf5/"+filename+".hdf5","w") as hfile:
@@ -134,6 +135,10 @@ def fit_all_phase_shifts(name):
 
 
 if __name__ == "__main__":
+    # create directories if they do not exist
+    os.makedirs("../output/scattering", exist_ok=True)
+    os.makedirs("../output/plots/scattering", exist_ok=True)
+
     # name = "_evp_deriv_false"
     name = "_evp_deriv_true"
     fit_all_phase_shifts(name)
