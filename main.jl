@@ -10,11 +10,12 @@ using PDFmerger
 using Statistics
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
+t0     = 0
 deriv  = true
 gevp   = false
-t0     = 0
 use3x3 = true
-average_equivalent_momenta = false
+symmetrise = true
+average_equivalent_momenta = true
 
 path  = "/home/fabian/Documents/Physics/Data/"
 path  = "/home/fabian/Dokumente/Physics/Data/"
@@ -67,17 +68,18 @@ only_ens = [
         ]
 
 plotting = true
-half_sources=false
 
 parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 all_runs_table(h5file_raw,overview_table;)
 all_runs_table(h5file_raw,analysed_table;only_ens)
 merge_all_runs(h5file_raw, h5file_com)
 
-write_correlation_matrix(h5file_com,h5file_cor;plotpath,plotting,only_ens)
-write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, plotpath, plotting, use3x3, gevp, average_equivalent_momenta)
+write_correlation_matrix(h5file_com,h5file_cor;only_ens)
+plot_correlation_matrices(h5file_com,plotpath;only_ens)
+write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, gevp, average_equivalent_momenta,symmetrise)
+plot_eigenvalues(h5file_eig,plotpath)
 run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
-plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, half_sources, average_equivalent_momenta)
+plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, average_equivalent_momenta, symmetrise)
 
 redirect_stdio(stdout="make.log",stderr="make.log") do 
     run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
