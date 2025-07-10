@@ -8,27 +8,36 @@ using Plots
 using LaTeXStrings
 using PDFmerger
 using Statistics
-#pgfplotsx(frame=:box,markersize=5,labelfontsize=16,tickfontsize=14,legendfontsize=14,legend=:bottomleft,markeralpha=0.7)
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
-t0     = 6
+t0     = 0
 deriv  = true
 gevp   = false
 use3x3 = true
-symmetrise = true
+symmetrise = false
 average_equivalent_momenta = true
 
-path  = "/home/fabian/Dokumente/Physics/Data/"
 path  = "/home/fabian/Documents/Physics/Data/"
+path  = "/home/fabian/Dokumente/Physics/Data/"
 plotpath  = "./output/plots/"
 datapath  = "./output/data/"
+scatpath  = "./output/scattering/"
 tablepath = "./output/tables/"
 
 h5file_raw = joinpath(datapath,"isospin1_sorted.hdf5")
 h5file_com = joinpath(datapath,"isospin1_merged.hdf5")
 h5file_cor = joinpath(datapath,"isospin1_corr.hdf5")
-h5file_eig = joinpath(datapath,"isospin1_eigenvalues_t0_$(t0)_deriv_$deriv.hdf5")
-h5file_fit = joinpath(datapath,"isospin1_fitresults_t0_$(t0)_deriv_$deriv.hdf5")
+if gevp
+    h5file_eig      = joinpath(datapath,"isospin1_eigenvalues_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_fit      = joinpath(datapath,"isospin1_fitresults_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_scat     = joinpath(scatpath,"isospin1_scattering_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+    h5file_scat_fit = joinpath(scatpath,"isospin1_fit_scatter_gevp_t0_$(t0)_deriv_$deriv.hdf5")
+else
+    h5file_eig      = joinpath(datapath,"isospin1_eigenvalues_evp_deriv_$deriv.hdf5")
+    h5file_fit      = joinpath(datapath,"isospin1_fitresults_evp_deriv_$deriv.hdf5")
+    h5file_scat     = joinpath(scatpath,"isospin1_scattering_evp_deriv_$deriv.hdf5")
+    h5file_scat_fit = joinpath(scatpath,"isospin1_fit_scatter_evp_deriv_$deriv.hdf5")
+end
 
 inputfiles = "input/input_files.csv"
 infvolfile = "input/infinite_volume.csv"
@@ -60,7 +69,7 @@ only_ens = [
 
 plotting = true
 
-parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+#parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 all_runs_table(h5file_raw,overview_table;)
 all_runs_table(h5file_raw,analysed_table;only_ens)
 merge_all_runs(h5file_raw, h5file_com)
@@ -72,11 +81,13 @@ plot_eigenvalues(h5file_eig,plotpath)
 run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
 plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, average_equivalent_momenta, symmetrise)
 
-table_yannick(h5file_fit,infvolfile,yannick_fmt_table)
-cp(yannick_fmt_table,"rho_pipi_scattering_analysis/data/$(basename(yannick_fmt_table))",force=true)
 redirect_stdio(stdout="make.log",stderr="make.log") do 
     run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
 end
+
 cd("rho_pipi_scattering_analysis")
-run(`python3 src/scattering.py $(first(splitext(basename(yannick_fmt_table))))`)
-run(`python3 src/plotting.py $(first(splitext(basename(yannick_fmt_table))))`)
+cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
+run(`python3 src/scattering.py test`)
+cp("../$(h5file_scat)","../$(h5file_scat_fit)",force=true)
+run(`python3 src/fit_scatter.py`) 
+run(`python3 src/plotting.py`) 

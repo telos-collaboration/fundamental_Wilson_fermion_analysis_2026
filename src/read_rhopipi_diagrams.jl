@@ -121,12 +121,13 @@ end
 function correlatorE_00n(h5dset,ens;p::Vector{Int})
     @assert momentum_is_00n(p)
     z     = only(findall(x->!iszero(x),p))
+    zp    = (z+1) % 3
     p_e   = "($(p[1]),$(p[2]),$(p[3]))"
     try
-        Corrρ = read(h5dset,"$ens/p$p_e/rho_g$(z)_g$(z)/p_diag$p_e/C_re")
+        Corrρ = read(h5dset,"$ens/p$p_e/rho_g$(zp)_g$(zp)/p_diag$p_e/C_re")
         return Corrρ
     catch
-        Corrρ = read(h5dset,"$ens/p$p_e/rho_g$(z)$(z)/p_diag$p_e/C_re")
+        Corrρ = read(h5dset,"$ens/p$p_e/rho_g$(zp)$(zp)/p_diag$p_e/C_re")
         return Corrρ
     end
 end
@@ -173,25 +174,25 @@ function correlatorE_nnn(h5dset,ens;p::Vector{Int})
         return Corrρ
     end
 end
-function correlatorB2(h5dset,ens;p::Vector{Int})
-    if momentum_is_0nn(p)
-        x, y = findall(x->!iszero(x),p)
-        p_e  = "($(p[1]),$(p[2]),$(p[3]))"
-        # TODO: Fix normalization, check signs of i=2
-        try 
-            Corrρ =          read(h5dset,"$ens/p$p_e/rho_g$(x)$(x)/p_diag$p_e/C_re")
-            Corrρ = Corrρ .+ read(h5dset,"$ens/p$p_e/rho_g$(y)$(y)/p_diag$p_e/C_re")
-            Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(x)$(y)/p_diag$p_e/C_re")
-            Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(y)$(x)/p_diag$p_e/C_re")
-            return Corrρ
-        catch
-            Corrρ =          read(h5dset,"$ens/p$p_e/rho_g$(x)_g$(x)/p_diag$p_e/C_re")
-            Corrρ = Corrρ .+ read(h5dset,"$ens/p$p_e/rho_g$(y)_g$(y)/p_diag$p_e/C_re")
-            Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(x)_g$(y)/p_diag$p_e/C_re")
-            Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(y)_g$(x)/p_diag$p_e/C_re")
-            return Corrρ
-        end
-    else
-        return nothing
-    end
-end
+# function correlatorB2(h5dset,ens;p::Vector{Int})              # not needed for now
+#     if momentum_is_0nn(p)
+#         x, y = findall(x->!iszero(x),p)
+#         p_e  = "($(p[1]),$(p[2]),$(p[3]))"
+#         # TODO: Fix normalization, check signs of i=2
+#         try 
+#             Corrρ =          read(h5dset,"$ens/p$p_e/rho_g$(x)$(x)/p_diag$p_e/C_re")
+#             Corrρ = Corrρ .+ read(h5dset,"$ens/p$p_e/rho_g$(y)$(y)/p_diag$p_e/C_re")
+#             Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(x)$(y)/p_diag$p_e/C_re")
+#             Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(y)$(x)/p_diag$p_e/C_re")
+#             return Corrρ
+#         catch
+#             Corrρ =          read(h5dset,"$ens/p$p_e/rho_g$(x)_g$(x)/p_diag$p_e/C_re")
+#             Corrρ = Corrρ .+ read(h5dset,"$ens/p$p_e/rho_g$(y)_g$(y)/p_diag$p_e/C_re")
+#             Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(x)_g$(y)/p_diag$p_e/C_re")
+#             Corrρ = Corrρ .- read(h5dset,"$ens/p$p_e/rho_g$(y)_g$(x)/p_diag$p_e/C_re")
+#             return Corrρ
+#         end
+#     else
+#         return nothing
+#     end
+# end

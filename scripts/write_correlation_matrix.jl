@@ -11,7 +11,7 @@ pseudolog10(x,C=1E+4) = sign(x)*log10(abs(C*x)+1)
 function write_correlation_matrix(file_in,file_out;only_ens=nothing)
     isfile(file_out) && rm(file_out)
     fid = h5open(file_in)
-    
+  
     # Restrict ourselves to only the specified ensembles in the optional keyword argument
     ensembles = keys(fid)
     ensembles = isnothing(only_ens) ? ensembles : intersect(ensembles,only_ens)
@@ -52,10 +52,10 @@ function write_correlation_matrix(file_in,file_out;only_ens=nothing)
                 if maximum(pv) < 2
                     Corrρ_E  = ScatteringI1.correlatorE(fid,ens;p=pv)
                     Corrρ_B1 = ScatteringI1.correlatorB1(fid,ens;p=pv)
-                    Corrρ_B2 = ScatteringI1.correlatorB2(fid,ens;p=pv)
+                    # Corrρ_B2 = ScatteringI1.correlatorB2(fid,ens;p=pv)
                     isnothing(Corrρ_E)  || h5write(file_out,joinpath(ens,p0,"E"),Corrρ_E)
                     isnothing(Corrρ_B1) || h5write(file_out,joinpath(ens,p0,"B1"),Corrρ_B1)
-                    isnothing(Corrρ_B2) || h5write(file_out,joinpath(ens,p0,"B2"),Corrρ_B2)
+                    # isnothing(Corrρ_B2) || h5write(file_out,joinpath(ens,p0,"B2"),Corrρ_B2)
                 end
             end
         end
@@ -79,7 +79,7 @@ function plot_correlation_matrices(file_in,plotpath;only_ens=nothing)
 
     @showprogress desc="Plot correlation matrix elements" for ens in ensembles
 
-        T, L = fid["$ens/lattice"][1:2]
+        T, L = read(fid,joinpath(ens,"lattice"))[1:2]
         p_external = read(fid,"$ens/p_external")
 
         for p0 in p_external 
@@ -137,6 +137,7 @@ function plot_correlation_matrices(file_in,plotpath;only_ens=nothing)
                     if backend_name() == :pgfplotsx
                         savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$(p0)_3by3.tex") )
                     end
+
                     savefig(plt,"temp.pdf")
                     append_pdf!(joinpath(plotpath,plotname3x3),"temp.pdf",cleanup=true)
                     isinteractive() && display(plt)    

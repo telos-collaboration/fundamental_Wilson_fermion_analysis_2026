@@ -6,6 +6,7 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
+
 function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), average_equivalent_momenta, gevp, symmetrise)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
@@ -29,10 +30,10 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv,gevp,symmetrise)
                 eigvals_3x3, Δeigvals_3x3 = real.(eigvals_3x3), real.(Δeigvals_3x3), real.(eigvals_cov_3x3)
             end
-
-            h5write(outfile,joinpath(ens,p,"eigvals"),eigvals)
-            h5write(outfile,joinpath(ens,p,"Delta_eigvals"),Δeigvals)
-            h5write(outfile,joinpath(ens,p,"cov_eigvals"),eigvals_cov)
+   
+            h5write(outfile,joinpath(ens,p,"A1","eigvals"),eigvals)
+            h5write(outfile,joinpath(ens,p,"A1","Delta_eigvals"),Δeigvals)
+            h5write(outfile,joinpath(ens,p,"A1","cov_eigvals"),eigvals_cov)
             h5write(outfile,joinpath(ens,p,"t0"),t0)
             h5write(outfile,joinpath(ens,p,"deriv"),deriv)
             h5write(outfile,joinpath(ens,p,"average_equivalent_momenta"),average_equivalent_momenta)
@@ -73,8 +74,8 @@ function plot_eigenvalues(file,plotpath)
             
             three_by_three = use3x3 && haskey(h5dset[ens][p],"Corr3x3")
 
-            eigvals  = read(h5dset,joinpath(ens,p,"eigvals"))
-            Δeigvals = read(h5dset,joinpath(ens,p,"Delta_eigvals"))
+            eigvals  = read(h5dset,joinpath(ens,p,"A1","eigvals"))
+            Δeigvals = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals"))
             momenta  = read(h5dset,joinpath(ens,p,"momenta"))
             sources  = read(h5dset,joinpath(ens,p,"sources"))
             if three_by_three
@@ -88,7 +89,11 @@ function plot_eigenvalues(file,plotpath)
                 T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
                 m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
                 ncfg  = read(h5dset,joinpath(ens,"Nconf"))
-                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+                if gevp
+                    title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+                else
+                    title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg"
+                end
                 
                 t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
                 t1 = filter(x->!iszero(eigvals[1,x]),t)
@@ -114,6 +119,7 @@ function plot_eigenvalues(file,plotpath)
                 append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
                 isinteractive() && display(plt)
             end
+
         end
     end
 end

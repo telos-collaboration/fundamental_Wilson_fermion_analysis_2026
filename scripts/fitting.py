@@ -66,16 +66,19 @@ def fit_all_files(infile,outfile,parameterfile):
     
     for row in tqdm((reader), total=lines , desc="Fit eigenvalues", disable=False):
 
-        group, tmin, tmax = row[0], int(row[1]), int(row[2]) 
+        group, irrep, tmin1, tmax1, tmin2, tmax2 = row[0], row[1], int(row[2]), int(row[3]), int(row[4]), int(row[5])
 
         if group not in fid:
             continue 
+        
+        irreps = "/" + irrep
 
         # read the data from the hdf5 file
-        ev       = get_hdf5_value(fid,group+"/eigvals")
-        Delta_ev = get_hdf5_value(fid,group+"/Delta_eigvals")
-        cov_ev   = get_hdf5_value(fid,group+"/cov_eigvals")
-        t0       = get_hdf5_value(fid,group+"/t0") - 1 # offset for 1-indexing in julia 
+        lattice  = get_hdf5_value(fid,group[:-9]+"/lattice")
+        ev       = get_hdf5_value(fid,group+irreps+"/eigvals")
+        Delta_ev = get_hdf5_value(fid,group+irreps+"/Delta_eigvals")
+        cov_ev   = get_hdf5_value(fid,group+irreps+"/cov_eigvals")
+        # t0       = get_hdf5_value(fid,group+irreps+"/t0") - 1 # offset for 1-indexing in julia    # excluded for now. see "write_all_eigenvalues"
         T        = ev.shape[0]
         antisymmetric = get_hdf5_value(fid,group+"/deriv") 
 
@@ -85,32 +88,37 @@ def fit_all_files(infile,outfile,parameterfile):
         eig2 = dict(Gab=var2/var2[0])
         eig1 = dict(Gab=var1/var1[0])
 
-        plotname = group
+        plotname = group+irrep
         plotdir  = "./output/plots/"
         printing = False
         plotting = False
         Nmax = 5
 
-        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
-        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin,tmax,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin1,tmax1,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin2,tmax2,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
 
         f = h5py.File(outfile, "a")
-        f.create_dataset(group+"/tmin", data=tmin)
-        f.create_dataset(group+"/tmax", data=tmax)
-        f.create_dataset(group+"/Nmax", data=Nmax)
-        f.create_dataset(group+"/antisymmetric", data=antisymmetric)
-        f.create_dataset(group+"/E0", data=[E_i.mean for E_i in E1])
-        f.create_dataset(group+"/E1", data=[E_i.mean for E_i in E2])
-        f.create_dataset(group+"/Delta_E0", data=[E_i.sdev for E_i in E1])
-        f.create_dataset(group+"/Delta_E1", data=[E_i.sdev for E_i in E2])
-        f.create_dataset(group+"/a0", data=[a_i.mean for a_i in a1])
-        f.create_dataset(group+"/a1", data=[a_i.mean for a_i in a2])
-        f.create_dataset(group+"/Delta_a0", data=[a_i.sdev for a_i in a1])
-        f.create_dataset(group+"/Delta_a1", data=[a_i.sdev for a_i in a2])
-        f.create_dataset(group+"/chi2_0", data=chi2_1)
-        f.create_dataset(group+"/chi2_1", data=chi2_2)
-        f.create_dataset(group+"/dof0", data=dof1)
-        f.create_dataset(group+"/dof1", data=dof2)
+        lattice_key = group[:-9]+"/lattice"
+        if not lattice_key in f.keys():
+            f.create_dataset(lattice_key, data=lattice)
+        f.create_dataset(group+irreps+"/tmin1", data=tmin1)
+        f.create_dataset(group+irreps+"/tmax1", data=tmax1)
+        f.create_dataset(group+irreps+"/tmin2", data=tmin2)
+        f.create_dataset(group+irreps+"/tmax2", data=tmax2)
+        f.create_dataset(group+irreps+"/Nmax", data=Nmax)
+        f.create_dataset(group+irreps+"/antisymmetric", data=antisymmetric)
+        f.create_dataset(group+irreps+"/E0", data=[E_i.mean for E_i in E1])
+        f.create_dataset(group+irreps+"/E1", data=[E_i.mean for E_i in E2])
+        f.create_dataset(group+irreps+"/Delta_E0", data=[E_i.sdev for E_i in E1])
+        f.create_dataset(group+irreps+"/Delta_E1", data=[E_i.sdev for E_i in E2])
+        f.create_dataset(group+irreps+"/a0", data=[a_i.mean for a_i in a1])
+        f.create_dataset(group+irreps+"/a1", data=[a_i.mean for a_i in a2])
+        f.create_dataset(group+irreps+"/Delta_a0", data=[a_i.sdev for a_i in a1])
+        f.create_dataset(group+irreps+"/Delta_a1", data=[a_i.sdev for a_i in a2])
+        f.create_dataset(group+irreps+"/chi2_0", data=chi2_1)
+        f.create_dataset(group+irreps+"/chi2_1", data=chi2_2)
+        f.create_dataset(group+irreps+"/dof0", data=dof1)
+        f.create_dataset(group+irreps+"/dof1", data=dof2)
         f.close()
 
 args = sys.argv

@@ -1,13 +1,16 @@
 *.hdf5
 *.pdf
 *.csv
+*.dat
 *.svg
 *.webm
 *.log
-output/
+# output/
 data/
 plots/
 !input/pipi_fitintervals.csv
 !input/input_files.csv
 !input/input_files_light.csv
 !input/infinite_volume.csv
+!input/scattering_input.csv
+!input/fit_scatter_input.csv
