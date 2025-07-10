@@ -14,7 +14,7 @@ t0     = 0
 deriv  = true
 gevp   = false
 use3x3 = true
-symmetrise = true
+symmetrise = false
 average_equivalent_momenta = true
 
 path  = "/home/fabian/Documents/Physics/Data/"
@@ -69,7 +69,7 @@ only_ens = [
 
 plotting = true
 
-parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+#parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 all_runs_table(h5file_raw,overview_table;)
 all_runs_table(h5file_raw,analysed_table;only_ens)
 merge_all_runs(h5file_raw, h5file_com)
