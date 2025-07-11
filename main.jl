@@ -1,4 +1,4 @@
-using Pkg; Pkg.activate("."); Pkg.instantiate()
+using Pkg; Pkg.activate("src/src_jl"); Pkg.instantiate()
 using ScatteringI1
 using DelimitedFiles
 using HDF5
@@ -46,12 +46,12 @@ overview_table    = joinpath(tablepath,"all_runs.csv")
 analysed_table    = joinpath(tablepath,"analysed_runs.csv")
 yannick_fmt_table = joinpath(tablepath,"yannick_format_t0_$(t0)_deriv_$deriv.dat")
 
-include("scripts/parse_all_files.jl")
-include("scripts/combine_runs.jl")
-include("scripts/write_correlation_matrix.jl")
-include("scripts/write_eigenvalues.jl")
-include("scripts/variational_analysis_meff.jl")
-include("scripts/write_tables.jl")
+include("src/scripts_julia/parse_all_files.jl")
+include("src/scripts_julia/combine_runs.jl")
+include("src/scripts_julia/write_correlation_matrix.jl")
+include("src/scripts_julia/write_eigenvalues.jl")
+include("src/scripts_julia/variational_analysis_meff.jl")
+include("src/scripts_julia/write_tables.jl")
 
 only_ens = nothing
 only_ens = [
@@ -68,7 +68,7 @@ only_ens = [
 
 plotting = true
 
-parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+#parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 all_runs_table(h5file_raw,overview_table;)
 all_runs_table(h5file_raw,analysed_table;only_ens)
 merge_all_runs(h5file_raw, h5file_com)
@@ -77,17 +77,17 @@ write_correlation_matrix(h5file_com,h5file_cor;only_ens)
 plot_correlation_matrices(h5file_com,plotpath;only_ens)
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, gevp, average_equivalent_momenta,symmetrise)
 plot_eigenvalues(h5file_eig,plotpath)
-run(`python3 scripts/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
+run(`python3 src/scripts_julia/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
 plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, average_equivalent_momenta, symmetrise)
 
 redirect_stdio(stdout="make.log",stderr="make.log") do 
-    run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
+    run(`bash src/zeta/compile.sh`)
 end
 
 ispath(scatpath) || mkpath(scatpath)
-cd("rho_pipi_scattering_analysis")
+cd("src")
 cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
-run(`python3 src/scattering.py test`)
+run(`python3 src_py/scattering.py test`)
 cp("../$(h5file_scat)","../$(h5file_scat_fit)",force=true)
-run(`python3 src/fit_scatter.py`) 
-run(`python3 src/plotting.py`) 
+run(`python3 src_py/fit_scatter.py`) 
+run(`python3 src_py/plotting.py`) 
