@@ -1,0 +1,146 @@
+\documentclass[a4paper,12pt]{book}
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[pdftex]{graphicx}
+\usepackage{hyperref}
+\usepackage[sort,numbers]{natbib}
+\usepackage[a4paper,inner=3.5cm,outer=2.5cm,top=2.5cm,bottom=2.5cm,pdftex]{geometry}
+\usepackage{epstopdf}
+\usepackage{verbatim}
+\usepackage{bm}
+
+\begin{document}
+\chapter*{\texorpdfstring{Evaluation of $Z^{\mathbf{d}}_{lm}(s;q^2)$}{Evaluating the generalized Zlm}}
+\vspace{-1cm}
+Extended appendix of 1202.2145\\
+\vspace{-1cm}
+\section*{\texorpdfstring{Evaluation of $Z^{\mathbf{d}}_{lm}(1;q^2)$}{Evaluating the generalized Zlm1q2}}
+
+This documentation provides a form of the  generalized function $Z_{lm}^{\mathbf{d}}(1;q^2)$  that is appropriate for numerical evaluation. We consider the most general case $m_1\not = m_2$,  $\mathbf{d}=\tfrac{L}{2\pi}\mathbf{P} \not = 0$ and general $l$ and $m$, which has not been considered before. Some parts of our derivation  are similar to  Appendix A of \cite{Yamazaki:2004qb}, done for $l=m=0$ and $m_1=m_2$, and to  Appendix B of \cite{Fu:2011xz}, done for  $l=1$ and $m=0$. 
+
+The $Z_{lm}^{\mathbf{d}}(1;q^2)$ for the general case of $m_1\not = m_2$ and $\mathbf{d}=\tfrac{L}{2\pi}\mathbf{P} \not = 0$ is defined as:
+\begin{equation}
+\label{Zlm_def}
+Z_{lm}^{\mathbf{d}}(1;q^2)\equiv \sum_{\mathbf{r}\in P_{d}} \frac{{\cal Y}_{lm}(\mathbf{r})}{(|\mathbf{r}|^2-q^2)}\ , \qquad q=\frac{L}{2\pi}~ p^*~,\quad {\cal Y}_{lm}(\mathbf{r})\equiv r^l Y_{lm}(\theta,\phi) \ ,
+\end{equation}
+where the relations for the phase shift depend on $Z_{lm}^{\mathbf{d}}(1;q^2)$. Here $q^2$ is real and can be positive or negative. The sum goes over the mesh $P_{d}$, which is shifted from $\bf{n} \in Z^3$ along $\bf{d}$ and boosted with $\hat{\gamma}^{-1}$:
+\begin{align}
+P_{\mathbf{d}} = \{ \mathbf{r} | \mathbf{r}=\hat{\gamma}^{-1}(\mathbf{r}-\frac{1}{2}A \mathbf{d}) \}, \quad \mathbf{n} \in Z^3,\quad A=1+\frac{m_1^2 - m_2^2}{2}
+\end{align}
+and the action of the operator $\hat{\gamma}$ on a general vector $\bf{v}$ is:
+\begin{align}
+\hat{\gamma}\mathbf{v}=\gamma \mathbf{v}_{||} + \mathbf{v}_{\bot}, \quad \hat{\gamma}^{-1}\mathbf{v}=\gamma^{-1} \mathbf{v}_{||} + \mathbf{v}_{\bot},\quad \mathbf{v}_{||} = \frac{(\mathbf{v}\cdot\mathbf{d})\mathbf{d}}{d^2}, \quad \mathbf{v}_{\bot}=\mathbf{v} - \mathbf{v}_{||}.
+\end{align}
+
+The sum is finite at $s=1$ for every $l$ and $m$ except for $l=m=0$, and the expression that converges faster than (\ref{Zlm_def}) is presented within this documentation. For details see \cite{Leskovec:2012gb}. The sum converges only for $s>3/2$ (but not $s=1$) in case of $l=m=0$. The divergence that appears  for $s=1$  is  exactly equal to the divergence that appears in the infinite volume. Since the phase-shift relations depend on the finite volume shift with respect to the infinite volume, we will get rid of the divergence by the analytic continuation from $s>3/2$ to $s=1$. 
+
+First we express $1/(r^2-q^2)^s$ using the definition of the Gamma function $\int_0^\infty dt~ t^{s-1}~e^{-ta}=\Gamma(s)/a^s$ and then split the integral to two parts
+\begin{align}
+\label{Zlm_1}
+Z_{lm}^{\mathbf{d}}(s;q^2)&= \frac{1}{\Gamma(s)}\sum_{\mathbf{r}\in P_{\mathbf{d}}} {\cal Y}_{lm}(\mathbf{r}) \int _0^\infty dt~t^{s-1} e^{-t(r^2-q^2)} \nonumber \\
+&=\frac{1}{\Gamma(s)}\sum_{\mathbf{r}\in P_{d}} {\cal Y}_{lm}(\mathbf{r})~\bigl\{~\int _0^1 dt~t^{s-1} e^{-t(r^2-q^2)}~+~\int _1^\infty dt~t^{s-1} e^{-t(r^2-q^2)}~\bigr\}\ .
+\end{align}
+The integral in the second term is finite at $s=1$, it is easily evaluated, and renders faster convergence than the original sum 
+\begin{equation}
+\label{second_term}
+\mathrm{second\ term}=\sum_{\mathbf{r}\in P_{d}} {\cal Y}_{lm}(\mathbf{r}) \frac{1}{\Gamma(s)} \int _1^\infty dt~t^{s-1} e^{-t(r^2-q^2)} \ \stackrel {s=1}{ \longrightarrow} ~\sum_{\mathbf{r}\in P_{d}} {\cal Y}_{lm}(\mathbf{r}) \frac{e^{-(r^2-q^2)}}{r^2-q^2}\ .
+\end{equation}
+
+The first term (\ref{Zlm_1}) contains the sum $\sum_{\mathbf{r} \in P_d}F(\mathbf{r})$, which is equivalent to the sum $\sum_{\mathbf{n}\in Z^3} F(\mathbf{r}(\mathbf{n}))$ and we express  it  using the Poisson summation formula  
+\begin{equation}
+\label{poisson}
+\sum_{\mathbf{n}\in Z^3} f(\mathbf{n})=\sum_{\mathbf{n}\in Z^3} \int d^3x~f(\mathbf{x})~e^{i2\pi \mathbf{n}\cdot \mathbf{x}}
+\end{equation}
+leading to
+\begin{equation}
+\label{first_term}
+\mathrm{first\ term}=\frac{1}{\Gamma(s)} \int _0^1 dt~t^{s-1} e^{tq^2} \sum_{\mathbf{n}\in Z^3} f_{\mathbf{n}}~,\quad f_{\mathbf{n}}\equiv \int d^3x~{\cal Y}_{lm}(\mathbf{r}(\mathbf{x}))~ e^{-t|\mathbf{r}(\mathbf{x})|^2~+~i2\pi \mathbf{n}\cdot \mathbf{x}} \ 
+\end{equation}
+with $\mathbf{r}(\mathbf{x})=\hat \gamma^{-1}(\mathbf{x}-\tfrac{1}{2}A\mathbf{d})$. We change the integration variable  from $\mathbf{x}$ to $\mathbf{r}$ using $d^3x=det(J)d^3r=\gamma d^3r$ and separate terms that depend only on $r$  using ${\cal Y}_{lm}(\mathbf{r})= r^l Y_{lm}(\theta,\phi)$.  Applying  $\mathbf{x}=\hat \gamma \mathbf{r}+\tfrac{1}{2}A\mathbf{d}$ the term dependent on $A$ factorizes 
+\begin{equation}
+\label{f}
+f_{\mathbf{n}}\equiv \gamma~ e^{i\pi A \mathbf{n\cdot d}}  \int_0^\infty r^2 dr ~ e^{-tr^2} ~r^l~\int_0^\pi \sin\theta d\theta\int_0^{2\pi} d\phi~ Y_{lm}(\theta,\phi)~e^{-i\mathbf{k}\cdot \mathbf{r}}   
+\end{equation}
+with $\mathbf{k}\equiv -2\pi \hat \gamma^T \mathbf{n}$. We insert the well known relation for $e^{-i\mathbf{k}\cdot \mathbf{r}}$ 
+
+
+\begin{equation}
+e^{-i\mathbf{k}\cdot \mathbf{r}}=4\pi\sum_{l'=0}^\infty \sum_{m'=-l'}^{l'}  (-i)^{l'} ~Y_{l'm'}(\theta_k,\phi_k)~Y_{l'm'}(\theta,\phi)^*~j_{l'}(kr)~.
+\end{equation}
+The integral $\int_0^\pi \sin\theta d\theta~\int_0^{2\pi} d\phi Y_{lm}(\theta,\phi)Y^*_{l'm'}(\theta,\phi)=\delta_{ll'}\delta_{mm'}$ simplifies (\ref{f})   to 
+\begin{align}
+f_{\mathbf{n}}= \gamma ~4\pi~(-i)^l~ (-1)^{A\mathbf{n\cdot d}} ~ Y_{lm}(\theta_k,\phi_k) \int_0^\infty ~dr ~ r^2~ e^{-tr^2} ~r^l~ j_l(kr)~.
+\end{align}
+The remaining integral can be evaluated with Mathematica
+\begin{align}
+f_{\mathbf{n}}= \gamma (-i)^l~ (-1)^{A\mathbf{n\cdot d}} ~ \biggl(\frac{k}{2t}\biggr)^l~Y_{lm}(\theta_k,\phi_k) \biggl(\frac{\pi}{t}\biggr)^{3/2}  e^{-k^2/4t}~
+\end{align} 
+and we apply $(k/2t)^l~Y_{lm}(\theta_k,\phi_k)={\cal Y}_{lm}(\mathbf{k}/2t)={\cal Y}_{lm}(-\pi\hat \gamma\mathbf{n}/t)$. Inserting this $f_{\mathbf{n}}$ to (\ref{first_term}) we get
+\begin{equation}
+\mathrm{first\ term}=\frac{1}{\Gamma(s)} \int _0^1 dt~t^{s-1} e^{tq^2} \sum_{\mathbf{n}\in Z^3} \gamma (-i)^l~ (-1)^{A\mathbf{n\cdot d}} ~ {\cal Y}_{lm}(-\frac{\pi\hat \gamma \mathbf{n}}{t}) \biggl(\frac{\pi}{t}\biggr)^{3/2}  e^{-(\pi \hat \gamma \mathbf{n})^2/t}~.
+\end{equation}
+In the case of $s=1$, this integral over $t$ is finite for all $\mathbf{n}$ except for $\mathbf{n}=0$. The $\mathbf{n}=0$  divergence occurs only for $l=m=0$ since ${\cal Y}_{lm}(\mathbf{n}=0)\propto \delta_{l0}\delta_{m0}$. The term with $\mathbf{n}=0$  is the infinite volume  $f_{\mathbf{n}=0}=\int d^3x f(\mathbf{x})$  analog of  $\sum_{\mathbf{n}} f(\mathbf{n})$ in the Poisson's formula (\ref{poisson}) and is finite only for $s>3/2$. In order to get rid of the divergence, that cancels in the difference between the finite and infinite volume result anyway, we split the $\mathbf{n}=0$ term in two parts
+\begin{equation}
+\frac{1}{\Gamma(s)} \int _0^1 dt~t^{s-5/2} e^{tq^2} = \frac{1}{\Gamma(s)} \biggl[\int _0^1 dt~t^{s-5/2} (e^{tq^2}-1)+\int _0^1 dt~t^{s-5/2}\biggr]~.
+\end{equation}
+The first integral is finite for $s=1$, while the second integral $\int_0^1  t^{s-5/2}dt\stackrel{s>3/2}{ =}\tfrac{1}{s-3/2}\stackrel{s\to  1}{ \longrightarrow}-2 $ is finite only for $s>3/2$, but we analytically continue it to $s=1$.
+
+Collecting (\ref{second_term}) as well as convergent and divergent piece of (\ref{first_term}) to get (\ref{Zlm_1}), we get  finally 
+\begin{align}
+Z_{lm}^{\mathbf{d}}(1;q^2)&=  \gamma \int _0^1 dt~ e^{tq^2} \sum_{\mathbf{n}\in Z^3,\mathbf{n}\not=0}   (-1)^{A\mathbf{n\cdot d}}~(-i)^l~ {\cal Y}_{lm}(-\frac{\pi\hat \gamma \mathbf{n}}{t}) (\frac{\pi}{t})^{3/2}  e^{-(\pi \hat \gamma \mathbf{n})^2/t}\nonumber \\
+ &+\gamma  \int_0^1 dt~(e^{tq^2}-1)\biggl(\frac{\pi}{t}\biggr)^{3/2} \frac{1}{\sqrt{4\pi}}\delta_{l0}\delta_{m0}-\gamma\pi\delta_{l0}\delta_{m0}\nonumber\\
+&+\sum_{\mathbf{r}\in P_{d}} {\cal Y}_{lm}(\mathbf{r}) \frac{e^{-(r^2-q^2)}}{r^2-q^2}\ 
+\end{align}
+which is used for our numerical evaluation and converges rapidly for $l,m,\mathbf{d}$  of our interest. It is applicable for $q^2>0$ and $q^2<0$. We verified numerically that this $Z_{lm}^{\mathbf{d}}$ respects all the relations listed in the main text, that follow from discrete symmetries at $\mathbf{d}=e_x+e_y$ or $\mathbf{d}=e_z$.   
+ 
+In the special case $m_1=m_2$, our result agrees with the result in \cite{Feng:2011ah}, which was presented for $m_1=m_2$ without derivation\footnote{Note that 
+$Z_{lm}^{\mathbf{d}}$ in \cite{Feng:2011ah} is defined to be complex conjugate of ours.}. 
+We also verified that such $Z^{\mathbf{d}}_{lm}$  numerically agrees with  $Z^{\mathbf{d}}_{lm}$ obtained for $m_1=m_2$ via $c_{lm}$ as proposed by \cite{Kim:2005gf}.  
+
+\section*{\texorpdfstring{Evaluation of derivative of $Z^{\mathbf{d}}_{lm}(1;q^2)$}{Evaluating the derivative of Zlm1q2}}
+
+Meyer \cite{Meyer:2011um} and Briceno et al. \cite{Briceno:2014uqa} state that the first derivative of the (generalized) zeta function $Z_{lm}^{\mathbf{d}}(1;q^2)$ with respect to $q^2$ is needed in taking into account the finite volume effects in the Lellouch-L\"uscher formalism. It turns out that the derivative of the $Z_{lm}^{\mathbf{d}}(1;q^2)$ is again a Riemann Zeta function, this time with a different value of $s$.\\
+
+This can be seen by taking the derivative of $Z_{lm}^{\mathbf{d}}(1;q^2)$ with respect to $q^2$:
+\begin{align}
+\frac{\partial Z_{lm}^{\mathbf{d}}(1;q^2)}{\partial q^2} &= \frac{\partial}{\partial q^2} \sum_{\mathbf{r}\in P_{d}} \frac{{\cal Y}_{lm}(\mathbf{r})}{(|\mathbf{r}|^2-q^2)}= \sum_{\mathbf{r}\in P_{d}} \frac{\partial}{\partial q^2} \frac{{\cal Y}_{lm}(\mathbf{r})}{(|\mathbf{r}|^2-q^2)}=\\
+&=\sum_{\mathbf{r}\in P_{d}} \frac{{\cal Y}_{lm}(\mathbf{r})}{(|\mathbf{r}|^2-q^2)^2}= Z_{lm}^{\mathbf{d}}(2;q^2).
+\end{align}
+From the relation $ \partial Z_{lm}^{\mathbf{d}}(1;q^2)/ \partial q^2 = Z_{lm}^{\mathbf{d}}(2;q^2)$ and by noting that $\partial (\frac{1}{(a-b)^s}/\partial b = \frac{s}{(a-b)^{s+1}}$ we can deduce that all the derivatives of the zeta function will again be a zeta function, specifically:
+\begin{align}
+\frac{\partial}{\partial q^2} Z_{lm}^{\mathbf{d}}(s;q^2) = s Z_{lm}^{\mathbf{d}}(s+1;q^2).
+\end{align} 
+
+Therefore the numerical evaluation of $Z_{lm}(s;q^2)$ can follow the guidelines from evaluating the $Z_{lm}(1;q^2)$, while taking into the account, that we need not analytically continue it as $s = 2$ is larger than $3/2$.\\
+
+First we express $1/(r^2-q^2)^s$ using the definition of the Gamma function $\int_0^\infty dt~ t^{s-1}~e^{-ta}=\Gamma(s)/a^s$ and then split the integral to two parts
+\begin{align}
+Z_{lm}^{\mathbf{d}}(s;q^2)&= \frac{1}{\Gamma(s)}\sum_{\mathbf{r}\in P_{\mathbf{d}}} {\cal Y}_{lm}(\mathbf{r}) \int _0^\infty dt~t^{s-1} e^{-t(r^2-q^2)} \nonumber \\
+&=\frac{1}{\Gamma(s)}\sum_{\mathbf{r}\in P_{d}} {\cal Y}_{lm}(\mathbf{r})~\bigl\{~\int _0^1 dt~t^{s-1} e^{-t(r^2-q^2)}~+~\int _1^\infty dt~t^{s-1} e^{-t(r^2-q^2)}~\bigr\}\ .
+\end{align}
+The integral in the second term is finite at $s=2$, it is easily evaluated, and renders faster convergence than the original sum 
+\begin{equation}
+\mathrm{second\ term}=\sum_{\mathbf{r}\in P_{d}} {\cal Y}_{lm}(\mathbf{r}) \frac{1}{\Gamma(s)} \int _1^\infty dt~t^{s-1} e^{-t(r^2-q^2)} \ \stackrel {s=2}{ \longrightarrow} ~\sum_{\mathbf{r}\in P_{d}} {\cal Y}_{lm}(\mathbf{r}) \frac{\left[ 1 + (r^2 - q^2) \right] e^{-(r^2-q^2)}}{(r^2-q^2)^2}\ .
+\end{equation}
+
+The first term in $Z_{lm}(2;q^2)$ contains the sum $\sum_{\mathbf{r} \in P_d}F(\mathbf{r})$, which is equivalent to the sum $\sum_{\mathbf{n}\in Z^3} F(\mathbf{r}(\mathbf{n}))$ and we express  it  using the Poisson summation formula  
+\begin{equation}
+\sum_{\mathbf{n}\in Z^3} f(\mathbf{n})=\sum_{\mathbf{n}\in Z^3} \int d^3x~f(\mathbf{x})~e^{i2\pi \mathbf{n}\cdot \mathbf{x}}
+\end{equation}
+leading to
+\begin{equation}
+\mathrm{first\ term}=\frac{1}{\Gamma(s)} \int _0^1 dt~t^{s-1} e^{tq^2} \sum_{\mathbf{n}\in Z^3} f_{\mathbf{n}}~,\quad f_{\mathbf{n}}\equiv \int d^3x~{\cal Y}_{lm}(\mathbf{r}(\mathbf{x}))~ e^{-t|\mathbf{r}(\mathbf{x})|^2~+~i2\pi \mathbf{n}\cdot \mathbf{x}}.
+\end{equation}
+Repeating the procedure for $Z_{lm}(1;q^2)$ we can reformulate this term as:
+\begin{align}
+\mathrm{first\ term}=\frac{1}{\Gamma(s)} \int _0^1 dt~t^{s-1} e^{tq^2} \sum_{\mathbf{n}\in Z^3} \gamma (-i)^l~ (-1)^{A\mathbf{n\cdot d}} ~ {\cal Y}_{lm}(-\frac{\pi\hat \gamma \mathbf{n}}{t}) \biggl(\frac{\pi}{t}\biggr)^{3/2}  e^{-(\pi \hat \gamma \mathbf{n})^2/t}~.
+\end{align}
+In the case of $s=2$, this integral over $t$ is finite for all cases and can be evaluated numerically. The presence of exponential functions in the sum guarantees fast convergence.
+
+\bibliographystyle{apsrevENG}
+\bibliography{References}
+
+\end{document}
