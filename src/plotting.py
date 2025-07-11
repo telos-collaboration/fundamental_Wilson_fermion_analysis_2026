@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import h5py
 import math
 import fit_scatter
+import os.path as op
+import os
 
 ########################################## Plot energy levels in lattice units ##########################################
 
@@ -16,14 +18,6 @@ def E_pipi(mpi,p12,p22,L):
 
 def E_rho(mrho,p2,L):
     return np.sqrt(mrho**2+(2*np.pi/L)**2*p2)
-
-def LminLmax(m0):                   # maybe to be replaced by input file
-    if m0 == -0.92:
-        return [12,26]
-    elif m0 == -0.863:
-        return [14,38]
-    elif m0 == -0.867:
-        return [14,38]
     
 def marker(lv):                     # maybe to be replaced by input file
     markers = ["*", "o", "^"]
@@ -32,7 +26,7 @@ def marker(lv):                     # maybe to be replaced by input file
 def get_data_E_L(name, beta, m0, num_lv = 2):
     NLs,NL_invs,aEs,aE_ms,aE_ps,d2s,lvs = [[],[],[],[],[],[],[]]
 
-    with h5py.File("../output/scattering/isospin1_scattering"+name+".hdf5","r") as hfile:
+    with h5py.File(op.join(OUTDIR, "isospin1_scattering"+name+".hdf5"),"r") as hfile:
         for key in hfile:
             if str(beta) in key and str(m0) in key:
                 for P in hfile[key]:
@@ -56,13 +50,11 @@ def get_data_E_L(name, beta, m0, num_lv = 2):
 def plot_E_L(name,beta,m0,levels=False,outname=None,show=False):
     mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(name, beta, m0)
     
-    Lmin, Lmax = LminLmax(m0)
-    
     for i in range(len(En)):
         plt.errorbar([NL_invs[i],],y=[En[i],],yerr=[[En_m_err[i],],[En_p_err[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(d2s[i]), marker = marker(lvs[i]))   
     plt.axhline(mrho,c="red", ls="dotted", label = "$m_\\rho$")
-    plt.axhline(2*mpi,c="black",label = "2$m_\pi$")
-    plt.axhline(4*mpi,c="black",label = "4$m_\pi$")
+    plt.axhline(2*mpi,c="black",label = r"2$m_\pi$")
+    plt.axhline(4*mpi,c="black",label = r"4$m_\pi$")
     plt.grid()
     plt.title("$\\beta$ = %f, $m_0$ = %f"%(beta,m0))
     xarrinv = np.linspace(1/40,1/13)
@@ -109,9 +101,9 @@ def plot_E_L(name,beta,m0,levels=False,outname=None,show=False):
     plt.xlabel("1/$N_L$")
     plt.ylabel("a$E$")
     if outname == None:    
-        plt.savefig("../output/plots/scattering/E_L_b%f_m0%f_levels_%r.pdf"%(beta,m0,levels), bbox_inches='tight')
+        plt.savefig(op.join(PLTDIR, "E_L_b%f_m0%f_levels_%r.pdf"%(beta,m0,levels)), bbox_inches='tight')
     else:    
-        plt.savefig("../output/plots/scattering/E_L_"+outname+"_levels_%r.pdf"%levels, bbox_inches='tight')
+        plt.savefig(op.join(PLTDIR, "E_L_"+outname+"_levels_%r.pdf"%levels), bbox_inches='tight')
     if show:
         plt.show()
     plt.clf()
@@ -121,7 +113,7 @@ def plot_E_L(name,beta,m0,levels=False,outname=None,show=False):
 def get_data_E_CM_L(name, beta, m0, num_lv = 2):
     NLs,NL_invs,aEs,aE_ms,aE_ps,d2s,lvs = [[],[],[],[],[],[],[]]
 
-    with h5py.File("../output/scattering/isospin1_scattering"+name+".hdf5","r") as hfile:
+    with h5py.File(op.join(OUTDIR, "isospin1_scattering"+name+".hdf5"),"r") as hfile:
         for key in hfile:
             if str(beta) in key and str(m0) in key:
                 for P in hfile[key]:
@@ -145,10 +137,6 @@ def get_data_E_CM_L(name, beta, m0, num_lv = 2):
 def plot_E_CM_L(name,beta,m0,levels=False,outname=None,show=False):
     mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(name, beta, m0)
 
-    Lmin, Lmax = LminLmax(m0)
-    
-    # d2s = [x[0]**2+x[1]**2+x[2]**2 for x in dvecs]
-
     ECMs = [np.sqrt(En[i]**2-(2*np.pi/NLs[i])**2*d2s[i]) for i in range(len(En))]
     ECM_errms = [abs(np.sqrt((En[i]-En_m_err[i])**2-(2*np.pi/NLs[i])**2*d2s[i])-ECMs[i])/mpi  for i in range(len(En))]
     ECM_errps = [abs(np.sqrt((En[i]+En_p_err[i])**2-(2*np.pi/NLs[i])**2*d2s[i])-ECMs[i])/mpi  for i in range(len(En))]
@@ -162,7 +150,6 @@ def plot_E_CM_L(name,beta,m0,levels=False,outname=None,show=False):
     plt.axhline(4,c="black",label = r"4$m_\pi$")
     plt.grid()
     plt.title("$\\beta$ = %f, $m_0$ = %f"%(beta,m0))
-    # xarr = np.linspace(14,38)
     xarrinv = np.linspace(1/40,1/13)
     xarr = [1/x for x in xarrinv]
     if levels:
@@ -200,11 +187,10 @@ def plot_E_CM_L(name,beta,m0,levels=False,outname=None,show=False):
     plt.xlabel("1/$N_L$")
     plt.ylabel("$E_{CM}$/$m_\\pi$")
     plt.xticks([1/14,1/16,1/20,1/24,1/36],["1/14","1/16","1/20","1/24","1/36"])
-    # plt.show()
     if outname == None:    
-        plt.savefig("../output/plots/scattering/E_CM_L_b%f_m0%f_levels_%r.pdf"%(beta,m0,levels), bbox_inches='tight')
+        plt.savefig(op.join(PLTDIR, "E_CM_L_b%f_m0%f_levels_%r.pdf"%(beta,m0,levels)), bbox_inches='tight')
     else:    
-        plt.savefig("../output/plots/scattering/E_CM_L_"+outname+"_levels_%r.pdf"%levels, bbox_inches='tight')
+        plt.savefig(op.join(PLTDIR, "E_CM_L_"+outname+"_levels_%r.pdf"%levels), bbox_inches='tight')
     if show:
         plt.show()
     plt.clf()
@@ -250,12 +236,11 @@ def get_data_p3cotPS(name, beta, m0):
     res = {}
     res_spl = {}
 
-    with h5py.File("../output/scattering/isospin1_fit_scatter"+name+".hdf5","r") as hfile:
+    with h5py.File(op.join(OUTDIR, "isospin1_fit_scatter"+name+".hdf5"),"r") as hfile:
         for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
             res[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
             res_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
     return res, res_spl
-
 
 def plot_p3cotPS(name,beta,m0,fit=False,outname=None,show=False):
     plt.rcParams['figure.figsize'] = [10, 6]
@@ -266,9 +251,7 @@ def plot_p3cotPS(name,beta,m0,fit=False,outname=None,show=False):
     plt.grid()
     res, res_smp = get_data_p3cotPS(name, beta, m0)
     xlim = [0,3]
-    ylim = [-1,0.1]
     ax.set_xlim(xlim)
-    # ax.set_ylim(ylim)
 
     plt.xlabel(r"$p^{\star^2}/m_\pi^2$")
     x_plot = res["p2star_prime"]
@@ -284,7 +267,6 @@ def plot_p3cotPS(name,beta,m0,fit=False,outname=None,show=False):
     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
     d2s = [np.dot(d,d) for d in dvecs]
 
-    # for i in  [4, 16, 10, 13]:
     for i in  range(14):
         ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
         sorted_indices = np.argsort(x_plot_sam[i])
@@ -299,11 +281,6 @@ def plot_p3cotPS(name,beta,m0,fit=False,outname=None,show=False):
         a1_1_smp = res_smp["a1_1"]
         r1_1_smp = res_smp["r1_1"]
 
-        a1_1_em = abs(sorted(a1_1_smp)[math.floor(length*(1-num_perc)/2)]-a1_1)
-        a1_1_ep = abs(sorted(a1_1_smp)[math.ceil(length*(1+num_perc)/2)]-a1_1)
-        r1_1_em = abs(sorted(r1_1_smp)[math.floor(length*(1-num_perc)/2)]-r1_1)
-        r1_1_ep = abs(sorted(r1_1_smp)[math.ceil(length*(1+num_perc)/2)]-r1_1)
-
         yarr = [fit_scatter.ERE_1(x,a1_1,r1_1) for x in xarr]
         yarr_smp = [sorted([fit_scatter.ERE_1(x,a1_1_smp[i],r1_1_smp[i]) for i in range(len(a1_1_smp))]) for x in xarr]
 
@@ -315,25 +292,14 @@ def plot_p3cotPS(name,beta,m0,fit=False,outname=None,show=False):
 
     ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
     if outname == None:    
-        plt.savefig("../output/plots/scattering/p3cotPS_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit), bbox_inches='tight')
+        plt.savefig(op.join(PLTDIR, "p3cotPS_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit)), bbox_inches='tight')
     else:    
-        plt.savefig("../output/plots/scattering/p3cotPS_"+outname+"_fit_%r.pdf"%fit, bbox_inches='tight')
+        plt.savefig(op.join(PLTDIR, "p3cotPS_"+outname+"_fit_%r.pdf"%fit), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
 
 ########################################## Plot sigma1 ##########################################
-
-
-# def get_data_sigma_1(name, beta, m0):
-#     res = {}
-#     res_spl = {}
-
-#     with h5py.File("../output/scattering/isospin1_fit_scatter"+name+".hdf5","r") as hfile:
-#         for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
-#             res[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
-#             res_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
-#     return res, res_spl
 
 def sigma_ERE_s_wave(s, a, r):
     p2 = s/4-1
@@ -354,40 +320,17 @@ def plot_sigma_1(name,beta,m0,fit=False,outname=None,show=False):
     matplotlib.rc('font', **font)
     fig, ax = plt.subplots()
     plt.grid()
-    # res, res_smp = read_from_hdf("non_res_fit")    
     res, res_smp = get_data_p3cotPS(name, beta, m0)
-    # beta = res["beta"]
-    # m0 = res["m_1"]
 
     xlim = [4,6.5]
 
     plt.xlabel(r"$s/m_\pi^2$")
-    x_plot = res["s_prime"]
     x_plot_sam = np.transpose(res_smp["s_prime"])
-    # ax.set_xlim(xlim)
-    y_plot = np.real(res["sigma_prime"])
-    y_plot_sam = np.transpose(np.real(res_smp["sigma_prime"]))
-    # ax.set_ylim([0,26])
-
-
 
     plt.ylabel(r"$\sigma m_\pi^2$")        
     
     length = len(x_plot_sam[0])
     num_perc = math.erf(1/np.sqrt(2))
-    # N_Ls = res["N_L"]
-    # dvecs = res["dvec"]
-    # d2s = res["d2"]
-
-    # for i in  [4, 10, 13, 16]:
-    #     ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
-    #     sorted_indices = np.argsort(x_plot_sam[i])    
-    #     ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-    # for i in [1,7]:
-    #     ax.scatter(x_plot[i],y_plot[i], color = "grey", ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
-    #     sorted_indices = np.argsort(x_plot_sam[i])
-    #     ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],y_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvecs[i]))
-
 
     sarr = np.linspace(xlim[0],xlim[1],5000)
     p2arr = [x/4-1 for x in sarr]
@@ -395,18 +338,12 @@ def plot_sigma_1(name,beta,m0,fit=False,outname=None,show=False):
     yarr_14 = [sigma_ERE_s_wave(s, 0.52, 6.7) for s in sarr]
 
     plt.plot(sarr, yarr_14, color = "red", label = "2405.06506")
-    
     a1_1 = res["a1_1"]
     r1_1 = res["r1_1"]
-    # plt.axvline(1/r1_1**2, label = "$r1 p \approx 1$")
+
     print("smax = ", 4*(1+1/r1_1**2))
     a1_1_smp = res_smp["a1_1"]
     r1_1_smp = res_smp["r1_1"]
-
-    a1_1_em = abs(sorted(a1_1_smp)[math.floor(length*(1-num_perc)/2)]-a1_1)
-    a1_1_ep = abs(sorted(a1_1_smp)[math.ceil(length*(1+num_perc)/2)] -a1_1)
-    r1_1_em = abs(sorted(r1_1_smp)[math.floor(length*(1-num_perc)/2)]-r1_1)
-    r1_1_ep = abs(sorted(r1_1_smp)[math.ceil(length*(1+num_perc)/2)] -r1_1)
 
     yarr = [sigma_of_P3cotPS(fit_scatter.ERE_1(x,a1_1,r1_1), x) for x in p2arr]
     plt.plot(sarr,yarr,label="This work")
@@ -424,14 +361,23 @@ def plot_sigma_1(name,beta,m0,fit=False,outname=None,show=False):
     plt.fill_between(sarr, yarr_m, yarr_p, alpha = 0.3)
 
     if outname == None:    
-        plt.savefig("../output/plots/scattering/sigma1_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit), bbox_inches='tight')
+        plt.savefig(op.join(PLTDIR,"scattering/sigma1_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit)), bbox_inches='tight')
     else:    
-        plt.savefig("../output/plots/scattering/sigma1_"+outname+"_fit_%r.pdf"%fit, bbox_inches='tight')
+        plt.savefig(op.join(PLTDIR,"sigma1_"+outname+"_fit_%r.pdf"%fit), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
 
 if __name__ == "__main__":
+
+    # avod hard-coding of names outside of main
+    OUTDIR = "../output/scattering/"
+    PLTDIR = "../output/plots/scattering/"
+
+    # create directories if they do not exist
+    os.makedirs("../output/scattering", exist_ok=True)
+    os.makedirs("../output/plots/scattering", exist_ok=True)
+
     # name = "_evp_deriv_false"
     name = "_evp_deriv_true"
     plot_E_L(name,6.9,-0.92,True,outname="non_res")
@@ -455,5 +401,3 @@ if __name__ == "__main__":
     plot_sigma_1(name,6.9,-0.92,True,outname="non_res",show=False)
     plot_sigma_1(name,7.05,-0.863,True,outname="close_res",show=False)
     plot_sigma_1(name,7.05,-0.867,True,outname="res",show=False)
-
-    # plot_sigma()

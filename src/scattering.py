@@ -1,14 +1,13 @@
 import numpy as np
-# import matplotlib.pyplot as plt
+import h5py
+import os.path as op
+import os
 from pylink_wlm import wlm_func_c as wlm
 from tqdm import tqdm
-import h5py
-# import sys
-# import os
 
-def save_to_hdf(res,res_sample, info, ens, P, irrep, lv, filename):
+def save_to_hdf(res,res_sample, info, ens, P, irrep, lv, outfile):
     group = ens+"/"+P+"/"+irrep+"/"+"lv"+"%i/"%lv
-    with h5py.File("../output/scattering/isospin1_scattering"+filename+".hdf5","a") as hfile:
+    with h5py.File(outfile,"a") as hfile:
         for key, val in res.items():
             hfile.create_dataset(group+"mean/"+key, data = val)
         for key, val in res_sample.items():
@@ -198,10 +197,10 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     res["N_L"] = N_L
     return res
 
-def calc_all_phaseshifts(corrfitname,resampling="lin",num_resample=5,num_lv=2):
+def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_resample=5,num_lv=2):
     info = {}
-    infile = np.transpose(np.genfromtxt("../input/scattering_input.csv",delimiter=";",skip_header=1,dtype=str))
-    with h5py.File("../output/data/isospin1_fitresults"+corrfitname+".hdf5","r") as hfile:
+    infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
+    with h5py.File(fitresults,"r") as hfile:
         for ens in hfile:
             for P in hfile[ens]:
                 if P[0] == "p":
@@ -226,9 +225,16 @@ def calc_all_phaseshifts(corrfitname,resampling="lin",num_resample=5,num_lv=2):
                             res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
                             for key, val in info_tmp.items():
                                 info[key] = val
-                            save_to_hdf(res, res_sampled, info, ens, P, irrep, i, corrfitname)
+                            save_to_hdf(res, res_sampled, info, ens, P, irrep, i, h5file)
 
 if __name__ == "__main__":
-    # name = "_evp_deriv_false"
-    name = "_evp_deriv_true"
-    calc_all_phaseshifts(name, resampling="lin", num_resample=200)
+    # avod hard-coding of names outside of main
+    # create directories if they do not exist
+    OUTDIR = "../output/scattering/"
+    os.makedirs("../output/scattering", exist_ok=True)
+
+    input_file = "../input/scattering_input.csv"
+    fitresults = op.join("..","output","data","isospin1_fitresults_evp_deriv_true.hdf5")
+    h5fileout = op.join(OUTDIR,"isospin1_scattering_evp_deriv_true.hdf5")
+
+    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="lin", num_resample=200)
