@@ -14,14 +14,15 @@ t0     = 0
 deriv  = true
 gevp   = false
 use3x3 = true
+plotting = true
 symmetrise = false
 average_equivalent_momenta = true
 
-path  = "./raw_data/"
-plotpath  = "./data_assets/plots/"
-datapath  = "./data_assets/data/"
+raw_path  = "./raw_data/"
+plotpath  = "./assets/plots/"
+tablepath = "./assets/tables/"
+datapath  = "./data_assets/"
 scatpath  = "./data_assets/scattering/"
-tablepath = "./data_assets/tables/"
 
 h5file_raw = joinpath(datapath,"isospin1_sorted.hdf5")
 h5file_com = joinpath(datapath,"isospin1_merged.hdf5")
@@ -66,9 +67,7 @@ only_ens = [
             "Lt36Ls36beta7.05m-0.867",
         ]
 
-plotting = true
-
-#parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+parse_all_files(raw_path,h5file_raw,inputfiles)
 all_runs_table(h5file_raw,overview_table;)
 all_runs_table(h5file_raw,analysed_table;only_ens)
 merge_all_runs(h5file_raw, h5file_com)

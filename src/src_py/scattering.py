@@ -234,7 +234,7 @@ if __name__ == "__main__":
     os.makedirs("../data_assets/scattering", exist_ok=True)
 
     input_file = "../metadata/scattering_input.csv"
-    fitresults = op.join("..","data_assets","data","isospin1_fitresults_evp_deriv_true.hdf5")
+    fitresults = op.join("..","data_assets","isospin1_fitresults_evp_deriv_true.hdf5")
     h5fileout = op.join(OUTDIR,"isospin1_scattering_evp_deriv_true.hdf5")
 
     calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="lin", num_resample=200)

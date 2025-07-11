@@ -372,11 +372,11 @@ if __name__ == "__main__":
 
     # avod hard-coding of names outside of main
     OUTDIR = "../data_assets/scattering/"
-    PLTDIR = "../data_assets/plots/scattering/"
+    PLTDIR = "../assets/plots/scattering/"
 
     # create directories if they do not exist
     os.makedirs("../data_assets/scattering", exist_ok=True)
-    os.makedirs("../data_assets/plots/scattering", exist_ok=True)
+    os.makedirs("../assets/plots/scattering", exist_ok=True)
 
     # name = "_evp_deriv_false"
     name = "_evp_deriv_true"
