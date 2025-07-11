@@ -6,6 +6,9 @@
 *.webm
 *.log
 *.zst
+*.so
+*.hdf5
+*.pyc
 
 data_assets/
 raw_data/

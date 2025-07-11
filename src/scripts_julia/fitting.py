@@ -89,7 +89,7 @@ def fit_all_files(infile,outfile,parameterfile):
         eig1 = dict(Gab=var1/var1[0])
 
         plotname = group+irrep
-        plotdir  = "./output/plots/"
+        plotdir  = "./data_assets/plots/"
         printing = False
         plotting = False
         Nmax = 5

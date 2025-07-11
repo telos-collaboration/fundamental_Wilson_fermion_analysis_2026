@@ -75,7 +75,7 @@ function fold_3x3_correlator(c)
     return c_folded
 end
 
-h5file1  = "output/data/isospin1_eigenvalues_t0_6_deriv_false.hdf5"
+h5file1  = "data_assets/data/isospin1_eigenvalues_t0_6_deriv_false.hdf5"
 fid1     = h5open(h5file1)
 Corr1    = read(fid1[(first(keys(fid1)))],"p(0,0,1)/Corr3x3")
 t_dim    = 4

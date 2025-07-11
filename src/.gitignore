@@ -1,8 +1,0 @@
-*.so
-*.hdf5
-*.pdf
-*.pyc
-output/
-data/
-!data/Lang_Prelovsek.dat
-!data/Pylmouth.dat
