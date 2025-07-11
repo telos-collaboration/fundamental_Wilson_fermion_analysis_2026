@@ -230,11 +230,11 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
 if __name__ == "__main__":
     # avod hard-coding of names outside of main
     # create directories if they do not exist
-    OUTDIR = "../output/scattering/"
-    os.makedirs("../output/scattering", exist_ok=True)
+    OUTDIR = "../data_assets/scattering/"
+    os.makedirs("../data_assets/scattering", exist_ok=True)
 
-    input_file = "../input/scattering_input.csv"
-    fitresults = op.join("..","output","data","isospin1_fitresults_evp_deriv_true.hdf5")
+    input_file = "../metadata/scattering_input.csv"
+    fitresults = op.join("..","data_assets","data","isospin1_fitresults_evp_deriv_true.hdf5")
     h5fileout = op.join(OUTDIR,"isospin1_scattering_evp_deriv_true.hdf5")
 
     calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="lin", num_resample=200)

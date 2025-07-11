@@ -17,12 +17,11 @@ use3x3 = true
 symmetrise = false
 average_equivalent_momenta = true
 
-path  = "/home/fabian/Documents/Physics/Data/"
-path  = "/home/fabian/Dokumente/Physics/Data/"
-plotpath  = "./output/plots/"
-datapath  = "./output/data/"
-scatpath  = "./output/scattering/"
-tablepath = "./output/tables/"
+path  = "./raw_data/"
+plotpath  = "./data_assets/plots/"
+datapath  = "./data_assets/data/"
+scatpath  = "./data_assets/scattering/"
+tablepath = "./data_assets/tables/"
 
 h5file_raw = joinpath(datapath,"isospin1_sorted.hdf5")
 h5file_com = joinpath(datapath,"isospin1_merged.hdf5")
@@ -39,9 +38,9 @@ else
     h5file_scat_fit = joinpath(scatpath,"isospin1_fit_scatter_evp_deriv_$deriv.hdf5")
 end
 
-inputfiles = "input/input_files.csv"
-infvolfile = "input/infinite_volume.csv"
-fitparam   = "input/pipi_fitintervals.csv"
+inputfiles = "metadata/input_files.csv"
+infvolfile = "metadata/infinite_volume.csv"
+fitparam   = "metadata/pipi_fitintervals.csv"
 
 overview_table    = joinpath(tablepath,"all_runs.csv")
 analysed_table    = joinpath(tablepath,"analysed_runs.csv")
@@ -69,7 +68,7 @@ only_ens = [
 
 plotting = true
 
-#parse_all_file(path,h5file_raw,inputfiles;single_file = true)
+parse_all_file(path,h5file_raw,inputfiles;single_file = true)
 all_runs_table(h5file_raw,overview_table;)
 all_runs_table(h5file_raw,analysed_table;only_ens)
 merge_all_runs(h5file_raw, h5file_com)
@@ -85,6 +84,7 @@ redirect_stdio(stdout="make.log",stderr="make.log") do
     run(`bash rho_pipi_scattering_analysis/zeta/compile.sh`)
 end
 
+ispath(scatpath) || mkpath(scatpath)
 cd("rho_pipi_scattering_analysis")
 cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
 run(`python3 src/scattering.py test`)

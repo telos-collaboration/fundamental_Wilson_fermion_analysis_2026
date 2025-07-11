@@ -38,7 +38,7 @@ def print_fit_param(fit):
     print('chi2/dof = ', chi2/dof, '\n')
 
 
-def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname="test",plotdir="./output/plots/",plotting=False,printing=False):
+def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname="test",plotdir="./data_assets/plots/",plotting=False,printing=False):
     T = - abs(T) if antisymmetric else abs(T) 
     fitter = cf.CorrFitter(models=make_models(T,tmin,tmax))
     p0 = None

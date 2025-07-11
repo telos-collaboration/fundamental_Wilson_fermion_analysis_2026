@@ -119,8 +119,8 @@ def fit_all_phase_shifts(name):
 if __name__ == "__main__":
     # avod hard-coding of names outside of main
     # create directories if they do not exist
-    OUTDIR = "../output/scattering/"
-    os.makedirs("../output/scattering", exist_ok=True)
+    OUTDIR = "../data_assets/scattering/"
+    os.makedirs("../data_assets/scattering", exist_ok=True)
 
     # name = "_evp_deriv_false"
     name = "_evp_deriv_true"
