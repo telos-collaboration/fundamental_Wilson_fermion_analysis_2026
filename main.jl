@@ -77,7 +77,7 @@ write_correlation_matrix(h5file_com,h5file_cor;only_ens)
 plot_correlation_matrices(h5file_com,plotpath;only_ens)
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, gevp, average_equivalent_momenta,symmetrise)
 plot_eigenvalues(h5file_eig,plotpath)
-run(`python3 src/scripts_julia/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
+run(`python3 src/src_py/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
 plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, average_equivalent_momenta, symmetrise)
 
 redirect_stdio(stdout="make.log",stderr="make.log") do 
