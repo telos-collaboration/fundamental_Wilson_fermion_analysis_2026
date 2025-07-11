@@ -80,7 +80,8 @@ plot_eigenvalues(h5file_eig,plotpath)
 run(`python3 src/src_py/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
 plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, average_equivalent_momenta, symmetrise)
 
-redirect_stdio(stdout="make.log",stderr="make.log") do 
+ispath("tmp") || mkpath("tmp")
+redirect_stdio(stdout="tmp/make.log",stderr="tmp/make.log") do 
     run(`bash src/zeta/compile.sh`)
 end
 
