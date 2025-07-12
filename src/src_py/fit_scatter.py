@@ -77,7 +77,10 @@ def fit_one_phaseshift(name, beta, m0):
     res_calc = {}
     res_spl_calc = {}
 
-    with h5py.File(op.join(OUTDIR,"isospin1_scattering"+name+".hdf5"),"r") as hfile:
+    h5file_in = op.join(OUTDIR,"isospin1_scattering.hdf5")
+    h5file_out = op.join(OUTDIR,"isospin1_fit_scatter.hdf5")
+
+    with h5py.File(h5file_in,"r") as hfile:
         for ens in hfile:
             if str(beta) in ens and str(m0) in ens:
                 for P in hfile[ens]:
@@ -100,7 +103,7 @@ def fit_one_phaseshift(name, beta, m0):
         res_spl_calc[key] = np.transpose(np.asarray(res_spl_calc[key]))
 
     res_fit, res_spl_fit = get_fits(res_calc,res_spl_calc)
-    with h5py.File(op.join(OUTDIR,"isospin1_fit_scatter"+name+".hdf5"),"a") as hfile:
+    with h5py.File(h5file_out,"a") as hfile:
         for key, val in res_fit.items():
             hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"mean/"+key, data = val)
         for key, val in res_spl_fit.items():
@@ -119,8 +122,7 @@ def fit_all_phase_shifts(name):
 if __name__ == "__main__":
     # avod hard-coding of names outside of main
     # create directories if they do not exist
-    OUTDIR = "../data_assets/scattering/"
-    os.makedirs("../data_assets/scattering", exist_ok=True)
+    OUTDIR = "./data_assets/"
 
     # name = "_evp_deriv_false"
     name = "_evp_deriv_true"

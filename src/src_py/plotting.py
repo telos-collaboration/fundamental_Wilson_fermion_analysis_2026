@@ -26,7 +26,7 @@ def marker(lv):                     # maybe to be replaced by input file
 def get_data_E_L(name, beta, m0, num_lv = 2):
     NLs,NL_invs,aEs,aE_ms,aE_ps,d2s,lvs = [[],[],[],[],[],[],[]]
 
-    with h5py.File(op.join(OUTDIR, "isospin1_scattering"+name+".hdf5"),"r") as hfile:
+    with h5py.File(op.join(OUTDIR, "isospin1_scattering.hdf5"),"r") as hfile:
         for key in hfile:
             if str(beta) in key and str(m0) in key:
                 for P in hfile[key]:
@@ -113,7 +113,7 @@ def plot_E_L(name,beta,m0,levels=False,outname=None,show=False):
 def get_data_E_CM_L(name, beta, m0, num_lv = 2):
     NLs,NL_invs,aEs,aE_ms,aE_ps,d2s,lvs = [[],[],[],[],[],[],[]]
 
-    with h5py.File(op.join(OUTDIR, "isospin1_scattering"+name+".hdf5"),"r") as hfile:
+    with h5py.File(op.join(OUTDIR, "isospin1_scattering.hdf5"),"r") as hfile:
         for key in hfile:
             if str(beta) in key and str(m0) in key:
                 for P in hfile[key]:
@@ -236,7 +236,7 @@ def get_data_p3cotPS(name, beta, m0):
     res = {}
     res_spl = {}
 
-    with h5py.File(op.join(OUTDIR, "isospin1_fit_scatter"+name+".hdf5"),"r") as hfile:
+    with h5py.File(op.join(OUTDIR, "isospin1_fit_scatter.hdf5"),"r") as hfile:
         for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
             res[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
             res_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
@@ -371,12 +371,11 @@ def plot_sigma_1(name,beta,m0,fit=False,outname=None,show=False):
 if __name__ == "__main__":
 
     # avod hard-coding of names outside of main
-    OUTDIR = "../data_assets/scattering/"
-    PLTDIR = "../assets/plots/scattering/"
+    OUTDIR = "./data_assets/"
+    PLTDIR = "./assets/plots/scattering/"
 
     # create directories if they do not exist
-    os.makedirs("../data_assets/scattering", exist_ok=True)
-    os.makedirs("../assets/plots/scattering", exist_ok=True)
+    os.makedirs("./assets/plots/scattering", exist_ok=True)
 
     # name = "_evp_deriv_false"
     name = "_evp_deriv_true"

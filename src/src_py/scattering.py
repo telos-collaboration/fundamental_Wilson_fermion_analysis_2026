@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
-import os.path as op
 import os
+import sys
 from pylink_wlm import wlm_func_c as wlm
 from tqdm import tqdm
 
@@ -233,8 +233,13 @@ if __name__ == "__main__":
     OUTDIR = "../data_assets/scattering/"
     os.makedirs("../data_assets/scattering", exist_ok=True)
 
-    input_file = "../metadata/scattering_input.csv"
-    fitresults = op.join("..","data_assets","isospin1_fitresults_evp_deriv_true.hdf5")
-    h5fileout = op.join(OUTDIR,"isospin1_scattering_evp_deriv_true.hdf5")
+    #input_file = "../metadata/scattering_input.csv"
+    #fitresults = op.join("..","data_assets","isospin1_fitresults_evp_deriv_true.hdf5")
+    #h5fileout = op.join(OUTDIR,"isospin1_scattering_evp_deriv_true.hdf5")
+
+    args = sys.argv
+    input_file = args[1]
+    fitresults = args[2]
+    h5fileout  = args[3]
 
     calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="lin", num_resample=200)

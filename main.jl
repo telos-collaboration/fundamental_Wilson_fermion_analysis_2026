@@ -22,26 +22,21 @@ raw_path  = "./raw_data/"
 plotpath  = "./assets/plots/"
 tablepath = "./assets/tables/"
 datapath  = "./data_assets/"
-scatpath  = "./data_assets/scattering/"
 
 h5file_raw = joinpath(datapath,"isospin1_sorted.hdf5")
 h5file_com = joinpath(datapath,"isospin1_merged.hdf5")
 h5file_cor = joinpath(datapath,"isospin1_corr.hdf5")
-if gevp
-    h5file_eig      = joinpath(datapath,"isospin1_eigenvalues_gevp_t0_$(t0)_deriv_$deriv.hdf5")
-    h5file_fit      = joinpath(datapath,"isospin1_fitresults_gevp_t0_$(t0)_deriv_$deriv.hdf5")
-    h5file_scat     = joinpath(scatpath,"isospin1_scattering_gevp_t0_$(t0)_deriv_$deriv.hdf5")
-    h5file_scat_fit = joinpath(scatpath,"isospin1_fit_scatter_gevp_t0_$(t0)_deriv_$deriv.hdf5")
-else
-    h5file_eig      = joinpath(datapath,"isospin1_eigenvalues_evp_deriv_$deriv.hdf5")
-    h5file_fit      = joinpath(datapath,"isospin1_fitresults_evp_deriv_$deriv.hdf5")
-    h5file_scat     = joinpath(scatpath,"isospin1_scattering_evp_deriv_$deriv.hdf5")
-    h5file_scat_fit = joinpath(scatpath,"isospin1_fit_scatter_evp_deriv_$deriv.hdf5")
-end
+
+h5file_eig      = joinpath(datapath,"isospin1_eigenvalues.hdf5")
+h5file_fit      = joinpath(datapath,"isospin1_fitresults.hdf5")
+h5file_scat     = joinpath(datapath,"isospin1_scattering.hdf5")
+h5file_scat_fit = joinpath(datapath,"isospin1_fit_scatter.hdf5")
 
 inputfiles = "metadata/input_files.csv"
 infvolfile = "metadata/infinite_volume.csv"
 fitparam   = "metadata/pipi_fitintervals.csv"
+input_scatter = "metadata/scattering_input.csv"
+input_scatter_fit = "metadata/fit_scatter_input.csv"
 
 overview_table    = joinpath(tablepath,"all_runs.csv")
 analysed_table    = joinpath(tablepath,"analysed_runs.csv")
@@ -84,10 +79,8 @@ redirect_stdio(stdout="tmp/make.log",stderr="tmp/make.log") do
     run(`bash src/zeta/compile.sh`)
 end
 
-ispath(scatpath) || mkpath(scatpath)
-cd("src")
-cp("../$(h5file_fit)","../$(h5file_scat)",force=true)
-run(`python3 src_py/scattering.py test`)
-cp("../$(h5file_scat)","../$(h5file_scat_fit)",force=true)
-run(`python3 src_py/fit_scatter.py`) 
-run(`python3 src_py/plotting.py`) 
+cp(h5file_fit,h5file_scat,force=true)
+run(`python3 src/src_py/scattering.py $(input_scatter) $(h5file_fit) $(h5file_scat)`)
+cp(h5file_scat,h5file_scat_fit,force=true)
+run(`python3 src/src_py/fit_scatter.py`) 
+run(`python3 src/src_py/plotting.py`) 
