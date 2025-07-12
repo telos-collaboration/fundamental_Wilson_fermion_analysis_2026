@@ -6,6 +6,7 @@ import math
 import fit_scatter
 import os.path as op
 import os
+import sys
 
 ########################################## Plot energy levels in lattice units ##########################################
 
@@ -23,10 +24,10 @@ def marker(lv):                     # maybe to be replaced by input file
     markers = ["*", "o", "^"]
     return markers[lv-1]
 
-def get_data_E_L(name, beta, m0, num_lv = 2):
+def get_data_E_L(h5file_scatter, beta, m0, num_lv = 2):
     NLs,NL_invs,aEs,aE_ms,aE_ps,d2s,lvs = [[],[],[],[],[],[],[]]
 
-    with h5py.File(op.join(OUTDIR, "isospin1_scattering.hdf5"),"r") as hfile:
+    with h5py.File(h5file_scatter,"r") as hfile:
         for key in hfile:
             if str(beta) in key and str(m0) in key:
                 for P in hfile[key]:
@@ -47,8 +48,8 @@ def get_data_E_L(name, beta, m0, num_lv = 2):
                                 lvs.append(lv)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs
 
-def plot_E_L(name,beta,m0,levels=False,outname=None,show=False):
-    mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(name, beta, m0)
+def plot_E_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
+    mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(h5file_scatter, beta, m0)
     
     for i in range(len(En)):
         plt.errorbar([NL_invs[i],],y=[En[i],],yerr=[[En_m_err[i],],[En_p_err[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(d2s[i]), marker = marker(lvs[i]))   
@@ -110,10 +111,10 @@ def plot_E_L(name,beta,m0,levels=False,outname=None,show=False):
 
 ########################################## Plot com energies unitless ##########################################
 
-def get_data_E_CM_L(name, beta, m0, num_lv = 2):
+def get_data_E_CM_L(h5file_scatter, beta, m0, num_lv = 2):
     NLs,NL_invs,aEs,aE_ms,aE_ps,d2s,lvs = [[],[],[],[],[],[],[]]
 
-    with h5py.File(op.join(OUTDIR, "isospin1_scattering.hdf5"),"r") as hfile:
+    with h5py.File(h5file_scatter,"r") as hfile:
         for key in hfile:
             if str(beta) in key and str(m0) in key:
                 for P in hfile[key]:
@@ -134,8 +135,9 @@ def get_data_E_CM_L(name, beta, m0, num_lv = 2):
                                 lvs.append(lv)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs
 
-def plot_E_CM_L(name,beta,m0,levels=False,outname=None,show=False):
-    mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(name, beta, m0)
+def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
+    
+    mpi, mrho, d2s, NLs, NL_invs, En, En_m_err, En_p_err, lvs = get_data_E_L(h5file_scatter, beta, m0)
 
     ECMs = [np.sqrt(En[i]**2-(2*np.pi/NLs[i])**2*d2s[i]) for i in range(len(En))]
     ECM_errms = [abs(np.sqrt((En[i]-En_m_err[i])**2-(2*np.pi/NLs[i])**2*d2s[i])-ECMs[i])/mpi  for i in range(len(En))]
@@ -232,24 +234,25 @@ def delete_steps(arr, sign = 1, delete=True):
     else:
         return arr
 
-def get_data_p3cotPS(name, beta, m0):
+def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
     res = {}
     res_spl = {}
 
-    with h5py.File(op.join(OUTDIR, "isospin1_fit_scatter.hdf5"),"r") as hfile:
+    with h5py.File(h5file_scatter_fit,"r") as hfile:
         for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
             res[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
             res_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
     return res, res_spl
 
-def plot_p3cotPS(name,beta,m0,fit=False,outname=None,show=False):
+def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
+    
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
     matplotlib.rc('font', **font)
     fig, ax = plt.subplots()
     plt.grid()
-    res, res_smp = get_data_p3cotPS(name, beta, m0)
+    res, res_smp = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
     xlim = [0,3]
     ax.set_xlim(xlim)
 
@@ -313,14 +316,15 @@ def sigma_of_P3cotPS(P3cotPS, p2):
         cot_PS = P3cotPS/(p2**(3/2))
         return 4*np.pi*3/(cot_PS**2+1)/p2
 
-def plot_sigma_1(name,beta,m0,fit=False,outname=None,show=False):
+def plot_sigma_1(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
+    
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
     matplotlib.rc('font', **font)
     fig, ax = plt.subplots()
     plt.grid()
-    res, res_smp = get_data_p3cotPS(name, beta, m0)
+    res, res_smp = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
 
     xlim = [4,6.5]
 
@@ -370,33 +374,31 @@ def plot_sigma_1(name,beta,m0,fit=False,outname=None,show=False):
 
 if __name__ == "__main__":
 
-    # avod hard-coding of names outside of main
-    OUTDIR = "./data_assets/"
-    PLTDIR = "./assets/plots/scattering/"
+    args = sys.argv
+    PLTDIR = args[1]
+    h5file_scatter = args[2]
+    h5file_scatter_fit  = args[3]
 
-    # create directories if they do not exist
-    os.makedirs("./assets/plots/scattering", exist_ok=True)
+    os.makedirs(PLTDIR, exist_ok=True)
 
-    # name = "_evp_deriv_false"
-    name = "_evp_deriv_true"
-    plot_E_L(name,6.9,-0.92,True,outname="non_res")
-    plot_E_L(name,6.9,-0.92,False,outname="non_res")
-    plot_E_L(name,7.05,-0.863,True,outname="close_res")
-    plot_E_L(name,7.05,-0.863,False,outname="close_res")
-    plot_E_L(name,7.05,-0.867,True,outname="res")
-    plot_E_L(name,7.05,-0.867,False,outname="res")
+    plot_E_L(h5file_scatter,6.9,-0.92,True,outname="non_res")
+    plot_E_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
+    plot_E_L(h5file_scatter,7.05,-0.863,True,outname="close_res")
+    plot_E_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
+    plot_E_L(h5file_scatter,7.05,-0.867,True,outname="res")
+    plot_E_L(h5file_scatter,7.05,-0.867,False,outname="res")
 
-    plot_E_CM_L(name,6.9,-0.92,True,outname="non_res")
-    plot_E_CM_L(name,6.9,-0.92,False,outname="non_res")
-    plot_E_CM_L(name,7.05,-0.863,True,outname="close_res")
-    plot_E_CM_L(name,7.05,-0.863,False,outname="close_res")
-    plot_E_CM_L(name,7.05,-0.867,True,outname="res")
-    plot_E_CM_L(name,7.05,-0.867,False,outname="res")
+    plot_E_CM_L(h5file_scatter,6.9,-0.92,True,outname="non_res")
+    plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
+    plot_E_CM_L(h5file_scatter,7.05,-0.863,True,outname="close_res")
+    plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
+    plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res")
+    plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res")
     
-    plot_p3cotPS(name,6.9,-0.92,True,outname="non_res",show=False)
-    plot_p3cotPS(name,7.05,-0.863,True,outname="close_res",show=False)
-    plot_p3cotPS(name,7.05,-0.867,True,outname="res",show=False)
+    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
+    plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
-    plot_sigma_1(name,6.9,-0.92,True,outname="non_res",show=False)
-    plot_sigma_1(name,7.05,-0.863,True,outname="close_res",show=False)
-    plot_sigma_1(name,7.05,-0.867,True,outname="res",show=False)
+    plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
+    plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    plot_sigma_1(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)

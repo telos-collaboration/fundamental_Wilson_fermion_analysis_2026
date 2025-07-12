@@ -23,13 +23,12 @@ plotpath  = "./assets/plots/"
 tablepath = "./assets/tables/"
 datapath  = "./data_assets/"
 
-h5file_raw = joinpath(datapath,"isospin1_sorted.hdf5")
-h5file_com = joinpath(datapath,"isospin1_merged.hdf5")
-h5file_cor = joinpath(datapath,"isospin1_corr.hdf5")
-
-h5file_eig      = joinpath(datapath,"isospin1_eigenvalues.hdf5")
-h5file_fit      = joinpath(datapath,"isospin1_fitresults.hdf5")
-h5file_scat     = joinpath(datapath,"isospin1_scattering.hdf5")
+h5file_raw  = joinpath(datapath,"isospin1_sorted.hdf5")
+h5file_com  = joinpath(datapath,"isospin1_merged.hdf5")
+h5file_cor  = joinpath(datapath,"isospin1_corr.hdf5")
+h5file_eig  = joinpath(datapath,"isospin1_eigenvalues.hdf5")
+h5file_fit  = joinpath(datapath,"isospin1_fitresults.hdf5")
+h5file_scat = joinpath(datapath,"isospin1_scattering.hdf5")
 h5file_scat_fit = joinpath(datapath,"isospin1_fit_scatter.hdf5")
 
 inputfiles = "metadata/input_files.csv"
@@ -82,5 +81,5 @@ end
 cp(h5file_fit,h5file_scat,force=true)
 run(`python3 src/src_py/scattering.py $(input_scatter) $(h5file_fit) $(h5file_scat)`)
 cp(h5file_scat,h5file_scat_fit,force=true)
-run(`python3 src/src_py/fit_scatter.py`) 
-run(`python3 src/src_py/plotting.py`) 
+run(`python3 src/src_py/fit_scatter.py $(h5file_scat) $(h5file_scat_fit)`) 
+run(`python3 src/src_py/plotting.py $(joinpath(plotpath,"scattering")) $(h5file_scat) $(h5file_scat_fit)`) 

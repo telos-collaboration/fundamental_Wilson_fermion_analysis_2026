@@ -1,7 +1,6 @@
 import numpy as np
 import h5py
-import os.path as op
-import os
+import sys
 from scipy.optimize import curve_fit
 
 def curve_fit_try(func, x, y, num_res):
@@ -73,12 +72,9 @@ def get_fits(res, res_spl):
             res_spl_tmp[key].append(val)
     return res_tmp, res_spl_tmp
 
-def fit_one_phaseshift(name, beta, m0):
+def fit_one_phaseshift(h5file_in, h5file_out, beta, m0):
     res_calc = {}
     res_spl_calc = {}
-
-    h5file_in = op.join(OUTDIR,"isospin1_scattering.hdf5")
-    h5file_out = op.join(OUTDIR,"isospin1_fit_scatter.hdf5")
 
     with h5py.File(h5file_in,"r") as hfile:
         for ens in hfile:
@@ -113,17 +109,16 @@ def fit_one_phaseshift(name, beta, m0):
         for key, val in res_spl_calc.items():
             hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"sample/"+key, data = val)
 
-def fit_all_phase_shifts(name):
-    fit_one_phaseshift(name,6.9,-0.92)
-    fit_one_phaseshift(name,7.05,-0.863)
-    fit_one_phaseshift(name,7.05,-0.867)
+def fit_all_phase_shifts(h5file_in, h5file_out):
+    fit_one_phaseshift(h5file_in, h5file_out,6.9,-0.92)
+    fit_one_phaseshift(h5file_in, h5file_out,7.05,-0.863)
+    fit_one_phaseshift(h5file_in, h5file_out,7.05,-0.867)
 
 
 if __name__ == "__main__":
-    # avod hard-coding of names outside of main
-    # create directories if they do not exist
-    OUTDIR = "./data_assets/"
 
-    # name = "_evp_deriv_false"
-    name = "_evp_deriv_true"
-    fit_all_phase_shifts(name)
+    args = sys.argv
+    h5file_in = args[1]
+    h5file_out = args[2]
+
+    fit_all_phase_shifts(h5file_in, h5file_out)
