@@ -21,65 +21,54 @@ function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
         add_mass_band!(plt,non_interacting_energy_1P_lattice(mρ,Δmρ,px,py,pz,L)... ;color=:black,label=label1ρ)
     end
 end
-function construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equivalent_momenta)
-    Corr2x2, sources2x2, momenta2x2 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)
-    Corr3x3, sources3x3, momenta3x3 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix_3x3_ext";maxhits,average_equivalent_momenta)
-    Corr3x3[1:2,1:2,:,:] = Corr2x2
-    return Corr3x3, sources3x3, momenta3x3
-end
-function plot_meff_from_gevp!(plot2x2,h5dset,ens,p,t0,deriv;use3x3=true,gevp=true,average_equivalent_momenta,symmetrise)
-    three_by_three = haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
-    if three_by_three && use3x3
-        Corr, sources, momenta = construct_3x3_correlation_matrix(h5dset,ens,p;maxhits=typemax(Int),average_equivalent_momenta)
-        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp,symmetrise)
-        plot_effective_masses!(plot2x2, meff, Δmeff, sources; markershape=:rect)
-    elseif !use3x3
-        Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits=typemax(Int),average_equivalent_momenta)
-        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp,symmetrise)
-        plot_effective_masses!(plot2x2, meff, Δmeff, sources)
-    end
-end
-function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitparam; t0, deriv, gevp, average_equivalent_momenta, symmetrise, use3x3=true)
+function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3x3=true)
     h5dset  = h5open(corr_file)
     if isfile(fitresults)
         res = h5open(fitresults)
     end
-    if gevp
-        plotname = "effective_masses_gevp_t0$(t0)_deriv_$(deriv).pdf"
-    else
-        plotname = "effective_masses_evp_deriv_$(deriv).pdf"
-    end
-    inf_vol  = readdlm(infvolfile,',',skipstart=1)
-    fittable = readdlm(fitparam,',',skipstart=1)
 
+    plotname = "effective_masses_(g)evp.pdf"
+    inf_vol  = readdlm(infvolfile,',',skipstart=1)
     texpath  = joinpath(plotpath,"effective_masses_tex")
-    ispath(texpath)  || mkpath(texpath)
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
 
     @showprogress desc="Plot effective masses" for ens in keys(h5dset)
-        p0 = read(h5dset,"$ens/p_external")
-        p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)
+        p_external = read(h5dset,"$ens/p_external")
         for p in p_external
             
-            #joinpath(ens,p) ∉ fittable && continue
             p == "p(0,0,0)" && continue
 
             # write title and axis labels
-            T, L   = read(h5dset,joinpath(ens,"lattice"))[1:2]
-            m0     = only(read(h5dset,joinpath(ens,"quarkmasses")))
-            β      = read(h5dset,joinpath(ens,"beta"))
-            ncfg   = read(h5dset,joinpath(ens,"Nconf"))
+            T, L = read(h5dset,joinpath(ens,"lattice"))[1:2]
+            ncfg = read(h5dset,joinpath(ens,"Nconf"))
+            m0 = only(read(h5dset,joinpath(ens,"quarkmasses")))
+            β  = read(h5dset,joinpath(ens,"beta"))
+            t0 = read(h5dset,joinpath(ens,p,"t0"))
+            gevp = read(h5dset,joinpath(ens,p,"gevp"))
+            deriv = read(h5dset,joinpath(ens,p,"deriv"))
+            symmetrise = read(h5dset,joinpath(ens,p,"symmetrise"))
+
             if gevp
-                title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+                title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, gevp, t_0 = %$(t0)"
             else
-                title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg"
+                title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, evp"
             end
-            plt1  = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
-            plt2 = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
-        
-            plot_meff_from_gevp!(plt1,h5dset,ens,p,t0,deriv;use3x3,gevp,average_equivalent_momenta,symmetrise)
+            plt1 = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+
+            meff = read(h5dset[ens][p],"meff")
+            Δmeff = read(h5dset[ens][p],"Delta_meff")
+            sources = read(h5dset[ens][p],"sources")
+            plot_effective_masses!(plt1, meff, Δmeff, sources; markershape=:rect)
             plot_non_interacting_levels!(plt1,h5dset,ens,p,inf_vol)
+            
+            has3x3 = haskey(h5dset[ens][p],"meff_3x3")
+            if use3x3 && has3x3
+                meff_3x3 = read(h5dset[ens][p],"meff_3x3")
+                Δmeff_3x3 = read(h5dset[ens][p],"Delta_meff_3x3")
+                sources_3x3 = read(h5dset[ens][p],"sources_3x3")
+                plot_effective_masses!(plt1, meff_3x3, Δmeff_3x3, sources_3x3)
+            end
               
             for plt in [plt1]
                 if isfile(fitresults) && haskey(res,joinpath(ens,p))
@@ -93,6 +82,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, fitp
                 isinteractive() && display(plt)
                 savefig(plt,"temp.pdf")
                 if backend_name() == :pgfplotsx
+                    ispath(texpath)  || mkpath(texpath)
                     savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
                 end
                 append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)

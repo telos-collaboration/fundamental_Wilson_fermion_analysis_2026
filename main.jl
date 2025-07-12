@@ -39,7 +39,6 @@ input_scatter_fit = "metadata/fit_scatter_input.csv"
 
 overview_table    = joinpath(tablepath,"all_runs.csv")
 analysed_table    = joinpath(tablepath,"analysed_runs.csv")
-yannick_fmt_table = joinpath(tablepath,"yannick_format_t0_$(t0)_deriv_$deriv.dat")
 
 include("src/scripts_julia/parse_all_files.jl")
 include("src/scripts_julia/combine_runs.jl")
@@ -71,7 +70,7 @@ plot_correlation_matrices(h5file_com,plotpath;only_ens)
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, gevp, average_equivalent_momenta,symmetrise)
 plot_eigenvalues(h5file_eig,plotpath)
 run(`python3 src/src_py/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)
-plot_effective_masses(h5file_cor, h5file_fit, infvolfile, plotpath, fitparam; t0, deriv, gevp, use3x3, average_equivalent_momenta, symmetrise)
+plot_effective_masses(h5file_eig, h5file_fit, infvolfile, plotpath; use3x3)
 
 ispath("tmp") || mkpath("tmp")
 redirect_stdio(stdout="tmp/make.log",stderr="tmp/make.log") do 

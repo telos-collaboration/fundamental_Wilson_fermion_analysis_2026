@@ -71,7 +71,6 @@ function plot_correlation_matrices(file_in,plotpath;only_ens=nothing)
         plotname = "diagrams_v2.pdf"
         plotname3x3 = "diagrams_3x3_v2.pdf"
         texpath  = joinpath(plotpath,"diagrams_tex")
-        ispath(texpath) || mkpath(texpath)
         ispath(plotpath) || mkpath(plotpath)
         isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
         isfile(joinpath(plotpath,plotname3x3)) && rm(joinpath(plotpath,plotname3x3))
@@ -135,6 +134,7 @@ function plot_correlation_matrices(file_in,plotpath;only_ens=nothing)
                     end
 
                     if backend_name() == :pgfplotsx
+                        ispath(texpath) || mkpath(texpath)
                         savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$(p0)_3by3.tex") )
                     end
 
