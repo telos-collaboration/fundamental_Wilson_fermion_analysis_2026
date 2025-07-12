@@ -34,7 +34,9 @@ include("src/scripts_julia/parse_all_files.jl")
 include("src/scripts_julia/combine_runs.jl")
 include("src/scripts_julia/write_correlation_matrix.jl")
 include("src/scripts_julia/write_eigenvalues.jl")
-include("src/scripts_julia/variational_analysis_meff.jl")
+include("src/scripts_julia/plot_correlation_matrix.jl")
+include("src/scripts_julia/plot_effective_masses.jl")
+include("src/scripts_julia/plot_eigenvalues.jl")
 include("src/scripts_julia/write_tables.jl")
 
 only_ens = nothing
