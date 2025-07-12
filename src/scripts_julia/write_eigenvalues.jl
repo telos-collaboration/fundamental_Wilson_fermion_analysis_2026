@@ -1,3 +1,11 @@
+using ProgressMeter: @showprogress
+using HDF5: h5open, h5write
+using ScatteringI1
+using LaTeXStrings: @L_str
+using Plots: gr, plot, plot!, scatter!, savefig, backend_name
+using PDFmerger: append_pdf!
+gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
+
 function _copy_lattice_parameters_eigenvalues(outfile,infile;group="")
     file = h5open(infile)[group]
     entries = filter(!contains(r"p\([0-9],[0-9],[0-9]\)") ,keys(file))

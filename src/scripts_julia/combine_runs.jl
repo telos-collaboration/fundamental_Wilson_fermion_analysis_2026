@@ -1,3 +1,5 @@
+using HDF5: h5open, h5write
+
 function check_matching_runs(file,ensemble,key;verbose=true)
     fid  = h5open(file)[ensemble]
     runs = keys(fid)

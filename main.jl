@@ -1,14 +1,4 @@
 using Pkg; Pkg.activate("src/src_jl"); Pkg.instantiate()
-using ScatteringI1
-using DelimitedFiles
-using HDF5
-using ProgressMeter
-using LatticeUtils
-using Plots
-using LaTeXStrings
-using PDFmerger
-using Statistics
-gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
 t0     = 0
 deriv  = true

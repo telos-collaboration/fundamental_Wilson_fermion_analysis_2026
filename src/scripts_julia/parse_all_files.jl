@@ -1,3 +1,5 @@
+using DelimitedFiles: readdlm
+
 function parse_all_files(path,h5file,inputfiles)
     println("Parse correlator data from raw log:")
     info  = readdlm(inputfiles,',',skipstart=1)

@@ -1,3 +1,12 @@
+using ProgressMeter: @showprogress
+using HDF5: h5open, h5write
+using ScatteringI1
+using LaTeXStrings: @L_str
+using Plots: gr, plot, plot!, scatter!, savefig, backend_name
+using PDFmerger: append_pdf!
+using DelimitedFiles: readdlm
+gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
+
 function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
     Nev,T = size(meff)
     tmax  = T÷2
