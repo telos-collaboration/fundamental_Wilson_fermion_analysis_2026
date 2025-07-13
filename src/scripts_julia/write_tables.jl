@@ -6,10 +6,11 @@ function p_label(p0)
     sx = s"(\1\2\3)"
     return replace(p0,rx=>sx)
 end
-function all_runs_table(h5file,outfile;only_ens=nothing)
+function all_runs_table(h5file,outfile;ensembles_list=nothing)
     fid = h5open(h5file)
     ensembles = keys(fid)
     ispath(dirname(outfile)) || mkpath(dirname(outfile))
+    only_ens = isnothing(ensembles_list) ? nothing : vec(readdlm(ensembles_list))
 
     io = open(outfile,"w")
     for ens in ensembles

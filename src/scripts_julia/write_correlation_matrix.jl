@@ -2,6 +2,7 @@ using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
 using ScatteringI1
 using Statistics: mean, std
+using DelimitedFiles: readdlm
 
 function _copy_lattice_parameters(outfile,infile;group="")
     file = h5open(infile)[group]
@@ -11,11 +12,12 @@ function _copy_lattice_parameters(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-function write_correlation_matrix(file_in,file_out;only_ens=nothing)
+function write_correlation_matrix(file_in,file_out;ensembles_list)
     isfile(file_out) && rm(file_out)
     fid = h5open(file_in)
-  
+
     # Restrict ourselves to only the specified ensembles in the optional keyword argument
+    only_ens = isfile(ensembles_list) ? vec(readdlm(ensembles_list)) : nothing
     ensembles = keys(fid)
     ensembles = isnothing(only_ens) ? ensembles : intersect(ensembles,only_ens)
     
