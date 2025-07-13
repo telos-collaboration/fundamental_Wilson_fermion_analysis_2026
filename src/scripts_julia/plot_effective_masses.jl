@@ -1,3 +1,5 @@
+using Pkg; Pkg.activate("src/src_jl")
+using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
 using ScatteringI1
@@ -99,3 +101,30 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3
         end
     end
 end
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--h5file_eig"
+        help = "HDF5 file containing the eigenvalues"
+        required = true
+        "--h5file_fit"
+        help = "HDF5 file containing the fit results"
+        required = true
+        "--infinite_volume"
+        help = "CSV file containing the infinite volume results"
+        required = true
+        "--plotpath"
+        help = "HDF5 output file containing the correlation matrices"
+        required = true
+        "--three_by_three"
+        help = "Include plots of the 3x3 data"
+        default = true
+        arg_type = Bool
+    end
+    return parse_args(s)
+end
+function main()
+    args = parse_commandline()
+    plot_effective_masses(args["h5file_eig"], args["h5file_fit"], args["infinite_volume"], args["plotpath"]; use3x3=args["three_by_three"])
+end
+main()

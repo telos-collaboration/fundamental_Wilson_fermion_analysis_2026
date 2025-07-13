@@ -1,3 +1,5 @@
+using Pkg; Pkg.activate("src/src_jl")
+using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using ProgressMeter: @showprogress
 using HDF5: h5open
 using ScatteringI1
@@ -36,7 +38,7 @@ function plot_correlation_matrices(file_in,plotpath)
                 T, L  = read(fid,joinpath(ens,"lattice"))[1:2]
                 m0    = only(read(fid,joinpath(ens,"quarkmasses")))
                 ncfg  = first(size(Corrπ))
-                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(p0), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(p0), n_{cfg}=%$ncfg"
                 ylabel= L"\textrm{pseudolog}_{10} C(t)"
                 xlabel= L"t"
                     
@@ -89,3 +91,20 @@ function plot_correlation_matrices(file_in,plotpath)
         end
     end
 end
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--h5file_in"
+        help = "HDF5 file containing the parsed data"
+        required = true
+        "--plotpath"
+        help = "HDF5 output file containing the correlation matrices"
+        required = true
+    end
+    return parse_args(s)
+end
+function main()
+    args = parse_commandline()
+    plot_correlation_matrices(args["h5file_in"],args["plotpath"])
+end
+main()
