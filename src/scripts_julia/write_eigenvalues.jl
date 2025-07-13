@@ -24,6 +24,9 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
         p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)
         h5write(outfile,"$ens/p_external",p_external)
         for p in p_external
+
+            Corrπ = read_pion_correlator(h5dset,ens,p;average_equivalent_momenta)
+            h5write(outfile,joinpath(ens,p,"correlator_pion"),Corrπ)
             p == "p(0,0,0)" && continue
 
             Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)           
