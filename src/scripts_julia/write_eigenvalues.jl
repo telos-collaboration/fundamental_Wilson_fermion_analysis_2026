@@ -1,3 +1,5 @@
+using Pkg; Pkg.activate("src/src_jl")
+using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
 using ScatteringI1
@@ -11,7 +13,6 @@ function _copy_lattice_parameters_eigenvalues(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
-
 function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), average_equivalent_momenta, gevp, symmetrise)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
@@ -65,3 +66,50 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
         end
     end
 end
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--h5file_in"
+        help = "HDF5 file containing the parsed data"
+        required = true
+        "--h5file_out"
+        help = "HDF5 output file containing the correlation matrices"
+        required = true
+        "--gevp"
+        help = "Use GEVP analysis, otherwise use a simple EVP"
+        required = true
+        arg_type = Bool
+        "--t0"
+        help = "Reference time t0 used in GEVP analysis"
+        default = 1
+        arg_type = Int
+        "--deriv"
+        help = "Perform a numerical derivative first"
+        required = true
+        arg_type = Bool
+        "--avg"
+        help = "Average over equivalent external momenta"
+        required = true
+        arg_type = Bool
+        "--maxhits"
+        help = "Maximal number of stochastic sources to include"
+        default = typemax(Int)
+        "--symmetrise"
+        help = "Symmetrise correlation matrix with resprect to T/2"
+        required = true
+        arg_type = Bool
+    end
+    return parse_args(s)
+end
+function main()
+    args = parse_commandline()
+    t0 = args["t0"]
+    gevp = args["gevp"]
+    deriv = args["deriv"]
+    maxhits = args["maxhits"]
+    symmetrise = args["symmetrise"]
+    average_equivalent_momenta = args["avg"]
+    write_all_eigenvalues(args["h5file_in"],args["h5file_out"]; gevp, t0, deriv, maxhits, average_equivalent_momenta, symmetrise)    
+end
+main()
+

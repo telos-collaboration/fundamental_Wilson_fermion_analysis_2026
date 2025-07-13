@@ -1,3 +1,5 @@
+using Pkg; Pkg.activate("src/src_jl")
+using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
 using ScatteringI1
@@ -63,3 +65,24 @@ function write_correlation_matrix(file_in,file_out;ensembles_list)
         end
     end
 end
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--h5file_in"
+        help = "HDF5 file containing the parsed data"
+        required = true
+        "--h5file_out"
+        help = "HDF5 output file containing the correlation matrices"
+        required = true
+        "--ensembles_list"
+        help = "CSV file containing the ensembles to analyse "
+        default = nothing
+    end
+    return parse_args(s)
+end
+function main()
+    args = parse_commandline()
+    ensembles_list = args["ensembles_list"]
+    write_correlation_matrix(args["h5file_in"],args["h5file_out"];ensembles_list)
+end
+main()

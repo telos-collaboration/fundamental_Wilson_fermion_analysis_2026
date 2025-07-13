@@ -1,3 +1,5 @@
+using Pkg; Pkg.activate("src/src_jl")
+using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using HDF5: h5open, h5write
 
 function check_matching_runs(file,ensemble,key;verbose=true)
@@ -114,3 +116,20 @@ function merge_all_runs(h5file_in, h5file_out)
         end
     end
 end
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--h5file_in"
+        help = "HDF5 input file containing the parsed data"
+        required = true
+        "--h5file_out"
+        help = "HDF5 output file containing the merged data"
+        required = true
+    end
+    return parse_args(s)
+end
+function main()
+    args = parse_commandline()
+    merge_all_runs(args["h5file_in"], args["h5file_out"])
+end
+main()
