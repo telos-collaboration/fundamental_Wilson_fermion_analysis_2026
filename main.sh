@@ -3,7 +3,7 @@ deriv=true
 gevp=false
 use3x3=true
 plotting=true
-symmetrise=false
+symmetrise=true
 average_equivalent_momenta=true
 
 raw_path="./raw_data/"
