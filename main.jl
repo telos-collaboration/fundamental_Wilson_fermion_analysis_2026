@@ -31,18 +31,16 @@ ensembles_list = "metadata/ensembles.csv"
 overview_table    = joinpath(tablepath,"all_runs.csv")
 analysed_table    = joinpath(tablepath,"analysed_runs.csv")
 
-include("src/scripts_julia/parse_all_files.jl")
 include("src/scripts_julia/combine_runs.jl")
 include("src/scripts_julia/write_correlation_matrix.jl")
 include("src/scripts_julia/write_eigenvalues.jl")
 include("src/scripts_julia/plot_correlation_matrix.jl")
 include("src/scripts_julia/plot_effective_masses.jl")
 include("src/scripts_julia/plot_eigenvalues.jl")
-include("src/scripts_julia/write_tables.jl")
 
-parse_all_files(raw_path,h5file_raw,inputfiles)
-all_runs_table(h5file_raw,overview_table)
-all_runs_table(h5file_raw,analysed_table;ensembles_list)
+run(`julia src/scripts_julia/parse_all_files.jl --path $(raw_path) --h5file $(h5file_raw) --inputfiles $(inputfiles)`)
+run(`julia src/scripts_julia/write_tables.jl --h5file $(h5file_raw) --outfile $(overview_table)`)
+run(`julia src/scripts_julia/write_tables.jl --h5file $(h5file_raw) --outfile $(analysed_table) --ensembles_list $(ensembles_list)`)
 merge_all_runs(h5file_raw, h5file_com)
 
 write_correlation_matrix(h5file_com,h5file_cor;ensembles_list)

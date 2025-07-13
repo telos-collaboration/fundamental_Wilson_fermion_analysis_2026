@@ -1,3 +1,5 @@
+using Pkg; Pkg.activate("src/src_jl")
+using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using HDF5: h5open
 using DelimitedFiles: readdlm, writedlm
 
@@ -34,3 +36,26 @@ function all_runs_table(h5file,outfile;ensembles_list=nothing)
     data = sortslices(data,dims=1,by=x->(x[3],-x[4],x[2],-x[7]))
     writedlm(outfile,data,',')
 end
+
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--h5file"
+        help = "HDF5 file containing the parsed data"
+        required = true
+        "--outfile"
+        help = "CSV output containing the list of all parsed runs"
+        required = true
+        "--ensembles_list"
+        help = "CSV file containing the ensembles to analyse "
+        default = nothing
+    end
+    return parse_args(s)
+end
+
+function main()
+    args = parse_commandline()
+    ensembles_list = args["ensembles_list"]
+    all_runs_table(args["h5file"],args["outfile"];ensembles_list)
+end
+main()
