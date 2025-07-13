@@ -58,7 +58,7 @@ all_runs_table(h5file_raw,analysed_table;only_ens)
 merge_all_runs(h5file_raw, h5file_com)
 
 write_correlation_matrix(h5file_com,h5file_cor;only_ens)
-plot_correlation_matrices(h5file_com,plotpath;only_ens)
+plot_correlation_matrices(h5file_com,plotpath)
 write_all_eigenvalues(h5file_cor,h5file_eig; t0, deriv, gevp, average_equivalent_momenta,symmetrise)
 plot_eigenvalues(h5file_eig,plotpath)
 run(`python3 src/src_py/fitting.py $(h5file_eig) $(h5file_fit) $(fitparam)`)

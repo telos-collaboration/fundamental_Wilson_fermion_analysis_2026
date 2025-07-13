@@ -8,21 +8,17 @@ using PDFmerger: append_pdf!
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
 pseudolog10(x,C=1E+4) = sign(x)*log10(abs(C*x)+1)
-function plot_correlation_matrices(file_in,plotpath;only_ens=nothing)
+function plot_correlation_matrices(file_in,plotpath)
     fid = h5open(file_in)
-    # TODO: Rewrite using the filter! function
     ensembles = keys(fid)
-    ensembles = isnothing(only_ens) ? ensembles : intersect(ensembles,only_ens)
 
-    if plotting
-        plotname = "diagrams_v2.pdf"
-        plotname3x3 = "diagrams_3x3_v2.pdf"
-        texpath  = joinpath(plotpath,"diagrams_tex")
-        ispath(plotpath) || mkpath(plotpath)
-        isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
-        isfile(joinpath(plotpath,plotname3x3)) && rm(joinpath(plotpath,plotname3x3))
-    end
-
+    plotname = "diagrams_v2.pdf"
+    plotname3x3 = "diagrams_3x3_v2.pdf"
+    texpath  = joinpath(plotpath,"diagrams_tex")
+    ispath(plotpath) || mkpath(plotpath)
+    isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
+    isfile(joinpath(plotpath,plotname3x3)) && rm(joinpath(plotpath,plotname3x3))
+    
     @showprogress desc="Plot correlation matrix elements" for ens in ensembles
 
         T, L = read(fid,joinpath(ens,"lattice"))[1:2]
