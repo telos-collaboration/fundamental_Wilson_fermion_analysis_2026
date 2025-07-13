@@ -14,8 +14,8 @@ function plot_correlation_matrices(file_in,plotpath)
     fid = h5open(file_in)
     ensembles = keys(fid)
 
-    plotname = "diagrams_v2.pdf"
-    plotname3x3 = "diagrams_3x3_v2.pdf"
+    plotname = "diagrams.pdf"
+    plotname3x3 = "diagrams_3x3.pdf"
     texpath  = joinpath(plotpath,"diagrams_tex")
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))

@@ -14,7 +14,6 @@ function plot_eigenvalues(file,plotpath;use3x3)
 
     plotname = "eigenvalues.pdf"
     texpath  = joinpath(plotpath,"eigenvalues_tex")
-    ispath(texpath)  || mkpath(texpath)
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
 

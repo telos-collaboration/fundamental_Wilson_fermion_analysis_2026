@@ -1,6 +1,6 @@
 # Vector meson scattering in Sp(4) gauge theory—Analysis workflow
 
-The workflow in this repository performs the analyses presented in the paper
+The workflow in this repository performs the analysis presented in the paper
 
 ## Requirements
 
@@ -18,8 +18,8 @@ The workflow in this repository performs the analyses presented in the paper
    cd ScatteringI1
    ```
 
-3. For now I host the input on both VSC4 and DiaL3. They are rsyncable zstd
-archives. Download and decrompress the zstd archive from either of the following two locations.
+3. For now, I host the input on both VSC4 and DiaL3. They are rsyncable zstd
+archives. Download and decompress the zstd archive from either of the following two locations.
 
     ```shellsession
     /scratch/dp208/shared/raw_data.tar.zst
@@ -37,8 +37,10 @@ archives. Download and decrompress the zstd archive from either of the following
 5. Run the workflow
 
     ```shellsession
-    julia main.jl
-    ``` 
+    bash main.sh
+    ```
+
+On an AMD 5950X CPU the current workflow takes roughly 25 minutes to complete.
 
 ## Output
 
