@@ -74,19 +74,22 @@ def fit_all_files(infile,outfile,parameterfile):
         irreps = "/" + irrep
 
         # read the data from the hdf5 file
-        lattice  = get_hdf5_value(fid,group[:-9]+"/lattice")
-        ev       = get_hdf5_value(fid,group+irreps+"/eigvals")
-        Delta_ev = get_hdf5_value(fid,group+irreps+"/Delta_eigvals")
-        cov_ev   = get_hdf5_value(fid,group+irreps+"/cov_eigvals")
-        # t0       = get_hdf5_value(fid,group+irreps+"/t0") - 1 # offset for 1-indexing in julia    # excluded for now. see "write_all_eigenvalues"
-        T        = ev.shape[0]
-        antisymmetric = get_hdf5_value(fid,group+"/deriv") 
+        lattice = get_hdf5_value(fid,group[:-9]+"/lattice")
+        if "eigvals_3x3" in fid[group+irreps].keys():
+            ev = get_hdf5_value(fid,group+irreps+"/eigvals_3x3")
+            cov_ev = get_hdf5_value(fid,group+irreps+"/cov_eigvals_3x3")
+        else:
+            ev = get_hdf5_value(fid,group+irreps+"/eigvals")
+            cov_ev = get_hdf5_value(fid,group+irreps+"/cov_eigvals")
+
+        T = ev.shape[0]
+        antisymmetric = get_hdf5_value(fid,group+irreps+"/deriv") 
 
         # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
-        var2 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
-        var1 = gv.gvar(ev[:,1],cov_ev[:,:,1]/1)
-        eig2 = dict(Gab=var2/var2[0])
+        var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
+        var2 = gv.gvar(ev[:,1],cov_ev[:,:,1]/1)
         eig1 = dict(Gab=var1/var1[0])
+        eig2 = dict(Gab=var2/var2[0])
 
         plotname = group+irrep
         plotdir  = "./data_assets/plots/"
@@ -101,6 +104,8 @@ def fit_all_files(infile,outfile,parameterfile):
         lattice_key = group[:-9]+"/lattice"
         if not lattice_key in f.keys():
             f.create_dataset(lattice_key, data=lattice)
+        # TODO: Write ranges, energies and coefficients into an array 
+        #       of size n, where n corresponds to the nxn (G)EVP
         f.create_dataset(group+irreps+"/tmin1", data=tmin1)
         f.create_dataset(group+irreps+"/tmax1", data=tmax1)
         f.create_dataset(group+irreps+"/tmin2", data=tmin2)

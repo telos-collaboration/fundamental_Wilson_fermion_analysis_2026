@@ -71,7 +71,7 @@ function _preprocess_correlator(Corr;deriv,symmetrise)
 end
 function variational_analysis(Corr;t0,deriv,gevp,symmetrise)
     Corr = _preprocess_correlator(Corr;deriv,symmetrise)
-    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp)
+    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp,sortby=x->-abs(x))
     eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0, gevp)
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)

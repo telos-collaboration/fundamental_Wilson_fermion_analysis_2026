@@ -29,16 +29,16 @@ function plot_eigenvalues(file,plotpath;use3x3)
 
             eigvals  = read(h5dset,joinpath(ens,p,"A1","eigvals"))
             Δeigvals = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals"))
-            momenta  = read(h5dset,joinpath(ens,p,"momenta"))
-            sources  = read(h5dset,joinpath(ens,p,"sources"))
-            gevp     = read(h5dset,joinpath(ens,p,"gevp"))
-            deriv    = read(h5dset,joinpath(ens,p,"deriv"))
-            t0       = read(h5dset,joinpath(ens,p,"t0"))
+            momenta  = read(h5dset,joinpath(ens,p,"A1","momenta"))
+            sources  = read(h5dset,joinpath(ens,p,"A1","sources"))
+            gevp     = read(h5dset,joinpath(ens,p,"A1","gevp"))
+            deriv    = read(h5dset,joinpath(ens,p,"A1","deriv"))
+            t0       = read(h5dset,joinpath(ens,p,"A1","t0"))
             if three_by_three
-                Δeigvals_3x3 = read(h5dset,joinpath(ens,p,"Delta_eigvals_3x3"))
-                eigvals_3x3  = read(h5dset,joinpath(ens,p,"eigvals_3x3"))
-                momenta_3x3  = read(h5dset,joinpath(ens,p,"momenta_3x3"))
-                sources_3x3  = read(h5dset,joinpath(ens,p,"sources_3x3"))
+                Δeigvals_3x3 = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals_3x3"))
+                eigvals_3x3  = read(h5dset,joinpath(ens,p,"A1","eigvals_3x3"))
+                momenta_3x3  = read(h5dset,joinpath(ens,p,"A1","momenta_3x3"))
+                sources_3x3  = read(h5dset,joinpath(ens,p,"A1","sources_3x3"))
             end
 
             T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
