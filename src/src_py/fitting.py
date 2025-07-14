@@ -74,11 +74,16 @@ def fit_all_files(infile,outfile,parameterfile):
         irreps = "/" + irrep
 
         # read the data from the hdf5 file
-        lattice  = get_hdf5_value(fid,group[:-9]+"/lattice")
-        ev       = get_hdf5_value(fid,group+irreps+"/eigvals")
-        cov_ev   = get_hdf5_value(fid,group+irreps+"/cov_eigvals")
-        T        = ev.shape[0]
-        antisymmetric = get_hdf5_value(fid,group+"/deriv") 
+        lattice = get_hdf5_value(fid,group[:-9]+"/lattice")
+        if "eigvals_3x3" in fid[group+irreps].keys():
+            ev = get_hdf5_value(fid,group+irreps+"/eigvals_3x3")
+            cov_ev = get_hdf5_value(fid,group+irreps+"/cov_eigvals_3x3")
+        else:
+            ev = get_hdf5_value(fid,group+irreps+"/eigvals")
+            cov_ev = get_hdf5_value(fid,group+irreps+"/cov_eigvals")
+
+        T = ev.shape[0]
+        antisymmetric = get_hdf5_value(fid,group+irreps+"/deriv") 
 
         # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
         var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
