@@ -3,6 +3,7 @@ using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
 using ScatteringI1
+using Statistics
 
 function _copy_lattice_parameters_eigenvalues(outfile,infile;group="")
     file = h5open(infile)[group]
@@ -13,6 +14,14 @@ function _copy_lattice_parameters_eigenvalues(outfile,infile;group="")
         h5write(outfile,label,read(file,entry))
     end
 end
+
+function mean_and_error(corr)
+    me   = dropdims(mean(corr, dims=1);dims=1)
+    sd   = dropdims(std(corr, dims=1);dims=1)
+    err  = sqrt.(sd/size(corr)[1])
+    return me, err
+end
+
 function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), average_equivalent_momenta, gevp, symmetrise)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
@@ -26,10 +35,13 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
         for p in p_external
 
             Corrπ = read_pion_correlator(h5dset,ens,p;average_equivalent_momenta)
+            Cπ, ΔCπ = mean_and_error(Corrπ)
             h5write(outfile,joinpath(ens,p,"correlator_pion"),Corrπ)
+            h5write(outfile,joinpath(ens,p,"Cpi"),Cπ)
+            h5write(outfile,joinpath(ens,p,"Delta_Cpi"),ΔCπ)
             p == "p(0,0,0)" && continue
 
-            Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)           
+            Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
             eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise)
             eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
             meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp,symmetrise)
@@ -42,6 +54,21 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
                 eigvals_3x3, Δeigvals_3x3 = real.(eigvals_3x3), real.(Δeigvals_3x3), real.(eigvals_cov_3x3)
                 meff_3x3, Δmeff_3x3 = ScatteringI1.effective_masses(Corr3x3;t0,deriv,gevp,symmetrise)
             end
+
+            if haskey(h5dset,joinpath(ens,p,"B1"))
+                B1 = dropdims(mean(read(h5dset,joinpath(ens,p,"B1")),dims=2);dims=2)
+                CB1, ΔCB1 = mean_and_error(B1)
+                h5write(outfile,joinpath(ens,p,"correlator_B1"),B1)
+                h5write(outfile,joinpath(ens,p,"B1","C"),CB1)
+                h5write(outfile,joinpath(ens,p,"B1","Delta_C"),ΔCB1)
+            end 
+            if haskey(h5dset,joinpath(ens,p,"E"))
+                E = dropdims(mean(read(h5dset,joinpath(ens,p,"E")),dims=2);dims=2)
+                CE, ΔCE = mean_and_error(E)
+                h5write(outfile,joinpath(ens,p,"correlator_E"),E)
+                h5write(outfile,joinpath(ens,p,"E","C"),CE)
+                h5write(outfile,joinpath(ens,p,"E","Delta_C"),ΔCE)
+            end 
    
             h5write(outfile,joinpath(ens,p,"A1","eigvals"),eigvals)
             h5write(outfile,joinpath(ens,p,"A1","Delta_eigvals"),Δeigvals)
