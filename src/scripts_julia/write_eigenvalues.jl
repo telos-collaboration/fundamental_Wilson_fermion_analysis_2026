@@ -18,7 +18,7 @@ end
 function mean_and_error(corr)
     me   = dropdims(mean(corr, dims=1);dims=1)
     sd   = dropdims(std(corr, dims=1);dims=1)
-    err  = sqrt.(sd/size(corr)[1])
+    err  = sd ./ sqrt(size(corr,1))
     return me, err
 end
 
