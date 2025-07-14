@@ -55,10 +55,10 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3
             ncfg = read(h5dset,joinpath(ens,"Nconf"))
             m0 = only(read(h5dset,joinpath(ens,"quarkmasses")))
             β  = read(h5dset,joinpath(ens,"beta"))
-            t0 = read(h5dset,joinpath(ens,p,"t0"))
-            gevp = read(h5dset,joinpath(ens,p,"gevp"))
-            deriv = read(h5dset,joinpath(ens,p,"deriv"))
-            symmetrise = read(h5dset,joinpath(ens,p,"symmetrise"))
+            t0 = read(h5dset,joinpath(ens,p,"A1","t0"))
+            gevp = read(h5dset,joinpath(ens,p,"A1","gevp"))
+            deriv = read(h5dset,joinpath(ens,p,"A1","deriv"))
+            symmetrise = read(h5dset,joinpath(ens,p,"A1","symmetrise"))
 
             if gevp
                 title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, gevp, t_0 = %$(t0)"
@@ -67,17 +67,17 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3
             end
             plt1 = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
 
-            meff = read(h5dset[ens][p],"meff")
-            Δmeff = read(h5dset[ens][p],"Delta_meff")
-            sources = read(h5dset[ens][p],"sources")
+            meff = read(h5dset[ens][p]["A1"],"meff")
+            Δmeff = read(h5dset[ens][p]["A1"],"Delta_meff")
+            sources = read(h5dset[ens][p]["A1"],"sources")
             plot_effective_masses!(plt1, meff, Δmeff, sources; markershape=:rect)
             plot_non_interacting_levels!(plt1,h5dset,ens,p,inf_vol)
             
-            has3x3 = haskey(h5dset[ens][p],"meff_3x3")
+            has3x3 = haskey(h5dset[ens][p]["A1"],"meff_3x3")
             if use3x3 && has3x3
-                meff_3x3 = read(h5dset[ens][p],"meff_3x3")
-                Δmeff_3x3 = read(h5dset[ens][p],"Delta_meff_3x3")
-                sources_3x3 = read(h5dset[ens][p],"sources_3x3")
+                meff_3x3 = read(h5dset[ens][p]["A1"],"meff_3x3")
+                Δmeff_3x3 = read(h5dset[ens][p]["A1"],"Delta_meff_3x3")
+                sources_3x3 = read(h5dset[ens][p]["A1"],"sources_3x3")
                 plot_effective_masses!(plt1, meff_3x3, Δmeff_3x3, sources_3x3)
             end
               
