@@ -41,7 +41,7 @@ julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $
 julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --three_by_three $use3x3
 
 mkdir -p tmp
-bash src/zeta/compile.sh  &> tmp/make.log
+bash libs/zeta/compile.sh  &> tmp/make.log
 
 cp $h5file_fit $h5file_scat
 python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat

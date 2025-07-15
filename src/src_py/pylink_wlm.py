@@ -11,7 +11,7 @@ class c_double_complex(ct.Structure):
     def value(self):
         return self.real+1j*self.imag # fields declared above
 
-C_wlm = ct.CDLL(sys.path[0]+"/../zeta/out/get_wlm.so")
+C_wlm = ct.CDLL(sys.path[0]+"/../../libs/zeta/out/get_wlm.so")
 
 wlm = C_wlm.wlm_PL
 
