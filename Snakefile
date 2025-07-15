@@ -6,10 +6,9 @@ plotting="true"
 symmetrise="true"
 average_equivalent_momenta="true"
 
-plotpath="./assets/plots/"
-datapath="./data_assets/"
-
-tablepath="assets/tables/"
+plotpath="assets/plots/"
+datapath="data_assets/"
+tablepath="assets/tables"
 
 h5file_fit="data_assets/isospin1_fitresults.hdf5"
 h5file_scat="data_assets/isospin1_scattering.hdf5"
@@ -22,7 +21,13 @@ input_scatter_fit="metadata/fit_scatter_input.csv"
 rule all:
     input: 
         h5file="data_assets/isospin1_fitresults.hdf5",
-        fittable=f"{tablepath}/fit_results_3x3_tuned.csv",
+        fittable=f"{tablepath}/fit_results_3x3.csv",
+        plots=[
+            "assets/plots/diagrams.pdf",
+            "assets/plots/diagrams_3x3.pdf",
+            "assets/plots/eigenvalues.pdf",
+            "assets/plots/effective_masses_(g)evp.pdf",
+        ]
 
 rule julia_instantiate:
     input:
@@ -132,16 +137,59 @@ rule fitresult_table:
         script="src/scripts_julia/write_table_fitresults.jl",
         h5file="data_assets/isospin1_fitresults.hdf5",
     output: 
-        table="{tablepath}/fit_results_3x3_tuned.csv"
+        table="{tablepath}/fit_results_3x3.csv"
     conda:
         "environment.yml"
     shell:
         'julia {input.script} --h5file {input.h5file} --outfile {output.table}'
 
-#julia src/scripts_julia/plot_correlation_matrix.jl --h5file_in $h5file_com --plotpath $plotpath
-#julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --three_by_three $use3x3
-#julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --three_by_three $use3x3
-#
+rule plot_correlation_matrices:
+    input:
+        julia_instantiated="tmp/julia_ready",
+        script="src/scripts_julia/plot_correlation_matrix.jl",
+        h5file="data_assets/isospin1_merged.hdf5",
+    output: 
+        plots=[
+            "assets/plots/diagrams.pdf",
+            "assets/plots/diagrams_3x3.pdf",
+            ]
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file {input.h5file} --plotpath {plotpath}'
+
+rule plot_eigenvalues:
+    input:
+        julia_instantiated="tmp/julia_ready",
+        script="src/scripts_julia/plot_eigenvalues.jl",
+        h5file="data_assets/isospin1_eigenvalues.hdf5",
+    output: 
+        plots=[
+            "assets/plots/eigenvalues.pdf",
+            ]
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file {input.h5file} --plotpath {plotpath} --three_by_three {use3x3}'
+
+rule plot_effective_masses:
+    input:
+        julia_instantiated="tmp/julia_ready",
+        script="src/scripts_julia/plot_effective_masses.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults.hdf5",
+        infinite_volume="metadata/infinite_volume.csv",
+    output:
+        plots=[
+            "assets/plots/effective_masses_(g)evp.pdf",
+            ]
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --plotpath {plotpath} --three_by_three {use3x3}'
+
+
+
 #mkdir -p tmp
 #bash libs/zeta/compile.sh  &> tmp/make.log
 #
