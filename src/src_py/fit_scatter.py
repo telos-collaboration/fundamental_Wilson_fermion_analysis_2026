@@ -33,24 +33,27 @@ def ERE_fit(p3cotPS, p2):                                   # all primed
     result["c1_2"]=popt[2]
     return result
 
-def RES_Drach(ECM, m_R, gVPP2):
+####################### Ab hier wurden Änderungen gemacht. Bitte vorsichtig sein ###########################
+
+def ECM_p2(p2):
+    return 2*np.sqrt(1+p2)
+def RES_Drach(p2, m_R, gVPP2):
+    ECM = ECM_p2(p2)
     return 6*np.pi*(m_R**2-ECM**2)/gVPP2
-def ECM_p(p):
-    return 2*np.sqrt(1+p**2)
-def RES_Alex_BWI(p, m_R, gVPP2):
-    ECM = ECM_p(p)
-    return ECM*gVPP2*p**3/(6*np.pi*ECM**2*(m_R**2-ECM**2))
-def RES_Alex_BWII(p, m_R, gVPP2, r0):
-    ECM = ECM_p(p)
-    return ECM*gVPP2*p**3*(1+np.sqrt((m_R/2)**2-1))/(6*np.pi*ECM**2*(m_R**2-ECM**2)*(1+(p*r0)**2))
-def RES_fit(p3cotPS_ECM, ECM, tan_PS, p):                                   # all primed
+def RES_Alex_BWI(p2, m_R, gVPP2):
+    ECM = ECM_p2(p2)
+    return ECM*gVPP2*p2**(3/2)/(6*np.pi*ECM**2*(m_R**2-ECM**2))
+def RES_Alex_BWII(p2, m_R, gVPP2, r0):
+    ECM = ECM_p2(p2)
+    return ECM*gVPP2*p2**(3/2)*(1+np.sqrt((m_R/2)**2-1))/(6*np.pi*ECM**2*(m_R**2-ECM**2)*(1+p2*r0**2))
+def RES_fit(p3cotPS_ECM, tan_PS, p2):                                   # all primed
     result = {}
-    popt = curve_fit_try(RES_Drach, ECM, p3cotPS_ECM,2)
+    popt = curve_fit_try(RES_Drach, p2, p3cotPS_ECM,2)
     result["m_R_D"], result["gVPP2_D"] = popt
-    popt = curve_fit_try(RES_Alex_BWI, p, tan_PS,2)
+    popt = curve_fit_try(RES_Alex_BWI, p2, tan_PS,2)
     result["m_R_BWI"], result["gVPP2_BWI"] = popt
-    popt = curve_fit_try(RES_Alex_BWII, p, tan_PS,2)
-    result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
+    # popt = curve_fit_try(RES_Alex_BWII, p, tan_PS,2)
+    # result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
     return result
 
 def get_fits(res, res_spl):
@@ -59,7 +62,7 @@ def get_fits(res, res_spl):
     win_ind = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
     for key, val in ERE_fit(res["p3cotPS_prime"][win_ind],res["p2star_prime"][win_ind]).items():
         res_tmp[key] = val
-    for key, val in RES_fit(res["p3cotPS_Ecm_prime"][win_ind],res["E_cm_prime"][win_ind],res["tan_PS"][win_ind],res["pstar_prime"][win_ind]).items():
+    for key, val in RES_fit(res["p3cotPS_Ecm_prime"][win_ind],res["tan_PS"][win_ind],res["p2star_prime"][win_ind]).items():
         res_tmp[key] = val
         
     for key in res_tmp.keys():
@@ -71,6 +74,8 @@ def get_fits(res, res_spl):
         for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i][win_ind],res_spl["E_cm_prime"][i][win_ind],res_spl["tan_PS"][i][win_ind],res_spl["pstar_prime"][i][win_ind]).items():
             res_spl_tmp[key].append(val)
     return res_tmp, res_spl_tmp
+
+####################### Bis hier wurden Änderungen gemacht. Bitte vorsichtig sein ###########################
 
 def fit_one_phaseshift(h5file_in, h5file_out, beta, m0):
     res_calc = {}
