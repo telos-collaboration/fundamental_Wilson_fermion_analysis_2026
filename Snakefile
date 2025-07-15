@@ -26,6 +26,10 @@ input_scatter="metadata/scattering_input.csv"
 input_scatter_fit="metadata/fit_scatter_input.csv"
 ensembles_list="metadata/ensembles.csv"
 
+rule all:
+    input: 
+        h5file="data_assets/isospin1_corr.hdf5",
+
 rule julia_instantiate:
     input:
         script="src/scripts_julia/instantiate.jl",
@@ -45,11 +49,11 @@ rule parse_hdf5:
         julia_instantiated="tmp/julia_ready",
         metadata="metadata/input_files.csv",
         script="src/scripts_julia/parse_all_files.jl",
-        path="./raw_data/",
+        path="raw_data/",
     output:
         h5file="data_assets/isospin1_sorted.hdf5",
     conda:
-        "envs/environment.yml"
+        "environment.yml"
     shell:
         'julia {input.script} --path {input.path} --h5file {output.h5file} --inputfiles {input.metadata}'
 
@@ -57,10 +61,11 @@ rule ensemble_table:
     input:
         julia_instantiated="tmp/julia_ready",
         h5file="data_assets/isospin1_sorted.hdf5",
+        script="src/scripts_julia/write_tables.jl",
     output:
         table="{tablepath}/all_runs.csv",
     conda:
-        "envs/environment.yml"
+        "environment.yml"
     shell:
         'julia {input.script} --h5file {output.h5file} --outfile {output.table}'
 
@@ -68,30 +73,53 @@ rule restricted_ensemble_table:
     input:
         julia_instantiated="tmp/julia_ready",
         h5file="data_assets/isospin1_sorted.hdf5",
+        script="src/scripts_julia/write_tables.jl",
         ensembles_list="metadata/ensembles.csv",
     output:
         table="{tablepath}/analysed_runs.csv",
     conda:
-        "envs/environment.yml"
+        "environment.yml"
     shell:
         'julia {input.script} --h5file {output.h5file} --outfile {output.table} --ensemble_list {input.ensembles_list}'
 
+rule combine_runs:
+    input:
+        julia_instantiated="tmp/julia_ready",
+        h5file="data_assets/isospin1_sorted.hdf5",
+        script="src/scripts_julia/combine_runs.jl",
+    output:
+        h5file="data_assets/isospin1_merged.hdf5"
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file} --h5file_out {output.h5file}'
 
-julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5file_com
-julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5file_out $h5file_cor --ensembles_list $ensembles_list
-julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --gevp $gevp --t0 $t0 --deriv $deriv --avg $average_equivalent_momenta --symmetrise $symmetrise
-python3 src/src_py/fitting.py $h5file_eig $h5file_fit $fitparam
-julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
+rule write_correlation_matrices:
+    input:
+        julia_instantiated="tmp/julia_ready",
+        script="src/scripts_julia/write_correlation_matrix.jl",
+        h5file="data_assets/isospin1_merged.hdf5",
+        ensembles_list="metadata/ensembles.csv",
+    output:
+        h5file="data_assets/isospin1_corr.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file} --h5file_out {output.h5file} --ensembles_list {input.ensembles_list}'
 
-julia src/scripts_julia/plot_correlation_matrix.jl --h5file_in $h5file_com --plotpath $plotpath
-julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --three_by_three $use3x3
-julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --three_by_three $use3x3
-
-mkdir -p tmp
-bash libs/zeta/compile.sh  &> tmp/make.log
-
-cp $h5file_fit $h5file_scat
-python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat
-cp $h5file_scat $h5file_scat_fit
-python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit
-python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat $h5file_scat_fit
+#julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --gevp $gevp --t0 $t0 --deriv $deriv --avg $average_equivalent_momenta --symmetrise $symmetrise
+#python3 src/src_py/fitting.py $h5file_eig $h5file_fit $fitparam
+#julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
+#
+#julia src/scripts_julia/plot_correlation_matrix.jl --h5file_in $h5file_com --plotpath $plotpath
+#julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --three_by_three $use3x3
+#julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --three_by_three $use3x3
+#
+#mkdir -p tmp
+#bash libs/zeta/compile.sh  &> tmp/make.log
+#
+#cp $h5file_fit $h5file_scat
+#python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat
+#cp $h5file_scat $h5file_scat_fit
+#python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit
+#python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat $h5file_scat_fit
