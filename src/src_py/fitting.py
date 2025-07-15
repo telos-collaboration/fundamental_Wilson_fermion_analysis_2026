@@ -101,6 +101,50 @@ def fit_all_files(infile,outfile,parameterfile):
         E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin2,tmax2,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
 
         f = h5py.File(outfile, "a")
+
+        # Fit pion correlator (if it exists)
+        if "Cpi" in fid[group].keys():
+            Cpi = get_hdf5_value(fid,group+"/Cpi")
+            cov_pi = get_hdf5_value(fid,group+"/cov_Cpi")
+            var_pi = gv.gvar(Cpi[:],cov_pi[:,:])
+            cor_pi = dict(Gab=var_pi/var_pi[0])
+            E, a, chi2, dof = fit_correlator_without_bootstrap(cor_pi,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
+            f.create_dataset(group+"pi/E", data=[E_i.mean for E_i in E])
+            f.create_dataset(group+"pi/Delta_E", data=[E_i.sdev for E_i in E])
+            f.create_dataset(group+"pi/a", data=[a_i.mean for a_i in a])
+            f.create_dataset(group+"pi/Delta_a", data=[a_i.sdev for a_i in a])
+            f.create_dataset(group+"pi/chi2_", data=chi2)
+            f.create_dataset(group+"pi/dof", data=dof)
+        
+        # Fit rho correlator in E irrep (if it exists)
+        if "E" in fid[group].keys():
+            C_E = get_hdf5_value(fid,group+"/E/C")
+            cov_E = get_hdf5_value(fid,group+"/E/cov_C")
+            var_E = gv.gvar(C_E,cov_E)
+            cor_E = dict(Gab=var_E/var_E[0])
+            E, a, chi2, dof = fit_correlator_without_bootstrap(cor_E,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
+            f.create_dataset(group+"E/E", data=[E_i.mean for E_i in E])
+            f.create_dataset(group+"E/Delta_E", data=[E_i.sdev for E_i in E])
+            f.create_dataset(group+"E/a", data=[a_i.mean for a_i in a])
+            f.create_dataset(group+"E/Delta_a", data=[a_i.sdev for a_i in a])
+            f.create_dataset(group+"E/chi2_", data=chi2)
+            f.create_dataset(group+"E/dof", data=dof)
+
+
+        # Fit rho correlator in B1 irrep (if it exists)
+        if "B1" in fid[group].keys():
+            C_B1 = get_hdf5_value(fid,group+"/B1/C")
+            cov_B1 = get_hdf5_value(fid,group+"/B1/cov_C")
+            var_B1 = gv.gvar(C_B1,cov_B1)
+            cor_B1 = dict(Gab=var_B1/var_B1[0])
+            E, a, chi2, dof = fit_correlator_without_bootstrap(cor_B1,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
+            f.create_dataset(group+"B1/E", data=[E_i.mean for E_i in E])
+            f.create_dataset(group+"B1/Delta_E", data=[E_i.sdev for E_i in E])
+            f.create_dataset(group+"B1/a", data=[a_i.mean for a_i in a])
+            f.create_dataset(group+"B1/Delta_a", data=[a_i.sdev for a_i in a])
+            f.create_dataset(group+"B1/chi2_", data=chi2)
+            f.create_dataset(group+"B1/dof", data=dof)
+
         lattice_key = group[:-9]+"/lattice"
         if not lattice_key in f.keys():
             f.create_dataset(lattice_key, data=lattice)
