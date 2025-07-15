@@ -6,8 +6,8 @@ plotting="true"
 symmetrise="true"
 average_equivalent_momenta="true"
 
-plotpath="assets/plots/"
-datapath="data_assets/"
+plotpath="assets/plots"
+datapath="data_assets"
 tablepath="assets/tables"
 
 h5file_fit="data_assets/isospin1_fitresults.hdf5"
@@ -27,7 +27,14 @@ rule all:
             "assets/plots/diagrams_3x3.pdf",
             "assets/plots/eigenvalues.pdf",
             "assets/plots/effective_masses_(g)evp.pdf",
-        ]
+        ],
+        plots_sigma=expand("{p}/sigma1_{ens}_fit_True.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"]),
+        plots_cot=expand("{p}/p3cotPS_{ens}_fit_True.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"]),
+        plots_EL=expand("{p}/E_L_{ens}_levels_{b}.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"], b=[True, False]),
+        plots_ECML=expand("{p}/E_CM_L_{ens}_levels_{b}.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"], b=[True, False]),
+        binary="libs/zeta/out/get_wlm.so",
+        scatterh5="data_assets/isospin1_scattering.hdf5",
+        scatterfith5="data_assets/isospin1_fit_scatter.hdf5",
 
 rule julia_instantiate:
     input:
@@ -189,12 +196,55 @@ rule plot_effective_masses:
         'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --plotpath {plotpath} --three_by_three {use3x3}'
 
 
+rule compile_zeta:
+    input:
+        code="libs/zeta/"
+    output:
+        binary="libs/zeta/out/get_wlm.so"
+    conda:
+        "environment.yml"
+    shell:
+        'bash libs/zeta/compile.sh  &> tmp/make.log'
 
-#mkdir -p tmp
-#bash libs/zeta/compile.sh  &> tmp/make.log
-#
-#cp $h5file_fit $h5file_scat
-#python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat
-#cp $h5file_scat $h5file_scat_fit
-#python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit
-#python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat $h5file_scat_fit
+rule scattering_analysis:
+    input:
+        h5file="data_assets/isospin1_fitresults.hdf5",
+        input_scatter="metadata/scattering_input.csv",
+        script="src/src_py/scattering.py",
+    output:
+        h5file="data_assets/isospin1_scattering.hdf5",
+    conda:
+        "environment.yml"
+    shell: """ 
+        cp {input.h5file} {output.h5file}
+        python3 {input.script} {input.input_scatter} {input.h5file} {output.h5file}
+        """ 
+
+rule scattering_fits:
+    input:
+        h5file="data_assets/isospin1_scattering.hdf5",
+        script="src/src_py/fit_scatter.py",
+    output:
+        h5file="data_assets/isospin1_fit_scatter.hdf5",
+    conda:
+        "environment.yml"
+    shell: """ 
+        cp {input.h5file} {output.h5file}
+        python3 {input.script} {input.h5file} {output.h5file}
+        """ 
+
+rule scattering_fit_plots:
+    input:
+        h5file_scatter="data_assets/isospin1_scattering.hdf5",
+        h5file_scatter_fit="data_assets/isospin1_fit_scatter.hdf5",
+        script="src/src_py/plotting.py",
+    output:
+        plots_sigma=expand("{p}/sigma1_{ens}_fit_True.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"]),
+        plots_cot=expand("{p}/p3cotPS_{ens}_fit_True.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"]),
+        plots_EL=expand("{p}/E_L_{ens}_levels_{b}.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"], b=[True, False]),
+        plots_ECML=expand("{p}/E_CM_L_{ens}_levels_{b}.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"], b=[True, False]),
+    conda:
+        "environment.yml"
+    shell: """ 
+        python3 {input.script} {plotpath}/scattering {input.h5file_scatter} {input.h5file_scatter_fit}
+        """ 
