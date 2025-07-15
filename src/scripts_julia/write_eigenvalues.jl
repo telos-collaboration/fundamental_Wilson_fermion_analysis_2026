@@ -15,11 +15,13 @@ function _copy_lattice_parameters_eigenvalues(outfile,infile;group="")
     end
 end
 
-function mean_and_error(corr)
-    me   = dropdims(mean(corr, dims=1);dims=1)
-    sd   = dropdims(std(corr, dims=1);dims=1)
-    err  = sd ./ sqrt(size(corr,1))
-    return me, err
+function mean_error_cov(corr)
+    me = dropdims(mean(corr, dims=1);dims=1)
+    sd = dropdims(std(corr, dims=1);dims=1)
+    cv = cov(corr, dims=1)
+    sd .= sd ./ sqrt(size(corr,1))
+    cv .= cv ./ size(corr,1)
+    return me, sd, cv
 end
 
 function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), average_equivalent_momenta, gevp, symmetrise)    
@@ -35,10 +37,11 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
         for p in p_external
 
             Corrπ = read_pion_correlator(h5dset,ens,p;average_equivalent_momenta)
-            Cπ, ΔCπ = mean_and_error(Corrπ)
+            Cπ, ΔCπ, Cπcov = mean_error_cov(Corrπ)
             h5write(outfile,joinpath(ens,p,"correlator_pion"),Corrπ)
             h5write(outfile,joinpath(ens,p,"Cpi"),Cπ)
             h5write(outfile,joinpath(ens,p,"Delta_Cpi"),ΔCπ)
+            h5write(outfile,joinpath(ens,p,"cov_Cpi"),Cπcov)
             p == "p(0,0,0)" && continue
 
             Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
@@ -57,17 +60,19 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
 
             if haskey(h5dset,joinpath(ens,p,"B1"))
                 B1 = dropdims(mean(read(h5dset,joinpath(ens,p,"B1")),dims=2);dims=2)
-                CB1, ΔCB1 = mean_and_error(B1)
-                h5write(outfile,joinpath(ens,p,"correlator_B1"),B1)
+                CB1, ΔCB1, covCB1 = mean_error_cov(B1)
+                h5write(outfile,joinpath(ens,p,"B1","correlator_B1"),B1)
                 h5write(outfile,joinpath(ens,p,"B1","C"),CB1)
                 h5write(outfile,joinpath(ens,p,"B1","Delta_C"),ΔCB1)
+                h5write(outfile,joinpath(ens,p,"B1","cov_C"),covCB1)
             end 
             if haskey(h5dset,joinpath(ens,p,"E"))
                 E = dropdims(mean(read(h5dset,joinpath(ens,p,"E")),dims=2);dims=2)
-                CE, ΔCE = mean_and_error(E)
-                h5write(outfile,joinpath(ens,p,"correlator_E"),E)
+                CE, ΔCE, covCE = mean_error_cov(E)
+                h5write(outfile,joinpath(ens,p,"E","correlator_E"),E)
                 h5write(outfile,joinpath(ens,p,"E","C"),CE)
                 h5write(outfile,joinpath(ens,p,"E","Delta_C"),ΔCE)
+                h5write(outfile,joinpath(ens,p,"E","cov_C"),covCE)
             end 
    
             h5write(outfile,joinpath(ens,p,"A1","eigvals"),eigvals)
