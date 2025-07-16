@@ -1,6 +1,7 @@
 using Pkg; Pkg.activate("src/src_jl")
 using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using ProgressMeter: @showprogress
+using DelimitedFiles: readdlm
 using HDF5: h5open, h5write
 using LatticeUtils: log_meff
 using ScatteringI1
@@ -25,17 +26,28 @@ function mean_error_cov(corr)
     return me, sd, cv
 end
 
-function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), average_equivalent_momenta, gevp, symmetrise)    
+function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equivalent_momenta=true, metadata)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
 
     ensembles = keys(h5dset)
     @showprogress desc="Write eigenvalues:" enabled=true for ens in ensembles
+
         _copy_lattice_parameters_eigenvalues(outfile,infile;group=ens)
         p0 = read(h5dset,"$ens/p_external")
         p_external = ifelse(average_equivalent_momenta,unique_momenta(p0),p0)
         h5write(outfile,"$ens/p_external",p_external)
+
         for p in p_external
+
+            p == "p(0,0,0)" && continue
+            # TODO: Deal with p(0,0,0)
+
+            # get metadate for specific momentum
+            data = readdlm(metadata,',',skipstart=1)
+            metadata_ind = findfirst(i -> isequal(joinpath(ens,p),data[i,1]),1:first(size(data)))
+            t0, deriv, gevp, symmetrise = data[metadata_ind,7:10]
+            t0::Int, deriv::Bool, gevp::Bool, symmetrise::Bool = Int(t0), Bool(deriv), Bool(gevp), Bool(symmetrise) 
 
             Corrπ = read_pion_correlator(h5dset,ens,p;average_equivalent_momenta)
             meffπ, Δmeffπ = log_meff(Corrπ')
@@ -47,7 +59,6 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
             h5write(outfile,joinpath(ens,p,"meff_pi"),meffπ)
             h5write(outfile,joinpath(ens,p,"Delta_meff_pi"),Δmeffπ)
 
-            p == "p(0,0,0)" && continue
 
             Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
             eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise)
@@ -121,18 +132,9 @@ function parse_commandline()
         "--h5file_out"
         help = "HDF5 output file containing the correlation matrices"
         required = true
-        "--gevp"
-        help = "Use GEVP analysis, otherwise use a simple EVP"
+        "--metadata"
+        help = "CSV file containing the parameters for the variational analysis"
         required = true
-        arg_type = Bool
-        "--t0"
-        help = "Reference time t0 used in GEVP analysis"
-        default = 1
-        arg_type = Int
-        "--deriv"
-        help = "Perform a numerical derivative first"
-        required = true
-        arg_type = Bool
         "--avg"
         help = "Average over equivalent external momenta"
         required = true
@@ -140,22 +142,15 @@ function parse_commandline()
         "--maxhits"
         help = "Maximal number of stochastic sources to include"
         default = typemax(Int)
-        "--symmetrise"
-        help = "Symmetrise correlation matrix with resprect to T/2"
-        required = true
-        arg_type = Bool
     end
     return parse_args(s)
 end
 function main()
     args = parse_commandline()
-    t0 = args["t0"]
-    gevp = args["gevp"]
-    deriv = args["deriv"]
     maxhits = args["maxhits"]
-    symmetrise = args["symmetrise"]
+    metadata = args["metadata"]
     average_equivalent_momenta = args["avg"]
-    write_all_eigenvalues(args["h5file_in"],args["h5file_out"]; gevp, t0, deriv, maxhits, average_equivalent_momenta, symmetrise)    
+    write_all_eigenvalues(args["h5file_in"],args["h5file_out"]; maxhits, average_equivalent_momenta, metadata)    
 end
 main()
 
