@@ -4,13 +4,23 @@ using HDF5
 using DelimitedFiles: readdlm, writedlm
 using LatticeUtils: errorstring
 
+function _get_fit_engery_str(hdset,label)
+    if haskey(hdset,label)
+        E = hdset[label]["E"][1]
+        ΔE = hdset[label]["Delta_E"][1]
+        return errorstring(E,ΔE)
+    else
+        return = "-"
+    end
+end
+
 function fitresult_table(h5file,outfile)
     fid = h5open(h5file)
     ensembles = keys(fid)
     ispath(dirname(outfile)) || mkpath(dirname(outfile))
 
     io = open(outfile,"w")
-    write(io,"name;momentum;groundstate;scatterstate\n")
+    write(io,"name;momentum;pipi_groundstate;pipi_scatterstate;pi;rho_E;rho_B1\n")
     for ens in ensembles
         T,L  = read(fid[ens],"lattice")[1:2]
         moms = filter(startswith("p"),keys(fid[ens]))
@@ -19,7 +29,12 @@ function fitresult_table(h5file,outfile)
             E1 = fid[ens][p]["A1"]["E1"][1]
             ΔE0 = fid[ens][p]["A1"]["Delta_E0"][1]
             ΔE1 = fid[ens][p]["A1"]["Delta_E1"][1]
-            write(io,"$ens;$p;$(errorstring(E0,ΔE0));$(errorstring(E1,ΔE1))\n")
+            str0 = errorstring(E0,ΔE0)
+            str1 = errorstring(E1,ΔE1)
+            str_π = _get_fit_engery_str(fid[ens][p],"pi")
+            str_ρE = _get_fit_engery_str(fid[ens][p],"E")
+            str_ρB1 = _get_fit_engery_str(fid[ens][p],"B1")
+            write(io,"$ens;$p;$str0;$str1;$str_ρE;$str_π,$str_ρE,$str_ρB1\n")
         end
     end
     close(io)
