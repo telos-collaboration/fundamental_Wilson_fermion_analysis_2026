@@ -153,7 +153,7 @@ rule fitresult_table:
 rule plot_correlation_matrices:
     input:
         julia_instantiated="tmp/julia_ready",
-        script="src/scripts_julia/plot_correlation_matrix.jl",
+        script="src/scripts_julia/plot_diagrams.jl",
         h5file="data_assets/isospin1_merged.hdf5",
     output: 
         plots=[
