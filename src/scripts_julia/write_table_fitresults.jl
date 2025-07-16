@@ -10,7 +10,7 @@ function _get_fit_engery_str(hdset,label)
         ΔE = hdset[label]["Delta_E"][1]
         return errorstring(E,ΔE)
     else
-        return = "-"
+        return "-"
     end
 end
 
@@ -22,7 +22,6 @@ function fitresult_table(h5file,outfile)
     io = open(outfile,"w")
     write(io,"name;momentum;pipi_groundstate;pipi_scatterstate;pi;rho_E;rho_B1\n")
     for ens in ensembles
-        T,L  = read(fid[ens],"lattice")[1:2]
         moms = filter(startswith("p"),keys(fid[ens]))
         for p in moms
             E0 = fid[ens][p]["A1"]["E0"][1]
