@@ -11,7 +11,7 @@ gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
 function plot_effective_mass!(plt, meff, Δmeff ;kws...)
     T = length(meff)
-    tmax  = T÷2
+    tmax = T÷2
     scatter!(plt,meff[1:tmax],yerr=Δmeff[1:tmax],;kws...)
 end
 function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
@@ -20,7 +20,6 @@ function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
     for i in 1:Nev
         scatter!(plt,meff[Nev+1-i,1:tmax],yerr=Δmeff[Nev+1-i,1:tmax],label=L"\textrm{eigenvalue }~%$i~~(n_{src}=%$(sources))";kws...)
     end
-    plot!(plt,ylims=(0.0,π/2),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
 end
 function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
     T, L = read(h5dset,joinpath(ens,"lattice"))[1:2]
@@ -37,7 +36,7 @@ function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
         add_mass_band!(plt,non_interacting_energy_1P_lattice(mρ,Δmρ,px,py,pz,L)... ;color=:black,label=label1ρ)
     end
 end
-function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath)
+function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; plot2x2 = false)
     h5dset  = h5open(corr_file)
     if isfile(fitresults)
         res = h5open(fitresults)
@@ -74,11 +73,6 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath)
             plt = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
             plt_mesons = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
 
-            meff = read(h5dset[ens][p]["A1"],"meff")
-            Δmeff = read(h5dset[ens][p]["A1"],"Delta_meff")
-            sources = read(h5dset[ens][p]["A1"],"sources")
-            plot_effective_masses!(plt, meff, Δmeff, sources; markershape=:rect)
-            plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
             
             has3x3 = haskey(h5dset[ens][p]["A1"],"meff_3x3")
             if has3x3
@@ -87,7 +81,14 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath)
                 sources_3x3 = read(h5dset[ens][p]["A1"],"sources_3x3")
                 plot_effective_masses!(plt, meff_3x3, Δmeff_3x3, sources_3x3)
             end
-              
+            if !has3x3 || plot2x2
+                meff = read(h5dset[ens][p]["A1"],"meff")
+                Δmeff = read(h5dset[ens][p]["A1"],"Delta_meff")
+                sources = read(h5dset[ens][p]["A1"],"sources")
+                plot_effective_masses!(plt, meff, Δmeff, sources; markershape=:rect)
+            end
+            plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
+            
             if isfile(fitresults) && haskey(res,joinpath(ens,p))
                 r = res[joinpath(ens,p,"A1")]
                 E0, ΔE0 = read(r,"E0")[1], read(r,"Delta_E0")[1] 
@@ -114,7 +115,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath)
                 plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\rho (B1)")
             end
 
-            isinteractive() && display(plt)
+            plot!(plt,ylims=(0.0,π/2),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
             savefig(plt,"temp.pdf")
             savefig(plt_mesons ,"temp_mesons.pdf")
             append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)

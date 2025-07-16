@@ -68,7 +68,6 @@ function plot_eigenvalues(file,plotpath;use3x3)
             
             savefig(plt,"temp.pdf")
             append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
-            isinteractive() && display(plt)
         end
     end
 end

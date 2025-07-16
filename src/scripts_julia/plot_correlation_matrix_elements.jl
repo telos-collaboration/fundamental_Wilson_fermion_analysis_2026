@@ -54,7 +54,6 @@ function plot_correlation_matrix_elements(file,plotpath)
             
             savefig(plt,"temp.pdf")
             append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
-            isinteractive() && display(plt)
         end
     end
 end

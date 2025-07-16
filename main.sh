@@ -42,7 +42,7 @@ julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plo
 julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --three_by_three $use3x3
 julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
 julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath
-julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --three_by_three $use3x3
+julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile
 
 mkdir -p tmp
 bash libs/zeta/compile.sh  &> tmp/make.log
