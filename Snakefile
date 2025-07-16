@@ -224,7 +224,7 @@ rule plot_effective_masses:
     conda:
         "environment.yml"
     shell:
-        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --plotpath {plotpath} --three_by_three {use3x3}'
+        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --plotpath {plotpath}'
 
 
 rule compile_zeta:

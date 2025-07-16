@@ -16,7 +16,6 @@ function plot_correlation_matrices(file_in,plotpath)
 
     plotname = "diagrams.pdf"
     plotname3x3 = "diagrams_3x3.pdf"
-    texpath  = joinpath(plotpath,"diagrams_tex")
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
     isfile(joinpath(plotpath,plotname3x3)) && rm(joinpath(plotpath,plotname3x3))
@@ -57,9 +56,6 @@ function plot_correlation_matrices(file_in,plotpath)
                 end 
                 
                 savefig(plt,"temp.pdf")
-                if backend_name() == :pgfplotsx
-                    savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p0.tex") )
-                end
                 append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
                 isinteractive() && display(plt)
 
@@ -76,11 +72,6 @@ function plot_correlation_matrices(file_in,plotpath)
                         ΔC = dropdims(std(mean(C_tmp,dims=(2)),dims=1),dims=(1,2))/sqrt(ncfg)
                         scatter!(plt,1:T,C,yerr=ΔC,label=l,marker=markers[mi])
                         mi += 1
-                    end
-
-                    if backend_name() == :pgfplotsx
-                        ispath(texpath) || mkpath(texpath)
-                        savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$(p0)_3by3.tex") )
                     end
 
                     savefig(plt,"temp.pdf")

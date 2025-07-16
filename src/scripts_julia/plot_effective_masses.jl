@@ -37,7 +37,7 @@ function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
         add_mass_band!(plt,non_interacting_energy_1P_lattice(mρ,Δmρ,px,py,pz,L)... ;color=:black,label=label1ρ)
     end
 end
-function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3x3=true)
+function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath)
     h5dset  = h5open(corr_file)
     if isfile(fitresults)
         res = h5open(fitresults)
@@ -46,7 +46,6 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3
     plotname = "effective_masses_(g)evp.pdf"
     plotname_mesons = "effective_masses_mesons.pdf"
     inf_vol  = readdlm(infvolfile,',',skipstart=1)
-    texpath  = joinpath(plotpath,"effective_masses_tex")
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
     isfile(joinpath(plotpath,plotname_mesons)) && rm(joinpath(plotpath,plotname_mesons))
@@ -82,7 +81,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3
             plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
             
             has3x3 = haskey(h5dset[ens][p]["A1"],"meff_3x3")
-            if use3x3 && has3x3
+            if has3x3
                 meff_3x3 = read(h5dset[ens][p]["A1"],"meff_3x3")
                 Δmeff_3x3 = read(h5dset[ens][p]["A1"],"Delta_meff_3x3")
                 sources_3x3 = read(h5dset[ens][p]["A1"],"sources_3x3")
@@ -118,10 +117,6 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3
             isinteractive() && display(plt)
             savefig(plt,"temp.pdf")
             savefig(plt_mesons ,"temp_mesons.pdf")
-            if backend_name() == :pgfplotsx
-                ispath(texpath)  || mkpath(texpath)
-                savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
-            end
             append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
             append_pdf!(joinpath(plotpath,plotname_mesons), "temp_mesons.pdf", cleanup=true)
         end
@@ -142,15 +137,11 @@ function parse_commandline()
         "--plotpath"
         help = "HDF5 output file containing the correlation matrices"
         required = true
-        "--three_by_three"
-        help = "Include plots of the 3x3 data"
-        default = true
-        arg_type = Bool
     end
     return parse_args(s)
 end
 function main()
     args = parse_commandline()
-    plot_effective_masses(args["h5file_eig"], args["h5file_fit"], args["infinite_volume"], args["plotpath"]; use3x3=args["three_by_three"])
+    plot_effective_masses(args["h5file_eig"], args["h5file_fit"], args["infinite_volume"], args["plotpath"])
 end
 main()

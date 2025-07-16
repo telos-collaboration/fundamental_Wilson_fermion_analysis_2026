@@ -13,7 +13,6 @@ function plot_eigenvalues(file,plotpath;use3x3)
     ensembles = keys(h5dset)
 
     plotname = "eigenvalues.pdf"
-    texpath  = joinpath(plotpath,"eigenvalues_tex")
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
 
@@ -68,10 +67,6 @@ function plot_eigenvalues(file,plotpath;use3x3)
             plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
             
             savefig(plt,"temp.pdf")
-            if backend_name() == :pgfplotsx
-                ispath(texpath)  || mkpath(texpath)
-                savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
-            end
             append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
             isinteractive() && display(plt)
         end
