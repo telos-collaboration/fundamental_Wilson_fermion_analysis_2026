@@ -33,7 +33,7 @@ function fitresult_table(h5file,outfile)
             str_π = _get_fit_engery_str(fid[ens][p],"pi")
             str_ρE = _get_fit_engery_str(fid[ens][p],"E")
             str_ρB1 = _get_fit_engery_str(fid[ens][p],"B1")
-            write(io,"$ens;$p;$str0;$str1;$str_ρE;$str_π,$str_ρE,$str_ρB1\n")
+            write(io,"$ens;$p;$str0;$str1;$str_π;$str_ρE;$str_ρB1\n")
         end
     end
     close(io)
