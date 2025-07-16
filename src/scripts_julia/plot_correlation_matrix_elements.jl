@@ -18,7 +18,7 @@ function plot_correlation_matrix_elements(file,plotpath)
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
 
-    @showprogress desc="Plot eigenvalues:" for ens in ensembles
+    @showprogress desc="Plot correlation matrix elements:" for ens in ensembles
  
         p0         = read(h5dset,"$ens/p_external")
         p_external = unique_momenta(p0)

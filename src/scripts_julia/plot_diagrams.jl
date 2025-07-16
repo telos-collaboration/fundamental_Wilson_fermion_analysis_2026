@@ -21,7 +21,7 @@ function plot_correlation_matrices(file_in,plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
     isfile(joinpath(plotpath,plotname3x3)) && rm(joinpath(plotpath,plotname3x3))
     
-    @showprogress desc="Plot correlation matrix elements" for ens in ensembles
+    @showprogress desc="Plot diagrams in two-pion correlator" for ens in ensembles
 
         T, L = read(fid,joinpath(ens,"lattice"))[1:2]
         p_external = read(fid,"$ens/p_external")
