@@ -9,6 +9,11 @@ using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
+function plot_effective_mass!(plt, meff, Δmeff ;kws...)
+    T = length(meff)
+    tmax  = T÷2
+    scatter!(plt,meff[1:tmax],yerr=Δmeff[1:tmax],;kws...)
+end
 function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
     Nev,T = size(meff)
     tmax  = T÷2
@@ -68,6 +73,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3
                 title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, evp"
             end
             plt = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+            plt_mesons = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
 
             meff = read(h5dset[ens][p]["A1"],"meff")
             Δmeff = read(h5dset[ens][p]["A1"],"Delta_meff")
@@ -91,13 +97,33 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; use3
                 add_mass_band!(plt,E1, ΔE1;label="fit #2")
             end
             
+            if haskey(h5dset[ens][p],"meff_pi")
+                meff = read(h5dset[ens][p],"meff_pi")
+                Δmeff = read(h5dset[ens][p],"Delta_meff_pi")
+                plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\pi")
+            end
+
+            if haskey(h5dset[ens][p],"E")
+                meff = read(h5dset[ens][p]["E"],"meff")
+                Δmeff = read(h5dset[ens][p]["E"],"Delta_meff")
+                plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\rho (E)")
+            end
+
+            if haskey(h5dset[ens][p],"B1")
+                meff = read(h5dset[ens][p]["B1"],"meff")
+                Δmeff = read(h5dset[ens][p]["B1"],"Delta_meff")
+                plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\rho (B1)")
+            end
+
             isinteractive() && display(plt)
             savefig(plt,"temp.pdf")
+            savefig(plt_mesons ,"temp_mesons.pdf")
             if backend_name() == :pgfplotsx
                 ispath(texpath)  || mkpath(texpath)
                 savefig(plot!(plt,tex_output_standalone = true), joinpath(texpath,"$(ens)_$p.tex") )
             end
             append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
+            append_pdf!(joinpath(plotpath,plotname_mesons), "temp_mesons.pdf", cleanup=true)
         end
     end
 end
