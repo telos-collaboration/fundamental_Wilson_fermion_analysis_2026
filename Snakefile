@@ -179,6 +179,20 @@ rule plot_eigenvalues:
     shell:
         'julia {input.script} --h5file {input.h5file} --plotpath {plotpath} --three_by_three {use3x3}'
 
+rule plot_correlation_matrix_elements:
+    input:
+        julia_instantiated="tmp/julia_ready",
+        script="src/scripts_julia/plot_correlation_matrix_elements.jl",
+        h5file="data_assets/isospin1_eigenvalues.hdf5",
+    output: 
+        plots=[
+            "assets/plots/correlation_matrix_elements.pdf",
+            ]
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file {input.h5file} --plotpath {plotpath}'
+
 rule plot_effective_masses:
     input:
         julia_instantiated="tmp/julia_ready",
