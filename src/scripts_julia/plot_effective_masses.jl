@@ -101,6 +101,23 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; plot
                 E1, ΔE1 = read(r,"E1")[1], read(r,"Delta_E1")[1]
                 add_mass_band!(plt,E0, ΔE0;label="fit #1")
                 add_mass_band!(plt,E1, ΔE1;label="fit #2")
+
+                if haskey(res,joinpath(ens,p,"B1"))
+                    r = res[joinpath(ens,p,"B1")]
+                    E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
+                    add_mass_band!(plt_mesons,E, ΔE;label="")
+                end
+                if haskey(res,joinpath(ens,p,"E"))
+                    r = res[joinpath(ens,p,"E")]
+                    E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
+                    add_mass_band!(plt_mesons,E, ΔE;label="")
+                end
+                if haskey(res,joinpath(ens,p,"pi"))
+                    r = res[joinpath(ens,p,"pi")]
+                    E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
+                    add_mass_band!(plt_mesons,E, ΔE;label="")
+                end
+
             end
             
             if haskey(h5dset[ens][p],"meff_pi")
