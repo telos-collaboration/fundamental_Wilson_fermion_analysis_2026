@@ -27,6 +27,8 @@ rule all:
             "assets/plots/diagrams_3x3.pdf",
             "assets/plots/eigenvalues.pdf",
             "assets/plots/effective_masses_(g)evp.pdf",
+            "assets/plots/meson_correlators.pdf",
+            "assets/plots/correlation_matrix_elements.pdf",
         ],
         plots_sigma=expand("{p}/sigma1_{ens}_fit_True.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"]),
         plots_cot=expand("{p}/p3cotPS_{ens}_fit_True.pdf", p=f"{plotpath}/scattering", ens=["res","close_res","non_res"]),
@@ -187,6 +189,21 @@ rule plot_correlation_matrix_elements:
     output: 
         plots=[
             "assets/plots/correlation_matrix_elements.pdf",
+            ]
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file {input.h5file} --plotpath {plotpath}'
+
+
+rule plot_single_meson_correlators:
+    input:
+        julia_instantiated="tmp/julia_ready",
+        script="src/scripts_julia/plot_meson_correlators.jl",
+        h5file="data_assets/isospin1_eigenvalues.hdf5",
+    output: 
+        plots=[
+            "assets/plots/meson_correlators.pdf",
             ]
     conda:
         "environment.yml"
