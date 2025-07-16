@@ -11,14 +11,20 @@ gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
 function plot_effective_mass!(plt, meff, Δmeff ;kws...)
     T = length(meff)
-    tmax = T÷2
-    scatter!(plt,meff[1:tmax],yerr=Δmeff[1:tmax],;kws...)
+    tmax = findfirst(t->abs(Δmeff[t]/meff[t]) > 0.5, 1:T÷2)
+    tmax = isnothing(tmax) ? T÷2 : tmax - 1
+    t = 1:tmax
+    scatter!(plt,t,meff[t],yerr=Δmeff[t];kws...)
 end
 function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
     Nev,T = size(meff)
-    tmax  = T÷2
+    tmax  = 
     for i in 1:Nev
-        scatter!(plt,meff[Nev+1-i,1:tmax],yerr=Δmeff[Nev+1-i,1:tmax],label=L"\textrm{eigenvalue }~%$i~~(n_{src}=%$(sources))";kws...)
+        n = Nev+1-i
+        tmax = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.5, 1:T÷2)
+        tmax = isnothing(tmax) ? T÷2 : tmax - 1
+        t = 1:tmax
+        scatter!(plt,t,meff[n,t],yerr=Δmeff[n,t],label=L"\textrm{eigenvalue }~%$i~~(n_{src}=%$(sources))";kws...)
     end
 end
 function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)

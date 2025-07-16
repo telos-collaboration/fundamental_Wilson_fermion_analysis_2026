@@ -54,7 +54,7 @@ function plot_eigenvalues(file,plotpath;use3x3)
             t2 = filter(x->!iszero(eigvals[2,x]),t)
             f  = deriv ? abs : identity
             
-            plt = plot(yscale=:log10)
+            plt = plot(yscale=:log10,legend=:top)
             plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
             plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
             plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
