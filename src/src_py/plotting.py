@@ -302,10 +302,71 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
         plt.show()
     plt.close(fig)
 
+def p2_s_prime(s):
+    return s/4-1
+
+def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
+    
+    plt.rcParams['figure.figsize'] = [10, 6]
+    fontsize = 14
+    font = {'size'   : fontsize}
+    matplotlib.rc('font', **font)
+    fig, ax = plt.subplots()
+    plt.grid()
+    res, res_smp = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
+    xlim = [4,16]
+    ax.set_xlim(xlim)
+
+    plt.xlabel(r"$s/m_\pi^2$")
+    x_plot = res["s_prime"]
+    x_plot_sam = np.transpose(res_smp["s_prime"])
+    y_plot = np.real(res["p3cotPS_Ecm_prime"])
+    y_plot_sam = np.transpose(np.real(res_smp["p3cotPS_Ecm_prime"]))
+    plt.ylabel(r"$p^3\, \cot(\delta)/(E_{cm}m_\pi^2$")
+    
+    length = len(x_plot_sam[0])
+    num_perc = math.erf(1/np.sqrt(2))
+    N_Ls = res["N_L"]
+    dvecs = res["dvec"]
+    dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
+    d2s = [np.dot(d,d) for d in dvecs]
+
+    for i in  range(14):
+        ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+        sorted_indices = np.argsort(x_plot_sam[i])
+        ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+        
+    xarr = np.linspace(xlim[0], xlim[1])
+    
+    if fit:
+        m_R = res["m_R_D"]
+        gVPP2 = res["gVPP2_D"]
+
+        m_R_smp = res_smp["m_R_D"]
+        gVPP2_smp = res_smp["gVPP2_D"]
+
+        yarr = [fit_scatter.RES_Drach(x,m_R,gVPP2) for x in xarr]
+        yarr_smp = [sorted([fit_scatter.RES_Drach(x,m_R_smp[i],gVPP2_smp[i]) for i in range(len(m_R_smp))]) for x in xarr]
+
+        yarr_m = [yarr_smp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(yarr_smp))]
+        yarr_p = [yarr_smp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(yarr_smp))]
+
+        plt.plot(xarr,yarr, color = "blue")
+        plt.fill_between(xarr, yarr_m, yarr_p, alpha = 0.3, color = "blue")
+
+    ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
+    if outname == None:    
+        plt.savefig(op.join(PLTDIR, "p3cotPS_Ecm_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit)), bbox_inches='tight')
+    else:    
+        plt.savefig(op.join(PLTDIR, "p3cotPS_Ecm_"+outname+"_fit_%r.pdf"%fit), bbox_inches='tight')
+    if show:
+        plt.show()
+    plt.close(fig)
+
 ########################################## Plot sigma1 ##########################################
 
 def sigma_ERE_s_wave(s, a, r):
-    p2 = s/4-1
+    p2 = p2_s_prime(s)
     cot_PS = (-1/a+p2*r/2)/np.sqrt(p2)
     return 4*np.pi/(cot_PS**2+1)/p2
     
@@ -398,6 +459,10 @@ if __name__ == "__main__":
     plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
     plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
     plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
+    
+    plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
     plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
     plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)

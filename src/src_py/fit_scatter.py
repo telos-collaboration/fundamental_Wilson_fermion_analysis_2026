@@ -40,7 +40,7 @@ def ECM_p2(p2):
 def RES_Drach(p2, m_R, gVPP2):
     ECM = ECM_p2(p2)
     return 6*np.pi*(m_R**2-ECM**2)/gVPP2
-def RES_Alex_BWI(p2, m_R, gVPP2):
+def RES_Alex_BWI(p2, m_R, gVPP2):                 # ident zu "RES_Drach"
     ECM = ECM_p2(p2)
     return ECM*gVPP2*p2**(3/2)/(6*np.pi*ECM**2*(m_R**2-ECM**2))
 def RES_Alex_BWII(p2, m_R, gVPP2, r0):
@@ -52,8 +52,8 @@ def RES_fit(p3cotPS_ECM, tan_PS, p2):                                   # all pr
     result["m_R_D"], result["gVPP2_D"] = popt
     popt = curve_fit_try(RES_Alex_BWI, p2, tan_PS,2)
     result["m_R_BWI"], result["gVPP2_BWI"] = popt
-    # popt = curve_fit_try(RES_Alex_BWII, p, tan_PS,2)
-    # result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
+    popt = curve_fit_try(RES_Alex_BWII, p2, tan_PS,3)                   # maybe wrong. check later
+    result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
     return result
 
 def get_fits(res, res_spl):
