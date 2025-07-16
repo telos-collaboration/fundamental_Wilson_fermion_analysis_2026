@@ -2,6 +2,7 @@ using Pkg; Pkg.activate("src/src_jl")
 using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
+using LatticeUtils: log_meff
 using ScatteringI1
 using Statistics
 
@@ -37,11 +38,15 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
         for p in p_external
 
             Corrπ = read_pion_correlator(h5dset,ens,p;average_equivalent_momenta)
+            meffπ, Δmeffπ = log_meff(Corrπ')
             Cπ, ΔCπ, Cπcov = mean_error_cov(Corrπ)
             h5write(outfile,joinpath(ens,p,"correlator_pion"),Corrπ)
             h5write(outfile,joinpath(ens,p,"Cpi"),Cπ)
             h5write(outfile,joinpath(ens,p,"Delta_Cpi"),ΔCπ)
             h5write(outfile,joinpath(ens,p,"cov_Cpi"),Cπcov)
+            h5write(outfile,joinpath(ens,p,"meff_pi"),meffπ)
+            h5write(outfile,joinpath(ens,p,"Delta_meff_pi"),Δmeffπ)
+
             p == "p(0,0,0)" && continue
 
             Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
@@ -60,19 +65,25 @@ function write_all_eigenvalues(infile,outfile; t0, deriv, maxhits=typemax(Int), 
 
             if haskey(h5dset,joinpath(ens,p,"B1"))
                 B1 = dropdims(mean(read(h5dset,joinpath(ens,p,"B1")),dims=2);dims=2)
+                meff, Δmeff = log_meff(B1')
                 CB1, ΔCB1, covCB1 = mean_error_cov(B1)
                 h5write(outfile,joinpath(ens,p,"B1","correlator_B1"),B1)
                 h5write(outfile,joinpath(ens,p,"B1","C"),CB1)
                 h5write(outfile,joinpath(ens,p,"B1","Delta_C"),ΔCB1)
                 h5write(outfile,joinpath(ens,p,"B1","cov_C"),covCB1)
+                h5write(outfile,joinpath(ens,p,"B1","meff"),meff)
+                h5write(outfile,joinpath(ens,p,"B1","Delta_meff"),Δmeff)
             end 
             if haskey(h5dset,joinpath(ens,p,"E"))
                 E = dropdims(mean(read(h5dset,joinpath(ens,p,"E")),dims=2);dims=2)
+                meff, Δmeff = log_meff(E')
                 CE, ΔCE, covCE = mean_error_cov(E)
                 h5write(outfile,joinpath(ens,p,"E","correlator_E"),E)
                 h5write(outfile,joinpath(ens,p,"E","C"),CE)
                 h5write(outfile,joinpath(ens,p,"E","Delta_C"),ΔCE)
                 h5write(outfile,joinpath(ens,p,"E","cov_C"),covCE)
+                h5write(outfile,joinpath(ens,p,"E","meff"),meff)
+                h5write(outfile,joinpath(ens,p,"E","Delta_meff"),Δmeff)
             end 
    
             h5write(outfile,joinpath(ens,p,"A1","eigvals"),eigvals)
