@@ -42,9 +42,9 @@ function plot_correlation_matrices(file_in,plotpath)
                 ylabel= L"\textrm{pseudolog}_{10} C(t)"
                 xlabel= L"t"
                     
-                corrs  = [Corrπ, Corrρ, CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2] 
-                labels = ["Corrπ", "Corrρ", "CorrT1", "CorrT2", "CorrR1", "CorrR2", "CorrR3", "CorrR4", "CorrD1", "CorrD2"]
-                markers = [:circle, :diamond, :dtriangle, :pentagon, :rect, :rtriangle, :utriangle, :star6, :xcross, :vline]
+                corrs  = [CorrT1, CorrT2, CorrR1, CorrR2, CorrR3, CorrR4, CorrD1, CorrD2] 
+                labels = ["CorrT1", "CorrT2", "CorrR1", "CorrR2", "CorrR3", "CorrR4", "CorrD1", "CorrD2"]
+                markers = [:circle, :diamond, :dtriangle, :pentagon, :rect, :rtriangle, :utriangle, :star6]
                 
                 mi = 1
                 plt  = plot(legend=:outerright; xlabel, ylabel, title)
