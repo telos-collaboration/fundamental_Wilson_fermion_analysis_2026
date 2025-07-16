@@ -206,6 +206,7 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                     dvec = [int(P[2]),int(P[4]),int(P[6])]
                     #NOTE: Somethins is broken here with the extra irreps
                     for irrep in hfile[ens][P]:
+                        if irrep == "A1":                           # change later
                         beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]
                         beta = float(beta[0])
                         m0 = float(m0[0])
@@ -234,4 +235,4 @@ if __name__ == "__main__":
     fitresults = args[2]
     h5fileout  = args[3]
 
-    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="lin", num_resample=200)
+    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="lin", num_resample=50)
