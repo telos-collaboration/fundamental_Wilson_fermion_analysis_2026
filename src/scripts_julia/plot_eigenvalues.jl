@@ -25,7 +25,7 @@ function plot_eigenvalues(file,plotpath;use3x3)
         for p in p_external
             p == "p(0,0,0)" && continue
             
-            three_by_three = use3x3 && haskey(h5dset[ens][p],"Corr3x3")
+            three_by_three = use3x3 && haskey(h5dset[ens][p],"A1/Corr3x3")
 
             eigvals  = read(h5dset,joinpath(ens,p,"A1","eigvals"))
             Δeigvals = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals"))
