@@ -66,7 +66,7 @@ def fit_all_files(infile,outfile,parameterfile):
     
     for row in tqdm((reader), total=lines , desc="Fit eigenvalues", disable=False):
 
-        group, irrep, tmin1, tmax1, tmin2, tmax2 = row[0], row[1], int(row[2]), int(row[3]), int(row[4]), int(row[5])
+        group, irrep, tmin1, tmax1, tmin2, tmax2, use3x3 = row[0], row[1], int(row[2]), int(row[3]), int(row[4]), int(row[5]), bool(row[10])
 
         if group not in fid:
             continue 
@@ -75,7 +75,7 @@ def fit_all_files(infile,outfile,parameterfile):
 
         # read the data from the hdf5 file
         lattice = get_hdf5_value(fid,group[:-9]+"/lattice")
-        if "eigvals_3x3" in fid[group+irreps].keys():
+        if use3x3 and "eigvals_3x3" in fid[group+irreps].keys():
             ev = get_hdf5_value(fid,group+irreps+"/eigvals_3x3")
             cov_ev = get_hdf5_value(fid,group+irreps+"/cov_eigvals_3x3")
         else:
