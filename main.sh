@@ -1,4 +1,5 @@
 average_equivalent_momenta=true
+num_resample_scattering=200
 
 raw_path="./raw_data/"
 plotpath="./assets/plots/"
@@ -20,7 +21,7 @@ input_scatter="metadata/scattering_input.csv"
 input_scatter_fit="metadata/fit_scatter_input.csv"
 ensembles_list="metadata/ensembles.csv"
 
-# update all submodules in libs/
+update all submodules in libs/
 git submodule update --init --recursive
 julia src/scripts_julia/instantiate.jl
 julia src/scripts_julia/parse_all_files.jl --path $raw_path --h5file $h5file_raw --inputfiles $inputfiles
@@ -42,7 +43,8 @@ mkdir -p tmp
 bash libs/zeta/compile.sh  &> tmp/make.log
 
 cp $h5file_fit $h5file_scat
-python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat
+python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering
 cp $h5file_scat $h5file_scat_fit
 python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit
+echo "hsafklhasd"
 python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat $h5file_scat_fit

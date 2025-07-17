@@ -235,5 +235,6 @@ if __name__ == "__main__":
     input_file = args[1]
     fitresults = args[2]
     h5fileout  = args[3]
+    num_resample  = float(args[3])
 
-    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="gauss", num_resample=20)
+    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="gauss", num_resample=num_resample)
