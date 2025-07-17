@@ -91,11 +91,16 @@ def only(arr):
         return arr[0]
     raise ValueError(f"Expected exactly one element, got {len(arr)}")
 
+def genfromtxt_skip_empty(filename, **kwargs):
+    with open(filename) as f:
+        lines = [line for line in f if line.strip()]
+        return np.genfromtxt(lines, **kwargs)
+
 def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
     res_calc = {}
     res_spl_calc = {}
 
-    infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
+    infile = np.transpose(np.genfromtxt_skip_empty(input_file,delimiter=";",skip_header=1,dtype=str))
 
     with h5py.File(h5file_in,"r") as hfile:
         for ens in tqdm(hfile):
@@ -111,15 +116,18 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
                                     # exit()
                                     fit = infile[1][infile[0] == ens+P+irrep+lv]
                                     fit = only(infile[1][infile[0] == ens + P + irrep + lv])
-                                    # print(fit)
-                                    if res_calc == {}:
-                                        # num_resample = hfile[ens][P][irrep][lv]["info"]["num_resample"][()]
-                                        for key in hfile[ens][P][irrep][lv]["mean"]:
-                                            res_calc[key] = []
-                                            res_spl_calc[key] = []
-                                    for tmp in hfile[ens][P][irrep][lv]["mean"]:
-                                        res_calc[tmp].append(hfile[ens][P][irrep][lv]["mean"][tmp][()])
-                                        res_spl_calc[tmp].append(hfile[ens][P][irrep][lv]["sample"][tmp][()])
+                                    if fit:
+                                        print(ens+P+irrep+lv)
+                                        if res_calc == {}:
+                                            # num_resample = hfile[ens][P][irrep][lv]["info"]["num_resample"][()]
+                                            for key in hfile[ens][P][irrep][lv]["mean"]:
+                                                res_calc[key] = []
+                                                res_spl_calc[key] = []
+                                        for tmp in hfile[ens][P][irrep][lv]["mean"]:
+                                            res_calc[tmp].append(hfile[ens][P][irrep][lv]["mean"][tmp][()])
+                                            res_spl_calc[tmp].append(hfile[ens][P][irrep][lv]["sample"][tmp][()])
+                                    else:
+                                        print("not\t"+ens+P+irrep+lv)
 
     for key in res_calc:
         res_calc[key] = np.asarray(res_calc[key])
@@ -138,8 +146,8 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
 
 def fit_all_phase_shifts(h5file_in, h5file_out, input_file):
     fit_one_phaseshift(h5file_in, h5file_out, input_file,6.9,-0.92)
-    fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.863)
-    fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.867)
+    # fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.863)
+    # fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.867)
 
 
 if __name__ == "__main__":
