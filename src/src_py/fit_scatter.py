@@ -4,6 +4,9 @@ import sys
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 
+import warnings
+warnings.simplefilter("error")
+
 
 def curve_fit_try(func, x, y, num_res):
     try:
@@ -22,16 +25,17 @@ def ERE_1_lin(p2, a, b):
     return a+b*p2
 def ERE_2_lin(p2, a, b, c):
     return a+b*p2+c*p2**2
+    # return result
 def ERE_fit(p3cotPS, p2):                                   # all primed
     result = {}
     popt = curve_fit_try(ERE_0, p2, p3cotPS,1)
     result["a1_0"] = popt[0]
     popt = curve_fit_try(ERE_1_lin, p2, p3cotPS,2)
-    result["a1_1"]=-np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
-    result["r1_1"]=1/(2*popt[1])
+    result["a1_1"] = 0 if popt[0] == 0 else -np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
+    result["r1_1"] = 0 if popt[1] == 0 else 1/(2*popt[1])
     popt = curve_fit_try(ERE_2_lin, p2, p3cotPS,3)
-    result["a1_2"]=-np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
-    result["r1_2"]=1/(2*popt[1])
+    result["a1_2"] = 0 if popt[0] == 0 else -np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
+    result["r1_2"] = 0 if popt[1] == 0 else 1/(2*popt[1])
     result["c1_2"]=popt[2]
     return result
 
@@ -82,21 +86,34 @@ def get_fits(res, res_spl):
 
 ####################### Bis hier wurden Änderungen gemacht. Bitte vorsichtig sein ###########################
 
-def fit_one_phaseshift(h5file_in, h5file_out, beta, m0):
+def only(arr):
+    if len(arr) == 1:
+        return arr[0]
+    raise ValueError(f"Expected exactly one element, got {len(arr)}")
+
+def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
     res_calc = {}
     res_spl_calc = {}
+
+    infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
 
     with h5py.File(h5file_in,"r") as hfile:
         for ens in tqdm(hfile):
             if str(beta) in ens and str(m0) in ens:
                 for P in hfile[ens]:
                     if P[0] == "p":
-                        dvec = [int(P[2]),int(P[4]),int(P[6])]
+                        # dvec = [int(P[2]),int(P[4]),int(P[6])]
                         for irrep in hfile[ens][P]:
                             for lv in hfile[ens][P][irrep]:
                                 if lv[:2] == "lv":
+                                    # print(ens,P,irrep,lv)
+                                    # print(ens+P+irrep+lv)
+                                    # exit()
+                                    fit = infile[1][infile[0] == ens+P+irrep+lv]
+                                    fit = only(infile[1][infile[0] == ens + P + irrep + lv])
+                                    # print(fit)
                                     if res_calc == {}:
-                                        num_resample = hfile[ens][P][irrep][lv]["info"]["num_resample"][()]
+                                        # num_resample = hfile[ens][P][irrep][lv]["info"]["num_resample"][()]
                                         for key in hfile[ens][P][irrep][lv]["mean"]:
                                             res_calc[key] = []
                                             res_spl_calc[key] = []
@@ -119,10 +136,10 @@ def fit_one_phaseshift(h5file_in, h5file_out, beta, m0):
         for key, val in res_spl_calc.items():
             hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"sample/"+key, data = val)
 
-def fit_all_phase_shifts(h5file_in, h5file_out):
-    fit_one_phaseshift(h5file_in, h5file_out,6.9,-0.92)
-    fit_one_phaseshift(h5file_in, h5file_out,7.05,-0.863)
-    fit_one_phaseshift(h5file_in, h5file_out,7.05,-0.867)
+def fit_all_phase_shifts(h5file_in, h5file_out, input_file):
+    fit_one_phaseshift(h5file_in, h5file_out, input_file,6.9,-0.92)
+    fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.863)
+    fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.867)
 
 
 if __name__ == "__main__":
@@ -130,5 +147,6 @@ if __name__ == "__main__":
     args = sys.argv
     h5file_in = args[1]
     h5file_out = args[2]
+    input_file = args[3]
 
-    fit_all_phase_shifts(h5file_in, h5file_out)
+    fit_all_phase_shifts(h5file_in, h5file_out,input_file)
