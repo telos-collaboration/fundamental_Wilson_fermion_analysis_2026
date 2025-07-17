@@ -20,7 +20,7 @@ function fitresult_table(h5file,outfile)
     ispath(dirname(outfile)) || mkpath(dirname(outfile))
 
     io = open(outfile,"w")
-    write(io,"name;momentum;pipi_groundstate;pipi_scatterstate;pi;rho_E;rho_B1\n")
+    write(io,"name;momentum;pipi_groundstate;pipi_scatterstate;pi;rho_T1;rho_E;rho_B1\n")
     for ens in ensembles
         moms = filter(startswith("p"),keys(fid[ens]))
         for p in moms
@@ -38,7 +38,8 @@ function fitresult_table(h5file,outfile)
             str_π = _get_fit_engery_str(fid[ens][p],"pi")
             str_ρE = _get_fit_engery_str(fid[ens][p],"E")
             str_ρB1 = _get_fit_engery_str(fid[ens][p],"B1")
-            write(io,"$ens;$p;$str0;$str1;$str_π;$str_ρE;$str_ρB1\n")
+            str_ρT1 = _get_fit_engery_str(fid[ens][p],"T1")
+            write(io,"$ens;$p;$str0;$str1;$str_π;$str_ρT1;$str_ρE;$str_ρB1\n")
         end
     end
     close(io)

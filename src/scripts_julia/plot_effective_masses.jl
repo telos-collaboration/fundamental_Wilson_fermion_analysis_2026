@@ -79,6 +79,19 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; plot
                 plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\pi")
             end
 
+            if p == "p(0,0,0)"
+                if haskey(h5dset[ens][p],"T1")
+                    meff = read(h5dset[ens][p]["T1"],"meff")
+                    Δmeff = read(h5dset[ens][p]["T1"],"Delta_meff")
+                    plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\rho (T_1)")
+                end
+                if isfile(fitresults) haskey(res,joinpath(ens,p,"T1"))
+                    r = res[joinpath(ens,p,"T1")]
+                    E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1]
+                    add_mass_band!(plt_mesons,E, ΔE;label="")
+                end
+            end
+
             if p != "p(0,0,0)"
                 # write title and axis labels
                 t0 = read(h5dset,joinpath(ens,p,"A1","t0"))

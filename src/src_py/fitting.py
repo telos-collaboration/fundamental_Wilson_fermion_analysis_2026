@@ -126,7 +126,21 @@ def fit_all_files(infile,outfile,parameterfile):
             f.create_dataset(op.join(ensemble,p0,"pi/Delta_a"), data=[a_i.sdev for a_i in a])
             f.create_dataset(op.join(ensemble,p0,"pi/chi2_"), data=chi2)
             f.create_dataset(op.join(ensemble,p0,"pi/dof"), data=dof)
-        
+
+        if op.join(ensemble,p0,"T1/E") not in f.keys():
+            C_T1 = get_hdf5_value(fid,op.join(ensemble,p0,"T1/C"))
+            cov_T1 = get_hdf5_value(fid,op.join(ensemble,p0,"T1/cov_C"))
+            var_T1 = gv.gvar(C_T1[:],cov_T1[:,:])
+            cor_T1 = dict(Gab=var_T1/var_T1[0])
+            E, a, chi2, dof = fit_correlator_without_bootstrap(cor_T1,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
+            f.create_dataset(op.join(ensemble,p0,"T1/E"), data=[E_i.mean for E_i in E])
+            f.create_dataset(op.join(ensemble,p0,"T1/Delta_E"), data=[E_i.sdev for E_i in E])
+            f.create_dataset(op.join(ensemble,p0,"T1/a"), data=[a_i.mean for a_i in a])
+            f.create_dataset(op.join(ensemble,p0,"T1/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p0,"T1/chi2_"), data=chi2)
+            f.create_dataset(op.join(ensemble,p0,"T1/dof"), data=dof)
+
+
         # Fit rho correlator in E irrep (if it exists)
         if "E" in fid[op.join(ensemble,p)].keys():
             C_E = get_hdf5_value(fid,op.join(ensemble,p,"E/C"))

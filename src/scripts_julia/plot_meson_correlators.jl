@@ -9,7 +9,7 @@ using PDFmerger: append_pdf!
 using Statistics: mean, std
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
-function plot_correlation_matrix_elements(file,plotpath)
+function plot_meson_correlators(file,plotpath)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
 
@@ -31,23 +31,23 @@ function plot_correlation_matrix_elements(file,plotpath)
             title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(p[2:end])"
             plt = plot(;yscale=:log10,legend=:outerright,ylabel=L"$C_(t)$",xlabel=L"t",title)
 
-            if p != "p(0,0,0)"            
-               
-                momenta = read(h5dset,joinpath(ens,p,"A1","momenta"))
-                sources = read(h5dset,joinpath(ens,p,"A1","sources"))
-                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg"
-                plt = plot!(plt;title)
-
+            if p != "p(0,0,0)"
                 if haskey(h5dset,joinpath(ens,p,"B1"))
                     C = read(h5dset,joinpath(ens,p,"B1","C"))
                     ΔC = read(h5dset,joinpath(ens,p,"B1","Delta_C"))
-                    plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_{B1}")
+                    plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_\rho^{B1}")
                 end
                 if haskey(h5dset,joinpath(ens,p,"E"))
                     C = read(h5dset,joinpath(ens,p,"E","C"))
                     ΔC = read(h5dset,joinpath(ens,p,"E","Delta_C"))
-                    plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_{E}")
+                    plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_\rho^{E}")
                 end
+            end
+
+            if haskey(h5dset,joinpath(ens,p,"T1"))
+                C = read(h5dset,joinpath(ens,p,"T1","C"))
+                ΔC = read(h5dset,joinpath(ens,p,"T1","Delta_C"))
+                plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_\rho^{T1}")
             end
 
             if haskey(h5dset,joinpath(ens,p,"Cpi"))
@@ -75,6 +75,6 @@ function parse_commandline()
 end
 function main()
     args = parse_commandline()
-    plot_correlation_matrix_elements(args["h5file_in"],args["plotpath"])
+    plot_meson_correlators(args["h5file_in"],args["plotpath"])
 end
 main()

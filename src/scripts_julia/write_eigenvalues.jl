@@ -50,6 +50,18 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
             h5write(outfile,joinpath(ens,p,"meff_pi"),meffπ)
             h5write(outfile,joinpath(ens,p,"Delta_meff_pi"),Δmeffπ)
 
+            if p == "p(0,0,0)"
+                Corrρ = read_meson_correlator(h5dset,ens,p,"correlator_rho";average_equivalent_momenta)
+                meffρ, Δmeffρ = log_meff(Corrρ')
+                Cρ, ΔCρ, Cρcov = mean_error_cov(Corrρ)
+                h5write(outfile,joinpath(ens,p,"T1","correlator_rho"),Corrπ)
+                h5write(outfile,joinpath(ens,p,"T1","C"),Cρ)
+                h5write(outfile,joinpath(ens,p,"T1","Delta_C"),ΔCρ)
+                h5write(outfile,joinpath(ens,p,"T1","cov_C"),Cρcov)
+                h5write(outfile,joinpath(ens,p,"T1","meff"),meffρ)
+                h5write(outfile,joinpath(ens,p,"T1","Delta_meff"),Δmeffρ)
+            end
+
             p == "p(0,0,0)" && continue
             # TODO: Deal with p(0,0,0)
 
