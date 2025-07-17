@@ -28,10 +28,10 @@ function fitresult_table(h5file,outfile)
                 str0 = "-"
                 str1 = "-"
             else
-                E0 = fid[ens][p]["A1"]["E0"][1]
-                E1 = fid[ens][p]["A1"]["E1"][1]
-                ΔE0 = fid[ens][p]["A1"]["Delta_E0"][1]
-                ΔE1 = fid[ens][p]["A1"]["Delta_E1"][1]
+                E0 = fid[ens][p]["A1"]["E"][1]
+                E1 = fid[ens][p]["A1"]["E"][2]
+                ΔE0 = fid[ens][p]["A1"]["Delta_E"][1]
+                ΔE1 = fid[ens][p]["A1"]["Delta_E"][2]
                 str0 = errorstring(E0,ΔE0)
                 str1 = errorstring(E1,ΔE1)
             end
