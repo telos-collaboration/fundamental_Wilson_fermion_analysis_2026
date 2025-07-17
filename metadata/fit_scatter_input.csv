@@ -3,7 +3,7 @@ ensPirrep;fit?
 Lt24Ls14beta6.9m-0.92p(0,0,0)T1v1;False
 
 Lt24Ls14beta6.9m-0.92p(0,0,1)A1lv0;False
-Lt24Ls14beta6.9m-0.92p(0,0,1)A1lv1;True
+Lt24Ls14beta6.9m-0.92p(0,0,1)A1lv1;False
 Lt24Ls14beta6.9m-0.92p(0,0,1)Elv0;False
 Lt24Ls14beta6.9m-0.92p(0,0,1)B1v0;False
 Lt24Ls14beta6.9m-0.92p(0,1,1)A1lv0;False
@@ -11,20 +11,20 @@ Lt24Ls14beta6.9m-0.92p(0,1,1)A1lv1;True
 Lt24Ls14beta6.9m-0.92p(0,1,1)Elv0;False
 Lt24Ls14beta6.9m-0.92p(0,1,1)B1v0;False
 Lt24Ls14beta6.9m-0.92p(1,1,1)A1lv0;False
-Lt24Ls14beta6.9m-0.92p(1,1,1)A1lv1;True
+Lt24Ls14beta6.9m-0.92p(1,1,1)A1lv1;False
 Lt24Ls14beta6.9m-0.92p(1,1,1)Elv0;False
 Lt24Ls14beta6.9m-0.92p(1,1,1)B1v0;False
 
 Lt32Ls16beta6.9m-0.92p(0,0,1)A1lv0;False
-Lt32Ls16beta6.9m-0.92p(0,0,1)A1lv1;True
+Lt32Ls16beta6.9m-0.92p(0,0,1)A1lv1;False
 Lt32Ls16beta6.9m-0.92p(0,0,1)Elv0;False
 Lt32Ls16beta6.9m-0.92p(0,0,1)B1v0;False
 Lt32Ls16beta6.9m-0.92p(1,1,0)A1lv0;False
-Lt32Ls16beta6.9m-0.92p(1,1,0)A1lv1;True
+Lt32Ls16beta6.9m-0.92p(1,1,0)A1lv1;False
 Lt32Ls16beta6.9m-0.92p(1,1,0)Elv0;False
 Lt32Ls16beta6.9m-0.92p(1,1,0)B1v0;False
 Lt32Ls16beta6.9m-0.92p(1,1,1)A1lv0;False
-Lt32Ls16beta6.9m-0.92p(1,1,1)A1lv1;True
+Lt32Ls16beta6.9m-0.92p(1,1,1)A1lv1;False
 Lt32Ls16beta6.9m-0.92p(1,1,1)Elv0;False
 Lt32Ls16beta6.9m-0.92p(1,1,1)B1v0;False
 
@@ -47,11 +47,11 @@ Lt36Ls16beta7.05m-0.863p(0,0,1)A1lv1;True
 Lt36Ls16beta7.05m-0.863p(0,0,1)Elv0;False
 Lt36Ls16beta7.05m-0.863p(0,0,1)B1v0;False
 Lt36Ls16beta7.05m-0.863p(0,1,1)A1lv0;False
-Lt36Ls16beta7.05m-0.863p(0,1,1)A1lv1;True
+Lt36Ls16beta7.05m-0.863p(0,1,1)A1lv1;False
 Lt36Ls16beta7.05m-0.863p(0,1,1)Elv0;False
 Lt36Ls16beta7.05m-0.863p(0,1,1)B1v0;False
 Lt36Ls16beta7.05m-0.863p(1,1,1)A1lv0;False
-Lt36Ls16beta7.05m-0.863p(1,1,1)A1lv1;True
+Lt36Ls16beta7.05m-0.863p(1,1,1)A1lv1;False
 Lt36Ls16beta7.05m-0.863p(1,1,1)Elv0;False
 Lt36Ls16beta7.05m-0.863p(1,1,1)B1v0;False
 
@@ -69,7 +69,7 @@ Lt36Ls24beta7.05m-0.863p(1,1,1)Elv0;False
 Lt36Ls24beta7.05m-0.863p(1,1,1)B1v0;False
 
 Lt36Ls36beta7.05m-0.863p(0,0,1)A1lv0;False
-Lt36Ls36beta7.05m-0.863p(0,0,1)A1lv1;True
+Lt36Ls36beta7.05m-0.863p(0,0,1)A1lv1;False
 Lt36Ls36beta7.05m-0.863p(0,0,1)Elv0;False
 Lt36Ls36beta7.05m-0.863p(0,0,1)B1v0;False
 Lt36Ls36beta7.05m-0.863p(0,1,1)A1lv0;False
@@ -77,7 +77,7 @@ Lt36Ls36beta7.05m-0.863p(0,1,1)A1lv1;True
 Lt36Ls36beta7.05m-0.863p(0,1,1)Elv0;False
 Lt36Ls36beta7.05m-0.863p(0,1,1)B1v0;False
 Lt36Ls36beta7.05m-0.863p(1,1,1)A1lv0;False
-Lt36Ls36beta7.05m-0.863p(1,1,1)A1lv1;True
+Lt36Ls36beta7.05m-0.863p(1,1,1)A1lv1;False
 Lt36Ls36beta7.05m-0.863p(1,1,1)Elv0;False
 Lt36Ls36beta7.05m-0.863p(1,1,1)B1v0;False
 

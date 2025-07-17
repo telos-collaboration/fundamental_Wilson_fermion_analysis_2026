@@ -9,16 +9,24 @@ warnings.simplefilter("error")
 
 
 def curve_fit_try(func, x, y, num_res):
+    # popt, pcov = curve_fit(func, x, y)
+    # return popt
     try:
+        # print("hey")
+        # print(x)
+        # print(y)
         popt, pcov = curve_fit(func, x, y)
+        # print("\tyay")
         return popt
     except:
+        # print("\t\tnay")
         return np.zeros(num_res)
 
 def ERE_0(p2, a1_0):
     return -1/a1_0**3+0*p2
 def ERE_1(p2, a1_1, r1_1):
-    return -1/a1_1**3+p2/(2*r1_1)
+    return 0 if a1_1 == 0 or r1_1 == 0 else  -1/a1_1**3+p2/(2*r1_1)
+    # return result
 def ERE_2(p2, a1_2, r1_2, c1_2):
     return -1/a1_2**3+p2/(2*r1_2)+c1_2*p2**2
 def ERE_1_lin(p2, a, b):
@@ -52,25 +60,34 @@ def RES_Drach(p2, m_R, gVPP2):
 def RES_Alex_BWI(p2, m_R, gVPP2):                 # ident zu "RES_Drach"
     ECM = ECM_p2(p2)
     return ECM*gVPP2*p2**(3/2)/(6*np.pi*ECM**2*(m_R**2-ECM**2))
-def RES_Alex_BWII(p2, m_R, gVPP2, r0):
+def RES_Alex_BWII(p2, m_R, gVPP2, r0):                                      # possibly include first guess for mR2 or swap around
     ECM = ECM_p2(p2)
-    return ECM*gVPP2*p2**(3/2)*(1+np.sqrt((m_R/2)**2-1))/(6*np.pi*ECM**2*(m_R**2-ECM**2)*(1+p2*r0**2))
+    m_R2 = m_R**2
+    k_R2 = m_R2 - 1
+    return ECM/(m_R2-ECM**2)*(gVPP2*ECM**2/6*np.pi)*p2**(3/2)*(1+k_R2*r0**2)/(1+p2*r0**2)
+
+
+
+    # return ECM*gVPP2*p2**(3/2)*(1+np.sqrt((k_R/2)**2-1))/(6*np.pi*ECM**2*(k_R**2-ECM**2)*(1+p2*r0**2))
 def RES_fit(p3cotPS_ECM, tan_PS, p2):                                   # all primed
     result = {}
     popt = curve_fit_try(RES_Drach, p2, p3cotPS_ECM,2)
     result["m_R_D"], result["gVPP2_D"] = popt
     popt = curve_fit_try(RES_Alex_BWI, p2, tan_PS,2)
     result["m_R_BWI"], result["gVPP2_BWI"] = popt
-    popt = curve_fit_try(RES_Alex_BWII, p2, tan_PS,3)                   # maybe wrong. check later
-    result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
+    # popt = curve_fit_try(RES_Alex_BWII, p2, tan_PS,3)                   # maybe wrong. check later
+    # result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
     return result
 
 def get_fits(res, res_spl):
     res_tmp={}
     res_spl_tmp={}
-    for P in res["p3cotPS_prime"]:
-        print(P.real)
-    print()
+    # for P2 in res["p2star_prime"]:
+    #     print(P2.real)
+    # print()
+    # for P2 in res["p3cotPS_prime"]:
+    #     print(P2.real)
+    # print()
     for key, val in ERE_fit(res["p3cotPS_prime"],res["p2star_prime"]).items():
         res_tmp[key] = val
     for key, val in RES_fit(res["p3cotPS_Ecm_prime"],res["tan_PS"],res["p2star_prime"]).items():
@@ -84,6 +101,8 @@ def get_fits(res, res_spl):
             res_spl_tmp[key].append(val)
         for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i],res_spl["tan_PS"][i],res_spl["pstar_prime"][i]).items():
             res_spl_tmp[key].append(val)
+
+    # print(res_tmp)
     return res_tmp, res_spl_tmp
 
 ####################### Bis hier wurden Änderungen gemacht. Bitte vorsichtig sein ###########################
@@ -119,15 +138,21 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
                                     else:
                                         fit = fit_in[0]
                                     if fit == "True":
-                                        pstar_prime = hfile[ens][P][irrep][lv]["mean"]["pstar_prime"][()]
-                                        if 0 < pstar_prime < 3:
+                                        p2star_prime = hfile[ens][P][irrep][lv]["mean"]["p2star_prime"][()]
+                                        if 0 < p2star_prime < 15:
                                             if res_scat == {}:
                                                 for key in hfile[ens][P][irrep][lv]["mean"]:
                                                     res_scat[key] = []
                                                     res_spl_scat[key] = []
                                             for tmp in hfile[ens][P][irrep][lv]["mean"]:
-                                                res_scat[tmp].append(hfile[ens][P][irrep][lv]["mean"][tmp][()])
-                                                res_spl_scat[tmp].append(hfile[ens][P][irrep][lv]["sample"][tmp][()])
+                                                if type(hfile[ens][P][irrep][lv]["mean"][tmp][()]) == np.complex128:
+                                                    # if hfile[ens][P][irrep][lv]["mean"][tmp][()].imag > 1e-1:
+                                                    #     print("warning",hfile[ens][P][irrep][lv]["mean"][tmp][()].imag)                                                                
+                                                    res_scat[tmp].append(hfile[ens][P][irrep][lv]["mean"][tmp][()].real)
+                                                    res_spl_scat[tmp].append(hfile[ens][P][irrep][lv]["sample"][tmp][()].real)
+                                                else:
+                                                    res_scat[tmp].append(hfile[ens][P][irrep][lv]["mean"][tmp][()])
+                                                    res_spl_scat[tmp].append(hfile[ens][P][irrep][lv]["sample"][tmp][()])
                                         else:
                                             raise RuntimeError("Energy not in elastic window at: %s"%(ens+P+irrep+lv))
                                     elif fit == "False":
@@ -136,7 +161,7 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
                                         raise RuntimeError("Wrong assignment in 'fit_scatter_input.csv' at: %s"%(ens+P+irrep+lv))
 
     
-    if res_scat == {} or len(res_scat["pstar_prime"]) < 3:
+    if res_scat == {} or len(res_scat["p2star_prime"]) < 3:
         raise RuntimeError("Less than 3 energy levels selected in 'fit_scatter_input.csv' for beta=%f and m0%f"%(beta, m0))
 
     for key in res_scat:

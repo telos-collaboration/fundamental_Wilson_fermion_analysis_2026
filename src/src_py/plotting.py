@@ -146,7 +146,7 @@ def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
     ECM_errps = [abs(np.sqrt((En[i]+En_p_err[i])**2-(2*np.pi/NLs[i])**2*d2s[i])-ECMs[i])/mpi  for i in range(len(En))]
     ECMs = [ECMs[i]/mpi for i in range(len(ECMs))]
     
-    print(len(ECMs))
+    # print(len(ECMs))
     
     for i in range(len(ECMs)):
         plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(d2s[i]), marker = marker(lvs[i]))   
@@ -259,6 +259,8 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     res, res_smp = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
     xlim = [0,3]
     ax.set_xlim(xlim)
+    ylim = [-2,2]
+    ax.set_ylim(ylim)
 
     plt.xlabel(r"$p^{\star^2}/m_\pi^2$")
     x_plot = res["p2star_prime"]
@@ -274,7 +276,7 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
     d2s = [np.dot(d,d) for d in dvecs]
 
-    print(len(x_plot))
+    # print(len(x_plot))
 
     for i in  range(len(x_plot)):
         if 0<x_plot[i]<3: 
@@ -323,8 +325,8 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     res, res_smp = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
     xlim = [4,16]
     ax.set_xlim(xlim)
-    ylim = [-2,2]
-    ax.set_ylim(ylim)
+    # ylim = [-2,2]
+    # ax.set_ylim(ylim)
 
     plt.xlabel(r"$s/m_\pi^2$")
     x_plot = res["s_prime"]
@@ -348,14 +350,15 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     xarr = np.linspace(xlim[0], xlim[1])
     
     if fit:
+        p2arr = [p2_s_prime(s) for s in xarr]
         m_R = res["m_R_D"]
         gVPP2 = res["gVPP2_D"]
 
         m_R_smp = res_smp["m_R_D"]
         gVPP2_smp = res_smp["gVPP2_D"]
 
-        yarr = [fit_scatter.RES_Drach(x,m_R,gVPP2) for x in xarr]
-        yarr_smp = [sorted([fit_scatter.RES_Drach(x,m_R_smp[i],gVPP2_smp[i]) for i in range(len(m_R_smp))]) for x in xarr]
+        yarr = [fit_scatter.RES_Drach(x,m_R,gVPP2) for x in p2arr]
+        yarr_smp = [sorted([fit_scatter.RES_Drach(x,m_R_smp[i],gVPP2_smp[i]) for i in range(len(m_R_smp))]) for x in p2arr]
 
         yarr_m = [yarr_smp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(yarr_smp))]
         yarr_p = [yarr_smp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(yarr_smp))]
@@ -453,30 +456,30 @@ if __name__ == "__main__":
 
     os.makedirs(PLTDIR, exist_ok=True)
 
-    show=False
+    show=True
 
-    plot_E_L(h5file_scatter,6.9,-0.92,True,outname="non_res")
-    plot_E_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
-    plot_E_L(h5file_scatter,7.05,-0.863,True,outname="close_res")
-    plot_E_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
-    plot_E_L(h5file_scatter,7.05,-0.867,True,outname="res")
-    plot_E_L(h5file_scatter,7.05,-0.867,False,outname="res")
+    # plot_E_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
+    # plot_E_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
+    # plot_E_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
+    # plot_E_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
+    # plot_E_L(h5file_scatter,7.05,-0.867,False,outname="res")
+    # plot_E_L(h5file_scatter,7.05,-0.867,False,outname="res")
 
-    plot_E_CM_L(h5file_scatter,6.9,-0.92,True,outname="non_res",show=show)
-    plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
-    plot_E_CM_L(h5file_scatter,7.05,-0.863,True,outname="close_res",show=show)
-    plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
-    plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res",show=show)
-    plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res")
+    # plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res",show=show)
+    # plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
+    # plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res",show=show)
+    # plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
+    plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res",show=show)
+    # plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res")
     
-    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=show)
+    # plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=show)
     # plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
     # plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
     # plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=show)
-    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=show)
+    # plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=show)
+    # plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=show)
     
-    plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
-    plot_sigma_1(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
+    # plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
+    # plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    # plot_sigma_1(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
