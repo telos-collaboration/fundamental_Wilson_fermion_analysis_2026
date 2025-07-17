@@ -122,12 +122,12 @@ def cot_delta_mom(dvec, irrep):
     elif list(dvec) == [0,1,1]:
         if irrep == "A1":
             return cot_delta_110_A1
-        elif irrep == "E":
+        elif irrep == "B1":
             return cot_delta_110_B1
     elif list(dvec) == [1,1,1]:
         if irrep == "A1":
             return cot_delta_111_A1
-        elif irrep == "B1":
+        elif irrep == "E":
             return cot_delta_111_E
     else:
         print("wrong momentum or irrep")
@@ -206,8 +206,9 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                     dvec = [int(P[2]),int(P[4]),int(P[6])]
                     #NOTE: Somethins is broken here with the extra irreps
                     for irrep in hfile[ens][P]:
-                        if irrep == "A1":                           # change later
-                            beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]
+                        if irrep != "pi":
+                            print(ens+P+irrep)
+                            beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]           # should be replaced. input file not necessary
                             beta = float(beta[0])
                             m0 = float(m0[0])
                             mpi = float(mpi[0])
@@ -220,9 +221,9 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                             NL = hfile[ens]["lattice"][()][3]
                             info["NL"] = NL
                             for i in range(num_lv):
-                                E = hfile[ens][P][irrep]["E%i"%i][()][0]
-                                E_m = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
-                                E_p = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
+                                E = hfile[ens][P][irrep]["E"][()][i]
+                                E_m = hfile[ens][P][irrep]["Delta_E"][()][i]
+                                E_p = hfile[ens][P][irrep]["Delta_E"][()][i]
                                 res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
                                 for key, val in info_tmp.items():
                                     info[key] = val
@@ -235,4 +236,4 @@ if __name__ == "__main__":
     fitresults = args[2]
     h5fileout  = args[3]
 
-    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="gauss", num_resample=200)
+    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="gauss", num_resample=5)
