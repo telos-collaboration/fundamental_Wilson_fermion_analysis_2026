@@ -2,6 +2,8 @@ import numpy as np
 import h5py
 import sys
 from scipy.optimize import curve_fit
+from tqdm import tqdm
+
 
 def curve_fit_try(func, x, y, num_res):
     try:
@@ -82,7 +84,7 @@ def fit_one_phaseshift(h5file_in, h5file_out, beta, m0):
     res_spl_calc = {}
 
     with h5py.File(h5file_in,"r") as hfile:
-        for ens in hfile:
+        for ens in tqdm(hfile):
             if str(beta) in ens and str(m0) in ens:
                 for P in hfile[ens]:
                     if P[0] == "p":
