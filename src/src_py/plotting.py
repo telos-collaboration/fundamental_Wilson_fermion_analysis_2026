@@ -38,13 +38,16 @@ def get_data_E_L(h5file_scatter, beta, m0, num_lv = 2):
                             if irrep == "A1":                           # change later
                                 mpi = hfile[key][P][irrep]["lv0"]["info"]["mpi"][()]
                                 mrho = hfile[key][P][irrep]["lv0"]["info"]["mrho"][()]
+                                aEs = hfile[key][P][irrep]["E"][()]
+                                aE_ms = hfile[key][P][irrep]["Delta_E"][()]
+                                aE_ps = hfile[key][P][irrep]["Delta_E"][()]
                                 for lv in range(num_lv):
                                     NL = int(hfile[key][P][irrep]["lv0"]["info"]["NL"][()])
                                     NLs.append(NL)
+                                    # aEs.append(hfile[key][P][irrep]["E"][()][lv])
+                                    # aE_ms.append(hfile[key][P][irrep]["Delta_E"][()][lv])
+                                    # aE_ps.append(hfile[key][P][irrep]["Delta_E"][()][lv])
                                     NL_invs.append(1/NL)
-                                    aEs.append(hfile[key][P][irrep]["E%i"%lv][()][0])
-                                    aE_ms.append(hfile[key][P][irrep]["Delta_E%i"%lv][()][0])
-                                    aE_ps.append(hfile[key][P][irrep]["Delta_E%i"%lv][()][0])
                                     d2s.append(d2)
                                     lvs.append(lv)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs
