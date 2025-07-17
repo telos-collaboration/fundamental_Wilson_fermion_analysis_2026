@@ -35,17 +35,18 @@ def get_data_E_L(h5file_scatter, beta, m0, num_lv = 2):
                         dvec = [int(P[2]),int(P[4]),int(P[6])]
                         d2 = np.dot(dvec,dvec)
                         for irrep in hfile[key][P]:
-                            mpi = hfile[key][P][irrep]["lv0"]["info"]["mpi"][()]
-                            mrho = hfile[key][P][irrep]["lv0"]["info"]["mrho"][()]
-                            for lv in range(num_lv):
-                                NL = int(hfile[key][P][irrep]["lv0"]["info"]["NL"][()])
-                                NLs.append(NL)
-                                NL_invs.append(1/NL)
-                                aEs.append(hfile[key][P][irrep]["E%i"%lv][()][0])
-                                aE_ms.append(hfile[key][P][irrep]["Delta_E%i"%lv][()][0])
-                                aE_ps.append(hfile[key][P][irrep]["Delta_E%i"%lv][()][0])
-                                d2s.append(d2)
-                                lvs.append(lv)
+                            if irrep == "A1":                           # change later
+                                mpi = hfile[key][P][irrep]["lv0"]["info"]["mpi"][()]
+                                mrho = hfile[key][P][irrep]["lv0"]["info"]["mrho"][()]
+                                for lv in range(num_lv):
+                                    NL = int(hfile[key][P][irrep]["lv0"]["info"]["NL"][()])
+                                    NLs.append(NL)
+                                    NL_invs.append(1/NL)
+                                    aEs.append(hfile[key][P][irrep]["E%i"%lv][()][0])
+                                    aE_ms.append(hfile[key][P][irrep]["Delta_E%i"%lv][()][0])
+                                    aE_ps.append(hfile[key][P][irrep]["Delta_E%i"%lv][()][0])
+                                    d2s.append(d2)
+                                    lvs.append(lv)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs
 
 def plot_E_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
@@ -316,6 +317,8 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     res, res_smp = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
     xlim = [4,16]
     ax.set_xlim(xlim)
+    ylim = [-2,2]
+    ax.set_ylim(ylim)
 
     plt.xlabel(r"$s/m_\pi^2$")
     x_plot = res["s_prime"]
@@ -406,7 +409,7 @@ def plot_sigma_1(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     a1_1 = res["a1_1"]
     r1_1 = res["r1_1"]
 
-    print("smax = ", 4*(1+1/r1_1**2))
+    # print("smax = ", 4*(1+1/r1_1**2))
     a1_1_smp = res_smp["a1_1"]
     r1_1_smp = res_smp["r1_1"]
 

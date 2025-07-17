@@ -71,7 +71,7 @@ def get_fits(res, res_spl):
     for i in range(len(res_spl["p3cotPS_prime"])):
         for key, val in ERE_fit(res_spl["p3cotPS_prime"][i][win_ind],res_spl["p2star_prime"][i][win_ind]).items():
             res_spl_tmp[key].append(val)
-        for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i][win_ind],res_spl["E_cm_prime"][i][win_ind],res_spl["tan_PS"][i][win_ind],res_spl["pstar_prime"][i][win_ind]).items():
+        for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i][win_ind],res_spl["tan_PS"][i][win_ind],res_spl["pstar_prime"][i][win_ind]).items():
             res_spl_tmp[key].append(val)
     return res_tmp, res_spl_tmp
 

@@ -207,26 +207,26 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                     #NOTE: Somethins is broken here with the extra irreps
                     for irrep in hfile[ens][P]:
                         if irrep == "A1":                           # change later
-                        beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]
-                        beta = float(beta[0])
-                        m0 = float(m0[0])
-                        mpi = float(mpi[0])
-                        mrho = float(mrho[0])
-                        ld = bool(ld)
-                        info["beta"] = beta
-                        info["m0"] = m0
-                        info["mpi"] = mpi
-                        info["mrho"] = mrho
-                        NL = hfile[ens]["lattice"][()][3]
-                        info["NL"] = NL
-                        for i in range(num_lv):
-                            E = hfile[ens][P][irrep]["E%i"%i][()][0]
-                            E_m = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
-                            E_p = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
-                            res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
-                            for key, val in info_tmp.items():
-                                info[key] = val
-                            save_to_hdf(res, res_sampled, info, ens, P, irrep, i, h5file)
+                            beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]
+                            beta = float(beta[0])
+                            m0 = float(m0[0])
+                            mpi = float(mpi[0])
+                            mrho = float(mrho[0])
+                            ld = bool(ld)
+                            info["beta"] = beta
+                            info["m0"] = m0
+                            info["mpi"] = mpi
+                            info["mrho"] = mrho
+                            NL = hfile[ens]["lattice"][()][3]
+                            info["NL"] = NL
+                            for i in range(num_lv):
+                                E = hfile[ens][P][irrep]["E%i"%i][()][0]
+                                E_m = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
+                                E_p = hfile[ens][P][irrep]["Delta_E%i"%i][()][0]
+                                res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
+                                for key, val in info_tmp.items():
+                                    info[key] = val
+                                save_to_hdf(res, res_sampled, info, ens, P, irrep, i, h5file)
 
 if __name__ == "__main__":
     # avod hard-coding of names outside of main
@@ -235,4 +235,4 @@ if __name__ == "__main__":
     fitresults = args[2]
     h5fileout  = args[3]
 
-    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="lin", num_resample=50)
+    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="gauss", num_resample=200)
