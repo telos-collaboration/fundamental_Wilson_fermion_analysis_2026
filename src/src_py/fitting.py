@@ -3,6 +3,7 @@ import corrfitter as cf
 import h5py
 import numpy as np
 import os
+import os.path as op
 import matplotlib.pyplot as plt
 import csv
 import sys
@@ -66,24 +67,19 @@ def fit_all_files(infile,outfile,parameterfile):
     
     for row in tqdm((reader), total=lines , desc="Fit eigenvalues", disable=False):
 
-        group, irrep, tmin1, tmax1, tmin2, tmax2, use3x3 = row[0], row[1], int(row[2]), int(row[3]), int(row[4]), int(row[5]), bool(row[10])
-
-        if group not in fid:
-            continue 
+        ensemble, p, irrep, tmin1, tmax1, tmin2, tmax2, use3x3 = row[0], row[1], row[2], int(row[3]), int(row[4]), int(row[5]), int(row[6]), bool(row[11])
         
-        irreps = "/" + irrep
-
         # read the data from the hdf5 file
-        lattice = get_hdf5_value(fid,group[:-9]+"/lattice")
-        if use3x3 and "eigvals_3x3" in fid[group+irreps].keys():
-            ev = get_hdf5_value(fid,group+irreps+"/eigvals_3x3")
-            cov_ev = get_hdf5_value(fid,group+irreps+"/cov_eigvals_3x3")
+        lattice = get_hdf5_value(fid,op.join(ensemble,"lattice"))
+        if use3x3 and "eigvals_3x3" in fid[op.join(ensemble,p,irrep)].keys():
+            ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,"eigvals_3x3"))
+            cov_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,"cov_eigvals_3x3"))
         else:
-            ev = get_hdf5_value(fid,group+irreps+"/eigvals")
-            cov_ev = get_hdf5_value(fid,group+irreps+"/cov_eigvals")
+            ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,"eigvals"))
+            cov_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,"cov_eigvals"))
 
         T = ev.shape[0]
-        antisymmetric = get_hdf5_value(fid,group+irreps+"/deriv") 
+        antisymmetric = get_hdf5_value(fid,op.join(ensemble,p,irrep,"deriv")) 
 
         # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
         var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
@@ -91,7 +87,7 @@ def fit_all_files(infile,outfile,parameterfile):
         eig1 = dict(Gab=var1/var1[0])
         eig2 = dict(Gab=var2/var2[0])
 
-        plotname = group+irrep
+        plotname = op.join(ensemble,irrep)
         plotdir  = "./data_assets/plots/"
         printing = False
         plotting = False
@@ -103,71 +99,70 @@ def fit_all_files(infile,outfile,parameterfile):
         f = h5py.File(outfile, "a")
 
         # Fit pion correlator (if it exists)
-        if "Cpi" in fid[group].keys():
-            Cpi = get_hdf5_value(fid,group+"/Cpi")
-            cov_pi = get_hdf5_value(fid,group+"/cov_Cpi")
+        if "Cpi" in fid[ensemble].keys():
+            Cpi = get_hdf5_value(op.join(fid,ensemble,p,"Cpi"))
+            cov_pi = get_hdf5_value(fid,op.join(ensemble,p,"cov_Cpi"))
             var_pi = gv.gvar(Cpi[:],cov_pi[:,:])
             cor_pi = dict(Gab=var_pi/var_pi[0])
             E, a, chi2, dof = fit_correlator_without_bootstrap(cor_pi,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
-            f.create_dataset(group+"/pi/E", data=[E_i.mean for E_i in E])
-            f.create_dataset(group+"/pi/Delta_E", data=[E_i.sdev for E_i in E])
-            f.create_dataset(group+"/pi/a", data=[a_i.mean for a_i in a])
-            f.create_dataset(group+"/pi/Delta_a", data=[a_i.sdev for a_i in a])
-            f.create_dataset(group+"/pi/chi2_", data=chi2)
-            f.create_dataset(group+"/pi/dof", data=dof)
+            f.create_dataset(op.join(ensemble,p,"pi/E"), data=[E_i.mean for E_i in E])
+            f.create_dataset(op.join(ensemble,p,"pi/Delta_E"), data=[E_i.sdev for E_i in E])
+            f.create_dataset(op.join(ensemble,p,"pi/a"), data=[a_i.mean for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"pi/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"pi/chi2_"), data=chi2)
+            f.create_dataset(op.join(ensemble,p,"pi/dof"), data=dof)
         
         # Fit rho correlator in E irrep (if it exists)
-        if "E" in fid[group].keys():
-            C_E = get_hdf5_value(fid,group+"/E/C")
-            cov_E = get_hdf5_value(fid,group+"/E/cov_C")
+        if "E" in fid[ensemble].keys():
+            C_E = get_hdf5_value(fid,op.join(ensemble,p,"E/C"))
+            cov_E = get_hdf5_value(fid,op.join(ensemble,p,"E/cov_C"))
             var_E = gv.gvar(C_E,cov_E)
             cor_E = dict(Gab=var_E/var_E[0])
             E, a, chi2, dof = fit_correlator_without_bootstrap(cor_E,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
-            f.create_dataset(group+"/E/E", data=[E_i.mean for E_i in E])
-            f.create_dataset(group+"/E/Delta_E", data=[E_i.sdev for E_i in E])
-            f.create_dataset(group+"/E/a", data=[a_i.mean for a_i in a])
-            f.create_dataset(group+"/E/Delta_a", data=[a_i.sdev for a_i in a])
-            f.create_dataset(group+"/E/chi2_", data=chi2)
-            f.create_dataset(group+"/E/dof", data=dof)
+            f.create_dataset(op.join(ensemble,p,"E/E"), data=[E_i.mean for E_i in E])
+            f.create_dataset(op.join(ensemble,p,"E/Delta_E"), data=[E_i.sdev for E_i in E])
+            f.create_dataset(op.join(ensemble,p,"E/a"), data=[a_i.mean for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"E/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"E/chi2_"), data=chi2)
+            f.create_dataset(op.join(ensemble,p,"E/dof"), data=dof)
 
 
         # Fit rho correlator in B1 irrep (if it exists)
-        if "B1" in fid[group].keys():
-            C_B1 = get_hdf5_value(fid,group+"/B1/C")
-            cov_B1 = get_hdf5_value(fid,group+"/B1/cov_C")
+        if "B1" in fid[ensemble].keys():
+            C_B1   = get_hdf5_value(fid,op.join(ensemble,p,"B1/C"))
+            cov_B1 = get_hdf5_value(fid,op.join(ensemble,p,"B1/cov_C"))
             var_B1 = gv.gvar(C_B1,cov_B1)
             cor_B1 = dict(Gab=var_B1/var_B1[0])
             E, a, chi2, dof = fit_correlator_without_bootstrap(cor_B1,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
-            f.create_dataset(group+"/B1/E", data=[E_i.mean for E_i in E])
-            f.create_dataset(group+"/B1/Delta_E", data=[E_i.sdev for E_i in E])
-            f.create_dataset(group+"/B1/a", data=[a_i.mean for a_i in a])
-            f.create_dataset(group+"/B1/Delta_a", data=[a_i.sdev for a_i in a])
-            f.create_dataset(group+"/B1/chi2_", data=chi2)
-            f.create_dataset(group+"/B1/dof", data=dof)
+            f.create_dataset(op.join(ensemble,p,"B1/E"), data=[E_i.mean for E_i in E])
+            f.create_dataset(op.join(ensemble,p,"B1/Delta_E"), data=[E_i.sdev for E_i in E])
+            f.create_dataset(op.join(ensemble,p,"B1/a"), data=[a_i.mean for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"B1/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"B1/chi2_"), data=chi2)
+            f.create_dataset(op.join(ensemble,p,"B1/dof"), data=dof)
 
-        lattice_key = group[:-9]+"/lattice"
-        if not lattice_key in f.keys():
-            f.create_dataset(lattice_key, data=lattice)
+        if not op.join(ensemble,"lattice") in f.keys():
+            f.create_dataset(op.join(ensemble,"lattice"), data=lattice)
         # TODO: Write ranges, energies and coefficients into an array 
         #       of size n, where n corresponds to the nxn (G)EVP
-        f.create_dataset(group+irreps+"/tmin1", data=tmin1)
-        f.create_dataset(group+irreps+"/tmax1", data=tmax1)
-        f.create_dataset(group+irreps+"/tmin2", data=tmin2)
-        f.create_dataset(group+irreps+"/tmax2", data=tmax2)
-        f.create_dataset(group+irreps+"/Nmax", data=Nmax)
-        f.create_dataset(group+irreps+"/antisymmetric", data=antisymmetric)
-        f.create_dataset(group+irreps+"/E0", data=[E_i.mean for E_i in E1])
-        f.create_dataset(group+irreps+"/E1", data=[E_i.mean for E_i in E2])
-        f.create_dataset(group+irreps+"/Delta_E0", data=[E_i.sdev for E_i in E1])
-        f.create_dataset(group+irreps+"/Delta_E1", data=[E_i.sdev for E_i in E2])
-        f.create_dataset(group+irreps+"/a0", data=[a_i.mean for a_i in a1])
-        f.create_dataset(group+irreps+"/a1", data=[a_i.mean for a_i in a2])
-        f.create_dataset(group+irreps+"/Delta_a0", data=[a_i.sdev for a_i in a1])
-        f.create_dataset(group+irreps+"/Delta_a1", data=[a_i.sdev for a_i in a2])
-        f.create_dataset(group+irreps+"/chi2_0", data=chi2_1)
-        f.create_dataset(group+irreps+"/chi2_1", data=chi2_2)
-        f.create_dataset(group+irreps+"/dof0", data=dof1)
-        f.create_dataset(group+irreps+"/dof1", data=dof2)
+        f.create_dataset(op.join(ensemble,p,irrep,"tmin1"), data=tmin1)
+        f.create_dataset(op.join(ensemble,p,irrep,"tmax1"), data=tmax1)
+        f.create_dataset(op.join(ensemble,p,irrep,"tmin2"), data=tmin2)
+        f.create_dataset(op.join(ensemble,p,irrep,"tmax2"), data=tmax2)
+        f.create_dataset(op.join(ensemble,p,irrep,"Nmax"), data=Nmax)
+        f.create_dataset(op.join(ensemble,p,irrep,"antisymmetric"), data=antisymmetric)
+        f.create_dataset(op.join(ensemble,p,irrep,"E0"), data=[E_i.mean for E_i in E1])
+        f.create_dataset(op.join(ensemble,p,irrep,"E1"), data=[E_i.mean for E_i in E2])
+        f.create_dataset(op.join(ensemble,p,irrep,"Delta_E0"), data=[E_i.sdev for E_i in E1])
+        f.create_dataset(op.join(ensemble,p,irrep,"Delta_E1"), data=[E_i.sdev for E_i in E2])
+        f.create_dataset(op.join(ensemble,p,irrep,"a0"), data=[a_i.mean for a_i in a1])
+        f.create_dataset(op.join(ensemble,p,irrep,"a1"), data=[a_i.mean for a_i in a2])
+        f.create_dataset(op.join(ensemble,p,irrep,"Delta_a0"), data=[a_i.sdev for a_i in a1])
+        f.create_dataset(op.join(ensemble,p,irrep,"Delta_a1"), data=[a_i.sdev for a_i in a2])
+        f.create_dataset(op.join(ensemble,p,irrep,"chi2_0"), data=chi2_1)
+        f.create_dataset(op.join(ensemble,p,irrep,"chi2_1"), data=chi2_2)
+        f.create_dataset(op.join(ensemble,p,irrep,"dof0"), data=dof1)
+        f.create_dataset(op.join(ensemble,p,irrep,"dof1"), data=dof2)
         f.close()
 
 args = sys.argv

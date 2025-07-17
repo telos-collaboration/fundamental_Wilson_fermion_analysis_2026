@@ -45,8 +45,8 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
 
             # get metadate for specific momentum
             data = readdlm(metadata,',',skipstart=1)
-            metadata_ind = findfirst(i -> isequal(joinpath(ens,p),data[i,1]),1:first(size(data)))
-            t0, deriv, gevp, symmetrise = data[metadata_ind,7:10]
+            metadata_ind = findfirst(i -> isequal(joinpath(ens,p),joinpath(data[i,1:2]...)),1:first(size(data)))
+            t0, deriv, gevp, symmetrise = data[metadata_ind,8:11]
             t0::Int, deriv::Bool, gevp::Bool, symmetrise::Bool = Int(t0), Bool(deriv), Bool(gevp), Bool(symmetrise) 
 
             Corrπ = read_pion_correlator(h5dset,ens,p;average_equivalent_momenta)
