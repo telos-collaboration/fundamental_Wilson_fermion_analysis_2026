@@ -1,7 +1,6 @@
 t0=0
 deriv="true"
 gevp="false"
-use3x3="true"
 plotting="true"
 symmetrise="true"
 average_equivalent_momenta="true"
@@ -120,13 +119,14 @@ rule write_eigenvalues:
         julia_instantiated="tmp/julia_ready",
         script="src/scripts_julia/write_eigenvalues.jl",
         h5file="data_assets/isospin1_corr.hdf5",
+        metadata="metadata/pipi_fitintervals_3x3.csv",
         ensembles_list="metadata/ensembles.csv",
     output:
         h5file="data_assets/isospin1_eigenvalues.hdf5",
     conda:
         "environment.yml"
     shell:
-        'julia {input.script} --h5file_in {input.h5file} --h5file_out {output.h5file} --gevp {gevp} --t0 {t0} --deriv {deriv} --avg {average_equivalent_momenta} --symmetrise {symmetrise}'
+        'julia {input.script} --h5file_in {input.h5file} --h5file_out {output.h5file} --avg {average_equivalent_momenta} --metadata {input.metadata}'
 
 rule fit_eigenvalues:
     input:
@@ -179,7 +179,7 @@ rule plot_eigenvalues:
     conda:
         "environment.yml"
     shell:
-        'julia {input.script} --h5file {input.h5file} --plotpath {plotpath} --three_by_three {use3x3}'
+        'julia {input.script} --h5file {input.h5file} --plotpath {plotpath}'
 
 rule plot_correlation_matrix_elements:
     input:

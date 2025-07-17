@@ -8,7 +8,7 @@ using Plots: gr, plot, plot!, scatter!, savefig, backend_name
 using PDFmerger: append_pdf!
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
-function plot_eigenvalues(file,plotpath;use3x3)
+function plot_eigenvalues(file,plotpath)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
 
@@ -24,7 +24,7 @@ function plot_eigenvalues(file,plotpath;use3x3)
         for p in p_external
             p == "p(0,0,0)" && continue
             
-            three_by_three = use3x3 && haskey(h5dset[ens][p],"A1/Corr3x3")
+            three_by_three = haskey(h5dset[ens][p],"A1/Corr3x3")
 
             eigvals  = read(h5dset,joinpath(ens,p,"A1","eigvals"))
             Δeigvals = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals"))
@@ -80,15 +80,11 @@ function parse_commandline()
         "--plotpath"
         help = "HDF5 output file containing the correlation matrices"
         required = true
-        "--three_by_three"
-        help = "Include plots of the 3x3 data"
-        default = true
-        arg_type = Bool
     end
     return parse_args(s)
 end
 function main()
     args = parse_commandline()
-    plot_eigenvalues(args["h5file_in"],args["plotpath"];use3x3=args["three_by_three"])
+    plot_eigenvalues(args["h5file_in"],args["plotpath"])
 end
 main()
