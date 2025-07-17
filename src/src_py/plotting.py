@@ -35,21 +35,19 @@ def get_data_E_L(h5file_scatter, beta, m0, num_lv = 2):
                         dvec = [int(P[2]),int(P[4]),int(P[6])]
                         d2 = np.dot(dvec,dvec)
                         for irrep in hfile[key][P]:
-                            if irrep == "A1":                           # change later
-                                mpi = hfile[key][P][irrep]["lv0"]["info"]["mpi"][()]
-                                mrho = hfile[key][P][irrep]["lv0"]["info"]["mrho"][()]
-                                aEs = hfile[key][P][irrep]["E"][()]
-                                aE_ms = hfile[key][P][irrep]["Delta_E"][()]
-                                aE_ps = hfile[key][P][irrep]["Delta_E"][()]
-                                for lv in range(num_lv):
-                                    NL = int(hfile[key][P][irrep]["lv0"]["info"]["NL"][()])
+                            mpi = hfile[key][P]["A1"]["lv0"]["info"]["mpi"][()]
+                            mrho = hfile[key][P]["A1"]["lv0"]["info"]["mrho"][()]
+                            for lv in hfile[key][P][irrep]:
+                                if lv[:2] == "lv":
+                                    i = int(lv[2:])
+                                    NL = int(hfile[key][P][irrep][lv]["info"]["NL"][()])
                                     NLs.append(NL)
-                                    # aEs.append(hfile[key][P][irrep]["E"][()][lv])
-                                    # aE_ms.append(hfile[key][P][irrep]["Delta_E"][()][lv])
-                                    # aE_ps.append(hfile[key][P][irrep]["Delta_E"][()][lv])
+                                    aEs.append(hfile[key][P][irrep]["E"][()][i])
+                                    aE_ms.append(hfile[key][P][irrep]["Delta_E"][()][i])
+                                    aE_ps.append(hfile[key][P][irrep]["Delta_E"][()][i])
                                     NL_invs.append(1/NL)
                                     d2s.append(d2)
-                                    lvs.append(lv)
+                                    lvs.append(i)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs
 
 def plot_E_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
@@ -147,6 +145,8 @@ def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
     ECM_errms = [abs(np.sqrt((En[i]-En_m_err[i])**2-(2*np.pi/NLs[i])**2*d2s[i])-ECMs[i])/mpi  for i in range(len(En))]
     ECM_errps = [abs(np.sqrt((En[i]+En_p_err[i])**2-(2*np.pi/NLs[i])**2*d2s[i])-ECMs[i])/mpi  for i in range(len(En))]
     ECMs = [ECMs[i]/mpi for i in range(len(ECMs))]
+    
+    print(len(ECMs))
     
     for i in range(len(ECMs)):
         plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(d2s[i]), marker = marker(lvs[i]))   
@@ -274,10 +274,13 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
     d2s = [np.dot(d,d) for d in dvecs]
 
-    for i in  range(14):
-        ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
-        sorted_indices = np.argsort(x_plot_sam[i])
-        ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+    print(len(x_plot))
+
+    for i in  range(len(x_plot)):
+        if 0<x_plot[i]<3: 
+            ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+            sorted_indices = np.argsort(x_plot_sam[i])
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         
     xarr = np.linspace(xlim[0], xlim[1])
     
@@ -336,11 +339,11 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     dvecs = res["dvec"]
     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
     d2s = [np.dot(d,d) for d in dvecs]
-
-    for i in  range(14):
-        ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
-        sorted_indices = np.argsort(x_plot_sam[i])
-        ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+    for i in  range(len(x_plot)):
+        if 4<x_plot[i]<16: 
+            ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+            sorted_indices = np.argsort(x_plot_sam[i])
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         
     xarr = np.linspace(xlim[0], xlim[1])
     
@@ -448,6 +451,8 @@ if __name__ == "__main__":
 
     os.makedirs(PLTDIR, exist_ok=True)
 
+    show=False
+
     plot_E_L(h5file_scatter,6.9,-0.92,True,outname="non_res")
     plot_E_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
     plot_E_L(h5file_scatter,7.05,-0.863,True,outname="close_res")
@@ -455,20 +460,20 @@ if __name__ == "__main__":
     plot_E_L(h5file_scatter,7.05,-0.867,True,outname="res")
     plot_E_L(h5file_scatter,7.05,-0.867,False,outname="res")
 
-    plot_E_CM_L(h5file_scatter,6.9,-0.92,True,outname="non_res")
+    plot_E_CM_L(h5file_scatter,6.9,-0.92,True,outname="non_res",show=show)
     plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
-    plot_E_CM_L(h5file_scatter,7.05,-0.863,True,outname="close_res")
+    plot_E_CM_L(h5file_scatter,7.05,-0.863,True,outname="close_res",show=show)
     plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
-    plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res")
+    plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res",show=show)
     plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res")
     
-    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
-    plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
+    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=show)
+    # plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    # plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
-    plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
-    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
+    # plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=show)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=show)
     
     plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
     plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
