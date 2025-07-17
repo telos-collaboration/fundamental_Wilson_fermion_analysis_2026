@@ -96,8 +96,13 @@ def fit_all_files(infile,outfile,parameterfile):
         E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin1,tmax1,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
         E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin2,tmax2,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
 
+        E_A1 = [E1[0].mean,E2[0].mean]
+        a_A1 = [a1[0].mean,a2[0].mean]
+        Delta_E_A1 = [E1[0].sdev,E2[0].sdev]
+        Delta_a_A1 = [a1[0].sdev,a2[0].sdev]
+        
         f = h5py.File(outfile, "a")
-
+        
         # Fit pion correlator (if it exists)
         if "Cpi" in fid[op.join(ensemble,p)].keys():
             Cpi = get_hdf5_value(fid,op.join(ensemble,p,"Cpi"))
@@ -105,10 +110,10 @@ def fit_all_files(infile,outfile,parameterfile):
             var_pi = gv.gvar(Cpi[:],cov_pi[:,:])
             cor_pi = dict(Gab=var_pi/var_pi[0])
             E, a, chi2, dof = fit_correlator_without_bootstrap(cor_pi,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
-            f.create_dataset(op.join(ensemble,p,"pi/E"), data=[E_i.mean for E_i in E])
-            f.create_dataset(op.join(ensemble,p,"pi/Delta_E"), data=[E_i.sdev for E_i in E])
-            f.create_dataset(op.join(ensemble,p,"pi/a"), data=[a_i.mean for a_i in a])
-            f.create_dataset(op.join(ensemble,p,"pi/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"pi/E"), data=[E[0].mean])
+            f.create_dataset(op.join(ensemble,p,"pi/Delta_E"), data=[E[0].sdev])
+            f.create_dataset(op.join(ensemble,p,"pi/a"), data=[a[0].mean])
+            f.create_dataset(op.join(ensemble,p,"pi/Delta_a"), data=[a[0].sdev])
             f.create_dataset(op.join(ensemble,p,"pi/chi2_"), data=chi2)
             f.create_dataset(op.join(ensemble,p,"pi/dof"), data=dof)
 
@@ -120,10 +125,10 @@ def fit_all_files(infile,outfile,parameterfile):
             var_pi = gv.gvar(Cpi[:],cov_pi[:,:])
             cor_pi = dict(Gab=var_pi/var_pi[0])
             E, a, chi2, dof = fit_correlator_without_bootstrap(cor_pi,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
-            f.create_dataset(op.join(ensemble,p0,"pi/E"), data=[E_i.mean for E_i in E])
-            f.create_dataset(op.join(ensemble,p0,"pi/Delta_E"), data=[E_i.sdev for E_i in E])
-            f.create_dataset(op.join(ensemble,p0,"pi/a"), data=[a_i.mean for a_i in a])
-            f.create_dataset(op.join(ensemble,p0,"pi/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p0,"pi/E"), data=[E[0].mean])
+            f.create_dataset(op.join(ensemble,p0,"pi/Delta_E"), data=[E[0].sdev])
+            f.create_dataset(op.join(ensemble,p0,"pi/a"), data=[a[0].mean])
+            f.create_dataset(op.join(ensemble,p0,"pi/Delta_a"), data=[a[0].sdev])
             f.create_dataset(op.join(ensemble,p0,"pi/chi2_"), data=chi2)
             f.create_dataset(op.join(ensemble,p0,"pi/dof"), data=dof)
 
@@ -133,10 +138,10 @@ def fit_all_files(infile,outfile,parameterfile):
             var_T1 = gv.gvar(C_T1[:],cov_T1[:,:])
             cor_T1 = dict(Gab=var_T1/var_T1[0])
             E, a, chi2, dof = fit_correlator_without_bootstrap(cor_T1,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
-            f.create_dataset(op.join(ensemble,p0,"T1/E"), data=[E_i.mean for E_i in E])
-            f.create_dataset(op.join(ensemble,p0,"T1/Delta_E"), data=[E_i.sdev for E_i in E])
-            f.create_dataset(op.join(ensemble,p0,"T1/a"), data=[a_i.mean for a_i in a])
-            f.create_dataset(op.join(ensemble,p0,"T1/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p0,"T1/E"), data=[E[0].mean])
+            f.create_dataset(op.join(ensemble,p0,"T1/Delta_E"), data=[E[0].sdev])
+            f.create_dataset(op.join(ensemble,p0,"T1/a"), data=[a[0].mean])
+            f.create_dataset(op.join(ensemble,p0,"T1/Delta_a"), data=[a[0].sdev])
             f.create_dataset(op.join(ensemble,p0,"T1/chi2_"), data=chi2)
             f.create_dataset(op.join(ensemble,p0,"T1/dof"), data=dof)
 
@@ -148,10 +153,10 @@ def fit_all_files(infile,outfile,parameterfile):
             var_E = gv.gvar(C_E,cov_E)
             cor_E = dict(Gab=var_E/var_E[0])
             E, a, chi2, dof = fit_correlator_without_bootstrap(cor_E,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
-            f.create_dataset(op.join(ensemble,p,"E/E"), data=[E_i.mean for E_i in E])
-            f.create_dataset(op.join(ensemble,p,"E/Delta_E"), data=[E_i.sdev for E_i in E])
-            f.create_dataset(op.join(ensemble,p,"E/a"), data=[a_i.mean for a_i in a])
-            f.create_dataset(op.join(ensemble,p,"E/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"E/E"), data=[E[0].mean])
+            f.create_dataset(op.join(ensemble,p,"E/Delta_E"), data=[E[0].sdev])
+            f.create_dataset(op.join(ensemble,p,"E/a"), data=[a[0].mean])
+            f.create_dataset(op.join(ensemble,p,"E/Delta_a"), data=[a[0].sdev])
             f.create_dataset(op.join(ensemble,p,"E/chi2_"), data=chi2)
             f.create_dataset(op.join(ensemble,p,"E/dof"), data=dof)
 
@@ -163,30 +168,26 @@ def fit_all_files(infile,outfile,parameterfile):
             var_B1 = gv.gvar(C_B1,cov_B1)
             cor_B1 = dict(Gab=var_B1/var_B1[0])
             E, a, chi2, dof = fit_correlator_without_bootstrap(cor_B1,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
-            f.create_dataset(op.join(ensemble,p,"B1/E"), data=[E_i.mean for E_i in E])
-            f.create_dataset(op.join(ensemble,p,"B1/Delta_E"), data=[E_i.sdev for E_i in E])
-            f.create_dataset(op.join(ensemble,p,"B1/a"), data=[a_i.mean for a_i in a])
-            f.create_dataset(op.join(ensemble,p,"B1/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p,"B1/E"), data=[E[0].mean])
+            f.create_dataset(op.join(ensemble,p,"B1/Delta_E"), data=[E[0].sdev])
+            f.create_dataset(op.join(ensemble,p,"B1/a"), data=[a[0].mean])
+            f.create_dataset(op.join(ensemble,p,"B1/Delta_a"), data=[a[0].sdev])
             f.create_dataset(op.join(ensemble,p,"B1/chi2_"), data=chi2)
             f.create_dataset(op.join(ensemble,p,"B1/dof"), data=dof)
 
         if not op.join(ensemble,"lattice") in f.keys():
             f.create_dataset(op.join(ensemble,"lattice"), data=lattice)
-        # TODO: Write ranges, energies and coefficients into an array 
-        #       of size n, where n corresponds to the nxn (G)EVP
+
         f.create_dataset(op.join(ensemble,p,irrep,"tmin1"), data=tmin1)
         f.create_dataset(op.join(ensemble,p,irrep,"tmax1"), data=tmax1)
         f.create_dataset(op.join(ensemble,p,irrep,"tmin2"), data=tmin2)
         f.create_dataset(op.join(ensemble,p,irrep,"tmax2"), data=tmax2)
         f.create_dataset(op.join(ensemble,p,irrep,"Nmax"), data=Nmax)
         f.create_dataset(op.join(ensemble,p,irrep,"antisymmetric"), data=antisymmetric)
-        f.create_dataset(op.join(ensemble,p,irrep,"E0"), data=[E_i.mean for E_i in E1])
-        f.create_dataset(op.join(ensemble,p,irrep,"E1"), data=[E_i.mean for E_i in E2])
-        f.create_dataset(op.join(ensemble,p,irrep,"Delta_E0"), data=[E_i.sdev for E_i in E1])
-        f.create_dataset(op.join(ensemble,p,irrep,"Delta_E1"), data=[E_i.sdev for E_i in E2])
-        f.create_dataset(op.join(ensemble,p,irrep,"a0"), data=[a_i.mean for a_i in a1])
-        f.create_dataset(op.join(ensemble,p,irrep,"a1"), data=[a_i.mean for a_i in a2])
-        f.create_dataset(op.join(ensemble,p,irrep,"Delta_a0"), data=[a_i.sdev for a_i in a1])
+        f.create_dataset(op.join(ensemble,p,irrep,"E"), data=E_A1)
+        f.create_dataset(op.join(ensemble,p,irrep,"a"), data=a_A1)
+        f.create_dataset(op.join(ensemble,p,irrep,"Delta_E"), data=Delta_E_A1)
+        f.create_dataset(op.join(ensemble,p,irrep,"Delta_a"), data=Delta_a_A1)
         f.create_dataset(op.join(ensemble,p,irrep,"Delta_a1"), data=[a_i.sdev for a_i in a2])
         f.create_dataset(op.join(ensemble,p,irrep,"chi2_0"), data=chi2_1)
         f.create_dataset(op.join(ensemble,p,irrep,"chi2_1"), data=chi2_2)
