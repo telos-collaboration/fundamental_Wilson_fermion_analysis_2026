@@ -99,7 +99,7 @@ def fit_all_files(infile,outfile,parameterfile):
         f = h5py.File(outfile, "a")
 
         # Fit pion correlator (if it exists)
-        if "Cpi" in fid[ensemble].keys():
+        if "Cpi" in fid[op.join(ensemble,p)].keys():
             Cpi = get_hdf5_value(fid,op.join(ensemble,p,"Cpi"))
             cov_pi = get_hdf5_value(fid,op.join(ensemble,p,"cov_Cpi"))
             var_pi = gv.gvar(Cpi[:],cov_pi[:,:])
@@ -128,7 +128,7 @@ def fit_all_files(infile,outfile,parameterfile):
             f.create_dataset(op.join(ensemble,p0,"pi/dof"), data=dof)
         
         # Fit rho correlator in E irrep (if it exists)
-        if "E" in fid[ensemble].keys():
+        if "E" in fid[op.join(ensemble,p)].keys():
             C_E = get_hdf5_value(fid,op.join(ensemble,p,"E/C"))
             cov_E = get_hdf5_value(fid,op.join(ensemble,p,"E/cov_C"))
             var_E = gv.gvar(C_E,cov_E)
@@ -143,7 +143,7 @@ def fit_all_files(infile,outfile,parameterfile):
 
 
         # Fit rho correlator in B1 irrep (if it exists)
-        if "B1" in fid[ensemble].keys():
+        if "B1" in fid[op.join(ensemble,p)].keys():
             C_B1   = get_hdf5_value(fid,op.join(ensemble,p,"B1/C"))
             cov_B1 = get_hdf5_value(fid,op.join(ensemble,p,"B1/cov_C"))
             var_B1 = gv.gvar(C_B1,cov_B1)

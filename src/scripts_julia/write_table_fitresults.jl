@@ -24,12 +24,17 @@ function fitresult_table(h5file,outfile)
     for ens in ensembles
         moms = filter(startswith("p"),keys(fid[ens]))
         for p in moms
-            E0 = fid[ens][p]["A1"]["E0"][1]
-            E1 = fid[ens][p]["A1"]["E1"][1]
-            ΔE0 = fid[ens][p]["A1"]["Delta_E0"][1]
-            ΔE1 = fid[ens][p]["A1"]["Delta_E1"][1]
-            str0 = errorstring(E0,ΔE0)
-            str1 = errorstring(E1,ΔE1)
+            if p == "p(0,0,0)"
+                str0 = "-"
+                str1 = "-"
+            else
+                E0 = fid[ens][p]["A1"]["E0"][1]
+                E1 = fid[ens][p]["A1"]["E1"][1]
+                ΔE0 = fid[ens][p]["A1"]["Delta_E0"][1]
+                ΔE1 = fid[ens][p]["A1"]["Delta_E1"][1]
+                str0 = errorstring(E0,ΔE0)
+                str1 = errorstring(E1,ΔE1)
+            end
             str_π = _get_fit_engery_str(fid[ens][p],"pi")
             str_ρE = _get_fit_engery_str(fid[ens][p],"E")
             str_ρB1 = _get_fit_engery_str(fid[ens][p],"B1")

@@ -59,89 +59,91 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; plot
         p_external = read(h5dset,"$ens/p_external")
         for p in p_external
             
-            p == "p(0,0,0)" && continue
-
-            # write title and axis labels
             T, L = read(h5dset,joinpath(ens,"lattice"))[1:2]
             ncfg = read(h5dset,joinpath(ens,"Nconf"))
             m0 = only(read(h5dset,joinpath(ens,"quarkmasses")))
             β  = read(h5dset,joinpath(ens,"beta"))
-            t0 = read(h5dset,joinpath(ens,p,"A1","t0"))
-            gevp = read(h5dset,joinpath(ens,p,"A1","gevp"))
-            deriv = read(h5dset,joinpath(ens,p,"A1","deriv"))
-            symmetrise = read(h5dset,joinpath(ens,p,"A1","symmetrise"))
-
-            if gevp
-                title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, gevp, t_0 = %$(t0)"
-            else
-                title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, evp"
-            end
-            plt = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg"
             plt_mesons = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
-
-            
-            has3x3 = haskey(h5dset[ens][p]["A1"],"meff_3x3")
-            if has3x3
-                meff_3x3 = read(h5dset[ens][p]["A1"],"meff_3x3")
-                Δmeff_3x3 = read(h5dset[ens][p]["A1"],"Delta_meff_3x3")
-                sources_3x3 = read(h5dset[ens][p]["A1"],"sources_3x3")
-                plot_effective_masses!(plt, meff_3x3, Δmeff_3x3, sources_3x3)
-            end
-            if !has3x3 || plot2x2
-                meff = read(h5dset[ens][p]["A1"],"meff")
-                Δmeff = read(h5dset[ens][p]["A1"],"Delta_meff")
-                sources = read(h5dset[ens][p]["A1"],"sources")
-                plot_effective_masses!(plt, meff, Δmeff, sources; markershape=:rect)
-            end
-            plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
             
             if isfile(fitresults) && haskey(res,joinpath(ens,p))
-                r = res[joinpath(ens,p,"A1")]
-                E0, ΔE0 = read(r,"E0")[1], read(r,"Delta_E0")[1] 
-                E1, ΔE1 = read(r,"E1")[1], read(r,"Delta_E1")[1]
-                add_mass_band!(plt,E0, ΔE0;label="fit #1")
-                add_mass_band!(plt,E1, ΔE1;label="fit #2")
-
-                if haskey(res,joinpath(ens,p,"B1"))
-                    r = res[joinpath(ens,p,"B1")]
-                    E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
-                    add_mass_band!(plt_mesons,E, ΔE;label="")
-                end
-                if haskey(res,joinpath(ens,p,"E"))
-                    r = res[joinpath(ens,p,"E")]
-                    E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
-                    add_mass_band!(plt_mesons,E, ΔE;label="")
-                end
                 if haskey(res,joinpath(ens,p,"pi"))
                     r = res[joinpath(ens,p,"pi")]
                     E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
                     add_mass_band!(plt_mesons,E, ΔE;label="")
                 end
-
             end
-            
             if haskey(h5dset[ens][p],"meff_pi")
                 meff = read(h5dset[ens][p],"meff_pi")
                 Δmeff = read(h5dset[ens][p],"Delta_meff_pi")
                 plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\pi")
             end
 
-            if haskey(h5dset[ens][p],"E")
-                meff = read(h5dset[ens][p]["E"],"meff")
-                Δmeff = read(h5dset[ens][p]["E"],"Delta_meff")
-                plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\rho (E)")
-            end
+            if p != "p(0,0,0)"
+                # write title and axis labels
+                t0 = read(h5dset,joinpath(ens,p,"A1","t0"))
+                gevp = read(h5dset,joinpath(ens,p,"A1","gevp"))
+                deriv = read(h5dset,joinpath(ens,p,"A1","deriv"))
+                symmetrise = read(h5dset,joinpath(ens,p,"A1","symmetrise"))
 
-            if haskey(h5dset[ens][p],"B1")
-                meff = read(h5dset[ens][p]["B1"],"meff")
-                Δmeff = read(h5dset[ens][p]["B1"],"Delta_meff")
-                plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\rho (B1)")
-            end
+                if gevp
+                    title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, gevp, t_0 = %$(t0)"
+                else
+                    title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, evp"
+                end
+                plt = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+                
+                has3x3 = haskey(h5dset[ens][p]["A1"],"meff_3x3")
+                if has3x3
+                    meff_3x3 = read(h5dset[ens][p]["A1"],"meff_3x3")
+                    Δmeff_3x3 = read(h5dset[ens][p]["A1"],"Delta_meff_3x3")
+                    sources_3x3 = read(h5dset[ens][p]["A1"],"sources_3x3")
+                    plot_effective_masses!(plt, meff_3x3, Δmeff_3x3, sources_3x3)
+                end
+                if !has3x3 || plot2x2
+                    meff = read(h5dset[ens][p]["A1"],"meff")
+                    Δmeff = read(h5dset[ens][p]["A1"],"Delta_meff")
+                    sources = read(h5dset[ens][p]["A1"],"sources")
+                    plot_effective_masses!(plt, meff, Δmeff, sources; markershape=:rect)
+                end
+                plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
 
-            plot!(plt,ylims=(0.0,π/2),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
-            savefig(plt,"temp.pdf")
+                if haskey(h5dset[ens][p],"E")
+                    meff = read(h5dset[ens][p]["E"],"meff")
+                    Δmeff = read(h5dset[ens][p]["E"],"Delta_meff")
+                    plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\rho (E)")
+                end
+
+                if haskey(h5dset[ens][p],"B1")
+                    meff = read(h5dset[ens][p]["B1"],"meff")
+                    Δmeff = read(h5dset[ens][p]["B1"],"Delta_meff")
+                    plot_effective_mass!(plt_mesons, meff, Δmeff, label=L"\rho (B1)")
+                end
+
+                if isfile(fitresults) && haskey(res,joinpath(ens,p))
+                    r = res[joinpath(ens,p,"A1")]
+                    E0, ΔE0 = read(r,"E0")[1], read(r,"Delta_E0")[1] 
+                    E1, ΔE1 = read(r,"E1")[1], read(r,"Delta_E1")[1]
+                    add_mass_band!(plt,E0, ΔE0;label="fit #1")
+                    add_mass_band!(plt,E1, ΔE1;label="fit #2")
+
+                    if haskey(res,joinpath(ens,p,"B1"))
+                        r = res[joinpath(ens,p,"B1")]
+                        E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1]
+                        add_mass_band!(plt_mesons,E, ΔE;label="")
+                    end
+                    if haskey(res,joinpath(ens,p,"E"))
+                        r = res[joinpath(ens,p,"E")]
+                        E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
+                        add_mass_band!(plt_mesons,E, ΔE;label="")
+                    end
+                end
+
+                plot!(plt,ylims=(0.0,π/2),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
+                savefig(plt,"temp.pdf")
+                append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
+            end
             savefig(plt_mesons ,"temp_mesons.pdf")
-            append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
             append_pdf!(joinpath(plotpath,plotname_mesons), "temp_mesons.pdf", cleanup=true)
         end
     end

@@ -24,26 +24,32 @@ function plot_correlation_matrix_elements(file,plotpath)
         T, L = h5dset["$ens/lattice"][1:2]
         m0 = h5dset["$ens/quarkmasses"][1]
         ncfg  = read(h5dset,joinpath(ens,"Nconf"))
+        t = 1:T 
         
         for p in p_external
-            p == "p(0,0,0)" && continue
             
-            momenta = read(h5dset,joinpath(ens,p,"A1","momenta"))
-            sources = read(h5dset,joinpath(ens,p,"A1","sources"))
-            title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg"
+            title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(p[2:end])"
             plt = plot(;yscale=:log10,legend=:outerright,ylabel=L"$C_(t)$",xlabel=L"t",title)
-            t = 1:T 
 
-            if haskey(h5dset,joinpath(ens,p,"B1"))
-                C = read(h5dset,joinpath(ens,p,"B1","C"))
-                ΔC = read(h5dset,joinpath(ens,p,"B1","Delta_C"))
-                plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_{B1}")
+            if p != "p(0,0,0)"            
+               
+                momenta = read(h5dset,joinpath(ens,p,"A1","momenta"))
+                sources = read(h5dset,joinpath(ens,p,"A1","sources"))
+                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg"
+                plt = plot!(plt;title)
+
+                if haskey(h5dset,joinpath(ens,p,"B1"))
+                    C = read(h5dset,joinpath(ens,p,"B1","C"))
+                    ΔC = read(h5dset,joinpath(ens,p,"B1","Delta_C"))
+                    plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_{B1}")
+                end
+                if haskey(h5dset,joinpath(ens,p,"E"))
+                    C = read(h5dset,joinpath(ens,p,"E","C"))
+                    ΔC = read(h5dset,joinpath(ens,p,"E","Delta_C"))
+                    plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_{E}")
+                end
             end
-            if haskey(h5dset,joinpath(ens,p,"E"))
-                C = read(h5dset,joinpath(ens,p,"E","C"))
-                ΔC = read(h5dset,joinpath(ens,p,"E","Delta_C"))
-                plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_{E}")
-            end
+
             if haskey(h5dset,joinpath(ens,p,"Cpi"))
                 C = read(h5dset,joinpath(ens,p,"Cpi"))
                 ΔC = read(h5dset,joinpath(ens,p,"Delta_Cpi"))
