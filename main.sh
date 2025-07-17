@@ -21,7 +21,7 @@ input_scatter="metadata/scattering_input.csv"
 fit_scatter_input="metadata/fit_scatter_input.csv"
 ensembles_list="metadata/ensembles.csv"
 
-update all submodules in libs/
+# update all submodules in libs/
 git submodule update --init --recursive
 julia src/scripts_julia/instantiate.jl
 julia src/scripts_julia/parse_all_files.jl --path $raw_path --h5file $h5file_raw --inputfiles $inputfiles
@@ -45,6 +45,5 @@ bash libs/zeta/compile.sh  &> tmp/make.log
 cp $h5file_fit $h5file_scat
 python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering
 cp $h5file_scat $h5file_scat_fit
-echo hey
 python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
-python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat $h5file_scat_fit # -Werror
+python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat $h5file_scat_fit
