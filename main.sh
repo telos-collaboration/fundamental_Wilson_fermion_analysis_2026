@@ -39,13 +39,12 @@ julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_
 julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath
 julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile
 
-# mkdir -p tmp
-# bash libs/zeta/compile.sh  &> tmp/make.log
+mkdir -p tmp
+bash libs/zeta/compile.sh  &> tmp/make.log
 
 cp $h5file_fit $h5file_scat
 python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering
-# cp $h5file_scat $h5file_scat_fit
-# echo hey
-# python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
-# echo hey
-# python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat $h5file_scat_fit # -Werror
+cp $h5file_scat $h5file_scat_fit
+echo hey
+python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
+python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat $h5file_scat_fit # -Werror
