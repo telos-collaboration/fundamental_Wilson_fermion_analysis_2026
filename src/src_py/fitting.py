@@ -100,7 +100,7 @@ def fit_all_files(infile,outfile,parameterfile):
 
         # Fit pion correlator (if it exists)
         if "Cpi" in fid[ensemble].keys():
-            Cpi = get_hdf5_value(op.join(fid,ensemble,p,"Cpi"))
+            Cpi = get_hdf5_value(fid,op.join(ensemble,p,"Cpi"))
             cov_pi = get_hdf5_value(fid,op.join(ensemble,p,"cov_Cpi"))
             var_pi = gv.gvar(Cpi[:],cov_pi[:,:])
             cor_pi = dict(Gab=var_pi/var_pi[0])
@@ -111,6 +111,21 @@ def fit_all_files(infile,outfile,parameterfile):
             f.create_dataset(op.join(ensemble,p,"pi/Delta_a"), data=[a_i.sdev for a_i in a])
             f.create_dataset(op.join(ensemble,p,"pi/chi2_"), data=chi2)
             f.create_dataset(op.join(ensemble,p,"pi/dof"), data=dof)
+
+        # If it hasn't been done yet: Fit zero-momentum pi and rho correlator
+        p0 = "p(0,0,0)"
+        if op.join(ensemble,p0,"pi/E") not in f.keys():
+            Cpi = get_hdf5_value(fid,op.join(ensemble,p0,"Cpi"))
+            cov_pi = get_hdf5_value(fid,op.join(ensemble,p0,"cov_Cpi"))
+            var_pi = gv.gvar(Cpi[:],cov_pi[:,:])
+            cor_pi = dict(Gab=var_pi/var_pi[0])
+            E, a, chi2, dof = fit_correlator_without_bootstrap(cor_pi,T,1,T//2-1,Nmax,False,plotname,plotdir,plotting,printing)
+            f.create_dataset(op.join(ensemble,p0,"pi/E"), data=[E_i.mean for E_i in E])
+            f.create_dataset(op.join(ensemble,p0,"pi/Delta_E"), data=[E_i.sdev for E_i in E])
+            f.create_dataset(op.join(ensemble,p0,"pi/a"), data=[a_i.mean for a_i in a])
+            f.create_dataset(op.join(ensemble,p0,"pi/Delta_a"), data=[a_i.sdev for a_i in a])
+            f.create_dataset(op.join(ensemble,p0,"pi/chi2_"), data=chi2)
+            f.create_dataset(op.join(ensemble,p0,"pi/dof"), data=dof)
         
         # Fit rho correlator in E irrep (if it exists)
         if "E" in fid[ensemble].keys():

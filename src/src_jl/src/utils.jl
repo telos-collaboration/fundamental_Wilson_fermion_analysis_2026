@@ -66,11 +66,10 @@ function read_correlation_matrix(h5dset,ens,p,label="correlation_matrix";maxhits
 
     return Corr_avg, Tuple(sources), momenta
 end
-function read_pion_correlator(h5dset,ens,p;average_equivalent_momenta)
+function read_meson_correlator(h5dset,ens,p,label;average_equivalent_momenta)
     # for the pion correlator: Average over equvivalent external momenta
-    Corrπ = read(h5dset,joinpath(ens,p,"correlator_pion"))
+    Corrπ = read(h5dset,joinpath(ens,p,label))
     if average_equivalent_momenta
-        label = "correlator_pion"
         perms = unique(permutations(p))
         norm = 0
         # remove the do-nothing permutation
