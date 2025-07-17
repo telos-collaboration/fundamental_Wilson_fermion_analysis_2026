@@ -376,6 +376,8 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
 
 def sigma_ERE_s_wave(s, a, r):
     p2 = p2_s_prime(s)
+    if p2 == 0:
+        return 0
     cot_PS = (-1/a+p2*r/2)/np.sqrt(p2)
     return 4*np.pi/(cot_PS**2+1)/p2
     

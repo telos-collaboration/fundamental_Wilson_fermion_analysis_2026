@@ -41,7 +41,10 @@ def ECM_p2(p2):
     return 2*np.sqrt(1+p2)
 def RES_Drach(p2, m_R, gVPP2):
     ECM = ECM_p2(p2)
-    return 6*np.pi*(m_R**2-ECM**2)/gVPP2
+    if gVPP2 == 0:
+        return 0
+    else:
+        return 6*np.pi*(m_R**2-ECM**2)/gVPP2
 def RES_Alex_BWI(p2, m_R, gVPP2):                 # ident zu "RES_Drach"
     ECM = ECM_p2(p2)
     return ECM*gVPP2*p2**(3/2)/(6*np.pi*ECM**2*(m_R**2-ECM**2))
