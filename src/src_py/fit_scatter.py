@@ -82,12 +82,6 @@ def RES_fit(p3cotPS_ECM, tan_PS, p2):                                   # all pr
 def get_fits(res, res_spl):
     res_tmp={}
     res_spl_tmp={}
-    # for P2 in res["p2star_prime"]:
-    #     print(P2.real)
-    # print()
-    # for P2 in res["p3cotPS_prime"]:
-    #     print(P2.real)
-    # print()
     for key, val in ERE_fit(res["p3cotPS_prime"],res["p2star_prime"]).items():
         res_tmp[key] = val
     for key, val in RES_fit(res["p3cotPS_Ecm_prime"],res["tan_PS"],res["p2star_prime"]).items():
@@ -190,9 +184,11 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
         #     hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"sample/"+key, data = val)
 
 def fit_all_phase_shifts(h5file_in, h5file_out, input_file):
+    print("Fitting phase shifts...")
     fit_one_phaseshift(h5file_in, h5file_out, input_file,6.9,-0.92)
     fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.863)
     fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.867)
+    print("Done!")
 
 
 if __name__ == "__main__":
