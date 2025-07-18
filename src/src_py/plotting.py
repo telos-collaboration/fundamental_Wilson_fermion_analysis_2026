@@ -285,58 +285,84 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
                             for lv in hfile[ens][P][irrep]:
                                 if lv[:2] == "lv":
                                     for key in hfile[ens][P][irrep][lv]["mean"]:
+                                        # print(hfile[ens][P][irrep][lv]["fit"][()])
+                                        # print(type(hfile[ens][P][irrep][lv]["fit"][()]))
                                         if hfile[ens][P][irrep][lv]["fit"][()]:
-                                            scat_fit_mean[key] = hfile[ens][P][irrep][lv]["mean"][key][()]
-                                            scat_fit_spl[key] = hfile[ens][P][irrep][lv]["sample"][key][()]
+                                            # print("hey")
+                                            scat_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
+                                            scat_fit_spl.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["sample"][key][()])
                                         else:
-                                            scat_not_fit_mean[key] = hfile[ens][P][irrep][lv]["mean"][key][()]
-                                            scat_not_fit_spl[key] = hfile[ens][P][irrep][lv]["sample"][key][()]
+                                            # print("nay")
+                                            scat_not_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
+                                            scat_not_fit_spl.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["sample"][key][()])
+    # print(scat_fit_mean)
+    # for key, val in scat_fit_mean.items():
+    #     # print(key, val)
+    #     print(len(val))
+    # for key, val in scat_not_fit_mean.items():
+    #     # print(key, val)
+    #     print(len(val))
+    # exit()
     return fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_not_fit_mean, scat_not_fit_spl
 
 def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
-    
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
     matplotlib.rc('font', **font)
     fig, ax = plt.subplots()
     plt.grid()
-    res, res_smp = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
+    fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_not_fit_mean, scat_not_fit_spl = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
     xlim = [0,3]
     ax.set_xlim(xlim)
     ylim = [-2,2]
     ax.set_ylim(ylim)
 
     plt.xlabel(r"$p^{\star^2}/m_\pi^2$")
-    x_plot = res["p2star_prime"]
-    x_plot_sam = np.transpose(res_smp["p2star_prime"])
-    y_plot = np.real(res["p3cotPS_prime"])
-    y_plot_sam = np.transpose(np.real(res_smp["p3cotPS_prime"]))
+    x_plot = scat_fit_mean["p2star_prime"]
+    x_plot_sam = scat_fit_spl["p2star_prime"]
+    y_plot = np.real(scat_fit_mean["p3cotPS_prime"])
+    y_plot_sam = np.real(scat_fit_spl["p3cotPS_prime"])
+    x_n_plot = scat_not_fit_mean["p2star_prime"]                                        # n marks that it was not fitted
+    x_n_plot_sam = scat_not_fit_spl["p2star_prime"]
+    y_n_plot = np.real(scat_not_fit_mean["p3cotPS_prime"])
+    y_n_plot_sam = np.real(scat_not_fit_spl["p3cotPS_prime"])
     plt.ylabel(r"$p^3\, \cot(\delta)/m_\pi^3$")
     
     length = len(x_plot_sam[0])
     num_perc = math.erf(1/np.sqrt(2))
-    N_Ls = res["N_L"]
-    dvecs = res["dvec"]
+    
+    N_Ls = scat_fit_mean["N_L"]
+    dvecs = scat_fit_mean["dvec"]
     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
     d2s = [np.dot(d,d) for d in dvecs]
-
-    # print(len(x_plot))
+    
+    N_L_ns = scat_not_fit_mean["N_L"]
+    dvec_ns = scat_not_fit_mean["dvec"]
+    dvec_ns = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvec_ns]
+    d2_ns = [np.dot(d,d) for d in dvec_ns]
 
     for i in  range(len(x_plot)):
         if 0<x_plot[i]<3: 
             ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
             sorted_indices = np.argsort(x_plot_sam[i])
             ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-        
+        else:
+            raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
+
+    for i in  range(len(x_n_plot)):
+        ax.scatter(x_n_plot[i],y_n_plot[i], label = "|P|=%i, NL=%i"%(d2_ns[i],N_L_ns[i]), color = "grey", ls = ls_P(dvec_ns[i]), marker = ms_P(dvec_ns[i]),s=60)
+        sorted_indices = np.argsort(x_n_plot_sam[i])
+        ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
+
     xarr = np.linspace(xlim[0], xlim[1])
     
     if fit:
-        a1_1 = res["a1_1"]
-        r1_1 = res["r1_1"]
+        a1_1 = fit_param_mean["a1_1"]
+        r1_1 = fit_param_mean["r1_1"]
 
-        a1_1_smp = res_smp["a1_1"]
-        r1_1_smp = res_smp["r1_1"]
+        a1_1_smp = fit_param_spl["a1_1"]
+        r1_1_smp = fit_param_spl["r1_1"]
 
         yarr = [fit_scatter.ERE_1(x,a1_1,r1_1) for x in xarr]
         yarr_smp = [sorted([fit_scatter.ERE_1(x,a1_1_smp[i],r1_1_smp[i]) for i in range(len(a1_1_smp))]) for x in xarr]

@@ -120,7 +120,6 @@ def genfromtxt_skip_empty(filename, **kwargs):
 def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
     res_scat = {}
     res_spl_scat = {}
-    ens_here = None
 
     infile = np.transpose(genfromtxt_skip_empty(input_file,delimiter=";",skip_header=1,dtype=str))
 
@@ -128,7 +127,7 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
         # with h5py.File(h5file_in,"r") as hfilein:
         for ens in hfile:
             if str(beta) in ens and str(m0) in ens:
-                ens_here = ens
+                # ens_here = ens
                 for P in hfile[ens]:
                     if P[0] == "p":
                         for irrep in hfile[ens][P]:
@@ -141,7 +140,7 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
                                     else:
                                         fit = fit_in[0]
                                     if fit == "True":
-                                        hfile[ens][P][irrep][lv]["fit"] = fit == "True"
+                                        hfile[ens][P][irrep][lv]["fit"] = True
                                         p2star_prime = hfile[ens][P][irrep][lv]["mean"]["p2star_prime"][()]
                                         if 0 < p2star_prime < 15:
                                             if res_scat == {}:
@@ -158,7 +157,7 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
                                         else:
                                             raise RuntimeError("Energy not in elastic window at: %s"%(ens+P+irrep+lv))
                                     elif fit == "False":
-                                        hfile[ens][P][irrep][lv]["fit"] = fit == "False"
+                                        hfile[ens][P][irrep][lv]["fit"] = False
                                         pass
                                     else:
                                         raise RuntimeError("Wrong assignment in 'fit_scatter_input.csv' at: %s"%(ens+P+irrep+lv))
@@ -172,13 +171,14 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
             res_spl_scat[key] = np.transpose(np.asarray(res_spl_scat[key]))
 
         
+        fit_beta_m = "fit_b%f_m%f"%(beta,m0)
 
         res_fit, res_spl_fit = get_fits(res_scat,res_spl_scat)
         for key, val in res_fit.items():
-            mean_group = hfile[ens_here].require_group("fit/mean")
+            mean_group = hfile.require_group(fit_beta_m+"/mean")
             mean_group.create_dataset(key, data=val)
         for key, val in res_spl_fit.items():
-            spl_group = hfile[ens_here].require_group("fit/sample")
+            spl_group = hfile.require_group(fit_beta_m+"/sample")
             spl_group.create_dataset(key, data=val)
         # for key, val in res_fit.items():
         #     hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"mean/"+key, data = val)
