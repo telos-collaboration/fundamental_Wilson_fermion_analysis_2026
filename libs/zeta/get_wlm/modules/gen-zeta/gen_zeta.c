@@ -159,6 +159,7 @@ double _Complex Z_third_term(int const size, int const l, int const m, int const
 
 double _Complex generalized_zeta(int const l, int const m, int const *const dvec, double const mp1, double const mp2, double const q2, int const size)
 {
+	freopen("err.o", "a", stdout);  
 	/*E_CM_2: center of mass energy squared*/
 	double E_CM_2=pow( sqrt(pow(mp1,2)+q2) + sqrt(pow(mp2,2)+q2) ,2);
 
@@ -184,6 +185,7 @@ double _Complex generalized_zeta(int const l, int const m, int const *const dvec
 
 double _Complex zeta_PL(int const l, int const m, int const d1, int const d2, int const d3, double const m1, double const m2, double const q2, int const N_L, int const size)
 {
+	freopen("err.o", "a", stdout);  
 	gsl_set_error_handler_off();
 	double mp1= m1 * N_L / (2.0 * M_PI);
 	double mp2= m2 * N_L / (2.0 * M_PI);

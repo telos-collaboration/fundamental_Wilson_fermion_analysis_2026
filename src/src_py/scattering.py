@@ -14,7 +14,6 @@ def save_to_hdf(res,res_sample, info, ens, P, irrep, lv, outfile):
         for key, val in info.items():
             hfile.create_dataset(group+"info/"+key, data = val)
 
-
 def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld,resampling="gauss",num_resample=50):
     res = {}
     info = {}
@@ -46,7 +45,6 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld,resampling="
             for key, val in res_tmp.items():
                 res_sample[key].append(val)
     return res, res_sample, info
-
 
 def cot_delta_000_T1(q2,N_L,mpi):
     return wlm(0,0,0,0,0,mpi,mpi,q2,int(N_L))
@@ -103,7 +101,6 @@ def cot_delta_111_E(q2,N_L,mpi):                                                
     first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     second = complex(0,1)*np.sqrt(6)*wlm(2,2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     return first + second
-
 
 def cot_delta_mom(dvec, irrep):
     if list(dvec) == [0,0,0]:
@@ -196,7 +193,7 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     res["N_L"] = N_L
     return res
 
-def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_resample=5,num_lv=2):
+def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_resample=5):
     info = {}
     infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
     with h5py.File(fitresults,"r") as hfile:
@@ -207,6 +204,9 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                     #NOTE: Somethins is broken here with the extra irreps
                     for irrep in hfile[ens][P]:
                         if irrep != "pi":
+                            num_lv = 1
+                            if irrep == "A1":
+                                num_lv = 2
                             print(ens+P+irrep)
                             beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]           # should be replaced. input file not necessary
                             beta = float(beta[0])
