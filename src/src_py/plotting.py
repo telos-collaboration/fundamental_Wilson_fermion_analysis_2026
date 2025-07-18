@@ -238,15 +238,60 @@ def delete_steps(arr, sign = 1, delete=True):
     else:
         return arr
 
-def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
-    res = {}
-    res_spl = {}
+# def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
+#     res_scat = {}
+#     res_scat_spl = {}
+#     res_fit = {}
+#     res_fit_spl = {}
 
+#     with h5py.File(h5file_scatter_fit,"r") as hfile:
+#         for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
+#             res_scat[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
+#             res_scat_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
+#     with h5py.File(h5file_scatter_fit,"r") as hfile:
+#         for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
+#             res_fit[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
+#             res_fit_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
+#     return res_scat, res_scat_spl, res_fit, res_fit_spl
+
+def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
+    fit_param_mean = {}
+    fit_param_spl = {}
+    scat_fit_mean = {}
+    scat_fit_spl = {}
+    scat_not_fit_mean = {}
+    scat_not_fit_spl = {}
+    fit_beta_m = "fit_b%f_m%f"%(beta,m0)
     with h5py.File(h5file_scatter_fit,"r") as hfile:
-        for key in hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"]:
-            res[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["mean"][key][()]
-            res_spl[key] = hfile["fit_scatter_b%f_m%f"%(beta,m0)]["sample"][key][()]
-    return res, res_spl
+        for ens in hfile:
+            if str(beta) in ens and str(m0) in ens:
+                # print(fit_beta_m)
+                # print("asd")
+                # for key in hfile[fit_beta_m]:
+                #     print(key)
+                for key in hfile[fit_beta_m]["mean"]:
+                    fit_param_mean[key] = hfile[fit_beta_m]["mean"][key][()]
+                # for key in hfile[fit_beta_m]["sample"]:
+                    fit_param_spl[key] = hfile[fit_beta_m]["sample"][key][()]
+                    # print(len(fit_spl[key]))
+                    # print(len(spl[0]))
+                # for key, val in hfile[fit_beta_m]["sample"].items():
+                #     spl = hfile[ens]["fit"]["sample"][key][()]
+                #     print(len(spl))
+                # exit()
+                for P in hfile[ens]:
+                    if P[0] == "p":
+                        for irrep in hfile[ens][P]:
+                            for lv in hfile[ens][P][irrep]:
+                                if lv[:2] == "lv":
+                                    for key in hfile[ens][P][irrep][lv]["mean"]:
+                                        if hfile[ens][P][irrep][lv]["fit"][()]:
+                                            scat_fit_mean[key] = hfile[ens][P][irrep][lv]["mean"][key][()]
+                                            scat_fit_spl[key] = hfile[ens][P][irrep][lv]["sample"][key][()]
+                                        else:
+                                            scat_not_fit_mean[key] = hfile[ens][P][irrep][lv]["mean"][key][()]
+                                            scat_not_fit_spl[key] = hfile[ens][P][irrep][lv]["sample"][key][()]
+    return fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_not_fit_mean, scat_not_fit_spl
 
 def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     
@@ -456,8 +501,6 @@ if __name__ == "__main__":
 
     os.makedirs(PLTDIR, exist_ok=True)
 
-    show=True
-
     # plot_E_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
     # plot_E_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
     # plot_E_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
@@ -465,21 +508,21 @@ if __name__ == "__main__":
     # plot_E_L(h5file_scatter,7.05,-0.867,False,outname="res")
     # plot_E_L(h5file_scatter,7.05,-0.867,False,outname="res")
 
-    # plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res",show=show)
+    # plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res",show=False)
     # plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res")
-    # plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res",show=show)
+    # plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res",show=False)
     # plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res")
-    plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res",show=show)
+    # plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res",show=False)
     # plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res")
     
-    # plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=show)
+    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
     # plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
     # plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
     # plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    # plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=show)
-    # plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=show)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
-    # plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    # plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
-    # plot_sigma_1(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
+    plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
+    plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    plot_sigma_1(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
