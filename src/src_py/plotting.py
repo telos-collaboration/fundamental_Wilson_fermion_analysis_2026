@@ -35,19 +35,20 @@ def get_data_E_L(h5file_fit, beta, m0):
                         dvec = [int(P[2]),int(P[4]),int(P[6])]
                         d2 = np.dot(dvec,dvec)
                         for irrep in hfile[key][P]:
-                            mpi = hfile[key][P]["A1"]["lv0"]["info"]["mpi"][()]
-                            mrho = hfile[key][P]["A1"]["lv0"]["info"]["mrho"][()]
-                            for lv in hfile[key][P][irrep]:
-                                if lv[:2] == "lv":
-                                    i = int(lv[2:])
-                                    NL = int(hfile[key][P][irrep][lv]["info"]["NL"][()])
-                                    NLs.append(NL)
-                                    aEs.append(hfile[key][P][irrep]["E"][()][i])
-                                    aE_ms.append(hfile[key][P][irrep]["Delta_E"][()][i])
-                                    aE_ps.append(hfile[key][P][irrep]["Delta_E"][()][i])
-                                    NL_invs.append(1/NL)
-                                    d2s.append(d2)
-                                    lvs.append(i)
+                            if irrep != "pi":
+                                mpi = hfile[key][P][irrep]["lv0"]["info"]["mpi"][()]
+                                mrho = hfile[key][P][irrep]["lv0"]["info"]["mrho"][()]
+                                for lv in hfile[key][P][irrep]:
+                                    if lv[:2] == "lv":
+                                        i = int(lv[2:])
+                                        NL = int(hfile[key][P][irrep][lv]["info"]["NL"][()])
+                                        NLs.append(NL)
+                                        aEs.append(hfile[key][P][irrep]["E"][()][i])
+                                        aE_ms.append(hfile[key][P][irrep]["Delta_E"][()][i])
+                                        aE_ps.append(hfile[key][P][irrep]["Delta_E"][()][i])
+                                        NL_invs.append(1/NL)
+                                        d2s.append(d2)
+                                        lvs.append(i)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs
 
 def plot_E_L(h5file_fit,beta,m0,levels=False,outname=None,show=False):
@@ -220,6 +221,8 @@ def ls_P(dvec):
         return "dashed"
     elif list(dvec) == [1,1,1]:
         return "dashdot"
+    elif list(dvec) == [0,0,0]:
+        return (0, (1, 1))
 
 def ms_P(dvec):
     if list(dvec) == [0,0,1]:
@@ -265,20 +268,9 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
     with h5py.File(h5file_scatter_fit,"r") as hfile:
         for ens in hfile:
             if str(beta) in ens and str(m0) in ens:
-                # print(fit_beta_m)
-                # print("asd")
-                # for key in hfile[fit_beta_m]:
-                #     print(key)
                 for key in hfile[fit_beta_m]["mean"]:
                     fit_param_mean[key] = hfile[fit_beta_m]["mean"][key][()]
-                # for key in hfile[fit_beta_m]["sample"]:
                     fit_param_spl[key] = hfile[fit_beta_m]["sample"][key][()]
-                    # print(len(fit_spl[key]))
-                    # print(len(spl[0]))
-                # for key, val in hfile[fit_beta_m]["sample"].items():
-                #     spl = hfile[ens]["fit"]["sample"][key][()]
-                #     print(len(spl))
-                # exit()
                 for P in hfile[ens]:
                     if P[0] == "p":
                         for irrep in hfile[ens][P]:
@@ -286,11 +278,17 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
                                 if lv[:2] == "lv":
                                     for key in hfile[ens][P][irrep][lv]["mean"]:
                                         if hfile[ens][P][irrep][lv]["fit"][()]:
-                                            scat_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
-                                            scat_fit_spl.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["sample"][key][()])
+                                            if key == "dvec" or key == "N_L":
+                                                scat_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
+                                            else:
+                                                scat_fit_mean.setdefault(key,[]).append(float(np.real(hfile[ens][P][irrep][lv]["mean"][key][()])))
+                                                scat_fit_spl.setdefault(key,[]).append([float(x) for x in np.real(hfile[ens][P][irrep][lv]["sample"][key][()])])
                                         else:
-                                            scat_not_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
-                                            scat_not_fit_spl.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["sample"][key][()])
+                                            if key == "dvec" or key == "N_L":
+                                                scat_not_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
+                                            else:
+                                                scat_not_fit_mean.setdefault(key,[]).append(float(np.real(hfile[ens][P][irrep][lv]["mean"][key][()])))
+                                                scat_not_fit_spl.setdefault(key,[]).append([float(x) for x in np.real(hfile[ens][P][irrep][lv]["sample"][key][()])])
     return fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_not_fit_mean, scat_not_fit_spl
 
 def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
@@ -320,7 +318,7 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     length = len(x_plot_sam[0])
     num_perc = math.erf(1/np.sqrt(2))
     
-    N_Ls = scat_fit_mean["N_L"]
+    N_Ls = int(scat_fit_mean["N_L"])
     dvecs = scat_fit_mean["dvec"]
     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
     d2s = [np.dot(d,d) for d in dvecs]
@@ -328,7 +326,7 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     N_L_ns = scat_not_fit_mean["N_L"]
     dvec_ns = scat_not_fit_mean["dvec"]
     dvec_ns = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvec_ns]
-    d2_ns = [np.dot(d,d) for d in dvec_ns]
+    # d2_ns = [np.dot(d,d) for d in dvec_ns]
 
     for i in  range(len(x_plot)):
         if 0<x_plot[i]<3: 
@@ -387,33 +385,37 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     # ax.set_ylim(ylim)
 
     plt.xlabel(r"$s/m_\pi^2$")
-    x_plot = scat_fit_mean["s_prime"]
-    x_plot_sam = scat_fit_spl["s_prime"]
-    y_plot = np.real(scat_fit_mean["p3cotPS_Ecm_prime"])
-    y_plot_sam = np.real(scat_fit_spl["p3cotPS_Ecm_prime"])
-    x_n_plot = scat_not_fit_mean["s_prime"]                                        # n marks that it was not fitted
-    x_n_plot_sam = scat_not_fit_spl["s_prime"]
-    y_n_plot = np.real(scat_not_fit_mean["p3cotPS_Ecm_prime"])
-    y_n_plot_sam = np.real(scat_not_fit_spl["p3cotPS_Ecm_prime"])
+    x_plot       = np.asarray(scat_fit_mean["s_prime"])
+    x_plot_sam   = np.asarray(scat_fit_spl["s_prime"])
+    y_plot       = np.asarray(scat_fit_mean["p3cotPS_Ecm_prime"])
+    y_plot_sam   = np.asarray(scat_fit_spl["p3cotPS_Ecm_prime"])
+    x_n_plot     = np.asarray(scat_not_fit_mean["s_prime"])                                        # n marks that it was not fitted
+    x_n_plot_sam = np.asarray(scat_not_fit_spl["s_prime"])
+    y_n_plot     = np.asarray(scat_not_fit_mean["p3cotPS_Ecm_prime"])
+    y_n_plot_sam = np.asarray(scat_not_fit_spl["p3cotPS_Ecm_prime"])
+
     plt.ylabel(r"$p^3\, \cot(\delta)/(E_{cm}m_\pi^2$")
     
     length = len(x_plot_sam[0])
     num_perc = math.erf(1/np.sqrt(2))
     
-    N_Ls = scat_fit_mean["N_L"]
+    N_Ls = [int(x) for x in scat_fit_mean["N_L"]]
     dvecs = scat_fit_mean["dvec"]
     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
     d2s = [np.dot(d,d) for d in dvecs]
     
-    N_L_ns = scat_not_fit_mean["N_L"]
+    # N_L_ns = scat_not_fit_mean["N_L"]
     dvec_ns = scat_not_fit_mean["dvec"]
     dvec_ns = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvec_ns]
-    d2_ns = [np.dot(d,d) for d in dvec_ns]
-
+    # d2_ns = [np.dot(d,d) for d in dvec_ns]
+    import random
+    def random_color_rgb():
+        return (random.random(), random.random(), random.random())
     for i in  range(len(x_plot)):
         if 4<x_plot[i]<16: 
-            ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
-            sorted_indices = np.argsort(x_plot_sam[i])
+            # ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+            ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = random_color_rgb(), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+            sorted_indices = [int(x) for x in np.argsort(x_plot_sam[i])]
             ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         else:
             raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
@@ -433,8 +435,8 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
         m_R_smp = fit_param_spl["m_R_D"]
         gVPP2_smp = fit_param_spl["gVPP2_D"]
 
-        yarr = [fit_scatter.RES_Drach(x,m_R,gVPP2) for x in xarr]
-        yarr_smp = [sorted([fit_scatter.RES_Drach(x,m_R_smp[i],gVPP2_smp[i]) for i in range(len(m_R_smp))]) for x in xarr]
+        yarr = [fit_scatter.RES_Drach(x,m_R,gVPP2) for x in p2arr]
+        yarr_smp = [sorted([fit_scatter.RES_Drach(x,m_R_smp[i],gVPP2_smp[i]) for i in range(len(m_R_smp))]) for x in p2arr]
 
         yarr_m = [yarr_smp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(yarr_smp))]
         yarr_p = [yarr_smp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(yarr_smp))]
@@ -545,13 +547,13 @@ if __name__ == "__main__":
     # plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,False,outname="res",show=False)
     # plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,False,outname="res")
     
-    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
-    plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
+    # plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=True)
+    # plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    # plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
-    plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
-    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
+    # plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
+    # plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=True)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=True)
     
     # plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)                  # HAS TO BE FIXED WITH NEW DATA FORMAT!!
     # plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
