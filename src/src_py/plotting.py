@@ -305,25 +305,25 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     ax.set_ylim(ylim)
 
     plt.xlabel(r"$p^{\star^2}/m_\pi^2$")
-    x_plot = scat_fit_mean["p2star_prime"]
-    x_plot_sam = scat_fit_spl["p2star_prime"]
-    y_plot = np.real(scat_fit_mean["p3cotPS_prime"])
-    y_plot_sam = np.real(scat_fit_spl["p3cotPS_prime"])
-    x_n_plot = scat_not_fit_mean["p2star_prime"]                                        # n marks that it was not fitted
-    x_n_plot_sam = scat_not_fit_spl["p2star_prime"]
-    y_n_plot = np.real(scat_not_fit_mean["p3cotPS_prime"])
-    y_n_plot_sam = np.real(scat_not_fit_spl["p3cotPS_prime"])
+    x_plot       = np.asarray(scat_fit_mean["p2star_prime"])
+    x_plot_sam   = np.asarray(scat_fit_spl["p2star_prime"])
+    y_plot       = np.asarray(scat_fit_mean["p3cotPS_prime"])
+    y_plot_sam   = np.asarray(scat_fit_spl["p3cotPS_prime"])
+    x_n_plot     = np.asarray(scat_not_fit_mean["p2star_prime"])                                        # n marks that it was not fitted
+    x_n_plot_sam = np.asarray(scat_not_fit_spl["p2star_prime"])
+    y_n_plot     = np.asarray(scat_not_fit_mean["p3cotPS_prime"])
+    y_n_plot_sam = np.asarray(scat_not_fit_spl["p3cotPS_prime"])
     plt.ylabel(r"$p^3\, \cot(\delta)/m_\pi^3$")
     
     length = len(x_plot_sam[0])
     num_perc = math.erf(1/np.sqrt(2))
     
-    N_Ls = int(scat_fit_mean["N_L"])
+    N_Ls = [int(x) for x in scat_fit_mean["N_L"]]
     dvecs = scat_fit_mean["dvec"]
     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
     d2s = [np.dot(d,d) for d in dvecs]
     
-    N_L_ns = scat_not_fit_mean["N_L"]
+    # N_L_ns = scat_not_fit_mean["N_L"]
     dvec_ns = scat_not_fit_mean["dvec"]
     dvec_ns = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvec_ns]
     # d2_ns = [np.dot(d,d) for d in dvec_ns]
@@ -393,7 +393,6 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     x_n_plot_sam = np.asarray(scat_not_fit_spl["s_prime"])
     y_n_plot     = np.asarray(scat_not_fit_mean["p3cotPS_Ecm_prime"])
     y_n_plot_sam = np.asarray(scat_not_fit_spl["p3cotPS_Ecm_prime"])
-
     plt.ylabel(r"$p^3\, \cot(\delta)/(E_{cm}m_\pi^2$")
     
     length = len(x_plot_sam[0])
@@ -547,12 +546,12 @@ if __name__ == "__main__":
     # plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,False,outname="res",show=False)
     # plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,False,outname="res")
     
-    # plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=True)
+    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=True)
     # plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
     # plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
     # plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    # plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=True)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=True)
     plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=True)
     
     # plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)                  # HAS TO BE FIXED WITH NEW DATA FORMAT!!
