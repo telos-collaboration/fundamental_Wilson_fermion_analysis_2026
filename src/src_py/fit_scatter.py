@@ -9,17 +9,10 @@ warnings.simplefilter("error")
 
 
 def curve_fit_try(func, x, y, num_res):
-    # popt, pcov = curve_fit(func, x, y)
-    # return popt
     try:
-        # print("hey")
-        # print(x)
-        # print(y)
         popt, pcov = curve_fit(func, x, y)
-        # print("\tyay")
         return popt
     except:
-        # print("\t\tnay")
         return np.zeros(num_res)
 
 def ERE_0(p2, a1_0):
@@ -96,7 +89,6 @@ def get_fits(res, res_spl):
         for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i],res_spl["tan_PS"][i],res_spl["p2star_prime"][i]).items():
             res_spl_tmp[key].append(val)
 
-    # print(res_tmp)
     return res_tmp, res_spl_tmp
 
 ####################### Bis hier wurden Änderungen gemacht. Bitte vorsichtig sein ###########################
@@ -118,10 +110,8 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
     infile = np.transpose(genfromtxt_skip_empty(input_file,delimiter=";",skip_header=1,dtype=str))
 
     with h5py.File(h5file_out,"a") as hfile:
-        # with h5py.File(h5file_in,"r") as hfilein:
         for ens in hfile:
             if str(beta) in ens and str(m0) in ens:
-                # ens_here = ens
                 for P in hfile[ens]:
                     if P[0] == "p":
                         for irrep in hfile[ens][P]:
@@ -149,7 +139,7 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
                                                     res_scat[tmp].append(hfile[ens][P][irrep][lv]["mean"][tmp][()])
                                                     res_spl_scat[tmp].append(hfile[ens][P][irrep][lv]["sample"][tmp][()])
                                         else:
-                                            raise RuntimeError("Energy not in elastic window at: %s"%(ens+P+irrep+lv))
+                                            raise ValueError("Energy not in elastic window at: %s"%(ens+P+irrep+lv))
                                     elif fit == "False":
                                         hfile[ens][P][irrep][lv]["fit"] = False
                                         pass
@@ -158,7 +148,7 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
 
         
         if res_scat == {} or len(res_scat["p2star_prime"]) < 3:
-            raise RuntimeError("Less than 3 energy levels selected in 'fit_scatter_input.csv' for beta=%f and m0%f"%(beta, m0))
+            raise RuntimeError("Less than 3 energy levels selected in 'fit_scatter_input.csv' for beta=%f and m0=%f"%(beta, m0))
 
         for key in res_scat:
             res_scat[key] = np.asarray(res_scat[key])

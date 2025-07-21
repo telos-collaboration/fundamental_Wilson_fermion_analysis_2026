@@ -154,7 +154,7 @@ def pstar_cont(Ecm, mpi):
 def pstar_ld(Ecm, mpi):
     return 2*np.arcsin(np.sqrt(0.5*(np.cosh(Ecm/2)-np.cosh(mpi))))
 
-def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
+def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld=True):
     res = {}
     key_list = ["aEn","En_prime","E_cm","E_cm_prime","s","s_prime","pstar","pstar_prime","p2star","p2star_prime","q","q2","cot_PS","tan_PS","PS", "p3cotPS", "p3cotPS_prime", "p3cotPS_Ecm", "p3cotPS_Ecm_prime", "sigma", "sigma_prime"]
 
@@ -163,6 +163,9 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     res["aEn"] = E_pipi
     res["En_prime"] = En_prime
     E_cm_prime = Ecm(ld)(E_pipi,Pvec)/mpi
+    if irrep == "T1":
+        print(E_pipi, E_cm_prime*mpi)
+        # exit()
     if E_cm_prime < 2 or E_cm_prime > 4:
         for key in key_list:
             res[key] = float(0)
@@ -193,7 +196,7 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld):
     res["N_L"] = N_L
     return res
 
-def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_resample=5):
+def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_resample=10):
     info = {}
     infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
     with h5py.File(fitresults,"r") as hfile:
@@ -201,6 +204,7 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
             for P in hfile[ens]:
                 if P[0] == "p":
                     dvec = [int(P[2]),int(P[4]),int(P[6])]
+                    # print(dvec)
                     #NOTE: Somethins is broken here with the extra irreps
                     for irrep in hfile[ens][P]:
                         if irrep != "pi":
@@ -224,6 +228,7 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                                 E = hfile[ens][P][irrep]["E"][()][i]
                                 E_m = hfile[ens][P][irrep]["Delta_E"][()][i]
                                 E_p = hfile[ens][P][irrep]["Delta_E"][()][i]
+                                # print(E,E_m)
                                 res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
                                 for key, val in info_tmp.items():
                                     info[key] = val
