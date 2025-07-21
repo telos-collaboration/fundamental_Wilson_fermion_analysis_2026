@@ -206,8 +206,11 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                         if irrep != "pi":
                             # num_lv = 1
                             # if irrep == "A1":
-                            #     num_lv = 2
-                            beta, m0, mpi, mrho, ld, num_lv = infile[1:,infile[0] == ens+P+irrep]           # should be replaced. input file not necessary
+                            #     num_lv = 2     
+                            print(ens+P+irrep)
+                            # print(infile)
+                            # print(infile.shape)
+                            beta, m0, mpi, mrho, ld, num_lv = infile[1:,infile[0] == ens+P+irrep] 
                             beta = float(beta[0])
                             m0 = float(m0[0])
                             mpi = float(mpi[0])
