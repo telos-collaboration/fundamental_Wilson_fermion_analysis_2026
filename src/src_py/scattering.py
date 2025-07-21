@@ -128,7 +128,7 @@ def cot_delta_mom(dvec, irrep):
             return cot_delta_111_E
     else:
         print("wrong momentum or irrep")
-        exit()
+        raise ValueError("wrong momentum or irrep in cot_delta_mom")
 
 def Ecm(ld):
     if ld:
@@ -163,9 +163,6 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld=True):
     res["aEn"] = E_pipi
     res["En_prime"] = En_prime
     E_cm_prime = Ecm(ld)(E_pipi,Pvec)/mpi
-    if irrep == "T1":
-        print(E_pipi, E_cm_prime*mpi)
-        # exit()
     if E_cm_prime < 2 or E_cm_prime > 4:
         for key in key_list:
             res[key] = float(0)
@@ -204,14 +201,12 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
             for P in hfile[ens]:
                 if P[0] == "p":
                     dvec = [int(P[2]),int(P[4]),int(P[6])]
-                    # print(dvec)
                     #NOTE: Somethins is broken here with the extra irreps
                     for irrep in hfile[ens][P]:
                         if irrep != "pi":
                             num_lv = 1
                             if irrep == "A1":
                                 num_lv = 2
-                            print(ens+P+irrep)
                             beta, m0, mpi, mrho, ld = infile[1:,infile[0] == ens+P+irrep]           # should be replaced. input file not necessary
                             beta = float(beta[0])
                             m0 = float(m0[0])
@@ -228,7 +223,6 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                                 E = hfile[ens][P][irrep]["E"][()][i]
                                 E_m = hfile[ens][P][irrep]["Delta_E"][()][i]
                                 E_p = hfile[ens][P][irrep]["Delta_E"][()][i]
-                                # print(E,E_m)
                                 res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
                                 for key, val in info_tmp.items():
                                     info[key] = val

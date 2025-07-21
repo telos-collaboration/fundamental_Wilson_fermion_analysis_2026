@@ -166,6 +166,8 @@ def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
     mpi, mrho, d2s, NLs, NL_invs, ECMs, ECM_errms, ECM_errps, lvs, irreps = get_data_E_CM_L(h5file_scatter, beta, m0)
     
     for i in range(len(ECMs)):
+        ECM_errms[i] = 0 if ECM_errms[i] > 1 else ECM_errms[i]
+        ECM_errps[i] = 0 if ECM_errps[i] > 1 else ECM_errps[i]
         plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(d2s[i]), marker = marker(irreps[i]))   
     plt.axhline(1,c="black", ls="dotted", label = r"$m_\pi$")
     plt.axhline(mrho/mpi,c="red", ls="dotted", label = r"$m_\rho$")
@@ -240,15 +242,20 @@ def ls_P(dvec):
     elif list(dvec) == [0,0,0]:
         return (0, (1, 1))
 
-def ms_P(dvec):
-    if list(dvec) == [0,0,1]:
-        return "*"
-    elif list(dvec) == [1,1,0] or list(dvec) == [0,1,1]:
-        return "o"
-    elif list(dvec) == [1,1,1]:
-        return "^"
+# def ms_P(dvec):
+#     if list(dvec) == [0,0,1]:
+#         return "*"
+#     elif list(dvec) == [1,1,0] or list(dvec) == [0,1,1]:
+#         return "o"
+#     elif list(dvec) == [1,1,1]:
+#         return "^"
 
 def delete_steps(arr, sign = 1, delete=True):
+    for i in range(len(arr)-1):
+        # if abs(arr[i]-arr[i+1]) > 0.1*abs(arr[i]):
+        #     arr[i] = np.nan
+        if arr[i] == 0:
+            arr[i] = np.nan
     if delete:
         for i in range(len(arr)-1):
             if arr[i+1] < sign*arr[i]: 
@@ -264,7 +271,6 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
     scat_fit_spl = {}
     scat_not_fit_mean = {}
     scat_not_fit_spl = {}
-    ind = 0
     fit_beta_m = "fit_b%f_m%f"%(beta,m0)
     with h5py.File(h5file_scatter_fit,"r") as hfile:
         for ens in hfile:
@@ -277,15 +283,18 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
                         for irrep in hfile[ens][P]:
                             for lv in hfile[ens][P][irrep]:
                                 if lv[:2] == "lv":
-                                    ind += 1
-                                    for key in hfile[ens][P][irrep][lv]["mean"]:
-                                        if hfile[ens][P][irrep][lv]["fit"][()]:
+                                    # print(ens+P+irrep+lv)
+                                    if hfile[ens][P][irrep][lv]["fit"][()]:
+                                        scat_fit_mean.setdefault("irrep",[]).append(irrep)
+                                        for key in hfile[ens][P][irrep][lv]["mean"]:
                                             if key == "dvec" or key == "N_L":
                                                 scat_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
                                             else:
                                                 scat_fit_mean.setdefault(key,[]).append(float(np.real(hfile[ens][P][irrep][lv]["mean"][key][()])))
                                                 scat_fit_spl.setdefault(key,[]).append([float(x) for x in np.real(hfile[ens][P][irrep][lv]["sample"][key][()])])
-                                        else:
+                                    else:
+                                        scat_not_fit_mean.setdefault("irrep",[]).append(irrep)
+                                        for key in hfile[ens][P][irrep][lv]["mean"]:
                                             if key == "dvec" or key == "N_L":
                                                 scat_not_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
                                             else:
@@ -303,8 +312,8 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_not_fit_mean, scat_not_fit_spl = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
     xlim = [0,3]
     ax.set_xlim(xlim)
-    # ylim = [-2,2]
-    # ax.set_ylim(ylim)
+    ylim = [-4,4]
+    ax.set_ylim(ylim)
 
     plt.xlabel(r"$p^{\star^2}/m_\pi^2$")
     x_plot       = np.asarray(scat_fit_mean["p2star_prime"])
@@ -331,14 +340,14 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
 
     for i in  range(len(x_plot)):
         if 0<x_plot[i]<3: 
-            ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+            ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = marker(scat_fit_mean["irrep"][i]),s=60)
             sorted_indices = np.argsort(x_plot_sam[i])
             ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         else:
             raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
 
     for i in  range(len(x_n_plot)):
-        ax.scatter(x_n_plot[i],y_n_plot[i], color = "grey", ls = ls_P(dvec_ns[i]), marker = ms_P(dvec_ns[i]),s=60)
+        ax.scatter(x_n_plot[i],y_n_plot[i], color = "grey", ls = ls_P(dvec_ns[i]), marker = marker(scat_not_fit_mean["irrep"][i]),s=60)
         sorted_indices = np.argsort(x_n_plot_sam[i])
         ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
 
@@ -382,8 +391,8 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_not_fit_mean, scat_not_fit_spl = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
     xlim = [4,16]
     ax.set_xlim(xlim)
-    # ylim = [-2,2]
-    # ax.set_ylim(ylim)
+    ylim = [-2,2]
+    ax.set_ylim(ylim)
 
     plt.xlabel(r"$s/m_\pi^2$")
     x_plot       = np.asarray(scat_fit_mean["s_prime"])
@@ -406,18 +415,19 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     
     dvec_ns = scat_not_fit_mean["dvec"]
     dvec_ns = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvec_ns]
+    delete = True
     for i in  range(len(x_plot)):
         if 4<x_plot[i]<16: 
-            ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = ms_P(dvecs[i]),s=60)
+            ax.scatter(x_plot[i],y_plot[i], label = "%s |P|=%i, NL=%i"%(scat_fit_mean["irrep"][i],d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = marker(scat_fit_mean["irrep"][i]),s=60)
             sorted_indices = [int(x) for x in np.argsort(x_plot_sam[i])]
-            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=delete)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         else:
             raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
 
     for i in  range(len(x_n_plot)):
-        ax.scatter(x_n_plot[i],y_n_plot[i], color = "grey", ls = ls_P(dvec_ns[i]), marker = ms_P(dvec_ns[i]),s=60)
+        ax.scatter(x_n_plot[i],y_n_plot[i], color = "grey", ls = ls_P(dvec_ns[i]), marker = marker(scat_not_fit_mean["irrep"][i]),s=60)
         sorted_indices = np.argsort(x_n_plot_sam[i])
-        ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
+        ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices],delete=delete)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
 
     xarr = np.linspace(xlim[0], xlim[1])
     
@@ -439,7 +449,7 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
         plt.fill_between(xarr, yarr_m, yarr_p, alpha = 0.3, color = "blue")
 
     if m0 == -0.867:
-        plt.axvline(5.68118973575, label="naive rho")
+        plt.axvline(5.756, label="naive rho")
 
     ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
     if outname == None:    
@@ -536,20 +546,20 @@ if __name__ == "__main__":
     # plot_E_L(h5file_scatter_fit,7.05,-0.867,False,outname="res")
     # plot_E_L(h5file_scatter_fit,7.05,-0.867,True,outname="res")
 
-    # plot_E_CM_L(h5file_scatter_fit,6.9,-0.92,False,outname="non_res",show=True)
-    # plot_E_CM_L(h5file_scatter_fit,6.9,-0.92,True,outname="non_res")
-    # plot_E_CM_L(h5file_scatter_fit,7.05,-0.863,False,outname="close_res",show=True)
-    # plot_E_CM_L(h5file_scatter_fit,7.05,-0.863,True,outname="close_res")
-    # plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,False,outname="res",show=True)
-    plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=True)
+    plot_E_CM_L(h5file_scatter_fit,6.9,-0.92,False,outname="non_res",show=False)
+    plot_E_CM_L(h5file_scatter_fit,6.9,-0.92,True,outname="non_res")
+    plot_E_CM_L(h5file_scatter_fit,7.05,-0.863,False,outname="close_res",show=False)
+    plot_E_CM_L(h5file_scatter_fit,7.05,-0.863,True,outname="close_res")
+    plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,False,outname="res",show=False)
+    plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
     plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=True)
-    # plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
-    # plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
+    plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
-    # plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
-    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=True)
-    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,False,outname="res",show=True)
+    plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
+    plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
     # plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)                  # HAS TO BE FIXED WITH NEW DATA FORMAT!!
     # plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
