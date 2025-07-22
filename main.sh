@@ -10,37 +10,34 @@ h5file_raw="data_assets/isospin1_sorted.hdf5"
 h5file_com="data_assets/isospin1_merged.hdf5"
 h5file_cor="data_assets/isospin1_corr.hdf5"
 h5file_eig="data_assets/isospin1_eigenvalues.hdf5"
-# h5file_fit="data_assets/isospin1_fitresults.hdf5"
 h5file_fit="data_assets/literature.hdf5"
-# h5file_scat="data_assets/isospin1_scattering.hdf5"
 h5file_scat="data_assets/literaure_scattering.hdf5"
 h5file_scat_fit="data_assets/isospin1_fit_scatter.hdf5"
 
 inputfiles="metadata/input_files.csv"
 infvolfile="metadata/infinite_volume.csv"
 fitparam="metadata/pipi_fitintervals_2x2.csv"
-# input_scatter="metadata/scattering_input.csv"
 input_scatter="metadata/scattering_input_literature.csv"
 fit_scatter_input="metadata/fit_scatter_input.csv"
 ensembles_list="metadata/ensembles.csv"
 
-# # update all submodules in libs/
+# update all submodules in libs/
 git submodule update --init --recursive
 julia src/scripts_julia/instantiate.jl
-# julia src/scripts_julia/parse_all_files.jl --path $raw_path --h5file $h5file_raw --inputfiles $inputfiles
-# julia src/scripts_julia/write_tables.jl --h5file $h5file_raw --outfile "$tablepath/all_runs.csv"
-# julia src/scripts_julia/write_tables.jl --h5file $h5file_raw --outfile "$tablepath/analysed_runs.csv" --ensembles_list $ensembles_list
-# julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5file_com
-# julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5file_out $h5file_cor --ensembles_list $ensembles_list
-# julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --metadata $fitparam --avg $average_equivalent_momenta
-# python3 src/src_py/fitting.py $h5file_eig $h5file_fit $fitparam
-# julia src/scripts_julia/write_table_fitres/ults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
+julia src/scripts_julia/parse_all_files.jl --path $raw_path --h5file $h5file_raw --inputfiles $inputfiles
+julia src/scripts_julia/write_tables.jl --h5file $h5file_raw --outfile "$tablepath/all_runs.csv"
+julia src/scripts_julia/write_tables.jl --h5file $h5file_raw --outfile "$tablepath/analysed_runs.csv" --ensembles_list $ensembles_list
+julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5file_com
+julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5file_out $h5file_cor --ensembles_list $ensembles_list
+julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --metadata $fitparam --avg $average_equivalent_momenta
+python3 src/src_py/fitting.py $h5file_eig $h5file_fit $fitparam
+julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
 
-# julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
-# julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath
-# julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
-# julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath
-# julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile
+julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
+julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath
+julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
+julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath
+julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile
 
 mkdir -p tmp
 bash libs/zeta/compile.sh  &> tmp/make.log
