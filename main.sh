@@ -1,5 +1,5 @@
 average_equivalent_momenta=true
-num_resample_scattering=20
+num_resample_scattering=200
 
 raw_path="./raw_data/"
 plotpath="./assets/plots/"
@@ -12,6 +12,10 @@ h5file_cor="data_assets/isospin1_corr.hdf5"
 h5file_eig="data_assets/isospin1_eigenvalues.hdf5"
 h5file_fit="data_assets/isospin1_fitresults.hdf5"
 h5file_scat="data_assets/literaure_scattering.hdf5"
+h5file_fit="data_assets/isospin1_fitresults.hdf5"
+# h5file_fit="data_assets/literature.hdf5"
+h5file_scat="data_assets/isospin1_scattering.hdf5"
+# h5file_scat="data_assets/literaure_scattering.hdf5"
 h5file_scat_fit="data_assets/isospin1_fit_scatter.hdf5"
 
 inputfiles="metadata/input_files.csv"

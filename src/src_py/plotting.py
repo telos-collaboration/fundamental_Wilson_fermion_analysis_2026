@@ -318,9 +318,9 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     fig, ax = plt.subplots()
     plt.grid()
     fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_not_fit_mean, scat_not_fit_spl = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
-    xlim = [0,3]
+    xlim = [0,0.3] if beta==6.9 else [0,3]
     ax.set_xlim(xlim)
-    ylim = [-4,4]
+    ylim = [-1,1] if beta==6.9 else [-4,4]
     ax.set_ylim(ylim)
 
     plt.xlabel(r"$p^{\star^2}/m_\pi^2$")
