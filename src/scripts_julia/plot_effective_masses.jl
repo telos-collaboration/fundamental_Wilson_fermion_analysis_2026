@@ -46,7 +46,7 @@ function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
         add_mass_band!(plt,non_interacting_energy_1P_lattice(mρ,Δmρ,px,py,pz,L)... ;color=:black,label=label1ρ)
     end
 end
-function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; plot2x2 = false)
+function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, metadata; plot2x2 = false)
     h5dset  = h5open(corr_file)
     if isfile(fitresults)
         res = h5open(fitresults)
@@ -109,15 +109,20 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; plot
                     title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, evp"
                 end
                 plt = plot(;title,legend=:outerright,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
-                
+
+                # get metadate for specific momentum
+                data = readdlm(metadata,',',skipstart=1)
+                metadata_ind = findfirst(i -> isequal(joinpath(ens,p),joinpath(data[i,1:2]...)),1:first(size(data)))
+                use3x3 = data[metadata_ind,12]
                 has3x3 = haskey(h5dset[ens][p]["A1"],"meff_3x3")
-                if has3x3
+
+                if has3x3 && use3x3
                     meff_3x3 = read(h5dset[ens][p]["A1"],"meff_3x3")
                     Δmeff_3x3 = read(h5dset[ens][p]["A1"],"Delta_meff_3x3")
                     sources_3x3 = read(h5dset[ens][p]["A1"],"sources_3x3")
                     plot_effective_masses!(plt, meff_3x3, Δmeff_3x3, sources_3x3)
                 end
-                if !has3x3 || plot2x2
+                if !(has3x3 && use3x3) || plot2x2
                     meff = read(h5dset[ens][p]["A1"],"meff")
                     Δmeff = read(h5dset[ens][p]["A1"],"Delta_meff")
                     sources = read(h5dset[ens][p]["A1"],"sources")
@@ -180,11 +185,14 @@ function parse_commandline()
         "--plotpath"
         help = "HDF5 output file containing the correlation matrices"
         required = true
+        "--metadata"
+        help = "CSV file containing the parameters for the variational analysis"
+        required = true
     end
     return parse_args(s)
 end
 function main()
     args = parse_commandline()
-    plot_effective_masses(args["h5file_eig"], args["h5file_fit"], args["infinite_volume"], args["plotpath"])
+    plot_effective_masses(args["h5file_eig"], args["h5file_fit"], args["infinite_volume"], args["plotpath"], args["metadata"])
 end
 main()

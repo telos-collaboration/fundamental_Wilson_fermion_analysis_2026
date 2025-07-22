@@ -6,9 +6,10 @@ using ScatteringI1
 using LaTeXStrings: @L_str
 using Plots: gr, plot, plot!, scatter!, savefig, backend_name
 using PDFmerger: append_pdf!
+using DelimitedFiles: readdlm
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
-function plot_eigenvalues(file,plotpath)
+function plot_eigenvalues(file,plotpath,metadata)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
 
@@ -23,8 +24,12 @@ function plot_eigenvalues(file,plotpath)
         
         for p in p_external
             p == "p(0,0,0)" && continue
-            
-            three_by_three = haskey(h5dset[ens][p],"A1/Corr3x3")
+
+            # get metadate for specific momentum
+            data = readdlm(metadata,',',skipstart=1)
+            metadata_ind = findfirst(i -> isequal(joinpath(ens,p),joinpath(data[i,1:2]...)),1:first(size(data)))
+            use3x3 = data[metadata_ind,12]
+            three_by_three = haskey(h5dset[ens][p],"A1/Corr3x3") && use3x3
 
             eigvals  = read(h5dset,joinpath(ens,p,"A1","eigvals"))
             Δeigvals = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals"))
@@ -80,11 +85,14 @@ function parse_commandline()
         "--plotpath"
         help = "HDF5 output file containing the correlation matrices"
         required = true
+        "--metadata"
+        help = "CSV file containing the parameters for the variational analysis"
+        required = true
     end
     return parse_args(s)
 end
 function main()
     args = parse_commandline()
-    plot_eigenvalues(args["h5file_in"],args["plotpath"])
+    plot_eigenvalues(args["h5file_in"],args["plotpath"],args["metadata"])
 end
 main()
