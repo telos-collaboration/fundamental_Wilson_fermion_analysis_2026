@@ -79,15 +79,16 @@ def cot_delta_110_A1(q2,N_L,mpi):                                               
     return first - second - third
 def cot_delta_110_B1(q2,N_L,mpi):                                                          # B1 (B1 or B2 in Luka? Ambiguity in sign)
     p = [1,1,0]
+    # p = [0,1,1]
     first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     second = 2*wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
     return first + second # sign of third term depends on convention. Please check!!
-# def cot_delta_110_B2(q2,N_L,mpi):                                                          # A1=B2 (B3 in Luka) # skipped for now
-#     p = [1,1,0]
-#     first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
-#     second = wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
-#     third = complex(0,1) * np.sqrt(6) * wlm(2,2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
-#     return first - second + third
+def cot_delta_110_B2(q2,N_L,mpi):                                                       # A1=B2 (B3 in Luka)
+    p = [1,1,0]
+    first = wlm(0,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    second = wlm(2,0,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    third = complex(0,1) * np.sqrt(6) * wlm(2,2,p[0],p[1],p[2],mpi,mpi,q2,int(N_L))
+    return first - second + third
 
 def cot_delta_111_A1(q2,N_L,mpi):                                                              # A1 (A2 in Luka) (formula in 1206.4141v2 different [old]) 
     p = [1,1,1]
@@ -116,6 +117,8 @@ def cot_delta_mom(dvec, irrep):
             return cot_delta_110_A1
         elif irrep == "B1":
             return cot_delta_110_B1
+        elif irrep == "B2":
+            return cot_delta_110_B2
     elif list(dvec) == [0,1,1]:
         if irrep == "A1":
             return cot_delta_110_A1
