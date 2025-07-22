@@ -36,16 +36,18 @@ if __name__ == "__main__":
 
     if done:
         with h5py.File("data_assets/literaure_scattering.hdf5","r") as hfile:
-            for ens in hfile:
-                for p in hfile[ens]:
-                    if p[0] == "p":
-                        for irrep in hfile[ens][p]:
-                            for lv in hfile[ens][p][irrep]:
-                                if lv[:2] == "lv":
-                                    E = hfile[ens][p][irrep][lv]["mean"]["aEn"][()]
-                                    E_cm_prime = hfile[ens][p][irrep][lv]["mean"]["E_cm_prime"][()]
-                                    PS = hfile[ens][p][irrep][lv]["mean"]["PS"][()]
-                                    print("%s\nE:\t%f\nEcmp:\t%f\ndelta:\t%f\n\n"%(ens,E,E_cm_prime,PS))
+            with open("assets/tables/out_literature.dat","w") as outfile:
+                for ens in hfile:
+                    for p in hfile[ens]:
+                        if p[0] == "p":
+                            for irrep in hfile[ens][p]:
+                                for lv in hfile[ens][p][irrep]:
+                                    if lv[:2] == "lv":
+                                        E = hfile[ens][p][irrep][lv]["mean"]["aEn"][()]
+                                        E_cm_prime = hfile[ens][p][irrep][lv]["mean"]["E_cm_prime"][()]
+                                        PS = hfile[ens][p][irrep][lv]["mean"]["PS"][()]
+                                        print("%s,%s,%s\nE:\t%f\nEcmp:\t%f\ndelta:\t%f\n\n"%(ens,p,irrep,E,E_cm_prime,PS))
+                                        outfile.write("%s,%s,%s\nE:\t%f\nEcmp:\t%f\ndelta:\t%f\n\n"%(ens,p,irrep,E,E_cm_prime,PS))
 
 
 

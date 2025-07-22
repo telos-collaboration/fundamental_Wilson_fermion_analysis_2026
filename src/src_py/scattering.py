@@ -215,7 +215,7 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                             m0 = float(m0[0])
                             mpi = float(mpi[0])
                             mrho = float(mrho[0])
-                            ld = bool(ld)
+                            ld = ld[0] == "True"
                             num_lv = int(num_lv[0])
                             info["beta"] = beta
                             info["m0"] = m0
