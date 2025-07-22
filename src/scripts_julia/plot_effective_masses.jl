@@ -11,9 +11,11 @@ gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
 function plot_effective_mass!(plt, meff, Δmeff ;kws...)
     T = length(meff)
-    tmax = findfirst(t->abs(Δmeff[t]/meff[t]) > 0.5, 1:T÷2)
-    tmax = isnothing(tmax) ? T÷2 : tmax - 1
-    t = 1:tmax
+    tmax1 = findfirst(t->abs(Δmeff[t]/meff[t]) > 0.4, 1:T÷2)
+    tmax1 = isnothing(tmax1) ? T÷2 : tmax1 - 1
+    tmax2 = findfirst(t->abs(Δmeff[t]/meff[t]) > 0.4, T:-1:T÷2)
+    tmax2 = isnothing(tmax2) ? T÷2 : tmax2 - 1
+    t = vcat(1:tmax1,T:-1:T-tmax2)
     scatter!(plt,t,meff[t],yerr=Δmeff[t];kws...)
 end
 function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
@@ -21,9 +23,11 @@ function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
     tmax  = 
     for i in 1:Nev
         n = Nev+1-i
-        tmax = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.5, 1:T÷2)
-        tmax = isnothing(tmax) ? T÷2 : tmax - 1
-        t = 1:tmax
+        tmax1 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.4, 1:T÷2)
+        tmax1 = isnothing(tmax1) ? T÷2 : tmax1 - 1
+        tmax2 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.4, T:-1:T÷2)
+        tmax2 = isnothing(tmax2) ? T÷2 : tmax2 - 1
+        t = vcat(1:tmax1,T:-1:T-tmax2)
         scatter!(plt,t,meff[n,t],yerr=Δmeff[n,t],label=L"\textrm{eigenvalue }~%$i~~(n_{src}=%$(sources))";kws...)
     end
 end
@@ -104,7 +108,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; plot
                 else
                     title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, evp"
                 end
-                plt = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+                plt = plot(;title,legend=:outerright,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
                 
                 has3x3 = haskey(h5dset[ens][p]["A1"],"meff_3x3")
                 if has3x3
@@ -152,7 +156,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath; plot
                     end
                 end
 
-                plot!(plt,ylims=(0.0,π/2),xlims=(1.5,T÷2+0.5),xticks=2:2:T)
+                plot!(plt,ylims=(0.0,π/2),xticks=2:2:T)
                 savefig(plt,"temp.pdf")
                 append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
             end
