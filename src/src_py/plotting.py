@@ -250,19 +250,27 @@ def ls_P(dvec):
 #     elif list(dvec) == [1,1,1]:
 #         return "^"
 
-def delete_steps(arr, sign = 1, delete=True):
-    for i in range(len(arr)-1):
-        # if abs(arr[i]-arr[i+1]) > 0.1*abs(arr[i]):
-        #     arr[i] = np.nan
+def delete_steps(arr, sign = 1, delete=False):
+    # for i in range(1,len(arr)-1):
+    #     if abs(arr[i]-arr[i+1]) > 10*abs(arr[i-1]-arr[i]):
+    #         arr[i] = np.nan
+    for i in range(1,len(arr)-1):
+        if abs(arr[i] > 1):
+            if np.sign(arr[i]) != np.sign(arr[i+1]):
+                arr[i-1] = np.nan
+                arr[i] = np.nan
+                arr[i+1] = np.nan
+    for i in range(len(arr)):
         if arr[i] == 0:
             arr[i] = np.nan
-    if delete:
-        for i in range(len(arr)-1):
-            if arr[i+1] < sign*arr[i]: 
-                arr[i] = np.nan
-        return arr
-    else:
-        return arr
+    return arr
+    # if delete:
+    #     for i in range(len(arr)-1):
+    #         if arr[i+1] < sign*arr[i]: 
+    #             arr[i] = np.nan
+    #     return arr
+    # else:
+    #     return arr
 
 def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
     fit_param_mean = {}
@@ -342,14 +350,14 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
         if 0<x_plot[i]<3: 
             ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = marker(scat_fit_mean["irrep"][i]),s=60)
             sorted_indices = np.argsort(x_plot_sam[i])
-            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         else:
             raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
 
     for i in  range(len(x_n_plot)):
         ax.scatter(x_n_plot[i],y_n_plot[i], color = "grey", ls = ls_P(dvec_ns[i]), marker = marker(scat_not_fit_mean["irrep"][i]),s=60)
         sorted_indices = np.argsort(x_n_plot_sam[i])
-        ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices],delete=True)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
+        ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
 
     xarr = np.linspace(xlim[0], xlim[1])
     
@@ -415,19 +423,18 @@ def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=Fals
     
     dvec_ns = scat_not_fit_mean["dvec"]
     dvec_ns = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvec_ns]
-    delete = True
     for i in  range(len(x_plot)):
         if 4<x_plot[i]<16: 
             ax.scatter(x_plot[i],y_plot[i], label = "%s |P|=%i, NL=%i"%(scat_fit_mean["irrep"][i],d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = marker(scat_fit_mean["irrep"][i]),s=60)
             sorted_indices = [int(x) for x in np.argsort(x_plot_sam[i])]
-            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices],delete=delete)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         else:
             raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
 
     for i in  range(len(x_n_plot)):
         ax.scatter(x_n_plot[i],y_n_plot[i], color = "grey", ls = ls_P(dvec_ns[i]), marker = marker(scat_not_fit_mean["irrep"][i]),s=60)
         sorted_indices = np.argsort(x_n_plot_sam[i])
-        ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices],delete=delete)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
+        ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
 
     xarr = np.linspace(xlim[0], xlim[1])
     
@@ -553,7 +560,7 @@ if __name__ == "__main__":
     plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,False,outname="res",show=False)
     plot_E_CM_L(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
-    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=True)
+    plot_p3cotPS(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)
     plot_p3cotPS(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
     plot_p3cotPS(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
     
