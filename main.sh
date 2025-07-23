@@ -16,7 +16,7 @@ h5file_scat_fit="data_assets/isospin1_fit_scatter.hdf5"
 
 inputfiles="metadata/input_files.csv"
 infvolfile="metadata/infinite_volume.csv"
-fitparam="metadata/pipi_fitintervals_3x3.csv"
+fitparam="metadata/pipi_fitintervals_3x3_single_exp.csv"
 input_scatter="metadata/scattering_input.csv"
 fit_scatter_input="metadata/fit_scatter_input.csv"
 ensembles_list="metadata/ensembles.csv"
