@@ -69,6 +69,7 @@ def fit_all_files(infile,outfile,parameterfile):
 
         ensemble, p, irrep, tmin1, tmax1, tmin2, tmax2, use3x3 = row[0], row[1], row[2], int(row[3]), int(row[4]), int(row[5]), int(row[6]), row[11]
         use3x3 = use3x3 == "true"
+        Nmax = int(row[12])
         # read the data from the hdf5 file
         lattice = get_hdf5_value(fid,op.join(ensemble,"lattice"))
         if use3x3 and "eigvals_3x3" in fid[op.join(ensemble,p,irrep)].keys():
@@ -91,7 +92,6 @@ def fit_all_files(infile,outfile,parameterfile):
         plotdir  = "./data_assets/plots/"
         printing = False
         plotting = False
-        Nmax = 5
 
         E1, a1, chi2_1, dof1 = fit_correlator_without_bootstrap(eig1,T,tmin1,tmax1,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
         E2, a2, chi2_2, dof2 = fit_correlator_without_bootstrap(eig2,T,tmin2,tmax2,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
