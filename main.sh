@@ -2,6 +2,7 @@ average_equivalent_momenta=true
 num_resample_scattering=20
 
 raw_path="./raw_data/"
+raw_path="/home/fabian/Dokumente/Physics/Data"
 plotpath="./assets/plots/"
 datapath="./data_assets/"
 tablepath="./assets/tables/"
@@ -24,7 +25,7 @@ ensembles_list="metadata/ensembles.csv"
 # update all submodules in libs/
 git submodule update --init --recursive
 julia src/scripts_julia/instantiate.jl
-julia src/scripts_julia/parse_all_files.jl --path $raw_path --h5file $h5file_raw --inputfiles $inputfiles
+#julia src/scripts_julia/parse_all_files.jl --path $raw_path --h5file $h5file_raw --inputfiles $inputfiles
 julia src/scripts_julia/write_tables.jl --h5file $h5file_raw --outfile "$tablepath/all_runs.csv"
 julia src/scripts_julia/write_tables.jl --h5file $h5file_raw --outfile "$tablepath/analysed_runs.csv" --ensembles_list $ensembles_list
 julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5file_com

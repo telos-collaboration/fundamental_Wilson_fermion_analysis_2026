@@ -7,6 +7,7 @@ Lt32Ls16beta6.9m-0.92,DataVSC/measurements/runsSp4/Lt32Ls16beta6.9m1-0.92m2-0.92
 Lt32Ls16beta6.9m-0.92,DataVSC/measurements/runsSp4/Lt32Ls16beta6.9m1-0.92m2-0.92/out/out_scattering_I1_h16_p110,run3
 Lt32Ls16beta6.9m-0.92,DataVSC/measurements/runsSp4/Lt32Ls16beta6.9m1-0.92m2-0.92/out/out_scattering_I1_h32,run4
 Lt32Ls16beta6.9m-0.92,DataVSC/measurements/runsSp4/Lt32Ls16beta6.9m1-0.92m2-0.92/out/out_scattering_I1_h16_g0gi,run5
+Lt32Ls20beta6.9m-0.92,DataDiaL/shared/measurementsFUN/Lt32Ls20beta6.9mas-0.92FUN/scattering/out/out_scattering_I1_run1,run1
 Lt32Ls24beta6.9m-0.92,DataVSC/measurements/Pusan/Lt32Ls24beta6.9m1-0.92m2-0.92/out/out_scattering_I1,run1
 Lt32Ls24beta6.9m-0.92,DataVSC/measurements/Pusan/Lt32Ls24beta6.9m1-0.92m2-0.92/out/out_scattering_I1_h4,run2
 Lt32Ls24beta6.9m-0.92,DataVSC/measurements/Pusan/Lt32Ls24beta6.9m1-0.92m2-0.92/out/out_scattering_I1_h16_g0gi,run3
@@ -24,10 +25,12 @@ Lt36Ls16beta7.05m-0.863,DataTursa/measurementsFUN/Lt36Ls16beta7.05mas-0.863FUN/s
 Lt36Ls24beta7.05m-0.863,DataDiaL/shared/measurementsFUN/Lt36Ls24beta7.05mas-0.863FUN/scattering/out/out_scattering_I1_run1,run1
 Lt36Ls24beta7.05m-0.863,DataDiaL/shared/measurementsFUN/Lt36Ls24beta7.05mas-0.863FUN/scattering/out/out_scattering_I1_run2,run2
 Lt36Ls36beta7.05m-0.863,DataDiaL/shared/measurementsFUN/Lt36Ls36beta7.05mas-0.863FUN/scattering/out/out_scattering_I1,run1
+Lt36Ls20beta7.05m-0.863,DataVSC/measurements/runsSp4/Lt36Ls20beta7.05m1-0.863m2-0.863/out/out_scattering_I1_run1,run1
 Lt36Ls16beta7.05m-0.867,DataSunbird/Sunbird/HiRep/runsSp4/Lt36Ls16beta7.05m1-0.867m2-0.867/out/out_scattering_I1,run1
 Lt36Ls16beta7.05m-0.867,DataSunbird/Sunbird/HiRep/runsSp4/Lt36Ls16beta7.05m1-0.867m2-0.867/out/out_scattering_I1_3x3,run2
 Lt36Ls24beta7.05m-0.867,DataVSC/measurements/runsSp4/Lt36Ls24beta7.05m1-0.867m2-0.867/out/out_scattering_I1_run2,run2
 Lt36Ls36beta7.05m-0.867,DataVSC/measurements/runsSp4/Lt36Ls36beta7.05m1-0.867m2-0.867/out/out_scattering_I1_run1,run1
+Lt36Ls36beta7.05m-0.867,DataVSC/measurements/runsSp4/Lt36Ls36beta7.05m1-0.867m2-0.867/out/out_scattering_I1_run2,run2
 Lt36Ls16beta7.2m-0.76,DataVSC/measurements/Pusan/Lt36Ls16beta7.2m1-0.76m2-0.76/out/out_scattering_I1,run1
 Lt36Ls16beta7.2m-0.76,DataVSC/measurements/Pusan/Lt36Ls16beta7.2m1-0.76m2-0.76/out/out_scattering_I1_h4,run2
 Lt32Ls16beta7.2m-0.78,DataVSC/measurements/runsSp4/Lt32Ls16beta7.2m1-0.78m2-0.78/out/out_scattering_I1,run1
