@@ -2,7 +2,6 @@ average_equivalent_momenta=true
 num_resample_scattering=20
 
 raw_path="./raw_data/"
-raw_path="/home/fabian/Dokumente/Physics/Data"
 plotpath="./assets/plots/"
 datapath="./data_assets/"
 tablepath="./assets/tables/"
