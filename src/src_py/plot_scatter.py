@@ -294,7 +294,7 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     for i in  range(len(x_plot)):
         # if 0<x_plot[i]<3: 
         if y_plot[i] != 0:
-            print(d2s[i],irreps[i],N_Ls[i],lvs[i])
+            # print(d2s[i],irreps[i],N_Ls[i],lvs[i])
             ax.scatter(x_plot[i],y_plot[i], color = color_d_irrep(d2s[i],irreps[i]), ls = ls_NL(N_Ls[i]), marker = marker_NL_lv(N_Ls[i],lvs[i]),s=60)   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
             sorted_indices = np.argsort(x_plot_sam[i])
             ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color_d_irrep(d2s[i],irreps[i]), ls = ls_NL(N_Ls[i]))
@@ -356,6 +356,6 @@ if __name__ == "__main__":
     # plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res",show=False)
     plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res",show=False)
     
-    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res",show=True)
-    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res",show=True)
-    plot_p3cotPS(h5file_scatter,7.05,-0.867,False,outname="res",show=True)
+    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res",show=False)
+    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res",show=False)
+    plot_p3cotPS(h5file_scatter,7.05,-0.867,False,outname="res",show=False)

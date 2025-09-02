@@ -6,6 +6,8 @@ from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import os
 
+num_resample=0
+
 def save_to_hdf(res,res_sample, info, ens, P, irrep, lv, outfile):
     group = ens+"/"+P+"/"+irrep+"/"+"lv"+"%i/"%lv
     with h5py.File(outfile,"a") as hfile:
@@ -51,12 +53,12 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld=False,resamp
 def result_sampled_parallel(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep):
     ld=False
     resampling="gauss"
-    num_resample=30
+    num_res=num_resample
     res = {}
     info = {}
     res_sample = {}
     info["resampling"] = resampling
-    info["num_resample"] = num_resample
+    info["num_resample"] = num_res
     info["L_prime"] = N_L*mpi
     info["dvec"] = dvec
     info["d"] = [np.sqrt(np.dot(dvec[i],dvec[i])) for i in range(len(dvec))]
@@ -69,8 +71,8 @@ def result_sampled_parallel(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep):
         res_sample[key] = []
 
     if resampling == "gauss":
-        for i in range(num_resample):
-            if i < num_resample//2:
+        for i in range(num_res):
+            if i < num_res//2:
                 E_pipi_tmp = E_pipi+abs(np.random.normal(0,E_pipi_ep))
             else:
                 E_pipi_tmp = E_pipi-abs(np.random.normal(0,E_pipi_em))
@@ -78,7 +80,7 @@ def result_sampled_parallel(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep):
             for key, val in res_tmp.items():
                 res_sample[key].append(val)
     elif resampling == "lin":
-        for E_pipi_tmp in np.linspace(E_pipi-E_pipi_em,E_pipi+E_pipi_ep, num_resample):
+        for E_pipi_tmp in np.linspace(E_pipi-E_pipi_em,E_pipi+E_pipi_ep, num_res):
             res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep,ld)
             for key, val in res_tmp.items():
                 res_sample[key].append(val)
