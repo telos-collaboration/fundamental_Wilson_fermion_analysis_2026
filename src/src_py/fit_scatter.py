@@ -58,9 +58,6 @@ def RES_Alex_BWII(p2, m_R, gVPP2, r0):                                      # po
     m_R2 = m_R**2
     k_R2 = m_R2 - 1
     return ECM/(m_R2-ECM**2)*(gVPP2*ECM**2/6*np.pi)*p2**(3/2)*(1+k_R2*r0**2)/(1+p2*r0**2)
-
-
-
     # return ECM*gVPP2*p2**(3/2)*(1+np.sqrt((k_R/2)**2-1))/(6*np.pi*ECM**2*(k_R**2-ECM**2)*(1+p2*r0**2))
 def RES_fit(p3cotPS_ECM, tan_PS, p2):                                   # all primed
     result = {}
@@ -103,7 +100,7 @@ def genfromtxt_skip_empty(filename, **kwargs):
         lines = [line for line in f if line.strip()]
         return np.genfromtxt(lines, **kwargs)
 
-def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
+def fit_one_phaseshift(h5file_out, input_file, beta, m0):
     res_scat = {}
     res_spl_scat = {}
 
@@ -126,6 +123,7 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
                                     if fit == "True":
                                         hfile[ens][P][irrep][lv]["fit"] = True
                                         p2star_prime = hfile[ens][P][irrep][lv]["mean"]["p2star_prime"][()]
+                                        print(p2star_prime)
                                         if 0 < p2star_prime < 15:
                                             if res_scat == {}:
                                                 for key in hfile[ens][P][irrep][lv]["mean"]:
@@ -173,11 +171,11 @@ def fit_one_phaseshift(h5file_in, h5file_out, input_file, beta, m0):
         # for key, val in res_spl_scat.items():
         #     hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"sample/"+key, data = val)
 
-def fit_all_phase_shifts(h5file_in, h5file_out, input_file):
+def fit_all_phase_shifts(h5file_out, input_file):
     print("Fitting phase shifts...")
-    fit_one_phaseshift(h5file_in, h5file_out, input_file,6.9,-0.92)
-    fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.863)
-    fit_one_phaseshift(h5file_in, h5file_out, input_file,7.05,-0.867)
+    fit_one_phaseshift(h5file_out, input_file,6.9,-0.92)
+    fit_one_phaseshift(h5file_out, input_file,7.05,-0.863)
+    fit_one_phaseshift(h5file_out, input_file,7.05,-0.867)
     print("Done!")
 
 
@@ -188,4 +186,4 @@ if __name__ == "__main__":
     h5file_out = args[2]
     input_file = args[3]
 
-    fit_all_phase_shifts(h5file_in, h5file_out,input_file)
+    fit_all_phase_shifts(h5file_out,input_file)
