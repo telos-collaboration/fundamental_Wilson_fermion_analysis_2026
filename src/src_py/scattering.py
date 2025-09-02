@@ -157,7 +157,7 @@ def pstar_cont(Ecm, mpi):
 def pstar_ld(Ecm, mpi):
     return 2*np.arcsin(np.sqrt(0.5*(np.cosh(Ecm/2)-np.cosh(mpi))))
 
-def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld=True):
+def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld=False):
     res = {}
     key_list = ["aEn","En_prime","E_cm","E_cm_prime","s","s_prime","pstar","pstar_prime","p2star","p2star_prime","q","q2","cot_PS","tan_PS","PS", "p3cotPS", "p3cotPS_prime", "p3cotPS_Ecm", "p3cotPS_Ecm_prime", "sigma", "sigma_prime"]
 
@@ -190,8 +190,9 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld=True):
         res["p3cotPS_prime"] = res["pstar_prime"]**3*cot_PS
         res["p3cotPS_Ecm"] = res["pstar"]**3/res["E_cm"]*cot_PS
         res["p3cotPS_Ecm_prime"] = res["pstar_prime"]**3/res["E_cm_prime"]*cot_PS
-        res["sigma"] = 4*np.pi*3/(cot_PS**2+1)/res["p2star"]
-        res["sigma_prime"] = 4*np.pi*3/(cot_PS**2+1)/res["p2star_prime"]
+        res["sigma"] = 12*np.pi*res["p2star"]**2/(res["p2star"]**3+res["p3cotPS"]**2)
+        res["sigma_prime"] = res["sigma"]*mpi**2
+        print("should be identical:\t",res["sigma_prime"],12*np.pi*res["p2star_prime"]**2/(res["p2star_prime"]**3+res["p3cotPS_prime"]**2),12*np.pi/(res["p2star_prime"]*(1+res["cot_PS"]**2)))
     res["dvec"] = "%i%i%i"%(dvec[0],dvec[1],dvec[2])
     res["N_L"] = N_L
     return res
