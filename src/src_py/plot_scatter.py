@@ -16,27 +16,68 @@ def color(level):
     colors = ["green","orange", "cyan", "blueviolet"]
     return colors[level]
     
-def marker(d2,irrep):                     # maybe to be replaced by input file
-    if d2 == 0:
-        if irrep == "T1":
+def marker_NL_lv(NL, lv):                     # maybe to be replaced by input file
+    if NL == 14:
+        if lv == 0:
             return "o"
-    elif d2 == 1:
-        if irrep == "A1":
+        elif lv == 1:
+            return "s"
+    elif NL == 16:
+        if lv == 0:
             return "*"
-        elif irrep == "E":
+        elif lv == 1:
+            return "P"
+    elif NL == 20:
+        if lv == 0:
             return "h"
-    elif d2 == 2:
-        if irrep == "A1":
-            return "^"
-        elif irrep == "B1":
-            return "v"
-    elif d2 == 3:
-        if irrep == "A1":
-            return ">"
-        elif irrep == "E":
+        elif lv == 1:
+            return "p"
+    elif NL == 24:
+        if lv == 0:
             return "<"
+        elif lv == 1:
+            return ">"
+    elif NL == 36:
+        if lv == 0:
+            return "^"
+        elif lv == 1:
+            return "v"
+        raise RuntimeError("Wrong NL or lv in marker: %i, %i"%(NL, lv))
+
+def color_d_irrep(d, irrep):
+    if d == 0:
+        if irrep == "T1":
+            return "sienna"
+    elif d == 1:
+        if irrep == "A1":
+            return "green"
+        elif irrep == "E":
+            return "darkgreen"
+    elif d == 2:
+        if irrep == "A1":
+            return "blue"
+        elif irrep == "B1":
+            return "darkblue"
+    elif d == 3:
+        if irrep == "A1":
+            return "red"
+        elif irrep == "E":
+            return "darkred"
+    raise ValueError("wrong d or irrep in color_d_irrep(): %i, %s"%(d,irrep))
+
+def ls_NL(NL):
+    if NL == 14:
+        return "solid"
+    elif NL == 16:
+        return (0,(1,1))
+    elif NL == 20:
+        return "dashed"
+    elif NL == 24:
+        return "dashdot"
+    elif NL == 36:
+        return "dotted"
     else:
-        raise RuntimeError("Wrong irrep in marker: %s"%irrep)
+        raise ValueError("Wrong NL given to ls_NL()")
 
 def E_pipi(mpi,p12,p22,L):
     return np.sqrt(mpi**2+(2*np.pi/L)**2*p12)+np.sqrt(mpi**2+(2*np.pi/L)**2*p22)  
@@ -88,10 +129,10 @@ def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
     
 
     for i in range(len(ECMs)):
-        # print(NLs[i],ECMs[i])
         ECM_errms[i] = 0 if ECM_errms[i] > 1 else ECM_errms[i]
         ECM_errps[i] = 0 if ECM_errps[i] > 1 else ECM_errps[i]
-        plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(lvs[i]), marker = marker(d2s[i],irreps[i]))   
+        # plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(lvs[i]), marker = marker(d2s[i],irreps[i]))   
+        plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color_d_irrep(d2s[i],irreps[i]), marker = marker_NL_lv(NLs[i],lvs[i]))   
     plt.axhline(1,c="black", ls="dotted", label = r"$m_\pi$")
     plt.axhline(mrho/mpi,c="red", ls="dotted", label = r"$m_\rho$")
     plt.axhline(2,c="black",label = r"2$m_\pi$")
@@ -123,13 +164,15 @@ def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
         plt.plot(xarrinv,yarr3_4, ls="solid", c=color(3))
     plt.plot([0,0],[0,0],c="grey", label = "non-int")
     plt.xlim([1/40,1/13])
-    plt.ylim([1,6])
-    # plt.ylim([2,2.5])
+    plt.ylim([1,5])
 
     for tmp in [[0,"T1"],[1,"A1"],[1,"E"],[2,"A1"],[2,"B1"],[3,"A1"],[3,"E"]]:
-        plt.scatter(x=[0,],y=[0,], color = "grey", marker = marker(tmp[0],tmp[1]), label = "|p|=%i, %s"%(tmp[0],tmp[1]))
-    for i in range(1,4):
-        plt.errorbar([0,],y=[0,],yerr=[[0,],[0,]], solid_capstyle="projecting", capsize=5, ls="", color = color(i), marker = "o", label = "|P|=%i"%(i))
+        plt.scatter(x=[-100,],y=[-100,], color = color_d_irrep(tmp[0],tmp[1]), marker = "o", label = "p=%i, %s"%(tmp[0],tmp[1]))
+    for tmp in [[14,0],[14,1],[16,0],[16,1],[24,0],[24,1],[36,0],[36,1]]:
+        plt.scatter(x=[-100,],y=[-100,], color = "grey", marker = marker_NL_lv(tmp[0],tmp[1]), label = "$N_L$=%i, lv%s"%(tmp[0],tmp[1]))
+
+    # for i in range(1,4):
+    #     plt.errorbar([0,],y=[0,],yerr=[[0,],[0,]], solid_capstyle="projecting", capsize=5, ls="", color = color(i), marker = "", label = "|P|=%i"%(i))
 
     plt.legend(loc='center right', bbox_to_anchor=(1.3, 0.5))
 
@@ -145,47 +188,6 @@ def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
     plt.clf()
 
 ########################################## Plot p3cotPS ##########################################
-
-def color_NL(NL,lv):
-    if NL == 14:
-        if lv == 0:
-            return "red"
-        elif lv == 1:
-            return "orange"
-    elif NL == 16:
-        if lv == 0:
-            return "darkred"
-        elif lv == 1:
-            return "darkorange"
-    elif NL == 20:
-        if lv == 0:
-            return "peru"
-        elif lv == 1:
-            return "saddlebrown"
-    elif NL == 24:
-        if lv == 0:
-            return "limegreen"
-        elif lv == 1:
-            return "darkgreen"
-    elif NL == 36:
-        if lv == 0:
-            return "blue"
-        elif lv == 1:
-            return "darkblue"
-
-def ls_NL(NL):
-    if NL == 14:
-        return "solid"
-    elif NL == 16:
-        return (0,(1,1))
-    elif NL == 20:
-        return "dashed"
-    elif NL == 24:
-        return "dashdot"
-    elif NL == 36:
-        return "dotted"
-    else:
-        raise ValueError("Wrong NL given to ls_NL()")
 
 def delete_steps(arr, sign = 1, delete=False):
     # for i in range(1,len(arr)-1):
@@ -230,9 +232,9 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
                             for lv in hfile[ens][P][irrep]:
                                 if lv[:2] == "lv":
                                     info.setdefault("lv",[]).append(int(lv[2:]))
+                                    info.setdefault("irrep",[]).append(irrep)
                                     # print(ens+P+irrep+lv)
                                     # if hfile[ens][P][irrep][lv]["fit"][()]:
-                                    scat_fit_mean.setdefault("irrep",[]).append(irrep)
                                     for key in hfile[ens][P][irrep][lv]["mean"]:
                                         if key == "dvec" or key == "N_L":
                                             scat_fit_mean.setdefault(key,[]).append(hfile[ens][P][irrep][lv]["mean"][key][()])
@@ -258,10 +260,10 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     plt.grid()
     info, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
     xlim = [0,0.3] if beta==6.9 else [0,3]
-    # ax.set_xlim(xlim)
+    ax.set_xlim(xlim)
     # ylim = [-1,1] if beta==6.9 else [-4,4]
     ylim = [-4,4]
-    # ax.set_ylim(ylim)
+    ax.set_ylim(ylim)
 
     plt.xlabel(r"$p^{\star^2}/m_\pi^2$")
     x_plot       = np.asarray(scat_fit_mean["p2star_prime"])
@@ -287,13 +289,14 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     # d2_ns = [np.dot(d,d) for d in dvec_ns]
 
     lvs = info["lv"]
+    irreps = info["irrep"]
 
     for i in  range(len(x_plot)):
         # if 0<x_plot[i]<3: 
-        print(i,lvs[i],N_Ls[i])
-        ax.scatter(x_plot[i],y_plot[i], label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i]), color = color_NL(N_Ls[i],lvs[i]), ls = ls_NL(N_Ls[i]), marker = marker(d2s[i],scat_fit_mean["irrep"][i]),s=60)
-        sorted_indices = np.argsort(x_plot_sam[i])
-        ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color_NL(N_Ls[i],lvs[i]), ls = ls_NL(N_Ls[i]))
+        if y_plot[i] != 0:
+            ax.scatter(x_plot[i],y_plot[i], color = color_d_irrep(d2s[i],irreps[i]), ls = ls_NL(N_Ls[i]), marker = marker_NL_lv(N_Ls[i],lvs[i]),s=60)   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
+            sorted_indices = np.argsort(x_plot_sam[i])
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color_d_irrep(d2s[i],irreps[i]), ls = ls_NL(N_Ls[i]))
         # else:
         #     raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
 
@@ -320,6 +323,11 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     #     plt.plot(xarr,yarr, color = "blue")
     #     plt.fill_between(xarr, yarr_m, yarr_p, alpha = 0.3, color = "blue")
 
+    for tmp in [[0,"T1"],[1,"A1"],[1,"E"],[2,"A1"],[2,"B1"],[3,"A1"],[3,"E"]]:
+        plt.scatter(x=[-100,],y=[-100,], color = color_d_irrep(tmp[0],tmp[1]), marker = "o", label = "p=%i, %s"%(tmp[0],tmp[1]))
+    for tmp in [[14,0],[14,1],[16,0],[16,1],[24,0],[24,1],[36,0],[36,1]]:
+        plt.scatter(x=[-100,],y=[-100,], color = "grey", marker = marker_NL_lv(tmp[0],tmp[1]), label = "$N_L$=%i, lv%s"%(tmp[0],tmp[1]))
+
     ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
     if outname == None:    
         plt.savefig(op.join(PLTDIR, "p3cotPS_b%f_m0%f_%r.pdf"%(beta,m0,fit)), bbox_inches='tight')
@@ -331,155 +339,6 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
 
 def p2_s_prime(s):
     return s/4-1
-
-# def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
-#     plt.rcParams['figure.figsize'] = [10, 6]
-#     fontsize = 14
-#     font = {'size'   : fontsize}
-#     matplotlib.rc('font', **font)
-#     fig, ax = plt.subplots()
-#     plt.grid()
-#     fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_not_fit_mean, scat_not_fit_spl = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
-#     xlim = [4,16]
-#     ax.set_xlim(xlim)
-#     ylim = [-2,2]
-#     ax.set_ylim(ylim)
-
-#     plt.xlabel(r"$s/m_\pi^2$")
-#     x_plot       = np.asarray(scat_fit_mean["s_prime"])
-#     x_plot_sam   = np.asarray(scat_fit_spl["s_prime"])
-#     y_plot       = np.asarray(scat_fit_mean["p3cotPS_Ecm_prime"])
-#     y_plot_sam   = np.asarray(scat_fit_spl["p3cotPS_Ecm_prime"])
-#     x_n_plot     = np.asarray(scat_not_fit_mean["s_prime"])                                        # n marks that it was not fitted
-#     x_n_plot_sam = np.asarray(scat_not_fit_spl["s_prime"])
-#     y_n_plot     = np.asarray(scat_not_fit_mean["p3cotPS_Ecm_prime"])
-#     y_n_plot_sam = np.asarray(scat_not_fit_spl["p3cotPS_Ecm_prime"])
-#     plt.ylabel(r"$p^3\, \cot(\delta)/(E_{cm}m_\pi^2$")
-    
-#     length = len(x_plot_sam[0])
-#     num_perc = math.erf(1/np.sqrt(2))
-    
-#     N_Ls = [int(x) for x in scat_fit_mean["N_L"]]
-#     dvecs = scat_fit_mean["dvec"]
-#     dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
-#     d2s = [np.dot(d,d) for d in dvecs]
-    
-#     dvec_ns = scat_not_fit_mean["dvec"]
-#     dvec_ns = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvec_ns]
-#     for i in  range(len(x_plot)):
-#         if 4<x_plot[i]<16: 
-#             ax.scatter(x_plot[i],y_plot[i], label = "%s |P|=%i, NL=%i"%(scat_fit_mean["irrep"][i],d2s[i],N_Ls[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]), marker = marker(scat_fit_mean["irrep"][i]),s=60)
-#             sorted_indices = [int(x) for x in np.argsort(x_plot_sam[i])]
-#             ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-#         else:
-#             raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
-
-#     for i in  range(len(x_n_plot)):
-#         ax.scatter(x_n_plot[i],y_n_plot[i], color = "grey", ls = ls_P(dvec_ns[i]), marker = marker(scat_not_fit_mean["irrep"][i]),s=60)
-#         sorted_indices = np.argsort(x_n_plot_sam[i])
-#         ax.plot(x_n_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_n_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = ls_P(dvec_ns[i]))
-
-#     xarr = np.linspace(xlim[0], xlim[1])
-    
-#     if fit:
-#         p2arr = [p2_s_prime(s) for s in xarr]
-#         m_R = fit_param_mean["m_R_D"]
-#         gVPP2 = fit_param_mean["gVPP2_D"]
-
-#         m_R_smp = fit_param_spl["m_R_D"]
-#         gVPP2_smp = fit_param_spl["gVPP2_D"]
-
-#         yarr = [fit_scatter.RES_Drach(x,m_R,gVPP2) for x in p2arr]
-#         yarr_smp = [sorted([fit_scatter.RES_Drach(x,m_R_smp[i],gVPP2_smp[i]) for i in range(len(m_R_smp))]) for x in p2arr]
-
-#         yarr_m = [yarr_smp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(yarr_smp))]
-#         yarr_p = [yarr_smp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(yarr_smp))]
-
-#         plt.plot(xarr,yarr, color = "blue")
-#         plt.fill_between(xarr, yarr_m, yarr_p, alpha = 0.3, color = "blue")
-
-#     if m0 == -0.867:
-#         plt.axvline(5.756, label="naive rho")
-
-#     ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
-#     if outname == None:    
-#         plt.savefig(op.join(PLTDIR, "p3cotPS_Ecm_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit)), bbox_inches='tight')
-#     else:    
-#         plt.savefig(op.join(PLTDIR, "p3cotPS_Ecm_"+outname+"_fit_%r.pdf"%fit), bbox_inches='tight')
-#     if show:
-#         plt.show()
-#     plt.close(fig)
-
-########################################## Plot sigma1 ##########################################
-
-def sigma_ERE_s_wave(s, a, r):
-    p2 = p2_s_prime(s)
-    if p2 == 0:
-        return 0
-    cot_PS = (-1/a+p2*r/2)/np.sqrt(p2)
-    return 4*np.pi/(cot_PS**2+1)/p2
-    
-def sigma_of_P3cotPS(P3cotPS, p2):
-    if p2 == 0:
-        return 0
-    else:
-        cot_PS = P3cotPS/(p2**(3/2))
-        return 4*np.pi*3/(cot_PS**2+1)/p2
-
-def plot_sigma_1(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):         # HAS TO BE FIXED WITH NEW data format!!!
-    
-    plt.rcParams['figure.figsize'] = [10, 6]
-    fontsize = 14
-    font = {'size'   : fontsize}
-    matplotlib.rc('font', **font)
-    fig, ax = plt.subplots()
-    plt.grid()
-    res, res_smp = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
-
-    xlim = [4,6.5]
-
-    plt.xlabel(r"$s/m_\pi^2$")
-    x_plot_sam = np.transpose(res_smp["s_prime"])
-
-    plt.ylabel(r"$\sigma m_\pi^2$")        
-    
-    length = len(x_plot_sam[0])
-    num_perc = math.erf(1/np.sqrt(2))
-
-    sarr = np.linspace(xlim[0],xlim[1],5000)
-    p2arr = [x/4-1 for x in sarr]
-
-    yarr_14 = [sigma_ERE_s_wave(s, 0.52, 6.7) for s in sarr]
-
-    plt.plot(sarr, yarr_14, color = "red", label = "2405.06506")
-    a1_1 = res["a1_1"]
-    r1_1 = res["r1_1"]
-
-    a1_1_smp = res_smp["a1_1"]
-    r1_1_smp = res_smp["r1_1"]
-
-    yarr = [sigma_of_P3cotPS(fit_scatter.ERE_1(x,a1_1,r1_1), x) for x in p2arr]
-    plt.plot(sarr,yarr,label="This work")
-
-    yarr_smp = []
-    for p2 in p2arr:
-        p3cotPS_smp = [fit_scatter.ERE_1(p2,a1_1_smp[i],r1_1_smp[i]) for i in range(len(a1_1_smp))]
-        sorted_indices = np.argsort(p3cotPS_smp)[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)]
-        yarr_smp.append(np.asarray([sigma_of_P3cotPS(fit_scatter.ERE_1(p2,a1_1_smp[i],r1_1_smp[i]), p2) for i in range(len(a1_1_smp))])[sorted_indices])
-
-
-    yarr_m = [min(yarr_smp[i]) for i in range(len(yarr_smp))]
-    yarr_p = [max(yarr_smp[i]) for i in range(len(yarr_smp))]
-
-    plt.fill_between(sarr, yarr_m, yarr_p, alpha = 0.3)
-
-    if outname == None:    
-        plt.savefig(op.join(PLTDIR,"scattering/sigma1_b%f_m0%f_fit_%r.pdf"%(beta,m0,fit)), bbox_inches='tight')
-    else:    
-        plt.savefig(op.join(PLTDIR,"sigma1_"+outname+"_fit_%r.pdf"%fit), bbox_inches='tight')
-    if show:
-        plt.show()
-    plt.close(fig)
 
 if __name__ == "__main__":
 
@@ -496,14 +355,6 @@ if __name__ == "__main__":
     # plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res",show=False)
     plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res",show=False)
     
-    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res",show=False)
-    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res",show=False)
+    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res",show=True)
+    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res",show=True)
     plot_p3cotPS(h5file_scatter,7.05,-0.867,False,outname="res",show=True)
-    
-    # plot_p3cotPS_ECM(h5file_scatter_fit,6.9,-0.92,False,outname="non_res",show=False)
-    # plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.863,False,outname="close_res",show=False)
-    # plot_p3cotPS_ECM(h5file_scatter_fit,7.05,-0.867,False,outname="res",show=False)
-    
-    # plot_sigma_1(h5file_scatter_fit,6.9,-0.92,True,outname="non_res",show=False)                  # HAS TO BE FIXED WITH NEW DATA FORMAT!!
-    # plot_sigma_1(h5file_scatter_fit,7.05,-0.863,True,outname="close_res",show=False)
-    # plot_sigma_1(h5file_scatter_fit,7.05,-0.867,True,outname="res",show=False)
