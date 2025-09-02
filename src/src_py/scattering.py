@@ -3,6 +3,8 @@ import h5py
 import sys
 from pylink_wlm import wlm_func_c as wlm
 from tqdm import tqdm
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import os
 
 def save_to_hdf(res,res_sample, info, ens, P, irrep, lv, outfile):
     group = ens+"/"+P+"/"+irrep+"/"+"lv"+"%i/"%lv
@@ -14,7 +16,7 @@ def save_to_hdf(res,res_sample, info, ens, P, irrep, lv, outfile):
         for key, val in info.items():
             hfile.create_dataset(group+"info/"+key, data = val)
 
-def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld,resampling="gauss",num_resample=50):
+def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld=False,resampling="gauss",num_resample=50):
     res = {}
     info = {}
     res_sample = {}
@@ -41,6 +43,42 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld,resampling="
                 res_sample[key].append(val)
     elif resampling == "lin":
         for E_pipi_tmp in tqdm(np.linspace(E_pipi-E_pipi_em,E_pipi+E_pipi_ep, num_resample)):
+            res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep,ld)
+            for key, val in res_tmp.items():
+                res_sample[key].append(val)
+    return res, res_sample, info
+
+def result_sampled_parallel(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep):
+    ld=False
+    resampling="gauss"
+    num_resample=30
+    res = {}
+    info = {}
+    res_sample = {}
+    info["resampling"] = resampling
+    info["num_resample"] = num_resample
+    info["L_prime"] = N_L*mpi
+    info["dvec"] = dvec
+    info["d"] = [np.sqrt(np.dot(dvec[i],dvec[i])) for i in range(len(dvec))]
+    info["d2"] = [np.dot(dvec[i],dvec[i]) for i in range(len(dvec))]
+
+
+    for key, val in get_rizz(E_pipi,N_L,dvec,mpi,irrep,ld).items():
+        res[key] = val
+    for key in res.keys():
+        res_sample[key] = []
+
+    if resampling == "gauss":
+        for i in range(num_resample):
+            if i < num_resample//2:
+                E_pipi_tmp = E_pipi+abs(np.random.normal(0,E_pipi_ep))
+            else:
+                E_pipi_tmp = E_pipi-abs(np.random.normal(0,E_pipi_em))
+            res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep,ld)
+            for key, val in res_tmp.items():
+                res_sample[key].append(val)
+    elif resampling == "lin":
+        for E_pipi_tmp in np.linspace(E_pipi-E_pipi_em,E_pipi+E_pipi_ep, num_resample):
             res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,mpi,irrep,ld)
             for key, val in res_tmp.items():
                 res_sample[key].append(val)
@@ -215,11 +253,6 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                     #NOTE: Somethins is broken here with the extra irreps
                     for irrep in hfile[ens][P]:
                         if irrep != "pi":
-                            # num_lv = 1
-                            # if irrep == "A1":
-                            #     num_lv = 2     
-                            # print(infile)
-                            # print(infile.shape)
                             beta, m0, mpi, mrho, ld, num_lv = infile[1:,infile[0] == ens+P+irrep] 
                             beta = float(beta[0])
                             m0 = float(m0[0])
@@ -242,6 +275,74 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                                     info[key] = val
                                 save_to_hdf(res, res_sampled, info, ens, P, irrep, i, h5file)
 
+def unpack_and_run(args):
+    return result_sampled_parallel(*args)
+
+def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
+    info = {}
+    NLs, Es, E_ms, E_ps, dvecs, mpis, irreps, enss, Ps, lvs = [[],[],[],[],[],[],[],[],[],[]]
+    infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
+    with h5py.File(fitresults,"r") as hfile:
+        for ens in hfile:
+            for P in hfile[ens]:
+                if P[0] == "p":
+                    dvec = [int(P[2]),int(P[4]),int(P[6])]
+                    #NOTE: Somethins is broken here with the extra irreps
+                    for irrep in hfile[ens][P]:
+                        if irrep != "pi":
+                            beta, m0, mpi, mrho, ld, num_lv = infile[1:,infile[0] == ens+P+irrep] 
+                            beta = float(beta[0])
+                            m0 = float(m0[0])
+                            mpi = float(mpi[0])
+                            mrho = float(mrho[0])
+                            ld = ld[0] == "True"
+                            num_lv = int(num_lv[0])
+                            info["beta"] = beta
+                            info["m0"] = m0
+                            info["mpi"] = mpi
+                            info["mrho"] = mrho
+                            NL = hfile[ens]["lattice"][()][3]
+                            info["NL"] = NL
+                            for i in range(num_lv):
+                                E = hfile[ens][P][irrep]["E"][()][i]
+                                E_m = hfile[ens][P][irrep]["Delta_E"][()][i]
+                                E_p = hfile[ens][P][irrep]["Delta_E"][()][i]
+                                NLs.append(NL)
+                                Es.append(E)
+                                E_ms.append(E_m)
+                                E_ps.append(E_p)
+                                dvecs.append(dvec)
+                                mpis.append(mpi)
+                                irreps.append(irrep)
+                                enss.append(ens)
+                                Ps.append(P)
+                                lvs.append(i)
+        
+    params = list(zip(NLs, Es, E_ms, E_ps, dvecs, mpis, irreps))
+    
+    results = [None] * len(params)    
+    num_cores = os.cpu_count()
+    with ProcessPoolExecutor(max_workers=num_cores) as executor:
+        futures = {executor.submit(unpack_and_run, p): i for i, p in enumerate(params)}
+        for f in tqdm(as_completed(futures), total=len(futures)):
+            idx = futures[f]
+            results[idx] = f.result()
+    for i in range(len(results)):
+        res, res_sampled, info_tmp = results[i]
+        for key, val in info_tmp.items():
+            info[key] = val
+        save_to_hdf(res, res_sampled, info, enss[i], Ps[i], irreps[i], lvs[i], h5file)
+
+
+    
+                                # E = hfile[ens][P][irrep]["E"][()][i]
+                                # E_m = hfile[ens][P][irrep]["Delta_E"][()][i]
+                                # E_p = hfile[ens][P][irrep]["Delta_E"][()][i]
+                                # res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
+                                # for key, val in info_tmp.items():
+                                #     info[key] = val
+                                # save_to_hdf(res, res_sampled, info, ens, P, irrep, i, h5file)
+
 if __name__ == "__main__":
     # avod hard-coding of names outside of main
     args = sys.argv
@@ -250,4 +351,4 @@ if __name__ == "__main__":
     h5fileout  = args[3]
     num_resample  = int(args[4])
 
-    calc_all_phaseshifts(input_file, fitresults, h5fileout, resampling="gauss", num_resample=num_resample)
+    calc_all_phaseshifts_parallel(input_file, fitresults, h5fileout)
