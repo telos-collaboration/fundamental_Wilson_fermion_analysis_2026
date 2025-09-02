@@ -163,9 +163,10 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld=False):
 
     Pvec = [2*np.pi*x/N_L for x in dvec]
     En_prime = E_pipi/mpi
-    res["aEn"] = E_pipi
-    res["En_prime"] = En_prime
-    E_cm_prime = Ecm(ld)(E_pipi,Pvec)/mpi
+    if E_pipi**2 >= np.dot(Pvec,Pvec):
+        E_cm_prime = Ecm(ld)(E_pipi,Pvec)/mpi
+    else:
+        E_cm_prime = 0
     if E_cm_prime < 2 or E_cm_prime > 4:
         for key in key_list:
             res[key] = float(0)
@@ -192,7 +193,13 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld=False):
         res["p3cotPS_Ecm_prime"] = res["pstar_prime"]**3/res["E_cm_prime"]*cot_PS
         res["sigma"] = 12*np.pi*res["p2star"]**2/(res["p2star"]**3+res["p3cotPS"]**2)
         res["sigma_prime"] = res["sigma"]*mpi**2
-        print("should be identical:\t",res["sigma_prime"],12*np.pi*res["p2star_prime"]**2/(res["p2star_prime"]**3+res["p3cotPS_prime"]**2),12*np.pi/(res["p2star_prime"]*(1+res["cot_PS"]**2)))
+
+    res["aEn"] = E_pipi
+    res["En_prime"] = En_prime
+    res["E_cm_prime"] = E_cm_prime
+    res["E_cm"] = E_cm_prime*mpi
+    res["s_prime"] = res["E_cm_prime"]**2
+    res["s"] = res["E_cm"]**2
     res["dvec"] = "%i%i%i"%(dvec[0],dvec[1],dvec[2])
     res["N_L"] = N_L
     return res
@@ -211,7 +218,6 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                             # num_lv = 1
                             # if irrep == "A1":
                             #     num_lv = 2     
-                            print(ens+P+irrep)
                             # print(infile)
                             # print(infile.shape)
                             beta, m0, mpi, mrho, ld, num_lv = infile[1:,infile[0] == ens+P+irrep] 
