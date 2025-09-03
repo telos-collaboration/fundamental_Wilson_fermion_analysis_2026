@@ -111,8 +111,6 @@ def get_data_E_CM_L(h5file_fit, beta, m0):
                                         NLs.append(NL)
                                         aE = hfile[key][P][irrep][lv]["mean"]["E_cm_prime"][()]
                                         aEs.append(aE)
-                                        # print(aE)
-                                        # print()
                                         E_spl = sorted(hfile[key][P][irrep][lv]["sample"]["E_cm_prime"][()])
                                         length = len(E_spl)
                                         aE_ms.append(abs(aE-E_spl[math.floor(length*(1-num_perc)/2)]))
@@ -126,7 +124,6 @@ def get_data_E_CM_L(h5file_fit, beta, m0):
 def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
     
     mpi, mrho, d2s, NLs, NL_invs, ECMs, ECM_errms, ECM_errps, lvs, irreps = get_data_E_CM_L(h5file_scatter, beta, m0)
-    
 
     for i in range(len(ECMs)):
         ECM_errms[i] = 0 if ECM_errms[i] > 1 else ECM_errms[i]

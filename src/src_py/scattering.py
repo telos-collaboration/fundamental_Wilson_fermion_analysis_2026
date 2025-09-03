@@ -6,7 +6,7 @@ from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import os
 
-num_resample=0
+num_resample=None
 
 def save_to_hdf(res,res_sample, info, ens, P, irrep, lv, outfile):
     group = ens+"/"+P+"/"+irrep+"/"+"lv"+"%i/"%lv
@@ -245,7 +245,6 @@ def get_rizz(E_pipi, N_L, dvec, mpi, irrep,ld=False):
     return res
 
 def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_resample=10):
-    info = {}
     infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
     with h5py.File(fitresults,"r") as hfile:
         for ens in hfile:
@@ -262,6 +261,7 @@ def calc_all_phaseshifts(input_file, fitresults, h5file, resampling="lin",num_re
                             mrho = float(mrho[0])
                             ld = ld[0] == "True"
                             num_lv = int(num_lv[0])
+                            info = {}
                             info["beta"] = beta
                             info["m0"] = m0
                             info["mpi"] = mpi
@@ -281,7 +281,7 @@ def unpack_and_run(args):
     return result_sampled_parallel(*args)
 
 def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
-    info = {}
+    info=[]
     NLs, Es, E_ms, E_ps, dvecs, mpis, irreps, enss, Ps, lvs = [[],[],[],[],[],[],[],[],[],[]]
     infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
     with h5py.File(fitresults,"r") as hfile:
@@ -292,6 +292,7 @@ def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
                     #NOTE: Somethins is broken here with the extra irreps
                     for irrep in hfile[ens][P]:
                         if irrep != "pi":
+                            # print(ens,P,irrep)
                             beta, m0, mpi, mrho, ld, num_lv = infile[1:,infile[0] == ens+P+irrep] 
                             beta = float(beta[0])
                             m0 = float(m0[0])
@@ -299,13 +300,14 @@ def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
                             mrho = float(mrho[0])
                             ld = ld[0] == "True"
                             num_lv = int(num_lv[0])
-                            info["beta"] = beta
-                            info["m0"] = m0
-                            info["mpi"] = mpi
-                            info["mrho"] = mrho
-                            NL = hfile[ens]["lattice"][()][3]
-                            info["NL"] = NL
                             for i in range(num_lv):
+                                info.append({})
+                                info[-1]["beta"] = beta
+                                info[-1]["m0"] = m0
+                                info[-1]["mpi"] = mpi
+                                info[-1]["mrho"] = mrho
+                                NL = hfile[ens]["lattice"][()][3]
+                                info[-1]["NL"] = NL
                                 E = hfile[ens][P][irrep]["E"][()][i]
                                 E_m = hfile[ens][P][irrep]["Delta_E"][()][i]
                                 E_p = hfile[ens][P][irrep]["Delta_E"][()][i]
@@ -332,8 +334,8 @@ def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
     for i in range(len(results)):
         res, res_sampled, info_tmp = results[i]
         for key, val in info_tmp.items():
-            info[key] = val
-        save_to_hdf(res, res_sampled, info, enss[i], Ps[i], irreps[i], lvs[i], h5file)
+            info[i][key] = val
+        save_to_hdf(res, res_sampled, info[i], enss[i], Ps[i], irreps[i], lvs[i], h5file)
 
 
     
@@ -351,6 +353,5 @@ if __name__ == "__main__":
     input_file = args[1]
     fitresults = args[2]
     h5fileout  = args[3]
-    num_resample  = int(args[4])
 
     calc_all_phaseshifts_parallel(input_file, fitresults, h5fileout)
