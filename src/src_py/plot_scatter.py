@@ -16,54 +16,52 @@ def color(level):
     colors = ["green","orange", "cyan", "blueviolet"]
     return colors[level]
     
-def marker_NL_lv(NL, lv):                     # maybe to be replaced by input file
+def marker_NL(NL):                     # maybe to be replaced by input file
     if NL == 14:
-        if lv == 0:
-            return "o"
-        elif lv == 1:
-            return "s"
+        return "D"
     elif NL == 16:
-        if lv == 0:
-            return "*"
-        elif lv == 1:
-            return "P"
+        return "p"
     elif NL == 20:
-        if lv == 0:
-            return "h"
-        elif lv == 1:
-            return "p"
+        return "X"
     elif NL == 24:
-        if lv == 0:
-            return "<"
-        elif lv == 1:
-            return ">"
+        return "o"
     elif NL == 36:
-        if lv == 0:
-            return "^"
-        elif lv == 1:
-            return "v"
-        raise RuntimeError("Wrong NL or lv in marker: %i, %i"%(NL, lv))
+        return "*"
+    else:
+        raise RuntimeError("Wrong NL in marker: NL=%i"%(NL))
+    
+def ms_p(p):                     # maybe to be replaced by input file
+    if p == 0:
+        return 3
+    elif p == 1:
+        return 4
+    elif p == 2:
+        return 5
+    elif p == 3:
+        return 6
+    else:
+        raise RuntimeError("Wrong p in ms_p: %i, %i"%(p))
 
-def color_d_irrep(d, irrep):
-    if d == 0:
-        if irrep == "T1":
-            return "sienna"
-    elif d == 1:
-        if irrep == "A1":
-            return "green"
-        elif irrep == "E":
-            return "darkgreen"
-    elif d == 2:
-        if irrep == "A1":
-            return "blue"
-        elif irrep == "B1":
-            return "darkblue"
-    elif d == 3:
-        if irrep == "A1":
+def color_irrep_lv(irrep,lv,p):
+    if irrep == "A1":
+        if lv == 0:
             return "red"
-        elif irrep == "E":
+        elif lv == 1:
             return "darkred"
-    raise ValueError("wrong d or irrep in color_d_irrep(): %i, %s"%(d,irrep))
+    elif irrep == "E":
+        if lv == 0:
+            return "blue"
+        elif lv == 1:
+            return "darkblue"
+    elif irrep == "B1":
+        if lv == 0:
+            return "green"
+        elif lv == 1:
+            return "darkgreen"
+    elif irrep == "T1":
+        if lv == 0:
+            return "peru"
+    raise ValueError("wrong irrep or lv in color_irrep_lv(): %i, %i"%(irrep,lv))
 
 def ls_NL(NL):
     if NL == 14:
@@ -78,6 +76,69 @@ def ls_NL(NL):
         return "dotted"
     else:
         raise ValueError("Wrong NL given to ls_NL()")
+    
+# def marker_NL_lv(NL, lv):                     # maybe to be replaced by input file
+#     if NL == 14:
+#         if lv == 0:
+#             return "o"
+#         elif lv == 1:
+#             return "s"
+#     elif NL == 16:
+#         if lv == 0:
+#             return "*"
+#         elif lv == 1:
+#             return "P"
+#     elif NL == 20:
+#         if lv == 0:
+#             return "h"
+#         elif lv == 1:
+#             return "p"
+#     elif NL == 24:
+#         if lv == 0:
+#             return "<"
+#         elif lv == 1:
+#             return ">"
+#     elif NL == 36:
+#         if lv == 0:
+#             return "^"
+#         elif lv == 1:
+#             return "v"
+#         raise RuntimeError("Wrong NL or lv in marker: %i, %i"%(NL, lv))
+
+# def color_d_irrep(d, irrep):
+#     if d == 0:
+#         if irrep == "T1":
+#             return "sienna"
+#     elif d == 1:
+#         if irrep == "A1":
+#             return "green"
+#         elif irrep == "E":
+#             return "darkgreen"
+#     elif d == 2:
+#         if irrep == "A1":
+#             return "blue"
+#         elif irrep == "B1":
+#             return "darkblue"
+#     elif d == 3:
+#         if irrep == "A1":
+#             return "red"
+#         elif irrep == "E":
+#             return "darkred"
+#     raise ValueError("wrong d or irrep in color_d_irrep(): %i, %s"%(d,irrep))
+
+# def ls_NL(NL):
+#     if NL == 14:
+#         return "solid"
+#     elif NL == 16:
+#         return (0,(1,1))
+#     elif NL == 20:
+#         return "dashed"
+#     elif NL == 24:
+#         return "dashdot"
+#     elif NL == 36:
+#         return "dotted"
+#     else:
+#         raise ValueError("Wrong NL given to ls_NL()")
 
 def E_pipi(mpi,p12,p22,L):
     return np.sqrt(mpi**2+(2*np.pi/L)**2*p12)+np.sqrt(mpi**2+(2*np.pi/L)**2*p22)  
@@ -128,8 +189,8 @@ def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
     for i in range(len(ECMs)):
         ECM_errms[i] = 0 if ECM_errms[i] > 1 else ECM_errms[i]
         ECM_errps[i] = 0 if ECM_errps[i] > 1 else ECM_errps[i]
-        # plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color(lvs[i]), marker = marker(d2s[i],irreps[i]))   
-        plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color_d_irrep(d2s[i],irreps[i]), marker = marker_NL_lv(NLs[i],lvs[i]))   
+        # plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color_d_irrep(d2s[i],irreps[i]), marker = marker_NL_lv(NLs[i],lvs[i]))   
+        plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, ls="", color = color_irrep_lv(irreps[i],lvs[i]), marker = marker_NL(NLs[i]), ms = ms_p(d2s[i]))   
     plt.axhline(1,c="black", ls="dotted", label = r"$m_\pi$")
     plt.axhline(mrho/mpi,c="red", ls="dotted", label = r"$m_\rho$")
     plt.axhline(2,c="black",label = r"2$m_\pi$")
@@ -163,10 +224,15 @@ def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
     plt.xlim([1/40,1/13])
     plt.ylim([1,5])
 
-    for tmp in [[0,"T1"],[1,"A1"],[1,"E"],[2,"A1"],[2,"B1"],[3,"A1"],[3,"E"]]:
-        plt.scatter(x=[-100,],y=[-100,], color = color_d_irrep(tmp[0],tmp[1]), marker = "o", label = "p=%i, %s"%(tmp[0],tmp[1]))
-    for tmp in [[14,0],[14,1],[16,0],[16,1],[24,0],[24,1],[36,0],[36,1]]:
-        plt.scatter(x=[-100,],y=[-100,], color = "grey", marker = marker_NL_lv(tmp[0],tmp[1]), label = "$N_L$=%i, lv%s"%(tmp[0],tmp[1]))
+    # for tmp in [[0,"T1"],[1,"A1"],[1,"E"],[2,"A1"],[2,"B1"],[3,"A1"],[3,"E"]]:
+    #     plt.scatter(x=[-100,],y=[-100,], color = color_d_irrep(tmp[0],tmp[1]), marker = "o", label = "p=%i, %s"%(tmp[0],tmp[1]))
+    # for tmp in [[14,0],[14,1],[16,0],[16,1],[24,0],[24,1],[36,0],[36,1]]:
+    #     plt.scatter(x=[-100,],y=[-100,], color = "grey", marker = marker_NL_lv(tmp[0],tmp[1]), label = "$N_L$=%i, lv%s"%(tmp[0],tmp[1]))
+
+    for tmp in [["T1",0],["E",0],["B1",0],["A1",0],["A1",1]]:
+        plt.scatter(x=[-100,],y=[-100,], color = color_irrep_lv(tmp[0],tmp[1]), marker = "o", label = "%s, lv=%i"%(tmp[0],tmp[1]))
+    for tmp in [14,16,20,24,36]:
+        plt.scatter(x=[-100,],y=[-100,], color = "grey", marker = marker_NL(tmp), label = "$N_L$=%i"%(tmp))
 
     # for i in range(1,4):
     #     plt.errorbar([0,],y=[0,],yerr=[[0,],[0,]], solid_capstyle="projecting", capsize=5, ls="", color = color(i), marker = "", label = "|P|=%i"%(i))
@@ -291,10 +357,15 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     for i in  range(len(x_plot)):
         # if 0<x_plot[i]<3: 
         if y_plot[i] != 0:
-            # print(d2s[i],irreps[i],N_Ls[i],lvs[i])
-            ax.scatter(x_plot[i],y_plot[i], color = color_d_irrep(d2s[i],irreps[i]), ls = ls_NL(N_Ls[i]), marker = marker_NL_lv(N_Ls[i],lvs[i]),s=60)   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
+            # ax.scatter(x_plot[i],y_plot[i], color = color_d_irrep(d2s[i],irreps[i]), ls = ls_NL(N_Ls[i]), marker = marker_NL_lv(N_Ls[i],lvs[i]),s=60)   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
+            # sorted_indices = np.argsort(x_plot_sam[i])
+            # ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color_d_irrep(d2s[i],irreps[i]), ls = ls_NL(N_Ls[i]))
+            ax.scatter(x_plot[i],y_plot[i], color = color_irrep_lv(irreps[i],lvs[i]), ls = ls_NL(N_Ls[i]), marker = marker_NL(N_Ls[i]), s = 10*ms_p(d2s[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
             sorted_indices = np.argsort(x_plot_sam[i])
-            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color_d_irrep(d2s[i],irreps[i]), ls = ls_NL(N_Ls[i]))
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_irrep_lv(irreps[i],lvs[i]), ls = ls_NL(N_Ls[i]))
+        
+        
+        
         # else:
         #     raise ValueError("Fitted momentum is not in elastic threshhold in plotting.py!!!")
 
@@ -321,10 +392,15 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     #     plt.plot(xarr,yarr, color = "blue")
     #     plt.fill_between(xarr, yarr_m, yarr_p, alpha = 0.3, color = "blue")
 
-    for tmp in [[0,"T1"],[1,"A1"],[1,"E"],[2,"A1"],[2,"B1"],[3,"A1"],[3,"E"]]:
-        plt.scatter(x=[-100,],y=[-100,], color = color_d_irrep(tmp[0],tmp[1]), marker = "o", label = "p=%i, %s"%(tmp[0],tmp[1]))
-    for tmp in [[14,0],[14,1],[16,0],[16,1],[24,0],[24,1],[36,0],[36,1]]:
-        plt.scatter(x=[-100,],y=[-100,], color = "grey", marker = marker_NL_lv(tmp[0],tmp[1]), label = "$N_L$=%i, lv%s"%(tmp[0],tmp[1]))
+    # for tmp in [[0,"T1"],[1,"A1"],[1,"E"],[2,"A1"],[2,"B1"],[3,"A1"],[3,"E"]]:
+    #     plt.scatter(x=[-100,],y=[-100,], color = color_d_irrep(tmp[0],tmp[1]), marker = "o", label = "p=%i, %s"%(tmp[0],tmp[1]))
+    # for tmp in [[14,0],[14,1],[16,0],[16,1],[24,0],[24,1],[36,0],[36,1]]:
+    #     plt.scatter(x=[-100,],y=[-100,], color = "grey", marker = marker_NL_lv(tmp[0],tmp[1]), label = "$N_L$=%i, lv%s"%(tmp[0],tmp[1]))
+
+    for tmp in [["T1",0],["E",0],["B1",0],["A1",0],["A1",1]]:
+        plt.scatter(x=[-100,],y=[-100,], color = color_irrep_lv(tmp[0],tmp[1]), marker = "o", label = "%s, lv=%i"%(tmp[0],tmp[1]))
+    for tmp in [14,16,20,24,36]:
+        plt.scatter(x=[-100,],y=[-100,], color = "grey", marker = marker_NL(tmp), label = "$N_L$=%i"%(tmp))
 
     ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
     if outname == None:    
