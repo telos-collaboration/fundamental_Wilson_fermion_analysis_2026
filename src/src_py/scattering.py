@@ -355,8 +355,8 @@ if __name__ == "__main__":
     input_file = args[1]
     fitresults = args[2]
     h5fileout  = args[3]
-    resampling=args[5]
     num_res= int(args[4])
+    resampling=args[5]
 
     # calc_all_phaseshifts(input_file, fitresults, h5fileout,resampling,num_res)
     calc_all_phaseshifts_parallel(input_file, fitresults, h5fileout)

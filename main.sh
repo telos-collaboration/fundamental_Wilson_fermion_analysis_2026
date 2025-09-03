@@ -38,21 +38,21 @@ julia src/scripts_julia/instantiate.jl
 # julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5file_com
 # julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5file_out $h5file_cor --ensembles_list $ensembles_list
 # julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --metadata $fitparam --avg $average_equivalent_momenta
-python3 src/src_py/fitting.py $h5file_eig $h5file_fit $fitparam
+# python3 src/src_py/fitting.py $h5file_eig $h5file_fit $fitparam
 # julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
 
 # julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
 # julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam
 # julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
 # julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath
-julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam
+# julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam
 
-mkdir -p tmp
-bash libs/zeta/compile.sh  &> tmp/make.log
+# mkdir -p tmp
+# bash libs/zeta/compile.sh  &> tmp/make.log
 
-cp $h5file_fit $h5file_scat
-python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering
-python3 src/src_py/plot_scatter.py $plotpathscatter $h5file_scat $version
-#cp $h5file_scat $h5file_scat_fit
-#python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
+# cp $h5file_fit $h5file_scat
+# python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering gauss
+# python3 src/src_py/plot_scatter.py $plotpathscatter $h5file_scat $version
+cp $h5file_scat $h5file_scat_fit
+python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
 #python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat_fit
