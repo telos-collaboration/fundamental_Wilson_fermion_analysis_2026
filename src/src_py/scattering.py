@@ -51,9 +51,9 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld=False,resamp
     return res, res_sample, info
 
 def result_sampled_parallel(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep):
-    ld=False
-    resampling="gauss"
-    num_res=num_resample
+    ld=args[6] == "True"
+    resampling=args[5]
+    num_res= int(args[4])
     res = {}
     info = {}
     res_sample = {}
