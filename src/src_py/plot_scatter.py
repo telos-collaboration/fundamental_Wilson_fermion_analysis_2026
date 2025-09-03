@@ -345,17 +345,18 @@ if __name__ == "__main__":
 
     args = sys.argv
     PLTDIR = args[1]
-    h5file_scatter  = args[2]
+    h5file_scatter = args[2]
+    app = args[3]
 
     os.makedirs(PLTDIR, exist_ok=True)
 
     # plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res",show=False)
-    plot_E_CM_L(h5file_scatter,6.9,-0.92,True,outname="non_res")
+    plot_E_CM_L(h5file_scatter,6.9,-0.92,True,outname="non_res"+app)
     # plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res",show=False)
-    plot_E_CM_L(h5file_scatter,7.05,-0.863,True,outname="close_res")
+    plot_E_CM_L(h5file_scatter,7.05,-0.863,True,outname="close_res"+app)
     # plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res",show=False)
-    plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res",show=False)
+    plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res"+app,show=False)
     
-    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res",show=False)
-    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res",show=False)
-    plot_p3cotPS(h5file_scatter,7.05,-0.867,False,outname="res",show=False)
+    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res"+app,show=False)
+    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res"+app,show=False)
+    plot_p3cotPS(h5file_scatter,7.05,-0.867,False,outname="res"+app,show=False)
