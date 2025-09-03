@@ -50,8 +50,8 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld=False,resamp
                 res_sample[key].append(val)
     return res, res_sample, info
 
-def result_sampled_parallel(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep):
-    ld=args[6] == "True"
+def result_sampled_parallel(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld):
+    # ld=args[6] == "True"
     resampling=args[5]
     num_res= int(args[4])
     res = {}
@@ -282,7 +282,7 @@ def unpack_and_run(args):
 
 def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
     info=[]
-    NLs, Es, E_ms, E_ps, dvecs, mpis, irreps, enss, Ps, lvs = [[],[],[],[],[],[],[],[],[],[]]
+    NLs, Es, E_ms, E_ps, dvecs, mpis, irreps, enss, Ps, lvs, lds = [[],[],[],[],[],[],[],[],[],[],[]]
     infile = np.transpose(np.genfromtxt(input_file,delimiter=";",skip_header=1,dtype=str))
     with h5py.File(fitresults,"r") as hfile:
         for ens in hfile:
@@ -305,6 +305,7 @@ def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
                                 info[-1]["beta"] = beta
                                 info[-1]["m0"] = m0
                                 info[-1]["mpi"] = mpi
+                                info[-1]["ld"] = ld
                                 info[-1]["mrho"] = mrho
                                 NL = hfile[ens]["lattice"][()][3]
                                 info[-1]["NL"] = NL
@@ -321,8 +322,9 @@ def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
                                 enss.append(ens)
                                 Ps.append(P)
                                 lvs.append(i)
+                                lds.append(ld)
         
-    params = list(zip(NLs, Es, E_ms, E_ps, dvecs, mpis, irreps))
+    params = list(zip(NLs, Es, E_ms, E_ps, dvecs, mpis, irreps,lds))
     
     results = [None] * len(params)    
     num_cores = os.cpu_count()
@@ -353,5 +355,8 @@ if __name__ == "__main__":
     input_file = args[1]
     fitresults = args[2]
     h5fileout  = args[3]
+    resampling=args[5]
+    num_res= int(args[4])
 
+    # calc_all_phaseshifts(input_file, fitresults, h5fileout,resampling,num_res)
     calc_all_phaseshifts_parallel(input_file, fitresults, h5fileout)
