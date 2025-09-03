@@ -11,7 +11,7 @@
 *.pyc
 
 .snakemake/
-tmp/
-data_assets/
-raw_data/
+tmp
+data_assets
+raw_data
 !metadata/*

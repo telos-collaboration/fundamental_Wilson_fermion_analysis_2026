@@ -35,6 +35,10 @@ end
 
 function main()
     args = parse_commandline()
-    parse_all_files(args["path"],args["h5file"],args["inputfiles"])
+    if isfile(args["h5file"])
+        @warn "File $(args["h5file"]) already exists! I will do nothing"
+    else
+        parse_all_files(args["path"],args["h5file"],args["inputfiles"])
+    end
 end
 main()
