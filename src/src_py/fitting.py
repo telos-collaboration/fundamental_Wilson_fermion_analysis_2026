@@ -65,11 +65,13 @@ def fit_all_files(infile,outfile,parameterfile):
     reader = csv.reader(open(parameterfile))
     next(reader, None) # skip line containing headers
     
-    for row in tqdm((reader), total=lines , desc="Fit eigenvalues", disable=False):
+    print("Fitting of correlators started...")
+    for row in tqdm((reader), total=lines , desc="Fit eigenvalues", disable=True):
 
         ensemble, p, irrep, tmin1, tmax1, tmin2, tmax2, use3x3 = row[0], row[1], row[2], int(row[3]), int(row[4]), int(row[5]), int(row[6]), row[11]
         use3x3 = use3x3 == "true"
         Nmax = int(row[12])
+        print(f"{ensemble},{irrep},{p}")
         # read the data from the hdf5 file
         lattice = get_hdf5_value(fid,op.join(ensemble,"lattice"))
         if use3x3 and "eigvals_3x3" in fid[op.join(ensemble,p,irrep)].keys():
@@ -194,6 +196,7 @@ def fit_all_files(infile,outfile,parameterfile):
         f.create_dataset(op.join(ensemble,p,irrep,"dof0"), data=dof1)
         f.create_dataset(op.join(ensemble,p,irrep,"dof1"), data=dof2)
         f.close()
+    print("Fitting of correlators finished.")
 
 args = sys.argv
 infile         = args[1]
