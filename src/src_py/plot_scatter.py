@@ -93,69 +93,6 @@ def ls_NL(NL):
         return "dotted"
     else:
         raise ValueError("Wrong NL given to ls_NL()")
-    
-# def marker_NL_lv(NL, lv):                     # maybe to be replaced by input file
-#     if NL == 14:
-#         if lv == 0:
-#             return "o"
-#         elif lv == 1:
-#             return "s"
-#     elif NL == 16:
-#         if lv == 0:
-#             return "*"
-#         elif lv == 1:
-#             return "P"
-#     elif NL == 20:
-#         if lv == 0:
-#             return "h"
-#         elif lv == 1:
-#             return "p"
-#     elif NL == 24:
-#         if lv == 0:
-#             return "<"
-#         elif lv == 1:
-#             return ">"
-#     elif NL == 36:
-#         if lv == 0:
-#             return "^"
-#         elif lv == 1:
-#             return "v"
-#         raise RuntimeError("Wrong NL or lv in marker: %i, %i"%(NL, lv))
-
-# def color_d_irrep(d, irrep):
-#     if d == 0:
-#         if irrep == "T1":
-#             return "sienna"
-#     elif d == 1:
-#         if irrep == "A1":
-#             return "green"
-#         elif irrep == "E":
-#             return "darkgreen"
-#     elif d == 2:
-#         if irrep == "A1":
-#             return "blue"
-#         elif irrep == "B1":
-#             return "darkblue"
-#     elif d == 3:
-#         if irrep == "A1":
-#             return "red"
-#         elif irrep == "E":
-#             return "darkred"
-#     raise ValueError("wrong d or irrep in color_d_irrep(): %i, %s"%(d,irrep))
-
-# def ls_NL(NL):
-#     if NL == 14:
-#         return "solid"
-#     elif NL == 16:
-#         return (0,(1,1))
-#     elif NL == 20:
-#         return "dashed"
-#     elif NL == 24:
-#         return "dashdot"
-#     elif NL == 36:
-#         return "dotted"
-#     else:
-#         raise ValueError("Wrong NL given to ls_NL()")
 
 def E_pipi(mpi,p12,p22,L):
     return np.sqrt(mpi**2+(2*np.pi/L)**2*p12)+np.sqrt(mpi**2+(2*np.pi/L)**2*p22)  
@@ -315,7 +252,8 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
                                 if lv[:2] == "lv":
                                     info.setdefault("lv",[]).append(int(lv[2:]))
                                     info.setdefault("irrep",[]).append(irrep)
-                                    # print(ens+P+irrep+lv)
+                                    if hfile[ens][P][irrep][lv]["mean"]["p2star_prime"][()] > 0:
+                                        print(ens+P+irrep+lv, hfile[ens][P][irrep][lv]["mean"]["p2star_prime"][()])
                                     # if hfile[ens][P][irrep][lv]["fit"][()]:
                                     for key in hfile[ens][P][irrep][lv]["mean"]:
                                         if key == "dvec" or key == "N_L":
@@ -498,14 +436,16 @@ if __name__ == "__main__":
     # plot_E_CM_L(h5file_scatter,6.9,-0.92,True,outname="non_res_"+app)
     # plot_E_CM_L(h5file_scatter,7.05,-0.863,True,outname="close_res_"+app)
     # plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res_"+app,show=False)
-    plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app)
-    plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app)
-    plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
+    # plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app)
+    # plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app)
+    # plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
     
-    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app,show=False)
-    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app,show=False)
-    plot_p3cotPS(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
+    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app,show=True)
+    print()
+    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app,show=True)
+    print()
+    plot_p3cotPS(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=True)
     
-    plot_p3cotPS_ECM(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app,show=False)
-    plot_p3cotPS_ECM(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app,show=False)
-    plot_p3cotPS_ECM(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
+    # plot_p3cotPS_ECM(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app,show=False)
+    # plot_p3cotPS_ECM(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app,show=False)
+    # plot_p3cotPS_ECM(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
