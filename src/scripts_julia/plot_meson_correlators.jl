@@ -9,6 +9,14 @@ using PDFmerger: append_pdf!
 using Statistics: mean, std
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
+function _read_plot_correlator(plt,h5dset,ens,p,irrep;kws...)
+    if haskey(h5dset,joinpath(ens,p)) && haskey(h5dset,joinpath(ens,p,irrep))
+        C = read(h5dset,joinpath(ens,p,irrep,"C"))
+        ΔC = read(h5dset,joinpath(ens,p,irrep,"Delta_C"))
+        t = 1:length(C)
+        plot_correlator!(plt,t,C,ΔC,markersize=3;kws...)
+    end
+end
 function plot_meson_correlators(file,plotpath)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
@@ -31,25 +39,9 @@ function plot_meson_correlators(file,plotpath)
             title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(p[2:end])"
             plt = plot(;yscale=:log10,legend=:outerright,ylabel=L"$C_(t)$",xlabel=L"t",title)
 
-            if p != "p(0,0,0)"
-                if haskey(h5dset,joinpath(ens,p,"B1"))
-                    C = read(h5dset,joinpath(ens,p,"B1","C"))
-                    ΔC = read(h5dset,joinpath(ens,p,"B1","Delta_C"))
-                    plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_\rho^{B1}")
-                end
-                if haskey(h5dset,joinpath(ens,p,"E"))
-                    C = read(h5dset,joinpath(ens,p,"E","C"))
-                    ΔC = read(h5dset,joinpath(ens,p,"E","Delta_C"))
-                    plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_\rho^{E}")
-                end
-            end
-
-            if haskey(h5dset,joinpath(ens,p,"T1"))
-                C = read(h5dset,joinpath(ens,p,"T1","C"))
-                ΔC = read(h5dset,joinpath(ens,p,"T1","Delta_C"))
-                plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_\rho^{T1}")
-            end
-
+            _read_plot_correlator(plt,h5dset,ens,p,"B1";label=L"C_\rho^{B1}")
+            _read_plot_correlator(plt,h5dset,ens,p,"E";label=L"C_\rho^{E}")
+            _read_plot_correlator(plt,h5dset,ens,p,"T1";label=L"C_\rho^{T1}")
             if haskey(h5dset,joinpath(ens,p,"Cpi"))
                 C = read(h5dset,joinpath(ens,p,"Cpi"))
                 ΔC = read(h5dset,joinpath(ens,p,"Delta_Cpi"))
