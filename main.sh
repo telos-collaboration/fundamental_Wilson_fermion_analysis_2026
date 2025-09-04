@@ -38,6 +38,7 @@ julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5
 julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5file_out $h5file_cor --ensembles_list $ensembles_list
 julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --metadata $fitparam --avg $average_equivalent_momenta
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig $h5file_fit $fitparam
+python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit $fitparam
 julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
 
 julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
