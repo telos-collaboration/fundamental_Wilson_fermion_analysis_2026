@@ -23,7 +23,9 @@ h5file_scat_fit="data_assets/isospin1_fit_scatter.hdf5"
 
 inputfiles="metadata/input_files.csv"
 infvolfile="metadata/infinite_volume.csv"
-fitparam="metadata/pipi_fitintervals_3x3_yannick.csv"
+fitparam="metadata/pipi_fitintervals.csv"
+fitparam_meson="metadata/meson_fitintervals.csv"
+
 input_scatter="metadata/scattering_input.csv"
 fit_scatter_input="metadata/fit_scatter_input.csv"
 ensembles_list="metadata/ensembles.csv"
@@ -38,7 +40,7 @@ julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5
 julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5file_out $h5file_cor --ensembles_list $ensembles_list
 julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --metadata $fitparam --avg $average_equivalent_momenta
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig $h5file_fit $fitparam
-python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit $fitparam
+python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit $fitparam_meson
 julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
 
 julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
