@@ -17,84 +17,6 @@ num_perc = math.erf(1/np.sqrt(2))
 def color(level):
     colors = ["green","orange", "cyan", "blueviolet"]
     return colors[level]
-    
-# def marker_NL(NL):                     # maybe to be replaced by input file
-#     if NL == 14:
-#         return "D"
-#     elif NL == 16:
-#         return "p"
-#     elif NL == 20:
-#         return "X"
-#     elif NL == 24:
-#         return "o"
-#     elif NL == 36:
-#         return "*"
-#     else:
-#         raise RuntimeError("Wrong NL in marker: NL=%i"%(NL))
-    
-# def ms_p(p):                     # maybe to be replaced by input file
-#     if p == 0:
-#         return 3
-#     elif p == 1:
-#         return 4
-#     elif p == 2:
-#         return 5
-#     elif p == 3:
-#         return 6
-#     else:
-#         raise RuntimeError("Wrong p in ms_p: %i, %i"%(p))
-
-# def color_irrep_lv(irrep,lv,p):
-#     if irrep == "A1":
-#         if p == 1:
-#             if lv == 0:
-#                 return "red"
-#             elif lv == 1:
-#                 return "darkred"
-#         elif p == 2:
-#             if lv == 0:
-#                 return "yellow"
-#             elif lv == 1:
-#                 return "gold"
-#         elif p == 3:
-#             if lv == 0:
-#                 return "fuchsia"
-#             elif lv == 1:
-#                 return "purple"
-#     elif irrep == "E":
-#         if p == 1:
-#             if lv == 0:
-#                 return "blue"
-#             elif lv == 1:
-#                 return "darkblue"
-#         elif p == 3:
-#             if lv == 0:
-#                 return "lightseagreen"
-#             elif lv == 1:
-#                 return "mediumturquise"
-#     elif irrep == "B1":
-#         if lv == 0:
-#             return "green"
-#         elif lv == 1:
-#             return "darkgreen"
-#     elif irrep == "T1":
-#         if lv == 0:
-#             return "peru"
-#     raise ValueError("wrong irrep or lv in color_irrep_lv(): %i, %i"%(irrep,lv))
-
-# def ls_NL(NL):
-#     if NL == 14:
-#         return "solid"
-#     elif NL == 16:
-#         return (0,(1,1))
-#     elif NL == 20:
-#         return "dashed"
-#     elif NL == 24:
-#         return "dashdot"
-#     elif NL == 36:
-#         return "dotted"
-#     else:
-#         raise ValueError("Wrong NL given to ls_NL()")
 
 def E_pipi(mpi,p12,p22,L):
     return np.sqrt(mpi**2+(2*np.pi/L)**2*p12)+np.sqrt(mpi**2+(2*np.pi/L)**2*p22)  
@@ -138,9 +60,9 @@ def get_data_E_CM_L(h5file_fit, beta, m0):
                                         irreps.append(irrep)
     return mpi, mrho, d2s, NLs, NL_invs, aEs, aE_ms, aE_ps, lvs, irreps
 
-def plot_E_CM_L(h5file_scatter,beta,m0,levels=False,outname=None,show=False):
+def plot_E_CM_L(h5file_fit_scatter,beta,m0,levels=False,outname=None,show=False):
     
-    mpi, mrho, d2s, NLs, NL_invs, ECMs, ECM_errms, ECM_errps, lvs, irreps = get_data_E_CM_L(h5file_scatter, beta, m0)
+    mpi, mrho, d2s, NLs, NL_invs, ECMs, ECM_errms, ECM_errps, lvs, irreps = get_data_E_CM_L(h5file_fit_scatter, beta, m0)
 
     plot_args = list(zip(NLs,d2s,irreps,lvs))
 
@@ -234,7 +156,7 @@ def delete_steps(arr, sign = 1, delete=False):
     # else:
     #     return arr
 
-def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
+def get_data_p3cotPS(h5file_fit_scatter_fit, beta, m0):
     fit_param_mean = {}
     fit_param_spl = {}
     scat_fit_mean = {}
@@ -243,7 +165,7 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
     # scat_not_fit_mean = {}
     # scat_not_fit_spl = {}
     # fit_beta_m = "fit_b%f_m%f"%(beta,m0)
-    with h5py.File(h5file_scatter_fit,"r") as hfile:
+    with h5py.File(h5file_fit_scatter_fit,"r") as hfile:
         for ens in hfile:
             if str(beta) in ens and str(m0) in ens:
                 # for key in hfile[fit_beta_m]["mean"]:
@@ -275,14 +197,14 @@ def get_data_p3cotPS(h5file_scatter_fit, beta, m0):
                                     #             scat_not_fit_spl.setdefault(key,[]).append([float(x) for x in np.real(hfile[ens][P][irrep][lv]["sample"][key][()])])
     return info, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl# , scat_not_fit_mean, scat_not_fit_spl
 
-def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
+def plot_p3cotPS(h5file_fit_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
     matplotlib.rc('font', **font)
     fig, ax = plt.subplots()
     plt.grid()
-    info, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
+    info, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl = get_data_p3cotPS(h5file_fit_scatter_fit, beta, m0)
     xlim = [0,0.3] if beta==6.9 else [0,2.5]
     ax.set_xlim(xlim)
     ylim = [0,0.4] if beta==6.9 else [-3,1]
@@ -375,14 +297,14 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
         plt.show()
     plt.close(fig)
 
-def plot_p3cotPS_ECM(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
+def plot_p3cotPS_ECM(h5file_fit_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
     matplotlib.rc('font', **font)
     fig, ax = plt.subplots()
     plt.grid()
-    info, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl = get_data_p3cotPS(h5file_scatter_fit, beta, m0)
+    info, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl = get_data_p3cotPS(h5file_fit_scatter_fit, beta, m0)
     xlim = [4,5] if beta==6.9 else [4,15]
     ax.set_xlim(xlim)
     ylim = [0,0.2] if beta==6.9 else [-1,1]
@@ -437,24 +359,24 @@ if __name__ == "__main__":
 
     args = sys.argv
     PLTDIR = args[1]
-    h5file_scatter = args[2]
+    h5file_fit_scatter = args[2]
     app = args[3]
 
     os.makedirs(PLTDIR, exist_ok=True)
 
-    plot_E_CM_L(h5file_scatter,6.9,-0.92,True,outname="non_res_"+app)
-    plot_E_CM_L(h5file_scatter,7.05,-0.863,True,outname="close_res_"+app)
-    plot_E_CM_L(h5file_scatter,7.05,-0.867,True,outname="res_"+app,show=False)
-    plot_E_CM_L(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app)
-    plot_E_CM_L(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app)
-    plot_E_CM_L(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
+    plot_E_CM_L(h5file_fit_scatter,6.9,-0.92,True,outname="non_res_"+app)
+    plot_E_CM_L(h5file_fit_scatter,7.05,-0.863,True,outname="close_res_"+app)
+    plot_E_CM_L(h5file_fit_scatter,7.05,-0.867,True,outname="res_"+app,show=False)
+    plot_E_CM_L(h5file_fit_scatter,6.9,-0.92,False,outname="non_res_"+app)
+    plot_E_CM_L(h5file_fit_scatter,7.05,-0.863,False,outname="close_res_"+app)
+    plot_E_CM_L(h5file_fit_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
     
-    plot_p3cotPS(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app,show=True)
+    plot_p3cotPS(h5file_fit_scatter,6.9,-0.92,False,outname="non_res_"+app,show=True)
     print()
-    plot_p3cotPS(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app,show=True)
+    plot_p3cotPS(h5file_fit_scatter,7.05,-0.863,False,outname="close_res_"+app,show=True)
     print()
-    plot_p3cotPS(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=True)
+    plot_p3cotPS(h5file_fit_scatter,7.05,-0.867,False,outname="res_"+app,show=True)
     
-    # plot_p3cotPS_ECM(h5file_scatter,6.9,-0.92,False,outname="non_res_"+app,show=False)
-    # plot_p3cotPS_ECM(h5file_scatter,7.05,-0.863,False,outname="close_res_"+app,show=False)
-    # plot_p3cotPS_ECM(h5file_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
+    # plot_p3cotPS_ECM(h5file_fit_scatter,6.9,-0.92,False,outname="non_res_"+app,show=False)
+    # plot_p3cotPS_ECM(h5file_fit_scatter,7.05,-0.863,False,outname="close_res_"+app,show=False)
+    # plot_p3cotPS_ECM(h5file_fit_scatter,7.05,-0.867,False,outname="res_"+app,show=False)
