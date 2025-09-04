@@ -47,9 +47,15 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname
     if printing:
         print_fit_param(fit)
 
+    # Calculate value of correlator evaluated with the fit function
+    fitfun = make_models(T,tmin,tmax)[0].fitfcn
+    Cfit = fitfun(fit.p,t=range(abs(T)))
+    corr_fit = [C.mean for C in Cfit]
+    Delta_corr_fit = [C.sdev for C in Cfit]
+
     E, a, chi2, dof = first_fit_parameters(fit) 
     if plotting:
         os.makedirs(plotdir+plotname, exist_ok=True)
         fit.show_plots(view='ratio',save=plotdir+plotname+'/ratio.pdf')
         fit.show_plots(view='log'  ,save=plotdir+plotname+'/data.pdf')
-    return E, a, chi2, dof
+    return E, a, chi2, dof, corr_fit, Delta_corr_fit
