@@ -1,4 +1,4 @@
-def marker_NL(NL,irrep,lv,P):                     # maybe to be rePlaced by inPut file
+def marker(NL,P,irrep,lv):                     # maybe to be rePlaced by inPut file
     if NL == 14:
         return "D"
     elif NL == 16:
@@ -12,7 +12,7 @@ def marker_NL(NL,irrep,lv,P):                     # maybe to be rePlaced by inPu
     else:
         raise RuntimeError("Wrong NL in marker: NL=%i"%(NL))
     
-def ms_P(NL,irrep,lv,P):                     # maybe to be rePlaced by inPut file
+def ms(NL,P,irrep,lv):                     # maybe to be rePlaced by inPut file
     if P == 0:
         return 3
     elif P == 1:
@@ -24,7 +24,7 @@ def ms_P(NL,irrep,lv,P):                     # maybe to be rePlaced by inPut fil
     else:
         raise RuntimeError("Wrong P in ms_P: %i, %i"%(P))
 
-def color_irrep_lv(NL,irrep,lv,P):
+def color(NL,P,irrep,lv):
     if irrep == "A1":
         if P == 1:
             if lv == 0:
@@ -62,7 +62,7 @@ def color_irrep_lv(NL,irrep,lv,P):
             return "peru"
     raise ValueError("wrong irrep or lv in color_irrep_lv(): %i, %i"%(irrep,lv))
 
-def ls_NL(NL,irrep,lv,P):
+def ls(NL,P,irrep,lv):
     if NL == 14:
         return "solid"
     elif NL == 16:
