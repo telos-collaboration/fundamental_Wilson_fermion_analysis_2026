@@ -74,7 +74,9 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
                 if haskey(res,joinpath(ens,p,"pi"))
                     r = res[joinpath(ens,p,"pi")]
                     E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
-                    add_mass_band!(plt_mesons,E, ΔE;label="")
+                    tmin = read(r,"tmin") + 1
+                    tmax = read(r,"tmax") + 1
+                    add_fit_range!(plt_mesons, tmin, tmax, E, ΔE;label="")
                 end
             end
             if haskey(h5dset[ens][p],"meff_pi")
@@ -92,7 +94,9 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
                 if isfile(fitresults) haskey(res,joinpath(ens,p,"T1"))
                     r = res[joinpath(ens,p,"T1")]
                     E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1]
-                    add_mass_band!(plt_mesons,E, ΔE;label="")
+                    tmin = read(r,"tmin") + 1
+                    tmax = read(r,"tmax") + 1
+                    add_fit_range!(plt_mesons, tmin, tmax, E, ΔE;label="")
                 end
             end
 
@@ -146,18 +150,26 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
                     r = res[joinpath(ens,p,"A1")]
                     E0, ΔE0 = read(r,"E")[1], read(r,"Delta_E")[1] 
                     E1, ΔE1 = read(r,"E")[2], read(r,"Delta_E")[2]
-                    add_mass_band!(plt,E0, ΔE0;label="fit #1")
-                    add_mass_band!(plt,E1, ΔE1;label="fit #2")
+                    tmin1 = read(r,"tmin1") + 1
+                    tmax1 = read(r,"tmax1") + 1
+                    tmin2 = read(r,"tmin2") + 1
+                    tmax2 = read(r,"tmax2") + 1
+                    add_fit_range!(plt, tmin1, tmax1, E0, ΔE0;label="fit #1")
+                    add_fit_range!(plt, tmin2, tmax2, E1, ΔE1;label="fit #2")
 
                     if haskey(res,joinpath(ens,p,"B1"))
                         r = res[joinpath(ens,p,"B1")]
                         E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1]
-                        add_mass_band!(plt_mesons,E, ΔE;label="")
+                        tmin = read(r,"tmin") + 1
+                        tmax = read(r,"tmax") + 1
+                        add_fit_range!(plt_mesons, tmin, tmax, E, ΔE;label="")
                     end
                     if haskey(res,joinpath(ens,p,"E"))
                         r = res[joinpath(ens,p,"E")]
                         E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1] 
-                        add_mass_band!(plt_mesons,E, ΔE;label="")
+                        tmin = read(r,"tmin") + 1
+                        tmax = read(r,"tmax") + 1
+                        add_fit_range!(plt_mesons, tmin, tmax, E, ΔE;label="")
                     end
                 end
 
