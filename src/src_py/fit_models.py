@@ -3,7 +3,7 @@ import warnings
 # from typing import Optional, Tuple, Callable
 from scipy.optimize import curve_fit
 
-def safe_curve_fit(func, xdata, ydata, p0=None, name="", **kwargs):
+def safe_curve_fit(func, xdata, ydata, p0=None, name="",err=False, **kwargs):
     """
     Run scipy.optimize.curve_fit safely.
 
@@ -35,7 +35,8 @@ def safe_curve_fit(func, xdata, ydata, p0=None, name="", **kwargs):
             # print(f"Fit '{name}' succeeded.")
             return popt, pcov
         except (RuntimeWarning, RuntimeError, ValueError) as e:
-            print(f"⚠️ Fit '{name}' failed: {e}")
+            if err:
+                print(f"⚠️ Fit '{name}' failed: {e}")
             return None
 
 def cot(x):
@@ -47,17 +48,17 @@ class fitting_model:
         self.model = model
         self.param_names = param_names
         self.num_params = len(param_names)
-    def fit(self, xdata, ydata):
+    def fit(self, xdata, ydata,err=False):
         try:
-            # popt = safe_curve_fit(self.model, xdata, ydata, np.ones(self.num_params),self.name)[0]
-            popt = curve_fit(self.model, xdata, ydata, np.ones(self.num_params))[0]
+            popt = safe_curve_fit(self.model, xdata, ydata, np.ones(self.num_params),self.name,err)[0]
+            # popt = curve_fit(self.model, xdata, ydata, np.ones(self.num_params))[0]
             res = {}
             for i in range(self.num_params):
                 res[self.param_names[i]] = popt[i]
             return res
         except:
             return np.zeros(self.num_params)
-    
+
 def mixed_model(NR_model, R_model):
     def mixed(p2,*args):
         args_NR = args[:NR_model.num_params]

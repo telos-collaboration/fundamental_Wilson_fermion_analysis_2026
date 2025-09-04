@@ -202,7 +202,6 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
     irreps_nf = info_nf["irrep"]
     plot_args_nf = list(zip(N_Ls_nf,d2s_nf,irreps_nf,lvs_nf))
 
-
     for i in  range(len(x_plot)):
         if 0<x_plot[i]<3: 
             ax.scatter(x_plot[i],y_plot[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]), s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
