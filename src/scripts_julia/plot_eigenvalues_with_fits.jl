@@ -28,7 +28,6 @@ end
 function plot_eigenvalues(file,plotpath,metadata,fitresults)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
-
     fitres = h5open(fitresults)
 
     plotname = "eigenvalues_with_fit.pdf"

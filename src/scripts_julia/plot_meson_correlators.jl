@@ -10,20 +10,35 @@ using Statistics: mean, std
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
 function _read_plot_correlator(plt,h5dset,ens,p,irrep;kws...)
-    if haskey(h5dset,joinpath(ens,p)) && haskey(h5dset,joinpath(ens,p,irrep))
-        C = read(h5dset,joinpath(ens,p,irrep,"C"))
-        ΔC = read(h5dset,joinpath(ens,p,irrep,"Delta_C"))
-        t = 1:length(C)
-        plot_correlator!(plt,t,C,ΔC,markersize=3;kws...)
+    T = h5dset["$ens/lattice"][1]
+    t = 1:T
+    if irrep == "pi"
+        if haskey(h5dset,joinpath(ens,p)) && haskey(h5dset,joinpath(ens,p,"Cpi"))
+            C = read(h5dset,joinpath(ens,p,"Cpi"))
+            ΔC = read(h5dset,joinpath(ens,p,"Delta_Cpi"))
+            t = 1:length(C)
+            plot_correlator!(plt,t,C,ΔC,markersize=3;kws...)
+        end
+    else
+        if haskey(h5dset,joinpath(ens,p)) && haskey(h5dset,joinpath(ens,p,irrep))
+            C = read(h5dset,joinpath(ens,p,irrep,"C"))
+            ΔC = read(h5dset,joinpath(ens,p,irrep,"Delta_C"))
+            t = 1:length(C)
+            plot_correlator!(plt,t,C,ΔC,markersize=3;kws...)
+        end
     end
 end
-function plot_meson_correlators(file,plotpath)
+function plot_meson_correlators(file,plotpath,fitresults)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
+    fitres = h5open(fitresults)
 
     plotname = "meson_correlators.pdf"
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
+
+    irreps =  ["B1", "E", "T1", "pi"]
+    irrep_labels =  [L"C_\rho^{B1}", L"C_\rho^{E}", L"C_\rho^{T1}", L"C_{\pi}"]
 
     @showprogress desc="Plot single meson correlators:" for ens in ensembles
  
@@ -32,20 +47,14 @@ function plot_meson_correlators(file,plotpath)
         T, L = h5dset["$ens/lattice"][1:2]
         m0 = h5dset["$ens/quarkmasses"][1]
         ncfg  = read(h5dset,joinpath(ens,"Nconf"))
-        t = 1:T 
         
         for p in p_external
             
             title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(p[2:end])"
             plt = plot(;yscale=:log10,legend=:outerright,ylabel=L"$C_(t)$",xlabel=L"t",title)
 
-            _read_plot_correlator(plt,h5dset,ens,p,"B1";label=L"C_\rho^{B1}")
-            _read_plot_correlator(plt,h5dset,ens,p,"E";label=L"C_\rho^{E}")
-            _read_plot_correlator(plt,h5dset,ens,p,"T1";label=L"C_\rho^{T1}")
-            if haskey(h5dset,joinpath(ens,p,"Cpi"))
-                C = read(h5dset,joinpath(ens,p,"Cpi"))
-                ΔC = read(h5dset,joinpath(ens,p,"Delta_Cpi"))
-                plot_correlator!(plt,t,C,ΔC,markersize=3,label=L"C_{\pi}")
+            for (irrep,label) in zip(irreps, irrep_labels)
+                _read_plot_correlator(plt,h5dset,ens,p,irrep;label)
             end
             
             savefig(plt,"temp.pdf")
@@ -62,11 +71,14 @@ function parse_commandline()
         "--plotpath"
         help = "HDF5 output file containing the correlation matrices"
         required = true
+        "--fitresults"
+        help = "CSV file containing the parameters for the variational analysis"
+        default = ""
     end
     return parse_args(s)
 end
 function main()
     args = parse_commandline()
-    plot_meson_correlators(args["h5file_in"],args["plotpath"])
+    plot_meson_correlators(args["h5file_in"],args["plotpath"],args["fitresults"])
 end
 main()
