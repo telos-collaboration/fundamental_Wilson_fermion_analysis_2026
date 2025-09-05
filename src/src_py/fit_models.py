@@ -105,8 +105,8 @@ def BW_I(p2, m_R_I, gVPP2_I):
 def BW_II(p2, m_R_II, gVPP2_II, r0_II): 
     ECM = ECM_p2(p2)
     kR2 = m_R_II**2/4-1
-    return 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM/gVPP2_II
-    # return 0 if gVPP2_II == 0 else 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM/gVPP2_II
+    # return 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM/gVPP2_II
+    return 0 if gVPP2_II == 0 else 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM/gVPP2_II
 
 ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0"])
 ERE_1_model = fitting_model("ERE_1",ERE_1,["a1_1", "r1_1"])
@@ -125,6 +125,8 @@ for non_res_model in non_res_models:
 
 all_models = [*non_res_models,*res_models]
 # all_models = [*non_res_models,*res_models,*mixed_models]
+
+all_models_name = [[model.name, model] for model in all_models]
 
 if __name__ == "__main__":
     p2arr = [0.17046961, 0.23746778, 0.07671255, 0.13276073, 0.19855] 
