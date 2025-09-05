@@ -9,6 +9,22 @@ using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
+function _get_title(h5dset,ens,p)
+    momenta  = read(h5dset,joinpath(ens,p,"A1","momenta"))
+    sources  = read(h5dset,joinpath(ens,p,"A1","sources"))
+    gevp     = read(h5dset,joinpath(ens,p,"A1","gevp"))
+    t0       = read(h5dset,joinpath(ens,p,"A1","t0"))
+    T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
+    m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
+    ncfg  = read(h5dset,joinpath(ens,"Nconf"))
+    if gevp
+        title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)"
+    else
+        title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg"
+    end
+    return title
+end
+
 function plot_eigenvalues(file,plotpath,metadata)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
@@ -33,25 +49,14 @@ function plot_eigenvalues(file,plotpath,metadata)
 
             eigvals  = read(h5dset,joinpath(ens,p,"A1","eigvals"))
             Δeigvals = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals"))
-            momenta  = read(h5dset,joinpath(ens,p,"A1","momenta"))
-            sources  = read(h5dset,joinpath(ens,p,"A1","sources"))
             gevp     = read(h5dset,joinpath(ens,p,"A1","gevp"))
             deriv    = read(h5dset,joinpath(ens,p,"A1","deriv"))
             t0       = read(h5dset,joinpath(ens,p,"A1","t0"))
+            T, L     = read(h5dset,joinpath(ens,"lattice"))[1:2]
+
             if three_by_three
                 Δeigvals_3x3 = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals_3x3"))
                 eigvals_3x3  = read(h5dset,joinpath(ens,p,"A1","eigvals_3x3"))
-                momenta_3x3  = read(h5dset,joinpath(ens,p,"A1","momenta_3x3"))
-                sources_3x3  = read(h5dset,joinpath(ens,p,"A1","sources_3x3"))
-            end
-
-            T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
-            m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
-            ncfg  = read(h5dset,joinpath(ens,"Nconf"))
-            if gevp
-                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg, t_0 = %$(t0)"
-            else
-                title = L"{%$T} \times {%$L}^3: am^f_0={%$m0}, \mathbf{p} = %$(momenta), n_{src}=%$(sources), n_{cfg}=%$ncfg"
             end
             
             t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
@@ -59,6 +64,7 @@ function plot_eigenvalues(file,plotpath,metadata)
             t2 = filter(x->!iszero(eigvals[2,x]),t)
             f  = deriv ? abs : identity
             
+            title = _get_title(h5dset,ens,p)
             plt = plot(yscale=:log10,legend=:top)
             plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
             plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
@@ -68,8 +74,10 @@ function plot_eigenvalues(file,plotpath,metadata)
                 plot_correlator!(plt,t,f.(eigvals_3x3[2,t2]),Δeigvals_3x3[2,t2],markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
                 plot_correlator!(plt,t,f.(eigvals_3x3[3,t2]),Δeigvals_3x3[3,t2],markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
             end
-            plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
-            plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
+            if gevp
+                plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
+                plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
+            end
             
             savefig(plt,"temp.pdf")
             append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
