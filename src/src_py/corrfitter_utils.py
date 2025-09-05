@@ -49,7 +49,8 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname
 
     # Calculate value of correlator evaluated with the fit function
     fitfun = make_models(T,tmin,tmax)[0].fitfcn
-    Cfit = fitfun(fit.p,t=range(abs(T)))
+    tfit = np.linspace(0,abs(T)-1,num=1000)
+    Cfit = fitfun(fit.p,t=tfit)
     corr_fit = [C.mean for C in Cfit]
     Delta_corr_fit = [C.sdev for C in Cfit]
 
@@ -58,4 +59,4 @@ def fit_correlator_without_bootstrap(avg,T,tmin,tmax,Nmax,antisymmetric,plotname
         os.makedirs(plotdir+plotname, exist_ok=True)
         fit.show_plots(view='ratio',save=plotdir+plotname+'/ratio.pdf')
         fit.show_plots(view='log'  ,save=plotdir+plotname+'/data.pdf')
-    return E, a, chi2, dof, corr_fit, Delta_corr_fit
+    return E, a, chi2, dof, corr_fit, Delta_corr_fit, tfit

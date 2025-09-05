@@ -62,6 +62,7 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
             tmin2 = read(fitres,joinpath(ens,p,"A1","tmin2")) + 1 
             tmax1 = read(fitres,joinpath(ens,p,"A1","tmax1")) + 1
             tmax2 = read(fitres,joinpath(ens,p,"A1","tmax2")) + 1
+            tfit  = read(fitres,joinpath(ens,p,"A1","tfit")) .+ 1
 
             if three_by_three
                 Δeigvals_3x3 = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals_3x3"))
@@ -72,6 +73,9 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
             t1 = filter(x->!iszero(eigvals[1,x]),t)
             t2 = filter(x->!iszero(eigvals[2,x]),t)
             f  = deriv ? abs : identity
+            tind = deriv ? filter(i -> tfit[i] != T÷2+1, eachindex(tfit)) : eachindex(tfit)
+            tind1 = filter(i -> (deriv && tfit[i] != T÷2+1) && tmin1 < tfit[i] < tmax1 , eachindex(tfit))
+            tind2 = filter(i -> (deriv && tfit[i] != T÷2+1) && tmin2 < tfit[i] < tmax2 , eachindex(tfit))
             
             title = _get_title(h5dset,ens,p)
             plt = plot(yscale=:log10,legend=:top)
@@ -85,10 +89,10 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
                 plot_correlator!(plt,t,f.(eigvals[1,t1] ./ eigvals[1,1]),Δeigvals[1,t1] ./ eigvals[1,1],label="eigval #1")
                 plot_correlator!(plt,t,f.(eigvals[2,t2] ./ eigvals[2,1]),Δeigvals[2,t2] ./ eigvals[2,1],label="eigval #2")
             end
-            plot_correlator!(plt,[tmin1:tmax1],f.(Cfit1[tmin1:tmax1]),ΔCfit1[tmin1:tmax1],label="",lw=4,type=:ribbon)
-            plot_correlator!(plt,[tmin2:tmax2],f.(Cfit2[tmin2:tmax2]),ΔCfit2[tmin2:tmax2],label="",lw=4,type=:ribbon)
-            plot_correlator!(plt,t,f.(Cfit1[t1]),ΔCfit1[t1],label="fit #1",type=:ribbon)
-            plot_correlator!(plt,t,f.(Cfit2[t1]),ΔCfit2[t1],label="fit #2",type=:ribbon)
+            plot_correlator!(plt,tfit[tind1],f.(Cfit1[tind1]),ΔCfit1[tind1],label="",lw=4,type=:ribbon)
+            plot_correlator!(plt,tfit[tind2],f.(Cfit2[tind2]),ΔCfit2[tind2],label="",lw=4,type=:ribbon)
+            plot_correlator!(plt,tfit[tind],f.(Cfit1[tind]),ΔCfit1[tind],label="fit #1",type=:ribbon)
+            plot_correlator!(plt,tfit[tind],f.(Cfit2[tind]),ΔCfit2[tind],label="fit #2",type=:ribbon)
 
             savefig(plt,"temp.pdf")
             append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)

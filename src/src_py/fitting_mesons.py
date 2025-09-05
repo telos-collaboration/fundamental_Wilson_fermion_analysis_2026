@@ -39,7 +39,7 @@ def fit_all_files(infile,outfile,parameterfile):
         var = gv.gvar(C[:],cov[:,:])
         cor = dict(Gab=var/var[0])
             
-        E, a, chi2, dof, fit, Dfit = fit_correlator_without_bootstrap(cor,T,tmin,tmax,Nmax,False,plotname,plotdir,plotting,printing)
+        E, a, chi2, dof, fit, Dfit, tfit = fit_correlator_without_bootstrap(cor,T,tmin,tmax,Nmax,False,plotname,plotdir,plotting,printing)
         
         f.create_dataset(op.join(ensemble,p,irrep,"E"), data=[E[0].mean])
         f.create_dataset(op.join(ensemble,p,irrep,"Delta_E"), data=[E[0].sdev])
@@ -51,6 +51,7 @@ def fit_all_files(infile,outfile,parameterfile):
         f.create_dataset(op.join(ensemble,p,irrep,"tmin"), data=tmin)
         f.create_dataset(op.join(ensemble,p,irrep,"tmax"), data=tmax)
         f.create_dataset(op.join(ensemble,p,irrep,"fit"), data=fit)
+        f.create_dataset(op.join(ensemble,p,irrep,"tfit"), data=tfit)
         f.create_dataset(op.join(ensemble,p,irrep,"Delta_fit"), data=Dfit)
 
         if not op.join(ensemble,"lattice") in f.keys():

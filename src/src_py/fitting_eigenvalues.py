@@ -44,8 +44,8 @@ def fit_all_files(infile,outfile,parameterfile):
         printing = False
         plotting = False
 
-        E1, a1, chi2_1, dof1, fit1, Dfit1 = fit_correlator_without_bootstrap(eig1,T,tmin1,tmax1,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
-        E2, a2, chi2_2, dof2, fit2, Dfit2 = fit_correlator_without_bootstrap(eig2,T,tmin2,tmax2,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E1, a1, chi2_1, dof1, fit1, Dfit1, tfit = fit_correlator_without_bootstrap(eig1,T,tmin1,tmax1,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
+        E2, a2, chi2_2, dof2, fit2, Dfit2, tfit = fit_correlator_without_bootstrap(eig2,T,tmin2,tmax2,Nmax,antisymmetric,plotname,plotdir,plotting,printing)
 
         E_A1 = [E1[0].mean,E2[0].mean]
         a_A1 = [a1[0].mean,a2[0].mean]
@@ -71,6 +71,7 @@ def fit_all_files(infile,outfile,parameterfile):
         f.create_dataset(op.join(ensemble,p,irrep,"chi2_1"), data=chi2_2)
         f.create_dataset(op.join(ensemble,p,irrep,"dof0"), data=dof1)
         f.create_dataset(op.join(ensemble,p,irrep,"dof1"), data=dof2)
+        f.create_dataset(op.join(ensemble,p,irrep,"tfit"), data=tfit)
         f.create_dataset(op.join(ensemble,p,irrep,"fit0"), data=fit1)
         f.create_dataset(op.join(ensemble,p,irrep,"fit1"), data=fit2)
         f.create_dataset(op.join(ensemble,p,irrep,"Delta_fit0"), data=Dfit1)
