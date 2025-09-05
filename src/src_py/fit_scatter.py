@@ -94,13 +94,22 @@ def curve_fit_try(func, x, y, num_res):
 def get_fits(p2_data, p3cotPS_data,err=False):
     res = {}
     for model in fm.all_models:
-        model.fit(p2_data,p3cotPS_data,err)
+        tmp = model.fit(p2_data,p3cotPS_data,err)
+        for key, val in tmp.items():
+            res[key] = val
     return res
 
 def get_sampled_fits(p2_data, p3cotPS_data, p2_spl, p3cotPS_spl):
     res = get_fits(p2_data,p3cotPS_data,err=True)
-    for key, val in res:
+    popt, pcov = curve_fit(fm.ERE_1,p2_data,p3cotPS_data)
+    print(popt)
+    print(p2_data,p3cotPS_data)
+    print(p2_spl[1],p3cotPS_spl[1])
+    print("hey")
+    # print(res)
+    for key, val in res.items():
         print(key, val)
+    # exit()
     res_spl = {}
     for key in res:
         res_spl[key] = []
@@ -176,8 +185,12 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
         p2_spl = res_spl_scat["p2star_prime"]
         p3cotPS_spl = res_spl_scat["p3cotPS_prime"]
 
+        print(p3cotPS_spl.shape)
+        # exit()
+
         res_fit, res_spl_fit = get_sampled_fits(p2_mean,p3cotPS_mean,p2_spl,p3cotPS_spl)
 
+        print(res_fit.keys())
         print(res_fit.keys())
 
         for key, val in res_fit.items():

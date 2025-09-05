@@ -8,6 +8,7 @@ import os.path as op
 import os
 import sys
 import plotting_functions as pf
+import fit_models as fm
 
 num_perc = math.erf(1/np.sqrt(2))
 
@@ -225,14 +226,29 @@ def plot_p3cotPS(h5file_scatter_fit,beta,m0,fit=False,outname=None,show=False):
         a1_1_smp = fit_param_spl["a1_1"]
         r1_1_smp = fit_param_spl["r1_1"]
 
-        yarr = [fit_scatter.ERE_1(x,a1_1,r1_1) for x in xarr]
-        yarr_smp = [sorted([fit_scatter.ERE_1(x,a1_1_smp[i],r1_1_smp[i]) for i in range(len(a1_1_smp))]) for x in xarr]
+        yarr = [fm.ERE_1(x,a1_1,r1_1) for x in xarr]
+        yarr_smp = [sorted([fm.ERE_1(x,a1_1_smp[i],r1_1_smp[i]) for i in range(len(a1_1_smp))]) for x in xarr]
 
         yarr_m = [yarr_smp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(yarr_smp))]
         yarr_p = [yarr_smp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(yarr_smp))]
 
         plt.plot(xarr,yarr, color = "blue")
         plt.fill_between(xarr, yarr_m, yarr_p, alpha = 0.3, color = "blue")
+
+        a1_1 = fit_param_mean["m_R_I"]
+        r1_1 = fit_param_mean["gVPP2_I"]
+
+        a1_1_smp = fit_param_spl["m_R_I"]
+        r1_1_smp = fit_param_spl["gVPP2_I"]
+
+        yarr = [fm.BW_I(x,a1_1,r1_1) for x in xarr]
+        yarr_smp = [sorted([fm.BW_I(x,a1_1_smp[i],r1_1_smp[i]) for i in range(len(a1_1_smp))]) for x in xarr]
+
+        yarr_m = [yarr_smp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(yarr_smp))]
+        yarr_p = [yarr_smp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(yarr_smp))]
+
+        plt.plot(xarr,yarr, color = "red")
+        plt.fill_between(xarr, yarr_m, yarr_p, alpha = 0.3, color = "red")
 
     plt.plot([-1,-1],[-1,-1], color = "grey", label = "not fitted")
     for tmp in [[None,0,"T1",0],[None,1,"E",0],[None,2,"B1",0],[None,3,"E",0],[None,1,"A1",0],[None,1,"A1",1],[None,2,"A1",0],[None,2,"A1",1],[None,3,"A1",0],[None,3,"A1",1]]:
