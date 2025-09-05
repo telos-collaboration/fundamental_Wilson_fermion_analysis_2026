@@ -4,7 +4,7 @@ using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
 using ScatteringI1
 using LaTeXStrings: @L_str
-using Plots: gr, plot, plot!, scatter!, savefig, backend_name
+using Plots: gr, plot, plot!, scatter!, savefig, backend_name, palette
 using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
@@ -77,10 +77,14 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
             tind1 = filter(i -> (deriv && tfit[i] != T÷2+1) && tmin1 < tfit[i] < tmax1 , eachindex(tfit))
             tind2 = filter(i -> (deriv && tfit[i] != T÷2+1) && tmin2 < tfit[i] < tmax2 , eachindex(tfit))
             
+            colors = palette(:default)
             title = _get_title(h5dset,ens,p)
             plt = plot(yscale=:log10,legend=:top)
             plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
-            
+            plot_correlator!(plt,tfit[tind1],f.(Cfit1[tind1]),ΔCfit1[tind1],color=colors[1],label="",lw=4,type=:ribbon)
+            plot_correlator!(plt,tfit[tind2],f.(Cfit2[tind2]),ΔCfit2[tind2],color=colors[2],label="",lw=4,type=:ribbon)
+            plot_correlator!(plt,tfit[tind] ,f.(Cfit1[tind]) ,ΔCfit1[tind] ,color=colors[1],label="fit #1",type=:ribbon)
+            plot_correlator!(plt,tfit[tind] ,f.(Cfit2[tind]) ,ΔCfit2[tind] ,color=colors[2],label="fit #2",type=:ribbon)
             if three_by_three
                 plot_correlator!(plt,t,f.(eigvals_3x3[1,t1] ./ eigvals_3x3[1,1]), Δeigvals_3x3[1,t1]./ abs(eigvals_3x3[1,1]) ,markersize=3,markershape=:rect,label="eigval #1 (3x3)")
                 plot_correlator!(plt,t,f.(eigvals_3x3[2,t2] ./ eigvals_3x3[2,1]), Δeigvals_3x3[2,t2]./ abs(eigvals_3x3[2,1]) ,markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
@@ -89,10 +93,6 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
                 plot_correlator!(plt,t,f.(eigvals[1,t1] ./ eigvals[1,1]),Δeigvals[1,t1] ./ eigvals[1,1],label="eigval #1")
                 plot_correlator!(plt,t,f.(eigvals[2,t2] ./ eigvals[2,1]),Δeigvals[2,t2] ./ eigvals[2,1],label="eigval #2")
             end
-            plot_correlator!(plt,tfit[tind1],f.(Cfit1[tind1]),ΔCfit1[tind1],label="",lw=4,type=:ribbon)
-            plot_correlator!(plt,tfit[tind2],f.(Cfit2[tind2]),ΔCfit2[tind2],label="",lw=4,type=:ribbon)
-            plot_correlator!(plt,tfit[tind],f.(Cfit1[tind]),ΔCfit1[tind],label="fit #1",type=:ribbon)
-            plot_correlator!(plt,tfit[tind],f.(Cfit2[tind]),ΔCfit2[tind],label="fit #2",type=:ribbon)
 
             savefig(plt,"temp.pdf")
             append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
