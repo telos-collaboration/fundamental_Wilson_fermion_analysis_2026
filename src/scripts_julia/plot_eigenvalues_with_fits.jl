@@ -31,7 +31,7 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
 
     fitres = h5open(fitresults)
 
-    plotname = "eigenvalues.pdf"
+    plotname = "eigenvalues_with_fit.pdf"
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
 
@@ -54,6 +54,15 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
             deriv    = read(h5dset,joinpath(ens,p,"A1","deriv"))
             T, L     = read(h5dset,joinpath(ens,"lattice"))[1:2]
 
+            Cfit1 = read(fitres,joinpath(ens,p,"A1","fit0"))
+            Cfit2 = read(fitres,joinpath(ens,p,"A1","fit1")) 
+            ΔCfit1 = read(fitres,joinpath(ens,p,"A1","Delta_fit0"))
+            ΔCfit2 = read(fitres,joinpath(ens,p,"A1","Delta_fit1"))
+            tmin1 = read(fitres,joinpath(ens,p,"A1","tmin1")) + 1
+            tmin2 = read(fitres,joinpath(ens,p,"A1","tmin2")) + 1 
+            tmax1 = read(fitres,joinpath(ens,p,"A1","tmax1")) + 1
+            tmax2 = read(fitres,joinpath(ens,p,"A1","tmax2")) + 1
+
             if three_by_three
                 Δeigvals_3x3 = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals_3x3"))
                 eigvals_3x3  = read(h5dset,joinpath(ens,p,"A1","eigvals_3x3"))
@@ -69,13 +78,17 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
             plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
             
             if three_by_three
-                plot_correlator!(plt,t,f.(eigvals_3x3[1,t1]),Δeigvals_3x3[1,t1],markersize=3,markershape=:rect,label="eigval #1 (3x3)")
-                plot_correlator!(plt,t,f.(eigvals_3x3[2,t2]),Δeigvals_3x3[2,t2],markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
-                plot_correlator!(plt,t,f.(eigvals_3x3[3,t2]),Δeigvals_3x3[3,t2],markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
+                plot_correlator!(plt,t,f.(eigvals_3x3[1,t1] ./ eigvals_3x3[1,1]), Δeigvals_3x3[1,t1]./ abs(eigvals_3x3[1,1]) ,markersize=3,markershape=:rect,label="eigval #1 (3x3)")
+                plot_correlator!(plt,t,f.(eigvals_3x3[2,t2] ./ eigvals_3x3[2,1]), Δeigvals_3x3[2,t2]./ abs(eigvals_3x3[2,1]) ,markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
+                #plot_correlator!(plt,t,f.(eigvals_3x3[3,t2] ./ eigvals_3x3[3,1]), Δeigvals_3x3[3,t2]./ abs(eigvals_3x3[3,1]) ,markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
             else
-                plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
-                plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
+                plot_correlator!(plt,t,f.(eigvals[1,t1] ./ eigvals[1,1]),Δeigvals[1,t1] ./ eigvals[1,1],label="eigval #1")
+                plot_correlator!(plt,t,f.(eigvals[2,t2] ./ eigvals[2,1]),Δeigvals[2,t2] ./ eigvals[2,1],label="eigval #2")
             end
+            plot_correlator!(plt,[tmin1:tmax1],f.(Cfit1[tmin1:tmax1]),ΔCfit1[tmin1:tmax1],label="",lw=4,type=:ribbon)
+            plot_correlator!(plt,[tmin2:tmax2],f.(Cfit2[tmin2:tmax2]),ΔCfit2[tmin2:tmax2],label="",lw=4,type=:ribbon)
+            plot_correlator!(plt,t,f.(Cfit1[t1]),ΔCfit1[t1],label="fit #1",type=:ribbon)
+            plot_correlator!(plt,t,f.(Cfit2[t1]),ΔCfit2[t1],label="fit #2",type=:ribbon)
 
             savefig(plt,"temp.pdf")
             append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)

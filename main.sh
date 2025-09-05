@@ -45,6 +45,7 @@ julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile
 
 julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
 julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam
+julia src/scripts_julia/plot_eigenvalues_with_fits.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam --fitresults $h5file_fit
 julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
 julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath
 julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam
