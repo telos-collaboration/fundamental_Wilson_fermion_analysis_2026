@@ -288,7 +288,7 @@ def ylabel_f(yaxis):
 # def p2_p2(p2):
 #     return p2
 def p2_s(s):
-    return s-4
+    return s/4-1
 
 def x_axis_func(x, xaxis):
     if xaxis == "p2star_prime":
@@ -375,7 +375,7 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         ax.scatter(x_m[i],y_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]), s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
         sorted_indices = np.argsort(x_s[i])
         ax.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-     
+
     if fit:
         for i in  range(len(x_nf_m)):
             ax.scatter(x_nf_m[i],y_nf_m[i], color = "grey", ls = pf.ls(*plot_args_nf[i]), marker = pf.marker(*plot_args_nf[i]), s = 10*pf.ms(*plot_args_nf[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
@@ -395,7 +395,6 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
 
         # y_f_m = [y_axis_func(p2_arr[i],p3cotPS_m[i],yaxis) for i in range(len(p2_arr))]
         y_f_s = [sorted([y_axis_func(p2_arr[i],p3cotPS_s[i][j],yaxis) for j in range(len(p3cotPS_s[0]))]) for i in range(len(p2_arr))]
-
 
         y_f_m_m = [y_f_s[i][length//2-1] for i in range(len(p2_arr))]
         y_f_e_m = [y_f_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(p2_arr))]
@@ -429,6 +428,8 @@ if __name__ == "__main__":
 
     plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", None)
     plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_prime", None)
+    plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_Ecm_prime", None)
+    plot_any(h5file, 7.05, -0.867, "p2star_prime", "p3cotPS_Ecm_prime", None)
     plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", None)
     plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", None)
 
@@ -437,10 +438,10 @@ if __name__ == "__main__":
     plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_2_model)
     plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.NR_I_model)
     # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.NR_II_model)
-    plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
-    plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
-    plot_any(h5file, 7.05, -0.867, "p2star_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
-    plot_any(h5file, 7.05, -0.867, "p2star_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
+    plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
+    plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
+    plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
+    plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
 
     plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.NR_I_model)
     plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_0_model)
