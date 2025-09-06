@@ -17,15 +17,23 @@ function _read_plot_correlator(plt,h5dset,ens,p,irrep;kws...)
             C = read(h5dset,joinpath(ens,p,"Cpi"))
             ΔC = read(h5dset,joinpath(ens,p,"Delta_Cpi"))
             t = 1:length(C)
-            plot_correlator!(plt,t,C,ΔC,markersize=3;kws...)
+            plot_correlator!(plt,t,C ./ C[1],ΔC ./ C[1],markersize=3;kws...)
         end
     else
         if haskey(h5dset,joinpath(ens,p)) && haskey(h5dset,joinpath(ens,p,irrep))
             C = read(h5dset,joinpath(ens,p,irrep,"C"))
             ΔC = read(h5dset,joinpath(ens,p,irrep,"Delta_C"))
             t = 1:length(C)
-            plot_correlator!(plt,t,C,ΔC,markersize=3;kws...)
+            plot_correlator!(plt,t,C ./ C[1] ,ΔC./ C[1],markersize=3;kws...)
         end
+    end
+end
+function _read_plot_fitresults(plt,fitres,ens,p,irrep;kws...)
+    if haskey(fitres,joinpath(ens,p)) && haskey(fitres,joinpath(ens,p,irrep))
+        t = read(fitres,joinpath(ens,p,irrep,"tfit")) .+ 1
+        C = read(fitres,joinpath(ens,p,irrep,"fit"))
+        ΔC = read(fitres,joinpath(ens,p,irrep,"Delta_fit"))
+        plot_correlator!(plt,t,C,ΔC,markersize=3; type=:ribbon, kws...)
     end
 end
 function plot_meson_correlators(file,plotpath,fitresults)
@@ -55,6 +63,7 @@ function plot_meson_correlators(file,plotpath,fitresults)
 
             for (irrep,label) in zip(irreps, irrep_labels)
                 _read_plot_correlator(plt,h5dset,ens,p,irrep;label)
+                _read_plot_fitresults(plt,fitres,ens,p,irrep;label="")
             end
             
             savefig(plt,"temp.pdf")
