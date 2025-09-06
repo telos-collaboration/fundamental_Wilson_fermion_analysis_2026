@@ -102,20 +102,19 @@ def get_fits(p2_data, p3cotPS_data,err=False):
 def get_sampled_fits(p2_data, p3cotPS_data, p2_spl, p3cotPS_spl):
     res = get_fits(p2_data,p3cotPS_data,err=True)
     popt, pcov = curve_fit(fm.ERE_1,p2_data,p3cotPS_data)
-    print(popt)
-    print(p2_data,p3cotPS_data)
-    print(p2_spl[1],p3cotPS_spl[1])
-    print("hey")
-    # print(res)
-    for key, val in res.items():
-        print(key, val)
+    # print(popt)
+    # print(p2_data,p3cotPS_data)
+    # print(p2_spl[1],p3cotPS_spl[1])
+    # print("hey")
+    # # print(res)
+    # for key, val in res.items():
+    #     print(key, val)
     # exit()
     res_spl = {}
     for key in res:
         res_spl[key] = []
 
     for i in range(len(p2_spl)):
-        print(i)
         tmp = get_fits(p2_spl[i], p3cotPS_spl[i])
         for key, val in tmp.items():
             res_spl[key].append(val)
@@ -149,7 +148,7 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
                                     if fit == "True":
                                         hfile[ens][P][irrep][lv]["fit"] = True
                                         p2star_prime = hfile[ens][P][irrep][lv]["mean"]["p2star_prime"][()]
-                                        print(p2star_prime)
+                                        # print(p2star_prime)
                                         if 0 < p2star_prime < 15:
                                             if res_scat == {}:
                                                 for key in hfile[ens][P][irrep][lv]["mean"]:
@@ -185,13 +184,13 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
         p2_spl = res_spl_scat["p2star_prime"]
         p3cotPS_spl = res_spl_scat["p3cotPS_prime"]
 
-        print(p3cotPS_spl.shape)
+        # print(p3cotPS_spl.shape)
         # exit()
 
         res_fit, res_spl_fit = get_sampled_fits(p2_mean,p3cotPS_mean,p2_spl,p3cotPS_spl)
 
-        print(res_fit.keys())
-        print(res_fit.keys())
+        # print(res_fit.keys())
+        # print(res_fit.keys())
 
         for key, val in res_fit.items():
             mean_group = hfile.require_group(fit_beta_m+"/mean")
