@@ -1,0 +1,11 @@
+name,p,irrep,tmin1,tmax1,tmin2,tmax2,t0,deriv,gevp,symmetrise,use3x3,Nmax,id
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,0,true,false,true,true,10,"evp3x3"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,0,true,false,true,false,10,"evp2x2"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,1,true,false,true,false,10,"gevp_t0_1"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,2,true,false,true,false,10,"gevp_t0_2"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,3,true,false,true,false,10,"gevp_t0_3"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,4,true,false,true,false,10,"gevp_t0_4"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,5,true,false,true,false,10,"gevp_t0_5"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,6,true,false,true,false,10,"gevp_t0_6"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,7,true,false,true,false,10,"gevp_t0_7"
+"Lt32Ls24beta6.9m-0.92","p(0,0,1)","A1",4,12,4,11,8,true,false,true,false,10,"gevp_t0_8"
