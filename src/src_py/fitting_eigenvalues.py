@@ -19,7 +19,9 @@ def fit_all_files(infile,outfile,parameterfile):
 
         ensemble, p, irrep, tmin1, tmax1, tmin2, tmax2, use3x3 = row[0], row[1], row[2], int(row[3]), int(row[4]), int(row[5]), int(row[6]), row[11]
         use3x3 = use3x3 == "true"
-        Nmax = int(row[12])
+        Nmax   = int(row[12])
+        fit_id = row[13]
+
         print(f"{ensemble},{irrep},{p}")
         # read the data from the hdf5 file
         lattice = get_hdf5_value(fid,op.join(ensemble,"lattice"))
@@ -56,26 +58,26 @@ def fit_all_files(infile,outfile,parameterfile):
         if not op.join(ensemble,"lattice") in f.keys():
             f.create_dataset(op.join(ensemble,"lattice"), data=lattice)
 
-        f.create_dataset(op.join(ensemble,p,irrep,"tmin1"), data=tmin1)
-        f.create_dataset(op.join(ensemble,p,irrep,"tmax1"), data=tmax1)
-        f.create_dataset(op.join(ensemble,p,irrep,"tmin2"), data=tmin2)
-        f.create_dataset(op.join(ensemble,p,irrep,"tmax2"), data=tmax2)
-        f.create_dataset(op.join(ensemble,p,irrep,"Nmax"), data=Nmax)
-        f.create_dataset(op.join(ensemble,p,irrep,"antisymmetric"), data=antisymmetric)
-        f.create_dataset(op.join(ensemble,p,irrep,"E"), data=E_A1)
-        f.create_dataset(op.join(ensemble,p,irrep,"a"), data=a_A1)
-        f.create_dataset(op.join(ensemble,p,irrep,"Delta_E"), data=Delta_E_A1)
-        f.create_dataset(op.join(ensemble,p,irrep,"Delta_a"), data=Delta_a_A1)
-        f.create_dataset(op.join(ensemble,p,irrep,"Delta_a1"), data=[a_i.sdev for a_i in a2])
-        f.create_dataset(op.join(ensemble,p,irrep,"chi2_0"), data=chi2_1)
-        f.create_dataset(op.join(ensemble,p,irrep,"chi2_1"), data=chi2_2)
-        f.create_dataset(op.join(ensemble,p,irrep,"dof0"), data=dof1)
-        f.create_dataset(op.join(ensemble,p,irrep,"dof1"), data=dof2)
-        f.create_dataset(op.join(ensemble,p,irrep,"tfit"), data=tfit)
-        f.create_dataset(op.join(ensemble,p,irrep,"fit0"), data=fit1)
-        f.create_dataset(op.join(ensemble,p,irrep,"fit1"), data=fit2)
-        f.create_dataset(op.join(ensemble,p,irrep,"Delta_fit0"), data=Dfit1)
-        f.create_dataset(op.join(ensemble,p,irrep,"Delta_fit1"), data=Dfit2)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"tmin1"), data=tmin1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"tmax1"), data=tmax1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"tmin2"), data=tmin2)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"tmax2"), data=tmax2)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"Nmax"), data=Nmax)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"antisymmetric"), data=antisymmetric)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"E"), data=E_A1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"a"), data=a_A1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"Delta_E"), data=Delta_E_A1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"Delta_a"), data=Delta_a_A1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"Delta_a1"), data=[a_i.sdev for a_i in a2])
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"chi2_0"), data=chi2_1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"chi2_1"), data=chi2_2)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"dof0"), data=dof1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"dof1"), data=dof2)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"tfit"), data=tfit)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"fit0"), data=fit1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"fit1"), data=fit2)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"Delta_fit0"), data=Dfit1)
+        f.create_dataset(op.join(ensemble,fit_id,p,irrep,"Delta_fit1"), data=Dfit2)
         f.close()
     print("Fitting of correlators finished.")
 
