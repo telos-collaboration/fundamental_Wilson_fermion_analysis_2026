@@ -2,7 +2,7 @@
 set -e
 
 average_equivalent_momenta=true
-num_resample_scattering=50
+num_resample_scattering=1000
 
 version="yannick"
 
@@ -53,6 +53,7 @@ julia src/scripts_julia/instantiate.jl
 # cp $h5file_fit $h5file_scat
 # python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering gauss
 # python3 src/src_py/plot_scatter.py $plotpathscatter $h5file_scat $version
+
 cp $h5file_scat $h5file_scat_fit
-python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
-#python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat_fit
+python3 src/src_py/fit_scatter.py $h5file_scat_fit $fit_scatter_input
+python3 src/src_py/plot_fit_scatter.py $plotpath/scattering $h5file_scat_fit
