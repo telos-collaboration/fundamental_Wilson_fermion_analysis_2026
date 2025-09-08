@@ -26,6 +26,16 @@ function mean_error_cov(corr)
     return me, sd, cv
 end
 
+function write_meson_correlators(outfile,ens,p,irrep,Corr)
+    meff, Δmeff = log_meff(Corr')
+    C, ΔC, Ccov = mean_error_cov(Corr)
+    h5write(outfile,joinpath(ens,p,irrep,"C"),C)
+    h5write(outfile,joinpath(ens,p,irrep,"Delta_C"),ΔC)
+    h5write(outfile,joinpath(ens,p,irrep,"cov_C"),Ccov)
+    h5write(outfile,joinpath(ens,p,irrep,"meff"),meff)
+    h5write(outfile,joinpath(ens,p,irrep,"Delta_meff"),Δmeff)    
+end
+
 function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equivalent_momenta=true, metadata)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
@@ -43,39 +53,16 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
 
         # get correlators at vanishing momentum for every ensemble
         p = "p(0,0,0)"
-
         Corrπ = read_meson_correlator(h5dset,ens,p,"correlator_pion";average_equivalent_momenta)
-        meffπ, Δmeffπ = log_meff(Corrπ')
-        Cπ, ΔCπ, Cπcov = mean_error_cov(Corrπ)
-        h5write(outfile,joinpath(ens,p,"pi","C"),Cπ)
-        h5write(outfile,joinpath(ens,p,"pi","Delta_C"),ΔCπ)
-        h5write(outfile,joinpath(ens,p,"pi","cov_C"),Cπcov)
-        h5write(outfile,joinpath(ens,p,"pi","meff"),meffπ)
-        h5write(outfile,joinpath(ens,p,"pi","Delta_meff"),Δmeffπ)
-        
+        write_meson_correlators(outfile,ens,p,"pi",Corrπ)        
         Corrρ = read_meson_correlator(h5dset,ens,p,"correlator_rho";average_equivalent_momenta)
-        meffρ, Δmeffρ = log_meff(Corrρ')
-        Cρ, ΔCρ, Cρcov = mean_error_cov(Corrρ)
-        h5write(outfile,joinpath(ens,p,"T1","C"),Cρ)
-        h5write(outfile,joinpath(ens,p,"T1","Delta_C"),ΔCρ)
-        h5write(outfile,joinpath(ens,p,"T1","cov_C"),Cρcov)
-        h5write(outfile,joinpath(ens,p,"T1","meff"),meffρ)
-        h5write(outfile,joinpath(ens,p,"T1","Delta_meff"),Δmeffρ)
+        write_meson_correlators(outfile,ens,p,"T1",Corrρ)
     end
 
     @showprogress desc="Write eigenvalues:" enabled=true for row in eachrow(data)
 
         ens, p = row[1], row[2]
         t0, deriv, gevp, symmetrise = Int(row[8]), Bool(row[9]), Bool(row[10]), Bool(row[11])        
-
-        Corrπ = read_meson_correlator(h5dset,ens,p,"correlator_pion";average_equivalent_momenta)
-        meffπ, Δmeffπ = log_meff(Corrπ')
-        Cπ, ΔCπ, Cπcov = mean_error_cov(Corrπ)
-        h5write(outfile,joinpath(ens,p,"pi","C"),Cπ)
-        h5write(outfile,joinpath(ens,p,"pi","Delta_C"),ΔCπ)
-        h5write(outfile,joinpath(ens,p,"pi","cov_C"),Cπcov)
-        h5write(outfile,joinpath(ens,p,"pi","meff"),meffπ)
-        h5write(outfile,joinpath(ens,p,"pi","Delta_meff"),Δmeffπ)
 
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
         eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise)
@@ -91,27 +78,15 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
             meff_3x3, Δmeff_3x3 = ScatteringI1.effective_masses(Corr3x3;t0,deriv,gevp,symmetrise)
         end
 
+        Corrπ = read_meson_correlator(h5dset,ens,p,"correlator_pion";average_equivalent_momenta)
+        write_meson_correlators(outfile,ens,p,"pi",Corrπ)
         if haskey(h5dset,joinpath(ens,p,"B1"))
             B1 = dropdims(mean(read(h5dset,joinpath(ens,p,"B1")),dims=2);dims=2)
-            meffB1, ΔmeffB1 = log_meff(B1')
-            CB1, ΔCB1, covCB1 = mean_error_cov(B1)
-            h5write(outfile,joinpath(ens,p,"B1","correlator_B1"),B1)
-            h5write(outfile,joinpath(ens,p,"B1","C"),CB1)
-            h5write(outfile,joinpath(ens,p,"B1","Delta_C"),ΔCB1)
-            h5write(outfile,joinpath(ens,p,"B1","cov_C"),covCB1)
-            h5write(outfile,joinpath(ens,p,"B1","meff"),meffB1)
-            h5write(outfile,joinpath(ens,p,"B1","Delta_meff"),ΔmeffB1)
+            write_meson_correlators(outfile,ens,p,"B1",B1)
         end 
         if haskey(h5dset,joinpath(ens,p,"E"))
             E = dropdims(mean(read(h5dset,joinpath(ens,p,"E")),dims=2);dims=2)
-            meffE, ΔmeffE = log_meff(E')
-            CE, ΔCE, covCE = mean_error_cov(E)
-            h5write(outfile,joinpath(ens,p,"E","correlator_E"),E)
-            h5write(outfile,joinpath(ens,p,"E","C"),CE)
-            h5write(outfile,joinpath(ens,p,"E","Delta_C"),ΔCE)
-            h5write(outfile,joinpath(ens,p,"E","cov_C"),covCE)
-            h5write(outfile,joinpath(ens,p,"E","meff"),meffE)
-            h5write(outfile,joinpath(ens,p,"E","Delta_meff"),ΔmeffE)
+            write_meson_correlators(outfile,ens,p,"E",E)
         end 
    
         h5write(outfile,joinpath(ens,p,"A1","eigvals"),eigvals)
