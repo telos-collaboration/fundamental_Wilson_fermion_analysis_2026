@@ -70,7 +70,7 @@ def mixed_model(NR_model, R_model):
     #     delta_NR = np.arctan(p2**(3/2)/NR_model.model(p2, *args_NR))
     #     delta_R = np.arctan(p2**(3/2)/R_model.model(p2, *args_R))
     #     return p2**(3/2)*cot(delta_NR+delta_R)
-    def mixed(p2,*args):
+    def mixed(p2,*args):                                            # This is adding the p3cotPS
         args_NR = args[:NR_model.num_params]
         args_R = args[NR_model.num_params:]
         return NR_model.model(p2, *args_NR) + R_model.model(p2, *args_R)
@@ -100,13 +100,13 @@ def ECM_p2(p2):
 
 def BW_I(p2, m_R_I, gVPP2_I):
     ECM = ECM_p2(p2)
-    # return 6*np.pi*(m_R_I**2-ECM**2)*ECM/gVPP2_I
-    return 0 if gVPP2_I == 0 else 6*np.pi*(m_R_I**2-ECM**2)*ECM/gVPP2_I
+    return 6*np.pi*(m_R_I**2-ECM**2)*ECM*gVPP2_I
+    # return 0 if gVPP2_I == 0 else 6*np.pi*(m_R_I**2-ECM**2)*ECM*gVPP2_I
 def BW_II(p2, m_R_II, gVPP2_II, r0_II): 
     ECM = ECM_p2(p2)
     kR2 = m_R_II**2/4-1
-    # return 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM/gVPP2_II
-    return 0 if gVPP2_II == 0 else 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM/gVPP2_II
+    return 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM*gVPP2_II
+    # return 0 if gVPP2_II == 0 else 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM*gVPP2_II
 
 ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0"])
 ERE_1_model = fitting_model("ERE_1",ERE_1,["a1_1", "r1_1"])
@@ -119,7 +119,7 @@ BW_II_model = fitting_model("BW_II",BW_II,["m_R_II", "gVPP2_II","r0_II"])
 non_res_models = [ERE_0_model,ERE_1_model,ERE_2_model,NR_I_model,NR_II_model]
 res_models = [BW_I_model,BW_II_model]
 mixed_models = []
-for non_res_model in non_res_models:
+for non_res_model in [ERE_0_model,]:
     for res_model in res_models:
         mixed_models.append(mixed_model(non_res_model,res_model))
 

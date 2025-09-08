@@ -120,9 +120,15 @@ def get_sampled_fits(p2_data, p3cotPS_data, p2_spl, p3cotPS_spl):
             res_spl[key].append(val)
     return res, res_spl
 
+# def genfromtxt_skip_empty(filename, **kwargs):
+#     with open(filename) as f:
+#         lines = [line for line in f if line.strip()]
+#         return np.genfromtxt(lines, **kwargs)
+    
 def genfromtxt_skip_empty(filename, **kwargs):
     with open(filename) as f:
-        lines = [line for line in f if line.strip()]
+        # keep only non-empty lines that don't start with "#"
+        lines = [line for line in f if line.strip() and not line.lstrip().startswith("#")]
         return np.genfromtxt(lines, **kwargs)
 
 def fit_one_phaseshift(h5file_out, input_file, beta, m0):
