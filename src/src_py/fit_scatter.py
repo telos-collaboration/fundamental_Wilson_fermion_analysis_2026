@@ -2,7 +2,8 @@ import numpy as np
 import h5py
 import sys
 from scipy.optimize import curve_fit
-from tqdm import tqdm
+# from tqdm import tqdm
+import fit_models as fm
 
 import warnings
 warnings.simplefilter("error")
@@ -15,89 +16,119 @@ def curve_fit_try(func, x, y, num_res):
     except:
         return np.zeros(num_res)
 
-def ERE_0(p2, a1_0):
-    return -1/a1_0**3+0*p2
-def ERE_1(p2, a1_1, r1_1):
-    return 0 if a1_1 == 0 or r1_1 == 0 else  -1/a1_1**3+p2/(2*r1_1)
-    # return result
-def ERE_2(p2, a1_2, r1_2, c1_2):
-    return -1/a1_2**3+p2/(2*r1_2)+c1_2*p2**2
-def ERE_1_lin(p2, a, b):
-    return a+b*p2
-def ERE_2_lin(p2, a, b, c):
-    return a+b*p2+c*p2**2
-    # return result
-def ERE_fit(p3cotPS, p2):                                   # all primed
-    result = {}
-    popt = curve_fit_try(ERE_0, p2, p3cotPS,1)
-    result["a1_0"] = popt[0]
-    popt = curve_fit_try(ERE_1_lin, p2, p3cotPS,2)
-    result["a1_1"] = 0 if popt[0] == 0 else -np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
-    result["r1_1"] = 0 if popt[1] == 0 else 1/(2*popt[1])
-    popt = curve_fit_try(ERE_2_lin, p2, p3cotPS,3)
-    result["a1_2"] = 0 if popt[0] == 0 else -np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
-    result["r1_2"] = 0 if popt[1] == 0 else 1/(2*popt[1])
-    result["c1_2"]=popt[2]
-    return result
+# def ERE_0(p2, a1_0):
+#     return -1/a1_0**3+0*p2
+# def ERE_1(p2, a1_1, r1_1):
+#     return 0 if a1_1 == 0 or r1_1 == 0 else  -1/a1_1**3+p2/(2*r1_1)
+#     # return result
+# def ERE_2(p2, a1_2, r1_2, c1_2):
+#     return -1/a1_2**3+p2/(2*r1_2)+c1_2*p2**2
+# def ERE_1_lin(p2, a, b):
+#     return a+b*p2
+# def ERE_2_lin(p2, a, b, c):
+#     return a+b*p2+c*p2**2
+#     # return result
+# def ERE_fit(p3cotPS, p2):                                   # all primed
+#     result = {}
+#     popt = curve_fit_try(ERE_0, p2, p3cotPS,1)
+#     result["a1_0"] = popt[0]
+#     popt = curve_fit_try(ERE_1_lin, p2, p3cotPS,2)
+#     result["a1_1"] = 0 if popt[0] == 0 else -np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
+#     result["r1_1"] = 0 if popt[1] == 0 else 1/(2*popt[1])
+#     popt = curve_fit_try(ERE_2_lin, p2, p3cotPS,3)
+#     result["a1_2"] = 0 if popt[0] == 0 else -np.sign(popt[0])*np.power(1/abs(popt[0]),1/3.)
+#     result["r1_2"] = 0 if popt[1] == 0 else 1/(2*popt[1])
+#     result["c1_2"]=popt[2]
+#     return result
 
-####################### Ab hier wurden Änderungen gemacht. Bitte vorsichtig sein ###########################
+# ####################### Ab hier wurden Änderungen gemacht. Bitte vorsichtig sein ###########################
 
-def ECM_p2(p2):
-    return 2*np.sqrt(1+p2)
-def RES_Drach(p2, m_R, gVPP2):
-    ECM = ECM_p2(p2)
-    if gVPP2 == 0:
-        return 0
-    else:
-        return 6*np.pi*(m_R**2-ECM**2)/gVPP2
-def RES_Alex_BWI(p2, m_R, gVPP2):                 # ident zu "RES_Drach"
-    ECM = ECM_p2(p2)
-    return ECM*gVPP2*p2**(3/2)/(6*np.pi*ECM**2*(m_R**2-ECM**2))
-def RES_Alex_BWII(p2, m_R, gVPP2, r0):                                      # possibly include first guess for mR2 or swap around
-    ECM = ECM_p2(p2)
-    m_R2 = m_R**2
-    k_R2 = m_R2 - 1
-    return ECM/(m_R2-ECM**2)*(gVPP2*ECM**2/6*np.pi)*p2**(3/2)*(1+k_R2*r0**2)/(1+p2*r0**2)
-    # return ECM*gVPP2*p2**(3/2)*(1+np.sqrt((k_R/2)**2-1))/(6*np.pi*ECM**2*(k_R**2-ECM**2)*(1+p2*r0**2))
-def RES_fit(p3cotPS_ECM, tan_PS, p2):                                   # all primed
-    result = {}
-    popt = curve_fit_try(RES_Drach, p2, p3cotPS_ECM,2)
-    result["m_R_D"], result["gVPP2_D"] = popt
-    popt = curve_fit_try(RES_Alex_BWI, p2, tan_PS,2)
-    result["m_R_BWI"], result["gVPP2_BWI"] = popt
-    # popt = curve_fit_try(RES_Alex_BWII, p2, tan_PS,3)                   # maybe wrong. check later
-    # result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
-    return result
+# def ECM_p2(p2):
+#     return 2*np.sqrt(1+p2)
+# def RES_Drach(p2, m_R, gVPP2):
+#     ECM = ECM_p2(p2)
+#     if gVPP2 == 0:
+#         return 0
+#     else:
+#         return 6*np.pi*(m_R**2-ECM**2)/gVPP2
+# def RES_Alex_BWI(p2, m_R, gVPP2):                 # ident zu "RES_Drach"
+#     ECM = ECM_p2(p2)
+#     return ECM*gVPP2*p2**(3/2)/(6*np.pi*ECM**2*(m_R**2-ECM**2))
+# def RES_Alex_BWII(p2, m_R, gVPP2, r0):                                      # possibly include first guess for mR2 or swap around
+#     ECM = ECM_p2(p2)
+#     m_R2 = m_R**2
+#     k_R2 = m_R2 - 1
+#     return ECM/(m_R2-ECM**2)*(gVPP2*ECM**2/6*np.pi)*p2**(3/2)*(1+k_R2*r0**2)/(1+p2*r0**2)
+#     # return ECM*gVPP2*p2**(3/2)*(1+np.sqrt((k_R/2)**2-1))/(6*np.pi*ECM**2*(k_R**2-ECM**2)*(1+p2*r0**2))
+# def RES_fit(p3cotPS_ECM, tan_PS, p2):                                   # all primed
+#     result = {}
+#     popt = curve_fit_try(RES_Drach, p2, p3cotPS_ECM,2)
+#     result["m_R_D"], result["gVPP2_D"] = popt
+#     popt = curve_fit_try(RES_Alex_BWI, p2, tan_PS,2)
+#     result["m_R_BWI"], result["gVPP2_BWI"] = popt
+#     # popt = curve_fit_try(RES_Alex_BWII, p2, tan_PS,3)                   # maybe wrong. check later
+#     # result["m_R_BWII"], result["gVPP2_BWII"], result["r0_BWII"] = popt
+#     return result
 
-def get_fits(res, res_spl):
-    res_tmp={}
-    res_spl_tmp={}
-    for key, val in ERE_fit(res["p3cotPS_prime"],res["p2star_prime"]).items():
-        res_tmp[key] = val
-    for key, val in RES_fit(res["p3cotPS_Ecm_prime"],res["tan_PS"],res["p2star_prime"]).items():
-        res_tmp[key] = val
+# models = [fm.ERE_0,fm.ERE_1,fm.ERE_2,fm.]
+
+# def get_fits(res, res_spl):
+#     res_tmp={}
+#     res_spl_tmp={}
+#     for key, val in ERE_fit(res["p3cotPS_prime"],res["p2star_prime"]).items():
+#         res_tmp[key] = val
+#     for key, val in RES_fit(res["p3cotPS_Ecm_prime"],res["tan_PS"],res["p2star_prime"]).items():
+#         res_tmp[key] = val
         
-    for key in res_tmp.keys():
-        res_spl_tmp[key] = []
+#     for key in res_tmp.keys():
+#         res_spl_tmp[key] = []
 
-    for i in range(len(res_spl["p3cotPS_prime"])):
-        for key, val in ERE_fit(res_spl["p3cotPS_prime"][i],res_spl["p2star_prime"][i]).items():
-            res_spl_tmp[key].append(val)
-        for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i],res_spl["tan_PS"][i],res_spl["p2star_prime"][i]).items():
-            res_spl_tmp[key].append(val)
+#     for i in range(len(res_spl["p3cotPS_prime"])):
+#         for key, val in ERE_fit(res_spl["p3cotPS_prime"][i],res_spl["p2star_prime"][i]).items():
+#             res_spl_tmp[key].append(val)
+#         for key, val in RES_fit(res_spl["p3cotPS_Ecm_prime"][i],res_spl["tan_PS"][i],res_spl["p2star_prime"][i]).items():
+#             res_spl_tmp[key].append(val)
 
-    return res_tmp, res_spl_tmp
+#     return res_tmp, res_spl_tmp
 
-####################### Bis hier wurden Änderungen gemacht. Bitte vorsichtig sein ###########################
+def get_fits(p2_data, p3cotPS_data,err=False):
+    res = {}
+    for model in fm.all_models:
+        tmp = model.fit(p2_data,p3cotPS_data,err)
+        for key, val in tmp.items():
+            res[key] = val
+    return res
 
-def only(arr):
-    if len(arr) == 1:
-        return arr[0]
-    raise ValueError(f"Expected exactly one element, got {len(arr)}")
+def get_sampled_fits(p2_data, p3cotPS_data, p2_spl, p3cotPS_spl):
+    res = get_fits(p2_data,p3cotPS_data,err=True)
+    popt, pcov = curve_fit(fm.ERE_1,p2_data,p3cotPS_data)
+    # print(popt)
+    # print(p2_data,p3cotPS_data)
+    # print(p2_spl[1],p3cotPS_spl[1])
+    # print("hey")
+    # # print(res)
+    # for key, val in res.items():
+    #     print(key, val)
+    # exit()
+    res_spl = {}
+    for key in res:
+        res_spl[key] = []
 
+    for i in range(len(p2_spl)):
+        tmp = get_fits(p2_spl[i], p3cotPS_spl[i])
+        for key, val in tmp.items():
+            res_spl[key].append(val)
+    return res, res_spl
+
+# def genfromtxt_skip_empty(filename, **kwargs):
+#     with open(filename) as f:
+#         lines = [line for line in f if line.strip()]
+#         return np.genfromtxt(lines, **kwargs)
+    
 def genfromtxt_skip_empty(filename, **kwargs):
     with open(filename) as f:
-        lines = [line for line in f if line.strip()]
+        # keep only non-empty lines that don't start with "#"
+        lines = [line for line in f if line.strip() and not line.lstrip().startswith("#")]
         return np.genfromtxt(lines, **kwargs)
 
 def fit_one_phaseshift(h5file_out, input_file, beta, m0):
@@ -123,7 +154,7 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
                                     if fit == "True":
                                         hfile[ens][P][irrep][lv]["fit"] = True
                                         p2star_prime = hfile[ens][P][irrep][lv]["mean"]["p2star_prime"][()]
-                                        print(p2star_prime)
+                                        # print(p2star_prime)
                                         if 0 < p2star_prime < 15:
                                             if res_scat == {}:
                                                 for key in hfile[ens][P][irrep][lv]["mean"]:
@@ -144,7 +175,6 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
                                     else:
                                         raise RuntimeError("Wrong assignment in 'fit_scatter_input.csv' at: %s"%(ens+P+irrep+lv))
 
-        
         if res_scat == {} or len(res_scat["p2star_prime"]) < 3:
             raise RuntimeError("Less than 3 energy levels selected in 'fit_scatter_input.csv' for beta=%f and m0=%f"%(beta, m0))
 
@@ -155,13 +185,29 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
         
         fit_beta_m = "fit_b%f_m%f"%(beta,m0)
 
-        res_fit, res_spl_fit = get_fits(res_scat,res_spl_scat)
+        p2_mean = res_scat["p2star_prime"]
+        p3cotPS_mean = res_scat["p3cotPS_prime"]
+        p2_spl = res_spl_scat["p2star_prime"]
+        p3cotPS_spl = res_spl_scat["p3cotPS_prime"]
+
+        # print(p3cotPS_spl.shape)
+        # exit()
+
+        res_fit, res_spl_fit = get_sampled_fits(p2_mean,p3cotPS_mean,p2_spl,p3cotPS_spl)
+
+        # print(res_fit.keys())
+        # print(res_fit.keys())
+
         for key, val in res_fit.items():
             mean_group = hfile.require_group(fit_beta_m+"/mean")
             mean_group.create_dataset(key, data=val)
         for key, val in res_spl_fit.items():
             spl_group = hfile.require_group(fit_beta_m+"/sample")
             spl_group.create_dataset(key, data=val)
+
+
+
+
         # for key, val in res_fit.items():
         #     hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"mean/"+key, data = val)
         # for key, val in res_spl_fit.items():
@@ -171,19 +217,18 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
         # for key, val in res_spl_scat.items():
         #     hfile.create_dataset("fit_scatter_b%f_m%f/"%(beta,m0)+"sample/"+key, data = val)
 
-def fit_all_phase_shifts(h5file_out, input_file):
+def fit_all_phase_shifts(h5file, input_file):
     print("Fitting phase shifts...")
-    fit_one_phaseshift(h5file_out, input_file,6.9,-0.92)
-    fit_one_phaseshift(h5file_out, input_file,7.05,-0.863)
-    fit_one_phaseshift(h5file_out, input_file,7.05,-0.867)
+    fit_one_phaseshift(h5file, input_file,6.9,-0.92)
+    fit_one_phaseshift(h5file, input_file,7.05,-0.863)
+    fit_one_phaseshift(h5file, input_file,7.05,-0.867)
     print("Done!")
 
 
 if __name__ == "__main__":
 
     args = sys.argv
-    h5file_in = args[1]
-    h5file_out = args[2]
-    input_file = args[3]
+    h5file = args[1]
+    input_file = args[2]
 
-    fit_all_phase_shifts(h5file_out,input_file)
+    fit_all_phase_shifts(h5file,input_file)

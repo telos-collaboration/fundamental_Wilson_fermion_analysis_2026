@@ -27,10 +27,6 @@ def marker(irrep):                     # maybe to be replaced by input file
         return "s"
     else:
         raise RuntimeError("Wrong irrep in marker: %s"%irrep)
-    
-# def marker(lv):                     # maybe to be replaced by input file
-#     markers = ["*", "o", "^"]
-#     return markers[lv-1]
 
 def E_pipi(mpi,p12,p22,L):
     return np.sqrt(mpi**2+(2*np.pi/L)**2*p12)+np.sqrt(mpi**2+(2*np.pi/L)**2*p22)  
