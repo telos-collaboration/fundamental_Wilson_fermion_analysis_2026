@@ -25,15 +25,15 @@ def fit_all_files(infile,outfile,parameterfile):
         print(f"{ensemble},{irrep},{p}")
         # read the data from the hdf5 file
         lattice = get_hdf5_value(fid,op.join(ensemble,"lattice"))
-        if use3x3 and "eigvals_3x3" in fid[op.join(ensemble,p,irrep)].keys():
-            ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,"eigvals_3x3"))
-            cov_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,"cov_eigvals_3x3"))
+        if use3x3 and "eigvals_3x3" in fid[op.join(ensemble,p,irrep,fit_id)].keys():
+            ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"eigvals_3x3"))
+            cov_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"cov_eigvals_3x3"))
         else:
-            ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,"eigvals"))
-            cov_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,"cov_eigvals"))
+            ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"eigvals"))
+            cov_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"cov_eigvals"))
 
         T = ev.shape[0]
-        antisymmetric = get_hdf5_value(fid,op.join(ensemble,p,irrep,"deriv")) 
+        antisymmetric = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"deriv")) 
 
         # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
         var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)

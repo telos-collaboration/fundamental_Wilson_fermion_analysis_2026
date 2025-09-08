@@ -29,6 +29,15 @@ end
 function write_meson_correlators(outfile,ens,p,irrep,Corr)
     meff, Δmeff = log_meff(Corr')
     C, ΔC, Ccov = mean_error_cov(Corr)
+    exists_file = isfile(outfile)
+    if exists_file
+        fid = h5open(outfile)
+        exists_group = haskey(fid,joinpath(ens,p,irrep,"C"))
+        close(fid)
+        if exists_group
+            return 
+        end
+    end
     h5write(outfile,joinpath(ens,p,irrep,"C"),C)
     h5write(outfile,joinpath(ens,p,irrep,"Delta_C"),ΔC)
     h5write(outfile,joinpath(ens,p,irrep,"cov_C"),Ccov)
@@ -61,8 +70,8 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
 
     @showprogress desc="Write eigenvalues:" enabled=true for row in eachrow(data)
 
-        ens, p = row[1], row[2]
-        t0, deriv, gevp, symmetrise = Int(row[8]), Bool(row[9]), Bool(row[10]), Bool(row[11])        
+        ens, p, id = row[1], row[2], row[14]
+        t0, deriv, gevp, symmetrise = Int(row[8]), Bool(row[9]), Bool(row[10]), Bool(row[11])   
 
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
         eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise)
@@ -89,28 +98,28 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
             write_meson_correlators(outfile,ens,p,"E",E)
         end 
    
-        h5write(outfile,joinpath(ens,p,"A1","eigvals"),eigvals)
-        h5write(outfile,joinpath(ens,p,"A1","Delta_eigvals"),Δeigvals)
-        h5write(outfile,joinpath(ens,p,"A1","cov_eigvals"),eigvals_cov)
-        h5write(outfile,joinpath(ens,p,"A1","t0"),t0)
-        h5write(outfile,joinpath(ens,p,"A1","gevp"),gevp)
-        h5write(outfile,joinpath(ens,p,"A1","deriv"),deriv)
-        h5write(outfile,joinpath(ens,p,"A1","symmetrise"),symmetrise)
-        h5write(outfile,joinpath(ens,p,"A1","average_equivalent_momenta"),average_equivalent_momenta)
-        h5write(outfile,joinpath(ens,p,"A1","momenta"),ascii(momenta))
-        h5write(outfile,joinpath(ens,p,"A1","sources"),[sources...])
-        h5write(outfile,joinpath(ens,p,"A1","Corr2x2"),Corr)
-        h5write(outfile,joinpath(ens,p,"A1","meff"),meff)
-        h5write(outfile,joinpath(ens,p,"A1","Delta_meff"),Δmeff)            
+        h5write(outfile,joinpath(ens,p,"A1",id,"eigvals"),eigvals)
+        h5write(outfile,joinpath(ens,p,"A1",id,"Delta_eigvals"),Δeigvals)
+        h5write(outfile,joinpath(ens,p,"A1",id,"cov_eigvals"),eigvals_cov)
+        h5write(outfile,joinpath(ens,p,"A1",id,"t0"),t0)
+        h5write(outfile,joinpath(ens,p,"A1",id,"gevp"),gevp)
+        h5write(outfile,joinpath(ens,p,"A1",id,"deriv"),deriv)
+        h5write(outfile,joinpath(ens,p,"A1",id,"symmetrise"),symmetrise)
+        h5write(outfile,joinpath(ens,p,"A1",id,"average_equivalent_momenta"),average_equivalent_momenta)
+        h5write(outfile,joinpath(ens,p,"A1",id,"momenta"),ascii(momenta))
+        h5write(outfile,joinpath(ens,p,"A1",id,"sources"),[sources...])
+        h5write(outfile,joinpath(ens,p,"A1",id,"Corr2x2"),Corr)
+        h5write(outfile,joinpath(ens,p,"A1",id,"meff"),meff)
+        h5write(outfile,joinpath(ens,p,"A1",id,"Delta_meff"),Δmeff)            
         if three_by_three
-            h5write(outfile,joinpath(ens,p,"A1","Corr3x3"),Corr3x3)
-            h5write(outfile,joinpath(ens,p,"A1","momenta_3x3"),ascii(momenta3x3))
-            h5write(outfile,joinpath(ens,p,"A1","sources_3x3"),[sources3x3...])
-            h5write(outfile,joinpath(ens,p,"A1","eigvals_3x3"),eigvals_3x3)
-            h5write(outfile,joinpath(ens,p,"A1","Delta_eigvals_3x3"),Δeigvals_3x3)
-            h5write(outfile,joinpath(ens,p,"A1","cov_eigvals_3x3"),eigvals_cov_3x3)
-            h5write(outfile,joinpath(ens,p,"A1","meff_3x3"),meff_3x3)
-            h5write(outfile,joinpath(ens,p,"A1","Delta_meff_3x3"),Δmeff_3x3)            
+            h5write(outfile,joinpath(ens,p,"A1",id,"Corr3x3"),Corr3x3)
+            h5write(outfile,joinpath(ens,p,"A1",id,"momenta_3x3"),ascii(momenta3x3))
+            h5write(outfile,joinpath(ens,p,"A1",id,"sources_3x3"),[sources3x3...])
+            h5write(outfile,joinpath(ens,p,"A1",id,"eigvals_3x3"),eigvals_3x3)
+            h5write(outfile,joinpath(ens,p,"A1",id,"Delta_eigvals_3x3"),Δeigvals_3x3)
+            h5write(outfile,joinpath(ens,p,"A1",id,"cov_eigvals_3x3"),eigvals_cov_3x3)
+            h5write(outfile,joinpath(ens,p,"A1",id,"meff_3x3"),meff_3x3)
+            h5write(outfile,joinpath(ens,p,"A1",id,"Delta_meff_3x3"),Δmeff_3x3)            
         end
     end
 end

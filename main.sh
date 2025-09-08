@@ -17,6 +17,7 @@ h5file_com="data_assets/isospin1_merged.hdf5"
 h5file_cor="data_assets/isospin1_corr.hdf5"
 h5file_eig="data_assets/isospin1_eigenvalues.hdf5"
 h5file_fit="data_assets/isospin1_fitresults.hdf5"
+h5file_eig_gvp="data_assets/isospin1_eigenvalues_evp_gevp.hdf5"
 h5file_fit_evp="data_assets/isospin1_fitresults_evp.hdf5"
 # h5file_scat="data_assets/literature_scattering.hdf5"
 h5file_scat="data_assets/isospin1_scattering.hdf5"
@@ -41,9 +42,10 @@ julia src/scripts_julia/write_tables.jl --h5file $h5file_raw --outfile "$tablepa
 julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5file_com
 julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5file_out $h5file_cor --ensembles_list $ensembles_list
 julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --metadata $fitparam --avg $average_equivalent_momenta
+julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig_gvp --metadata $fitparam_evp --avg $average_equivalent_momenta
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig $h5file_fit $fitparam
 python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit $fitparam_meson
-python3 src/src_py/fitting_eigenvalues.py $h5file_eig $h5file_fit_evp $fitparam_evp
+python3 src/src_py/fitting_eigenvalues.py $h5file_eig_gvp $h5file_fit_evp $fitparam_evp
 julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
 
 julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
