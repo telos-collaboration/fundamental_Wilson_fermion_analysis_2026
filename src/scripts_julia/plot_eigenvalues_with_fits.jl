@@ -4,7 +4,7 @@ using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
 using ScatteringI1
 using LaTeXStrings: @L_str
-using Plots: gr, plot, plot!, scatter!, savefig, backend_name
+using Plots: gr, plot, plot!, scatter!, savefig, backend_name, palette
 using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
@@ -25,11 +25,12 @@ function _get_title(h5dset,ens,p)
     return title
 end
 
-function plot_eigenvalues(file,plotpath,metadata)
+function plot_eigenvalues(file,plotpath,metadata,fitresults)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
+    fitres = h5open(fitresults)
 
-    plotname = "eigenvalues.pdf"
+    plotname = "eigenvalues_with_fit.pdf"
     ispath(plotpath) || mkpath(plotpath)
     isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
 
@@ -49,10 +50,18 @@ function plot_eigenvalues(file,plotpath,metadata)
 
             eigvals  = read(h5dset,joinpath(ens,p,"A1","eigvals"))
             Δeigvals = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals"))
-            gevp     = read(h5dset,joinpath(ens,p,"A1","gevp"))
             deriv    = read(h5dset,joinpath(ens,p,"A1","deriv"))
-            t0       = read(h5dset,joinpath(ens,p,"A1","t0"))
             T, L     = read(h5dset,joinpath(ens,"lattice"))[1:2]
+
+            Cfit1 = read(fitres,joinpath(ens,p,"A1","fit0"))
+            Cfit2 = read(fitres,joinpath(ens,p,"A1","fit1")) 
+            ΔCfit1 = read(fitres,joinpath(ens,p,"A1","Delta_fit0"))
+            ΔCfit2 = read(fitres,joinpath(ens,p,"A1","Delta_fit1"))
+            tmin1 = read(fitres,joinpath(ens,p,"A1","tmin1")) + 1
+            tmin2 = read(fitres,joinpath(ens,p,"A1","tmin2")) + 1 
+            tmax1 = read(fitres,joinpath(ens,p,"A1","tmax1")) + 1
+            tmax2 = read(fitres,joinpath(ens,p,"A1","tmax2")) + 1
+            tfit  = read(fitres,joinpath(ens,p,"A1","tfit")) .+ 1
 
             if three_by_three
                 Δeigvals_3x3 = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals_3x3"))
@@ -63,22 +72,31 @@ function plot_eigenvalues(file,plotpath,metadata)
             t1 = filter(x->!iszero(eigvals[1,x]),t)
             t2 = filter(x->!iszero(eigvals[2,x]),t)
             f  = deriv ? abs : identity
+            tind = deriv ? filter(i -> tfit[i] != T÷2+1, eachindex(tfit)) : eachindex(tfit)
+            tind1 = filter(i -> (deriv && tfit[i] != T÷2+1) && tmin1 < tfit[i] < tmax1 , eachindex(tfit))
+            tind2 = filter(i -> (deriv && tfit[i] != T÷2+1) && tmin2 < tfit[i] < tmax2 , eachindex(tfit))
+            tind1_mirror = filter(i -> (deriv && tfit[i] != T÷2+1) && T + 2 - tmin1 > tfit[i] > T + 2 - tmax1 , eachindex(tfit))
+            tind2_mirror = filter(i -> (deriv && tfit[i] != T÷2+1) && T + 2 - tmin2 > tfit[i] > T + 2 - tmax2 , eachindex(tfit))
             
+            colors = palette(:default)
             title = _get_title(h5dset,ens,p)
             plt = plot(yscale=:log10,legend=:top)
             plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
-            plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
-            plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
+            plot_correlator!(plt,tfit[tind1],f.(Cfit1[tind1]),ΔCfit1[tind1],color=colors[1],label="",type=:ribbon,lw=3)
+            plot_correlator!(plt,tfit[tind2],f.(Cfit2[tind2]),ΔCfit2[tind2],color=colors[2],label="",type=:ribbon,lw=3)
+            plot_correlator!(plt,tfit[tind1_mirror],f.(Cfit1[tind1_mirror]),ΔCfit1[tind1_mirror],color=colors[1],label="",type=:ribbon,lw=3)
+            plot_correlator!(plt,tfit[tind2_mirror],f.(Cfit2[tind2_mirror]),ΔCfit2[tind2_mirror],color=colors[2],label="",type=:ribbon,lw=3)
+            plot_correlator!(plt,tfit[tind] ,f.(Cfit1[tind]) ,zero(ΔCfit1[tind]) ,color=colors[1],label="fit #1",type=:ribbon,lw=1)
+            plot_correlator!(plt,tfit[tind] ,f.(Cfit2[tind]) ,zero(ΔCfit2[tind]) ,color=colors[2],label="fit #2",type=:ribbon,lw=1)
             if three_by_three
-                plot_correlator!(plt,t,f.(eigvals_3x3[1,t1]),Δeigvals_3x3[1,t1],markersize=3,markershape=:rect,label="eigval #1 (3x3)")
-                plot_correlator!(plt,t,f.(eigvals_3x3[2,t2]),Δeigvals_3x3[2,t2],markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
-                plot_correlator!(plt,t,f.(eigvals_3x3[3,t2]),Δeigvals_3x3[3,t2],markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
+                plot_correlator!(plt,t,f.(eigvals_3x3[1,t1] ./ eigvals_3x3[1,1]), Δeigvals_3x3[1,t1]./ abs(eigvals_3x3[1,1]) ,markersize=3,markershape=:rect,label="eigval #1 (3x3)")
+                plot_correlator!(plt,t,f.(eigvals_3x3[2,t2] ./ eigvals_3x3[2,1]), Δeigvals_3x3[2,t2]./ abs(eigvals_3x3[2,1]) ,markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
+                #plot_correlator!(plt,t,f.(eigvals_3x3[3,t2] ./ eigvals_3x3[3,1]), Δeigvals_3x3[3,t2]./ abs(eigvals_3x3[3,1]) ,markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
+            else
+                plot_correlator!(plt,t,f.(eigvals[1,t1] ./ eigvals[1,1]),Δeigvals[1,t1] ./ eigvals[1,1],label="eigval #1")
+                plot_correlator!(plt,t,f.(eigvals[2,t2] ./ eigvals[2,1]),Δeigvals[2,t2] ./ eigvals[2,1],label="eigval #2")
             end
-            if gevp
-                plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
-                plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
-            end
-            
+
             savefig(plt,"temp.pdf")
             append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
         end
@@ -96,11 +114,14 @@ function parse_commandline()
         "--metadata"
         help = "CSV file containing the parameters for the variational analysis"
         required = true
+        "--fitresults"
+        help = "CSV file containing the parameters for the variational analysis"
+        default = ""
     end
     return parse_args(s)
 end
 function main()
     args = parse_commandline()
-    plot_eigenvalues(args["h5file_in"],args["plotpath"],args["metadata"])
+    plot_eigenvalues(args["h5file_in"],args["plotpath"],args["metadata"],args["fitresults"])
 end
 main()
