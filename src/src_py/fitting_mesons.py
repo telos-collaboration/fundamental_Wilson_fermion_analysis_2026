@@ -30,9 +30,8 @@ def fit_all_files(infile,outfile,parameterfile):
         
         f = h5py.File(outfile, "a")
         
-
-        corr_label = "Cpi" if irrep == "pi" else f"{irrep}/C"
-        covm_label = "cov_Cpi" if irrep == "pi" else f"{irrep}/cov_C"
+        corr_label = f"{irrep}/C"
+        covm_label = f"{irrep}/cov_C"
 
         C = get_hdf5_value(fid,op.join(ensemble,p,corr_label))
         cov = get_hdf5_value(fid,op.join(ensemble,p,covm_label))

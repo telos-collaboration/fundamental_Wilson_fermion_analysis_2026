@@ -12,20 +12,11 @@ gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 function _read_plot_correlator(plt,h5dset,ens,p,irrep;kws...)
     T = h5dset["$ens/lattice"][1]
     t = 1:T
-    if irrep == "pi"
-        if haskey(h5dset,joinpath(ens,p)) && haskey(h5dset,joinpath(ens,p,"Cpi"))
-            C = read(h5dset,joinpath(ens,p,"Cpi"))
-            ΔC = read(h5dset,joinpath(ens,p,"Delta_Cpi"))
-            t = 1:length(C)
-            plot_correlator!(plt,t,C ./ C[1],ΔC ./ C[1],markersize=3;kws...)
-        end
-    else
-        if haskey(h5dset,joinpath(ens,p)) && haskey(h5dset,joinpath(ens,p,irrep))
-            C = read(h5dset,joinpath(ens,p,irrep,"C"))
-            ΔC = read(h5dset,joinpath(ens,p,irrep,"Delta_C"))
-            t = 1:length(C)
-            plot_correlator!(plt,t,C ./ C[1] ,ΔC./ C[1],markersize=3;kws...)
-        end
+    if haskey(h5dset,joinpath(ens,p)) && haskey(h5dset,joinpath(ens,p,irrep))
+        C = read(h5dset,joinpath(ens,p,irrep,"C"))
+        ΔC = read(h5dset,joinpath(ens,p,irrep,"Delta_C"))
+        t = 1:length(C)
+        plot_correlator!(plt,t,C ./ C[1] ,ΔC./ C[1],markersize=3;kws...)
     end
 end
 function _read_plot_fitresults(plt,fitres,ens,p,irrep;kws...)
