@@ -56,8 +56,10 @@ def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with
                         for irrep in hfile[ens][P]:
                             for lv in hfile[ens][P][irrep]:
                                 if lv[:2] == "lv":
-                                    # print(ens+P+irrep+lv)
-                                    if hfile[ens][P][irrep][lv]["fit"][()] or not fit:
+                                    fit_this = False
+                                    if fit:
+                                        fit_this = hfile[ens][P][irrep][lv]["fit"][()]
+                                    if fit_this or not fit:
                                         info.setdefault("lv",[]).append(int(lv[2:]))
                                         info.setdefault("irrep",[]).append(irrep)
                                         for key in hfile[ens][P][irrep][lv]["info"]:

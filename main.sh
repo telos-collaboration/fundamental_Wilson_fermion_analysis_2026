@@ -61,7 +61,7 @@ julia src/scripts_julia/gevp_vs_evp.jl
 
 # cp $h5file_fit $h5file_scat
 # python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering gauss
-# python3 src/src_py/plot_fit_scatter.py $plotpathscatter $h5file_scat False
+python3 src/src_py/plot_fit_scatter.py $plotpathscatter $h5file_scat False
 
 cp $h5file_scat $h5file_scat_fit
 # python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
