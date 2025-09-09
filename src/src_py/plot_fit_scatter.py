@@ -34,7 +34,7 @@ def delete_steps(arr, sign = 1, delete=False):
     # else:
     #     return arr
 
-def get_data(h5file_scatter_fit, beta, m0, fit):
+def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with current get_data()
     fit_param_mean = {}
     fit_param_spl = {}
     scat_fit_mean = {}
@@ -330,35 +330,46 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
             ax.plot(x_nf_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_nf_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = pf.ls(*plot_args_nf[i]))
 
 
-    xarr = np.linspace(xlim[0]+1e-3, xlim[1], 500)
+    xarr = np.linspace(xlim[0]+1e-3, xlim[1], 600)
     
-    if fit:
-        p2_arr = [x_axis_func(x, xaxis) for x in xarr]
-        fit_param_s = np.asarray([fit_param_spl[fp] for fp in fit_model.param_names])
+    if fit:             # still needs adjustment for plotting fit in arbitrary axes. But I can also jsut add a new axis
         fit_param_m = np.asarray([fit_param_mean[fp] for fp in fit_model.param_names])
+        yarr_m = [fit_model.model(x,*fit_param_m) for x in xarr]
 
-        # print(fit_model.name, beta, m0)
-        # print(fit_param_mean)
-        # print(fit_param_m)
-
-        p3cotPS_m = [fit_model.model(p2,*fit_param_m) for p2 in p2_arr]
-        y_f_m = [y_axis_func(p2_arr[i],p3cotPS_m[i],yaxis) for i in range(len(p2_arr))]
-
-        p3cotPS_s = [[fit_model.model(p2,*fit_param_s[:,i]) for i in range(len(fit_param_s[0]))] for p2 in p2_arr]
-        y_f_s = [sorted([y_axis_func(p2_arr[i],p3cotPS_s[i][j],yaxis) for j in range(len(p3cotPS_s[0]))]) for i in range(len(p2_arr))]
-
-        y_f_m_m = [y_f_s[i][length//2-1] for i in range(len(p2_arr))]
-        y_f_e_m = [y_f_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(p2_arr))]
-        y_f_e_p = [y_f_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(p2_arr))]
-
-        plt.plot(xarr,y_f_m, color = "red")
+        fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
+        yarr_s = [sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in xarr]
+        print(len(fit_param_s),len(fit_param_s[0]))
+        print(len(yarr_s),len(yarr_s[0]))
+        y_f_m_m = [yarr_s[i][length//2-1] for i in range(len(xarr))]
+        y_f_e_m = [yarr_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(xarr))]
+        y_f_e_p = [yarr_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(xarr))]
+        plt.plot(xarr,yarr_m, color = "red")
         plt.plot(xarr,y_f_m_m, color = "blue")
         plt.fill_between(xarr, y_f_e_m, y_f_e_p, alpha = 0.3, color = "blue")
+        # exit()
+    
+    # if fit:         # old
+    #     p2_arr = [x_axis_func(x, xaxis) for x in xarr]
+    #     fit_param_s = np.asarray([fit_param_spl[fp] for fp in fit_model.param_names])
+    #     fit_param_m = np.asarray([fit_param_mean[fp] for fp in fit_model.param_names])
+
+    #     p3cotPS_m = [fit_model.model(p2,*fit_param_m) for p2 in p2_arr]
+    #     y_f_m = [y_axis_func(p2_arr[i],p3cotPS_m[i],yaxis) for i in range(len(p2_arr))]
+
+    #     p3cotPS_s = [[fit_model.model(p2,*fit_param_s[:,i]) for i in range(len(fit_param_s[0]))] for p2 in p2_arr]
+    #     y_f_s = [sorted([y_axis_func(p2_arr[i],p3cotPS_s[i][j],yaxis) for j in range(len(p3cotPS_s[0]))]) for i in range(len(p2_arr))]
+
+    #     y_f_m_m = [y_f_s[i][length//2-1] for i in range(len(p2_arr))]
+    #     y_f_e_m = [y_f_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(p2_arr))]
+    #     y_f_e_p = [y_f_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(p2_arr))]
+
+    #     plt.plot(xarr,y_f_m, color = "red")
+    #     plt.plot(xarr,y_f_m_m, color = "blue")
+    #     plt.fill_between(xarr, y_f_e_m, y_f_e_p, alpha = 0.3, color = "blue")
 
     if fit:
         p2_m = np.asarray(scat_fit_mean["p2star_prime"])
         
-        # print(len(p2_m), len(p2_e))
         p3cotPS_mean = np.asarray(scat_fit_mean["p3cotPS_prime"])
         p3cotPS_s = np.asarray(scat_fit_spl["p3cotPS_prime"])
         p3cotPS_e = [abs((p3cotPS_s[i][math.ceil(length*(1+num_perc)/2)]-p3cotPS_s[i][math.floor(length*(1-num_perc)/2)]))/2 for i in range(len(p2_m))]
@@ -369,6 +380,10 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         ndof = len(p3cotPS_mean) - len(fit_param_m)  # degrees of freedom
         chi2_ndof = chi2 / ndof
         print(beta, m0, fit_model.name, "chi2 = %f,\tdof = %f,\tchi2/dof = %f"%(chi2,ndof,chi2_ndof))
+        for key, val in fit_param_mean.items():
+            if key in fit_model.param_names:        
+                print(key, val)
+        print()
         plt.plot([-1,-1],[-1,-1], color = "grey", label = "not fitted")
 
     for tmp in [[None,0,"T1",0],[None,1,"E",0],[None,2,"B1",0],[None,3,"E",0],[None,1,"A1",0],[None,1,"A1",1],[None,2,"A1",0],[None,2,"A1",1],[None,3,"A1",0],[None,3,"A1",1]]:

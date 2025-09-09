@@ -36,7 +36,7 @@ def result_sampled(N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,mpi,irrep,ld=False,resamp
 
     if resampling == "gauss":
         for i in tqdm(range(num_resample)):
-            if i < num_resample//2:
+            if i < num_resample//2:                                     # I insert a bias here!! Check if we actually want that!
                 E_pipi_tmp = E_pipi+abs(np.random.normal(0,E_pipi_ep))
             else:
                 E_pipi_tmp = E_pipi-abs(np.random.normal(0,E_pipi_em))

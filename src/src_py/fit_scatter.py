@@ -24,7 +24,7 @@ def curve_fit_try(func, x, y, num_res):
 #             res[key] = val
 #     return res
 
-def get_fits(data,err=False):
+def get_fits(data,err=True):
     res = {}
     for model in fm.all_models:
         xaxis = data[model.xaxis]
@@ -62,10 +62,10 @@ def get_fits_spl(data_spl,res,err=False):
 #             res_spl[key].append(val)
 #     return res, res_spl
 
-def get_sampled_fits(data, data_spl):
-    res = get_fits(data,err=True)
-    res_spl = get_fits_spl(data_spl,res,err=True)
-    return res, res_spl
+# def get_sampled_fits(data, data_spl):
+#     res = get_fits(data,err=True)
+#     res_spl = get_fits_spl(data_spl,res,err=False)
+#     return res, res_spl
     
 def genfromtxt_skip_empty(filename, **kwargs):
     with open(filename) as f:   
@@ -87,6 +87,7 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
                         for irrep in hfile[ens][P]:
                             for lv in hfile[ens][P][irrep]:
                                 if lv[:2] == "lv":
+                                    # print(ens+P+irrep+lv)
                                     fit_in = infile[1][infile[0] == ens+P+irrep+lv]
                                     fit = None
                                     if len(fit_in) == 0:
@@ -128,8 +129,10 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
 
         print(len(res_scat["p2star_prime"]))
 
-        res_fit, res_spl_fit = get_sampled_fits(res_scat, res_spl_scat)
+        # res_fit, res_spl_fit = get_sampled_fits(res_scat, res_spl_scat)
 
+        res_fit = get_fits(res_scat,err=True)
+        res_spl_fit = get_fits_spl(res_spl_scat,res_fit,err=False)
 
         # x_mean = res_scat["p2star_prime"]
         # y_mean = res_scat["p3cotPS_prime"]

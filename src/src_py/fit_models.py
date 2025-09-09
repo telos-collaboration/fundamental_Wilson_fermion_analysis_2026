@@ -123,7 +123,7 @@ def BW_I(s, m_R_I, gVPP2_I):
 def BW_II(s, m_R_II, gVPP2_II, r02_II): 
     kR2 = m_R_II**2/4-1
     p2 = s/4-1
-    return (m_R_II**2-s)*gVPP2_II*(1+p2*r02_II)/(1+kR2*r02_II)
+    return (m_R_II-s)*gVPP2_II*(1+p2*r02_II)/(1+kR2*r02_II)
     # return 0 if gVPP2_II == 0 else 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM*gVPP2_II
 
 ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0"],"p2star_prime", "p3cotPS_prime")
@@ -146,16 +146,16 @@ all_models = [*non_res_models,*res_models]
 
 all_models_name = [[model.name, model] for model in all_models]
 
-if __name__ == "__main__":
-    p2arr = [0.17046961, 0.23746778, 0.07671255, 0.13276073, 0.19855] 
-    p3cotPS_arr = [0.23562546, 0.21903425, 0.26524005, 0.16530665, 0.20638275]
-    res = {}
-    for model in all_models:
-        tmp = model.fit(p2arr,p3cotPS_arr,err=True)
-        for key, val in tmp.items():
-            res[key] = val
-    for key, val in res.items():
-        print(key, val)
+# if __name__ == "__main__":
+#     p2arr = [0.17046961, 0.23746778, 0.07671255, 0.13276073, 0.19855] 
+#     p3cotPS_arr = [0.23562546, 0.21903425, 0.26524005, 0.16530665, 0.20638275]
+#     res = {}
+#     for model in all_models:
+#         tmp = model.fit(p2arr,p3cotPS_arr,err=True)
+#         for key, val in tmp.items():
+#             res[key] = val
+#     for key, val in res.items():
+#         print(key, val)
 
 
 
