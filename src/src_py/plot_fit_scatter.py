@@ -182,7 +182,7 @@ def xlim_f(m0, xaxis="p2star_prime"):
             return [4,8]
         elif m0 == -0.867:
             return [4,8]
-    raise ValueError("x- or y-lim not defined for %s, %s"%(m0, xaxis))
+    raise ValueError("x-lim not defined for %s, %s"%(m0, xaxis))
 
 def ylim_f(m0, yaxis="p3cotPS_prime"):
     if yaxis == "p3cotPS_prime":
@@ -390,40 +390,44 @@ if __name__ == "__main__":
     args = sys.argv
     PLTDIR = args[1]
     h5file  = args[2]
+    fit = args[3] == "True"
 
     os.makedirs(PLTDIR, exist_ok=True)
 
-    plot_E_CM_L(h5file, 6.9, -0.92)
-    plot_E_CM_L(h5file, 7.05, -0.863)
-    plot_E_CM_L(h5file, 7.05, -0.867)
+    if not fit:
 
-    plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", None)
-    plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_prime", None)
-    # plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_Ecm_prime", None)
-    # plot_any(h5file, 7.05, -0.867, "p2star_prime", "p3cotPS_Ecm_prime", None)
-    plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", None, show = False)
-    plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", None, show = False)
+        plot_E_CM_L(h5file, 6.9, -0.92)
+        plot_E_CM_L(h5file, 7.05, -0.863)
+        plot_E_CM_L(h5file, 7.05, -0.867)
 
-    # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_0_model)
-    # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_1_model)
-    # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_2_model)
-    # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.NR_I_model)
-    # # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.NR_II_model)
-    # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.ERE_0_model)
-    # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.ERE_1_model)
-    # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
-    # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
-    plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
-    plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
-    # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.mixed_model(fm.ERE_0_model,fm.BW_I_model))
-    # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.mixed_model(fm.ERE_0_model,fm.BW_II_model))
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", None)
+        plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_prime", None)
+        plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", None)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", None)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", None)
+        plot_any(h5file, 7.05, -0.863, "s_prime", "PS", None, show = False)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "PS", None, show = False)
+    else:
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_0_model)
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_1_model)
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_2_model)
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.NR_I_model)
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.NR_II_model)
+        # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.ERE_0_model)
+        # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.ERE_1_model)
+        # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
+        # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.mixed_model(fm.ERE_0_model,fm.BW_I_model))
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.mixed_model(fm.ERE_0_model,fm.BW_II_model))
 
-    plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_model)
-    plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_II_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_II_model)
 
-    # plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.NR_I_model)
-    # plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_0_model)
-    # plot_any(h5file, 7.05, -0.863, "s_prime", "sigma_prime", fm.BW_I_model)
-    # plot_any(h5file, 7.05, -0.863, "s_prime", "sigma_prime", fm.BW_II_model)
-    # plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", fm.BW_I_model)
-    # plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", fm.BW_II_model)
+        # plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.NR_I_model)
+        # plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_0_model)
+        # plot_any(h5file, 7.05, -0.863, "s_prime", "sigma_prime", fm.BW_I_model)
+        # plot_any(h5file, 7.05, -0.863, "s_prime", "sigma_prime", fm.BW_II_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", fm.BW_I_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", fm.BW_II_model)
