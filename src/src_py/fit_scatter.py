@@ -16,14 +16,6 @@ def curve_fit_try(func, x, y, num_res):
     except:
         return np.zeros(num_res)
 
-# def get_fits_old(p2_data, p3cotPS_data,err=False):
-#     res = {}
-#     for model in fm.all_models:
-#         tmp = model.fit(p2_data,p3cotPS_data,err)
-#         for key, val in tmp.items():
-#             res[key] = val
-#     return res
-
 def get_fits(data,err=True):
     res = {}
     for model in fm.all_models:
@@ -33,6 +25,25 @@ def get_fits(data,err=True):
         for key, val in tmp.items():
             res[key] = val
     return res
+
+# def get_fits_sample_again(data_spl,err=True):         # this did not work
+#     res = {}
+#     for model in fm.all_models:
+#         xtmp = data_spl[model.xaxis]
+#         ytmp = data_spl[model.yaxis]
+#         xaxis = []
+#         yaxis = []
+#         for i in range(len(xtmp)):
+#             for j in range(len(xtmp[i])):
+#                 xaxis.append(xtmp[i,j])
+#                 yaxis.append(ytmp[i,j])
+#         print(len(xaxis))
+#         # print(len(xaxis[0]))
+#         # exit()
+#         tmp = model.fit(xaxis,yaxis,err)
+#         for key, val in tmp.items():
+#             res[key] = val
+#     return res
 
 def get_fits_spl(data_spl,res,err=False):
     res_spl = {}
@@ -48,24 +59,6 @@ def get_fits_spl(data_spl,res,err=False):
             for key, val in tmp.items():
                 res_spl[key].append(val)
     return res_spl
-
-# def get_sampled_fits_old(p2_data, p3cotPS_data, p2_spl, p3cotPS_spl):
-#     res = get_fits(p2_data,p3cotPS_data,err=True)
-#     popt, pcov = curve_fit(fm.ERE_1,p2_data,p3cotPS_data)
-#     res_spl = {}
-#     for key in res:
-#         res_spl[key] = []
-
-#     for i in range(len(p2_spl)):
-#         tmp = get_fits(p2_spl[i], p3cotPS_spl[i])
-#         for key, val in tmp.items():
-#             res_spl[key].append(val)
-#     return res, res_spl
-
-# def get_sampled_fits(data, data_spl):
-#     res = get_fits(data,err=True)
-#     res_spl = get_fits_spl(data_spl,res,err=False)
-#     return res, res_spl
     
 def genfromtxt_skip_empty(filename, **kwargs):
     with open(filename) as f:   
@@ -129,15 +122,8 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
 
         print(len(res_scat["p2star_prime"]))
 
-        # res_fit, res_spl_fit = get_sampled_fits(res_scat, res_spl_scat)
-
         res_fit = get_fits(res_scat,err=True)
         res_spl_fit = get_fits_spl(res_spl_scat,res_fit,err=False)
-
-        # x_mean = res_scat["p2star_prime"]
-        # y_mean = res_scat["p3cotPS_prime"]
-        # x_spl = res_spl_scat["p2star_prime"]
-        # y_spl = res_spl_scat["p3cotPS_prime"]
 
         for key, val in res_fit.items():
             mean_group = hfile.require_group(fit_beta_m+"/mean")

@@ -126,6 +126,12 @@ def BW_II(s, m_R_II, gVPP2_II, r02_II):
     return (m_R_II-s)*gVPP2_II*(1+p2*r02_II)/(1+kR2*r02_II)
     # return 0 if gVPP2_II == 0 else 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM*gVPP2_II
 
+def BW_I_PS(s, m_R2_PS, gVPP2_PS): 
+    p2 = s/4-1
+    # print(p2)
+    Gamma = gVPP2_PS*p2**(3/2)/s
+    return np.arctan(np.sqrt(s)*Gamma/(m_R2_PS-s))%180
+
 ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0"],"p2star_prime", "p3cotPS_prime")
 ERE_1_model = fitting_model("ERE_1",ERE_1,["a1_1", "r1_1"],"p2star_prime", "p3cotPS_prime")
 ERE_2_model = fitting_model("ERE_2",ERE_2,["a1_2", "r1_2", "c1_2"],"p2star_prime", "p3cotPS_prime")
@@ -133,9 +139,10 @@ NR_I_model = fitting_model("NR_I",NR_I,["A_0"],"s_prime", "PS")
 NR_II_model = fitting_model("NR_II",NR_II,["A_1", "B_1"],"s_prime", "PS")
 BW_I_model = fitting_model("BW_I",BW_I,["m_R_I", "gVPP2_I"],"s_prime", "p3cotPS_Ecm_prime")
 BW_II_model = fitting_model("BW_II",BW_II,["m_R_II", "gVPP2_II","r02_II"],"s_prime", "p3cotPS_Ecm_prime")
+BW_I_PS_model = fitting_model("BW_I_PS",BW_I_PS,["m_R2_PS", "gVPP2_PS"],"s_prime", "PS")
 
 non_res_models = [ERE_0_model,ERE_1_model,ERE_2_model,NR_I_model,NR_II_model]
-res_models = [BW_I_model,BW_II_model]
+res_models = [BW_I_model,BW_II_model,BW_I_PS_model]
 # mixed_models = []
 # for non_res_model in [ERE_0_model,]:
 #     for res_model in res_models:

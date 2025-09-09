@@ -338,8 +338,8 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
 
         fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
         yarr_s = [sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in xarr]
-        print(len(fit_param_s),len(fit_param_s[0]))
-        print(len(yarr_s),len(yarr_s[0]))
+        # print(len(fit_param_s),len(fit_param_s[0]))
+        # print(len(yarr_s),len(yarr_s[0]))
         y_f_m_m = [yarr_s[i][length//2-1] for i in range(len(xarr))]
         y_f_e_m = [yarr_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(xarr))]
         y_f_e_p = [yarr_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(xarr))]
@@ -367,7 +367,7 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
     #     plt.plot(xarr,y_f_m_m, color = "blue")
     #     plt.fill_between(xarr, y_f_e_m, y_f_e_p, alpha = 0.3, color = "blue")
 
-    if fit:
+    if fit and False:
         p2_m = np.asarray(scat_fit_mean["p2star_prime"])
         
         p3cotPS_mean = np.asarray(scat_fit_mean["p3cotPS_prime"])
@@ -434,6 +434,7 @@ if __name__ == "__main__":
         # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_PS_model)
         # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.mixed_model(fm.ERE_0_model,fm.BW_I_model))
         # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.mixed_model(fm.ERE_0_model,fm.BW_II_model))
 
