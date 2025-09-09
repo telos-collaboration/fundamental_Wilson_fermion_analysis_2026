@@ -47,6 +47,7 @@ python3 src/src_py/fitting_eigenvalues.py $h5file_eig $h5file_fit $fitparam
 python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit $fitparam_meson
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig_gvp $h5file_fit_evp $fitparam_evp
 julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
+julia src/scripts_julia/gevp_vs_evp.jl
 
 julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
 julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam
@@ -62,5 +63,5 @@ cp $h5file_fit $h5file_scat
 python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering gauss
 python3 src/src_py/plot_scatter.py $plotpathscatter $h5file_scat $version
 cp $h5file_scat $h5file_scat_fit
-python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
-python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat_fit
+# python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
+# python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat_fit
