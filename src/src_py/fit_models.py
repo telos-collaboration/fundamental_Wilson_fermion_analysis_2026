@@ -44,14 +44,29 @@ def cot(x):
     return 1/np.tan(x)
 
 class fitting_model:
-    def __init__(self, name, model, param_names):
+    def __init__(self, name, model, param_names,xaxis, yaxis):
         self.name = name
         self.model = model
         self.param_names = param_names
         self.num_params = len(param_names)
-    def fit(self, xdata, ydata,err=False):
+        self.xaxis = xaxis
+        self.yaxis = yaxis
+    # def fit_old(self, xdata, ydata,err=False):
+    #     try:
+    #         popt = safe_curve_fit(self.model, xdata, ydata, np.ones(self.num_params),self.name,err,maxfev=4000)[0]
+    #         # popt = curve_fit(self.model, xdata, ydata, np.ones(self.num_params))[0]
+    #         res = {}
+    #         for i in range(self.num_params):
+    #             res[self.param_names[i]] = popt[i]
+    #         return res
+    #     except:
+    #         res = {}
+    #         for i in range(self.num_params):
+    #             res[self.param_names[i]] = 0
+    #         return res
+    def fit(self,xaxis,yaxis,err=False):
         try:
-            popt = safe_curve_fit(self.model, xdata, ydata, np.ones(self.num_params),self.name,err,maxfev=4000)[0]
+            popt = safe_curve_fit(self.model, xaxis, yaxis, np.ones(self.num_params),self.name,err,maxfev=4000)[0]
             # popt = curve_fit(self.model, xdata, ydata, np.ones(self.num_params))[0]
             res = {}
             for i in range(self.num_params):
@@ -88,40 +103,43 @@ def ERE_1(p2, a1_1, r1_1):
 def ERE_2(p2, a1_2, r1_2, c1_2):
     return a1_2+p2*r1_2+p2**2*c1_2
     # return 0 if a1_2 == 0 or r1_2 == 0 else -1/a1_2**3+p2/(2*r1_2)+c1_2*p2**2
-def NR_I(p2, A_0):
-    return p2**(3/2)*cot(A_0)
-def NR_II(p2, A_1, B_1):
-    return p2**(3/2)*cot(A_1+B_1*p2)
+# def NR_I(p2, A_0):
+#     return p2**(3/2)*cot(A_0)
+# def NR_II(p2, A_1, B_1):
+#     return p2**(3/2)*cot(A_1+B_1*p2)
+def NR_I(s, A_0):
+    return A_0+0*s
+def NR_II(s, A_1, B_1):
+    return A_1+B_1*s
 
 ### resonant models
 
-def ECM_p2(p2):
-    return 2*np.sqrt(1+p2)
+# def ECM_p2(p2):
+#     return 2*np.sqrt(1+p2)
 
-def BW_I(p2, m_R_I, gVPP2_I):
-    ECM = ECM_p2(p2)
-    return 6*np.pi*(m_R_I**2-ECM**2)*ECM*gVPP2_I
+def BW_I(s, m_R_I, gVPP2_I):
+    return (m_R_I**2-s)*gVPP2_I
     # return 0 if gVPP2_I == 0 else 6*np.pi*(m_R_I**2-ECM**2)*ECM*gVPP2_I
-def BW_II(p2, m_R_II, gVPP2_II, r0_II): 
-    ECM = ECM_p2(p2)
+def BW_II(s, m_R_II, gVPP2_II, r02_II): 
     kR2 = m_R_II**2/4-1
-    return 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM*gVPP2_II
+    p2 = s/4-1
+    return (m_R_II**2-s)*gVPP2_II*(1+p2*r02_II)/(1+kR2*r02_II)
     # return 0 if gVPP2_II == 0 else 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM*gVPP2_II
 
-ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0"])
-ERE_1_model = fitting_model("ERE_1",ERE_1,["a1_1", "r1_1"])
-ERE_2_model = fitting_model("ERE_2",ERE_2,["a1_2", "r1_2", "c1_2"])
-NR_I_model = fitting_model("NR_I",NR_I,["A_0"])
-NR_II_model = fitting_model("NR_II",NR_II,["A_1", "B_1"])
-BW_I_model = fitting_model("BW_I",BW_I,["m_R_I", "gVPP2_I"])
-BW_II_model = fitting_model("BW_II",BW_II,["m_R_II", "gVPP2_II","r0_II"])
+ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0"],"p2star_prime", "p3cotPS_prime")
+ERE_1_model = fitting_model("ERE_1",ERE_1,["a1_1", "r1_1"],"p2star_prime", "p3cotPS_prime")
+ERE_2_model = fitting_model("ERE_2",ERE_2,["a1_2", "r1_2", "c1_2"],"p2star_prime", "p3cotPS_prime")
+NR_I_model = fitting_model("NR_I",NR_I,["A_0"],"s_prime", "PS")
+NR_II_model = fitting_model("NR_II",NR_II,["A_1", "B_1"],"s_prime", "PS")
+BW_I_model = fitting_model("BW_I",BW_I,["m_R_I", "gVPP2_I"],"s_prime", "p3cotPS_Ecm_prime")
+BW_II_model = fitting_model("BW_II",BW_II,["m_R_II", "gVPP2_II","r02_II"],"s_prime", "p3cotPS_Ecm_prime")
 
 non_res_models = [ERE_0_model,ERE_1_model,ERE_2_model,NR_I_model,NR_II_model]
 res_models = [BW_I_model,BW_II_model]
-mixed_models = []
-for non_res_model in [ERE_0_model,]:
-    for res_model in res_models:
-        mixed_models.append(mixed_model(non_res_model,res_model))
+# mixed_models = []
+# for non_res_model in [ERE_0_model,]:
+#     for res_model in res_models:
+#         mixed_models.append(mixed_model(non_res_model,res_model))
 
 all_models = [*non_res_models,*res_models]
 # all_models = [*non_res_models,*res_models,*mixed_models]

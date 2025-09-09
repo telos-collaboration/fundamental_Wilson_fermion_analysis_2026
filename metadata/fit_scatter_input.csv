@@ -1,9 +1,12 @@
-ensPirrep;fit?
+#ensPirrep;fit?
 
+Lt32Ls14beta6.9m-0.92p(0,1,1)A1lv1;True
+Lt32Ls20beta6.9m-0.92p(1,1,1)A1lv1;True
+Lt32Ls20beta6.9m-0.92p(1,1,0)A1lv1;True
 Lt32Ls24beta6.9m-0.92p(0,0,1)A1lv1;True
 Lt32Ls24beta6.9m-0.92p(1,1,0)A1lv1;True
-Lt32Ls20beta6.9m-0.92p(0,1,1)A1lv1;True
-Lt32Ls20beta6.9m-0.92p(1,1,1)A1lv1;True
+Lt32Ls24beta6.9m-0.92p(1,1,1)A1lv1;True
+
 
 Lt36Ls16beta7.05m-0.863p(0,0,0)T1lv0;True
 Lt36Ls16beta7.05m-0.863p(0,0,1)Elv0;True
