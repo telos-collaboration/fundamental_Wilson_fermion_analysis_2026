@@ -47,22 +47,20 @@ python3 src/src_py/fitting_eigenvalues.py $h5file_eig_gvp $h5file_fit_evp $fitpa
 julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
 julia src/scripts_julia/gevp_vs_evp.jl
 
-# julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
-# julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam
-# julia src/scripts_julia/plot_eigenvalues_with_fits.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam --fitresults $h5file_fit
-# julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
-# julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath --fitresults $h5file_fit
-# julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam
+julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
+julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam
+julia src/scripts_julia/plot_eigenvalues_with_fits.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam --fitresults $h5file_fit
+julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
+julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath --fitresults $h5file_fit
+julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam
 
-# mkdir -p tmp
-# bash libs/zeta/compile.sh  &> tmp/make.log
+mkdir -p tmp
+bash libs/zeta/compile.sh  &> tmp/make.log
 
-# cp $h5file_fit $h5file_scat
-# python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering gauss
-# python3 src/src_py/plot_fit_scatter.py $plotpathscatter $h5file_scat False
+cp $h5file_fit $h5file_scat
+python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering gauss
+python3 src/src_py/plot_fit_scatter.py $plotpathscatter $h5file_scat False
 
 cp $h5file_scat $h5file_scat_fit
-# python3 src/src_py/fit_scatter.py $h5file_scat $h5file_scat_fit $fit_scatter_input
-# python3 src/src_py/plotting.py $plotpath/scattering $h5file_scat_fit
-
+python3 src/src_py/fit_scatter.py $h5file_scat_fit $fit_scatter_input
 python3 src/src_py/plot_fit_scatter.py $plotpath/scattering $h5file_scat_fit True
