@@ -25,13 +25,12 @@ function _get_title(h5dset,ens,p)
     return title
 end
 
-function plot_eigenvalues(file,plotpath,metadata)
+function plot_eigenvalues(file,plotname,metadata)
     h5dset = h5open(file)
     ensembles = keys(h5dset)
 
-    plotname = "eigenvalues.pdf"
-    ispath(plotpath) || mkpath(plotpath)
-    isfile(joinpath(plotpath,plotname)) && rm(joinpath(plotpath,plotname))
+    ispath(dirname(plotname)) || mkpath(dirname(plotname))
+    isfile(plotname) && rm(plotname)
 
     @showprogress desc="Plot eigenvalues:" for ens in ensembles
  
@@ -80,7 +79,7 @@ function plot_eigenvalues(file,plotpath,metadata)
             end
             
             savefig(plt,"temp.pdf")
-            append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
+            append_pdf!(plotname,"temp.pdf",cleanup=true)
         end
     end
 end
@@ -90,17 +89,17 @@ function parse_commandline()
         "--h5file_in"
         help = "HDF5 file containing the parsed data"
         required = true
-        "--plotpath"
-        help = "HDF5 output file containing the correlation matrices"
-        required = true
         "--metadata"
         help = "CSV file containing the parameters for the variational analysis"
         required = true
+        "--plotname"
+        help = "PDF filename for the plot"
+        default = "eigenvalues.pdf"
     end
     return parse_args(s)
 end
 function main()
     args = parse_commandline()
-    plot_eigenvalues(args["h5file_in"],args["plotpath"],args["metadata"])
+    plot_eigenvalues(args["h5file_in"],args["plotname"],args["metadata"])
 end
 main()
