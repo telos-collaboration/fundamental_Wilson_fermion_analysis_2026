@@ -9,11 +9,11 @@ using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
-function _get_title(h5dset,ens,p)
-    momenta  = read(h5dset,joinpath(ens,p,"A1","momenta"))
-    sources  = read(h5dset,joinpath(ens,p,"A1","sources"))
-    gevp     = read(h5dset,joinpath(ens,p,"A1","gevp"))
-    t0       = read(h5dset,joinpath(ens,p,"A1","t0"))
+function _get_title(h5dset,ens,p,irrep,id)
+    momenta  = read(h5dset,joinpath(ens,p,irrep,id,"momenta"))
+    sources  = read(h5dset,joinpath(ens,p,irrep,id,"sources"))
+    gevp     = read(h5dset,joinpath(ens,p,irrep,id,"gevp"))
+    t0       = read(h5dset,joinpath(ens,p,irrep,id,"t0"))
     T, L  = read(h5dset,joinpath(ens,"lattice"))[1:2]
     m0    = only(read(h5dset,joinpath(ens,"quarkmasses")))
     ncfg  = read(h5dset,joinpath(ens,"Nconf"))
@@ -27,60 +27,51 @@ end
 
 function plot_eigenvalues(file,plotname,metadata)
     h5dset = h5open(file)
-    ensembles = keys(h5dset)
+    data = readdlm(metadata,',',skipstart=1)
 
     ispath(dirname(plotname)) || mkpath(dirname(plotname))
     isfile(plotname) && rm(plotname)
 
-    @showprogress desc="Plot eigenvalues:" for ens in ensembles
- 
-        p0           = read(h5dset,"$ens/p_external")
-        p_external   = unique_momenta(p0)
-        
-        for p in p_external
-            p == "p(0,0,0)" && continue
+    @showprogress desc="Plot eigenvalues:" for row in eachrow(data)
 
-            # get metadate for specific momentum
-            data = readdlm(metadata,',',skipstart=1)
-            metadata_ind = findfirst(i -> isequal(joinpath(ens,p),joinpath(data[i,1:2]...)),1:first(size(data)))
-            use3x3 = data[metadata_ind,12]
-            three_by_three = haskey(h5dset[ens][p],"A1/Corr3x3") && use3x3
+        ens, p, irrep, id = row[1], row[2], row[3], row[14]
+        t0, deriv, gevp, use3x3 = Int(row[8]), Bool(row[9]), Bool(row[10]), Bool(row[12])
 
-            eigvals  = read(h5dset,joinpath(ens,p,"A1","eigvals"))
-            Δeigvals = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals"))
-            gevp     = read(h5dset,joinpath(ens,p,"A1","gevp"))
-            deriv    = read(h5dset,joinpath(ens,p,"A1","deriv"))
-            t0       = read(h5dset,joinpath(ens,p,"A1","t0"))
-            T, L     = read(h5dset,joinpath(ens,"lattice"))[1:2]
+        three_by_three = haskey(h5dset[ens][p],"A1/$id/Corr3x3") && use3x3
+        eigvals  = read(h5dset,joinpath(ens,p,irrep,id,"eigvals"))
+        Δeigvals = read(h5dset,joinpath(ens,p,irrep,id,"Delta_eigvals"))
+        gevp     = read(h5dset,joinpath(ens,p,irrep,id,"gevp"))
+        deriv    = read(h5dset,joinpath(ens,p,irrep,id,"deriv"))
+        t0       = read(h5dset,joinpath(ens,p,irrep,id,"t0"))
+        T, L     = read(h5dset,joinpath(ens,"lattice"))[1:2]
 
-            if three_by_three
-                Δeigvals_3x3 = read(h5dset,joinpath(ens,p,"A1","Delta_eigvals_3x3"))
-                eigvals_3x3  = read(h5dset,joinpath(ens,p,"A1","eigvals_3x3"))
-            end
-            
-            t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
-            t1 = filter(x->!iszero(eigvals[1,x]),t)
-            t2 = filter(x->!iszero(eigvals[2,x]),t)
-            f  = deriv ? abs : identity
-            
-            title = _get_title(h5dset,ens,p)
-            plt = plot(yscale=:log10,legend=:top)
-            plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
-            plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
-            plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
-            if three_by_three
-                plot_correlator!(plt,t,f.(eigvals_3x3[1,t1]),Δeigvals_3x3[1,t1],markersize=3,markershape=:rect,label="eigval #1 (3x3)")
-                plot_correlator!(plt,t,f.(eigvals_3x3[2,t2]),Δeigvals_3x3[2,t2],markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
-                plot_correlator!(plt,t,f.(eigvals_3x3[3,t2]),Δeigvals_3x3[3,t2],markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
-            end
-            if gevp
-                plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
-                plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
-            end
-            
-            savefig(plt,"temp.pdf")
-            append_pdf!(plotname,"temp.pdf",cleanup=true)
+        if three_by_three
+            Δeigvals_3x3 = read(h5dset,joinpath(ens,p,irrep,id,"Delta_eigvals_3x3"))
+            eigvals_3x3  = read(h5dset,joinpath(ens,p,irrep,id,"eigvals_3x3"))
         end
+        
+        t  = deriv ? filter(!isequal(T÷2+1),1:T) : 1:T
+        t1 = filter(x->!iszero(eigvals[1,x]),t)
+        t2 = filter(x->!iszero(eigvals[2,x]),t)
+        f  = deriv ? abs : identity
+            
+        title = _get_title(h5dset,ens,p,irrep,id)
+        plt = plot(yscale=:log10,legend=:top)
+        plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
+        plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
+        plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
+        if three_by_three
+            plot_correlator!(plt,t,f.(eigvals_3x3[1,t1]),Δeigvals_3x3[1,t1],markersize=3,markershape=:rect,label="eigval #1 (3x3)")
+            plot_correlator!(plt,t,f.(eigvals_3x3[2,t2]),Δeigvals_3x3[2,t2],markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
+            plot_correlator!(plt,t,f.(eigvals_3x3[3,t2]),Δeigvals_3x3[3,t2],markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
+        end
+        if gevp
+            plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
+            plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
+        end
+            
+        savefig(plt,"temp.pdf")
+        append_pdf!(plotname,"temp.pdf",cleanup=true)
     end
 end
 function parse_commandline()
