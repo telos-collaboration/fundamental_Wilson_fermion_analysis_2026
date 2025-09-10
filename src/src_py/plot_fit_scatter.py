@@ -299,11 +299,6 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
     x_s   = np.asarray(scat_fit_spl[xaxis])
     y_m   = np.asarray(scat_fit_mean[yaxis])
     y_s   = np.asarray(scat_fit_spl[yaxis])
-    if fit:
-        x_nf_m       = np.asarray(scat_nf_mean[xaxis])
-        x_nf_s   = np.asarray(scat_nf_spl[xaxis])
-        y_nf_m       = np.asarray(scat_nf_mean[yaxis])
-        y_nf_s   = np.asarray(scat_nf_spl[yaxis])
 
     xlabel = xlabel_f(xaxis)
     plt.xlabel(xlabel)
@@ -320,7 +315,20 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
     irreps = info["irrep"]
     plot_args = list(zip(N_Ls,d2s,irreps,lvs))
     
+
+    for i in  range(len(x_m)):
+        ax.scatter(x_m[i],y_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]), s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
+        sorted_indices = np.argsort(x_s[i])
+        ax.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
+
+
+    
     if fit:
+        x_nf_m       = np.asarray(scat_nf_mean[xaxis])
+        x_nf_s   = np.asarray(scat_nf_spl[xaxis])
+        y_nf_m       = np.asarray(scat_nf_mean[yaxis])
+        y_nf_s   = np.asarray(scat_nf_spl[yaxis])
+        
         N_Ls_nf = [int(x) for x in scat_nf_mean["N_L"]]
         dvecs_nf = scat_nf_mean["dvec"]
         dvecs_nf = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs_nf]
@@ -328,33 +336,22 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         lvs_nf = info_nf["lv"]
         irreps_nf = info_nf["irrep"]
         plot_args_nf = list(zip(N_Ls_nf,d2s_nf,irreps_nf,lvs_nf))
-
-    for i in  range(len(x_m)):
-        ax.scatter(x_m[i],y_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]), s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-
-    if fit:
+        
+        xarr = np.linspace(xlim[0]+1e-3, xlim[1], 600)
         for i in  range(len(x_nf_m)):
             ax.scatter(x_nf_m[i],y_nf_m[i], color = "grey", ls = pf.ls(*plot_args_nf[i]), marker = pf.marker(*plot_args_nf[i]), s = 10*pf.ms(*plot_args_nf[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
             sorted_indices = np.argsort(x_nf_s[i])
             ax.plot(x_nf_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_nf_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = "grey", ls = pf.ls(*plot_args_nf[i]))
-
-
-    xarr = np.linspace(xlim[0]+1e-3, xlim[1], 600)
-    
-    if fit:             # still needs adjustment for plotting fit in arbitrary axes. But I can also jsut add a new axis
+        plt.plot([-1,-1],[-1,-1], color = "grey", label = "not fitted")
+        
         fit_param_m = np.asarray([fit_param_mean[fp] for fp in fit_model.param_names])
-        yarr_m = [fit_model.model(x,*fit_param_m) for x in xarr]
+        yarr_m = np.asarray([fit_model.model(x,*fit_param_m) for x in xarr])
 
         fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
-        yarr_s = [sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in xarr]
-        y_f_med = [yarr_s[i][length//2-1] for i in range(len(xarr))]
-        y_f_e_m = [yarr_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(xarr))]
-        y_f_e_p = [yarr_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(xarr))]
-
-        print(fit_model.xaxis,xaxis)
-        print(fit_model.yaxis,yaxis)
+        yarr_s = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in xarr])
+        y_f_med = np.asarray([yarr_s[i][length//2-1] for i in range(len(xarr))])
+        y_f_e_m = np.asarray([yarr_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(xarr))])
+        y_f_e_p = np.asarray([yarr_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(xarr))])
 
         if fit_model.xaxis == xaxis:
             xarrplot = xarr
@@ -376,24 +373,20 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         plt.plot(xarrplot,yarr_med_plot, color = "blue")
         plt.fill_between(xarrplot, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = "blue")
 
-    # if fit:
-    #     p2_m = np.asarray(scat_fit_mean["p2star_prime"])
-        
-    #     p3cotPS_mean = np.asarray(scat_fit_mean["p3cotPS_prime"])
-    #     p3cotPS_s = np.asarray(scat_fit_spl["p3cotPS_prime"])
-    #     p3cotPS_e = [abs((p3cotPS_s[i][math.ceil(length*(1+num_perc)/2)]-p3cotPS_s[i][math.floor(length*(1-num_perc)/2)]))/2 for i in range(len(p2_m))]
-    #     fit_param_m = np.asarray([fit_param_mean[fp] for fp in fit_model.param_names])
-    #     p3cotPS_pred = [fit_model.model(p2, *fit_param_m) for p2 in p2_m]
-
-    #     chi2 = np.sum(((p3cotPS_mean - p3cotPS_pred) / p3cotPS_e) ** 2)
-    #     ndof = len(p3cotPS_mean) - len(fit_param_m)  # degrees of freedom
-    #     chi2_ndof = chi2 / ndof
-    #     print(beta, m0, fit_model.name, "chi2 = %f,\tdof = %f,\tchi2/dof = %f"%(chi2,ndof,chi2_ndof))
-    #     for key, val in fit_param_mean.items():
-    #         if key in fit_model.param_names:        
-    #             print(key, val)
-    #     print()
-    #     plt.plot([-1,-1],[-1,-1], color = "grey", label = "not fitted")
+        if fit_model.yaxis == yaxis:
+            y_e = np.asarray([sorted(y_s[i])[length//2] for i in range(len(y_s))])
+            y_pred = np.asarray([fit_model.model(x, *fit_param_m) for x in x_m])
+            print("beta = %1.3f, m0 = %1.3f"%(beta, m0))
+            print(fit_model.name)
+            for i in range(fit_model.num_params):
+                param_med = (sorted(np.transpose(fit_param_s)[i])[length//2])
+                param_e_m = (sorted(np.transpose(fit_param_s)[i])[math.floor(length*(1-num_perc)/2)])
+                param_e_p = (sorted(np.transpose(fit_param_s)[i])[math.ceil(length*(1+num_perc)/2)])
+                print("%s  =  %.3f^{+%.3f}{-%.3f}"%(fit_model.param_names[i], fit_param_m[i], param_med-param_e_m, param_e_p-param_med))
+            chi2 = np.sum(((y_m - y_pred) / y_e) ** 2)
+            ndof = len(y_m) - fit_model.num_params  # degrees of freedom
+            chi2_ndof = chi2 / ndof
+            print("chi2 = %f,  dof = %i,  chi2/dof = %f"%(chi2,ndof,chi2_ndof),end="\n\n")
 
     for tmp in [[None,0,"T1",0],[None,1,"E",0],[None,2,"B1",0],[None,3,"E",0],[None,1,"A1",0],[None,1,"A1",1],[None,2,"A1",0],[None,2,"A1",1],[None,3,"A1",0],[None,3,"A1",1]]:
         plt.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = "p=%i, %s, lv=%i"%(tmp[1],tmp[2],tmp[3]))
@@ -401,10 +394,12 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         plt.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(*tmp), label = "$N_L$=%i"%(tmp[0]))
     ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
     fit_str = "" if fit_model == None else "_fit_%s"%fit_model.name
-    if outname == None:    
-        plt.savefig(op.join(PLTDIR, "%s_%s_%s__b%f_m0%f%s.pdf"%(yaxis,xaxis,fit_model.name,beta,m0,fit_str)), bbox_inches='tight')
-    else:    
-        plt.savefig(op.join(PLTDIR, "%s_%s_%s__"%(yaxis,xaxis,fit_model.name)+outname+"%s.pdf"%(fit_str)), bbox_inches='tight')
+    out_str = "b%1.3f_m0%1.3f"%(beta,m0) if outname == None else outname
+    plt.savefig(op.join(PLTDIR, "%s_%s%s__%s.pdf"%(yaxis,xaxis,fit_str,out_str)), bbox_inches='tight')
+    # if outname == None:    
+    #     plt.savefig(op.join(PLTDIR, "%s_%s%s__b%f_m0%f.pdf"%(yaxis,xaxis,fit_str,beta,m0)), bbox_inches='tight')
+    # else:    
+    #     plt.savefig(op.join(PLTDIR, "%s_%s%s__"%(yaxis,xaxis,fit_str)+outname+".pdf"), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
