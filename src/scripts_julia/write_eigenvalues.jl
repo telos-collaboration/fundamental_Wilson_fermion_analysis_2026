@@ -71,20 +71,22 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
     @showprogress desc="Write eigenvalues:" enabled=true for row in eachrow(data)
 
         ens, p, id = row[1], row[2], row[14]
-        t0, deriv, gevp, symmetrise = Int(row[8]), Bool(row[9]), Bool(row[10]), Bool(row[11])   
+        t0, deriv, gevp, symmetrise = Int(row[8]), Bool(row[9]), Bool(row[10]), Bool(row[11])
+        swap, swap_t = Bool(row[15]), Int(row[15])  
 
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
-        eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise)
+        # For the 2x2 problem the eigenvalues should always be relabelled (swapped) at swap_t = t0
+        eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap,swap_t=t0)
+        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp,symmetrise,swap,swap_t=t0)
         eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
-        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp,symmetrise)
 
         three_by_three = haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
         if three_by_three
             Corr3x3, sources3x3, momenta3x3 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix_3x3_ext";maxhits,average_equivalent_momenta)
             Corr3x3[1:2,1:2,:,:] .= Corr
-            eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv,gevp,symmetrise)
+            eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv,gevp,symmetrise,swap,swap_t)
             eigvals_3x3, Δeigvals_3x3 = real.(eigvals_3x3), real.(Δeigvals_3x3), real.(eigvals_cov_3x3)
-            meff_3x3, Δmeff_3x3 = ScatteringI1.effective_masses(Corr3x3;t0,deriv,gevp,symmetrise)
+            meff_3x3, Δmeff_3x3 = ScatteringI1.effective_masses(Corr3x3;t0,deriv,gevp,symmetrise,swap,swap_t)
         end
 
         Corrπ = read_meson_correlator(h5dset,ens,p,"correlator_pion";average_equivalent_momenta)

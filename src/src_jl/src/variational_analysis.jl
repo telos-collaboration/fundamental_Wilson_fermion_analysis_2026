@@ -29,20 +29,15 @@ function pipi_rho_matrix_3x3_extension(Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ
     corr_ext[3,3,:,:,:] = @. Corr_γ0γi_γ0γi/L3
     return corr_ext
 end
-function swap_eigval_numbering(old,t0,gevp)
-    gevp || return old
-    Nops, T   = size(old)[1], size(old)[3]
+function swap_eigval_numbering(old,swap_t)
+    Nops, T = size(old)[1], size(old)[3]
     new = copy(old)
-    r1 = 1:t0-1
-    r2 = T-t0+2:T
-    if Nops == 2
-        @. new[1,:,r1] = old[2,:,r1]
-        @. new[2,:,r1] = old[1,:,r1]
-        @. new[1,:,r2] = old[2,:,r2]
-        @. new[2,:,r2] = old[1,:,r2]
-    elseif Nops == 3
-
-    end
+    r1 = 1:swap_t-1
+    r2 = T-swap_t+2:T
+    @. new[1,:,r1] = old[2,:,r1]
+    @. new[2,:,r1] = old[1,:,r1]
+    @. new[1,:,r2] = old[2,:,r2]
+    @. new[2,:,r2] = old[1,:,r2]
     return new
 end
 function fold_3x3_correlator(c)
@@ -69,18 +64,22 @@ function _preprocess_correlator(Corr;deriv,symmetrise)
     end
     return Corr
 end
-function variational_analysis(Corr;t0,deriv,gevp,symmetrise)
+function variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap,swap_t)
     Corr = _preprocess_correlator(Corr;deriv,symmetrise)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp,sortby=x->-abs(x))
-    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0, gevp)
+    if swap
+        eigvals_resamples = swap_eigval_numbering(eigvals_resamples, swap_t)
+    end
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
     return eigvals, Δeigvals, eigvals_cov
 end
-function effective_masses(Corr;t0,deriv,gevp,symmetrise)
+function effective_masses(Corr;t0,deriv,gevp,symmetrise,swap,swap_t)
     Corr = _preprocess_correlator(Corr;deriv,symmetrise)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp)
-    eigvals_resamples = swap_eigval_numbering(eigvals_resamples, t0, gevp)
+    if swap
+        eigvals_resamples = swap_eigval_numbering(eigvals_resamples, swap_t)
+    end
     meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
     return meff, Δmeff
 end
