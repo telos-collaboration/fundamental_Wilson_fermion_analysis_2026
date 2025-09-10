@@ -43,7 +43,7 @@ julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_ou
 julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig_gvp --metadata $fitparam_evp --avg $average_equivalent_momenta
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig $h5file_fit $fitparam
 python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit $fitparam_meson
-python3 src/src_py/fitting_eigenvalues.py $h5file_eig_gvp $h5file_fit_evp $h5file_eig_gvp
+python3 src/src_py/fitting_eigenvalues.py $h5file_eig_gvp $h5file_fit_evp $fitparam_evp
 julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
 julia src/scripts_julia/gevp_vs_evp.jl
 
