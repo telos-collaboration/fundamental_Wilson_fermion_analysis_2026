@@ -118,6 +118,7 @@ def fit_one_phaseshift(h5file_out, input_file, beta, m0):
             res_scat[key] = np.asarray(res_scat[key])
             res_spl_scat[key] = np.transpose(np.asarray(res_spl_scat[key]))
 
+
         fit_beta_m = "fit_b%f_m%f"%(beta,m0)
 
         print(len(res_scat["p2star_prime"]))

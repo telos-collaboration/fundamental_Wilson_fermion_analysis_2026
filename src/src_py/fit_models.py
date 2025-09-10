@@ -44,11 +44,14 @@ def cot(x):
     return 1/np.tan(x)
 
 class fitting_model:
-    def __init__(self, name, model, param_names,xaxis, yaxis):
+    def __init__(self, name, model, param_names, xaxis, yaxis, p0 = None):
         self.name = name
         self.model = model
         self.param_names = param_names
         self.num_params = len(param_names)
+        if p0 == None:
+            p0 = np.ones(self.num_params)
+        self.p0 = p0
         self.xaxis = xaxis
         self.yaxis = yaxis
     # def fit_old(self, xdata, ydata,err=False):
@@ -66,7 +69,7 @@ class fitting_model:
     #         return res
     def fit(self,xaxis,yaxis,err=False):
         try:
-            popt = safe_curve_fit(self.model, xaxis, yaxis, np.ones(self.num_params),self.name,err,maxfev=4000)[0]
+            popt = safe_curve_fit(self.model, xaxis, yaxis, self.p0,self.name,err,maxfev=4000)[0]
             # popt = curve_fit(self.model, xdata, ydata, np.ones(self.num_params))[0]
             res = {}
             for i in range(self.num_params):
@@ -128,18 +131,23 @@ def BW_II(s, m_R_II, gVPP2_II, r02_II):
 
 def BW_I_PS(s, m_R2_PS, gVPP2_PS): 
     p2 = s/4-1
-    # print(p2)
     Gamma = gVPP2_PS*p2**(3/2)/s
-    return np.arctan(np.sqrt(s)*Gamma/(m_R2_PS-s))%180
+    return ((360/(2*np.pi))*np.arctan(np.sqrt(s)*Gamma/(m_R2_PS-s)))%180
 
-ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0"],"p2star_prime", "p3cotPS_prime")
+# def BW_I_PS_FM(s, gVPP2_PS_FM): 
+#     p2 = s/4-1
+#     Gamma = gVPP2_PS_FM*p2**(3/2)/s
+#     return (360/(2*np.pi))*np.arctan(np.sqrt(s)*Gamma/(6-s))%180
+
+ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0",],"p2star_prime", "p3cotPS_prime")
 ERE_1_model = fitting_model("ERE_1",ERE_1,["a1_1", "r1_1"],"p2star_prime", "p3cotPS_prime")
 ERE_2_model = fitting_model("ERE_2",ERE_2,["a1_2", "r1_2", "c1_2"],"p2star_prime", "p3cotPS_prime")
-NR_I_model = fitting_model("NR_I",NR_I,["A_0"],"s_prime", "PS")
+NR_I_model = fitting_model("NR_I",NR_I,["A_0",],"s_prime", "PS")
 NR_II_model = fitting_model("NR_II",NR_II,["A_1", "B_1"],"s_prime", "PS")
 BW_I_model = fitting_model("BW_I",BW_I,["m_R_I", "gVPP2_I"],"s_prime", "p3cotPS_Ecm_prime")
 BW_II_model = fitting_model("BW_II",BW_II,["m_R_II", "gVPP2_II","r02_II"],"s_prime", "p3cotPS_Ecm_prime")
 BW_I_PS_model = fitting_model("BW_I_PS",BW_I_PS,["m_R2_PS", "gVPP2_PS"],"s_prime", "PS")
+# BW_I_PS_FM_model = fitting_model("BW_I_PS_FM",BW_I_PS_FM,["gVPP2_PS_FM",],"s_prime", "PS")
 
 non_res_models = [ERE_0_model,ERE_1_model,ERE_2_model,NR_I_model,NR_II_model]
 res_models = [BW_I_model,BW_II_model,BW_I_PS_model]
