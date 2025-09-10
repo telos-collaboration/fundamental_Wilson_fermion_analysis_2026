@@ -58,12 +58,13 @@ function plot_eigenvalues(file,plotname,metadata)
         title = _get_title(h5dset,ens,p,irrep,id)
         plt = plot(yscale=:log10,legend=:top)
         plot!(plt;ylabel=L"$|C(t)|$",xlabel=L"t",title)
-        plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
-        plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
         if three_by_three
             plot_correlator!(plt,t,f.(eigvals_3x3[1,t1]),Δeigvals_3x3[1,t1],markersize=3,markershape=:rect,label="eigval #1 (3x3)")
             plot_correlator!(plt,t,f.(eigvals_3x3[2,t2]),Δeigvals_3x3[2,t2],markersize=3,markershape=:rect,label="eigval #2 (3x3)")    
             plot_correlator!(plt,t,f.(eigvals_3x3[3,t2]),Δeigvals_3x3[3,t2],markersize=3,markershape=:rect,label="eigval #3 (3x3)")    
+        else
+            plot_correlator!(plt,t,f.(eigvals[1,t1]),Δeigvals[1,t1],label="eigval #1")
+            plot_correlator!(plt,t,f.(eigvals[2,t2]),Δeigvals[2,t2],label="eigval #2")
         end
         if gevp
             plot!(plt,[t0]    ,seriestype="vline", color=:black, label="")
