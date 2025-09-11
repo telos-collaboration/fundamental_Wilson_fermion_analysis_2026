@@ -64,7 +64,7 @@ function _preprocess_correlator(Corr;deriv,symmetrise)
     end
     return Corr
 end
-function variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap,swap_t)
+function variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap=false,swap_t)
     Corr = _preprocess_correlator(Corr;deriv,symmetrise)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp,sortby=x->-abs(x))
     if swap
@@ -74,7 +74,7 @@ function variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap,swap_t)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
     return eigvals, Δeigvals, eigvals_cov
 end
-function effective_masses(Corr;t0,deriv,gevp,symmetrise,swap,swap_t)
+function effective_masses(Corr;t0,deriv,gevp,symmetrise,swap=false,swap_t)
     Corr = _preprocess_correlator(Corr;deriv,symmetrise)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp)
     if swap
