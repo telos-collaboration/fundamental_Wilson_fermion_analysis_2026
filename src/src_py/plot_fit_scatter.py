@@ -433,7 +433,7 @@ if __name__ == "__main__":
         plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.NR_I_model)
         plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.NR_II_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
-        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_PS_model)
 
         plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_model)
