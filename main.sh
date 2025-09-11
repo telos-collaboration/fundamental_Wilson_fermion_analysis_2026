@@ -41,6 +41,7 @@ julia src/scripts_julia/combine_runs.jl --h5file_in $h5file_raw --h5file_out $h5
 julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5file_out $h5file_cor --ensembles_list $ensembles_list
 julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --metadata $fitparam --avg $average_equivalent_momenta
 julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig_gvp --metadata $fitparam_evp --avg $average_equivalent_momenta
+julia src/scripts_julia/swap_eigenvalues.jl --h5file $h5file_eig_gvp --swapinfo "metadata/swaps.csv"
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig $h5file_fit $fitparam
 python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit $fitparam_meson
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig_gvp $h5file_fit_evp $fitparam_evp
