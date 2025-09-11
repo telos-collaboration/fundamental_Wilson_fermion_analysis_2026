@@ -6,6 +6,7 @@ using HDF5: h5open, h5write
 using LatticeUtils: log_meff
 using ScatteringI1
 using Statistics
+include("utils_swap.jl")
 
 function _copy_lattice_parameters_eigenvalues(outfile,infile;group="")
     file = h5open(infile)[group]
@@ -45,7 +46,7 @@ function write_meson_correlators(outfile,ens,p,irrep,Corr)
     h5write(outfile,joinpath(ens,p,irrep,"Delta_meff"),Δmeff)    
 end
 
-function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equivalent_momenta=true, metadata)    
+function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equivalent_momenta=true, metadata, swap_metadata)    
     h5dset   = h5open(infile)
     isfile(outfile) && rm(outfile)
 
@@ -86,6 +87,9 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
             Corr3x3[1:2,1:2,:,:] .= Corr
             eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv,gevp,symmetrise,swap,swap_t)
             eigvals_3x3, Δeigvals_3x3 = real.(eigvals_3x3), real.(Δeigvals_3x3), real.(eigvals_cov_3x3)
+            if !isempty(swap_metadata)
+                eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = swap_eigvals(eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3, swap_metadata, ens, p, "A1", id)
+            end
             meff_3x3, Δmeff_3x3 = ScatteringI1.effective_masses(Corr3x3;t0,deriv,gevp,symmetrise,swap,swap_t)
         end
 
@@ -144,6 +148,9 @@ function parse_commandline()
         "--maxhits"
         help = "Maximal number of stochastic sources to include"
         default = typemax(Int)
+        "--swap_metadata"
+        help = "CSV containing data for eigenvalue relabelling"
+        default = "" 
     end
     return parse_args(s)
 end
@@ -151,8 +158,9 @@ function main()
     args = parse_commandline()
     maxhits = args["maxhits"]
     metadata = args["metadata"]
+    swap_metadata = args["swap_metadata"]
     average_equivalent_momenta = args["avg"]
-    write_all_eigenvalues(args["h5file_in"],args["h5file_out"]; maxhits, average_equivalent_momenta, metadata)    
+    write_all_eigenvalues(args["h5file_in"],args["h5file_out"]; maxhits, average_equivalent_momenta, metadata, swap_metadata)
 end
 main()
 
