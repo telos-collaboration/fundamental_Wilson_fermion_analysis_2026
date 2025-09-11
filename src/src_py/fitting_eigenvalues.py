@@ -38,14 +38,8 @@ def fit_all_files(infile,outfile,parameterfile):
         antisymmetric = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"deriv")) 
 
         # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
-        # Use a try-exscept statement for relablled eigenvalues. needs to be removed
-        # once the swapped eigenvalues are calculated correctly.
-        #try:
-        #    var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
-        #    var2 = gv.gvar(ev[:,1],cov_ev[:,:,1]/1)
-        #except:
-        var1 = gv.gvar(ev[:,0],std_ev[:,0]/1)
-        var2 = gv.gvar(ev[:,1],std_ev[:,1]/1)
+        var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
+        var2 = gv.gvar(ev[:,1],cov_ev[:,:,1]/1)
         
         eig1 = dict(Gab=var1/var1[0])
         eig2 = dict(Gab=var2/var2[0])

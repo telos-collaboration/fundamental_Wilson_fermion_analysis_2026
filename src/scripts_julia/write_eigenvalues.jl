@@ -86,12 +86,12 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
             Corr3x3, sources3x3, momenta3x3 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix_3x3_ext";maxhits,average_equivalent_momenta)
             Corr3x3[1:2,1:2,:,:] .= Corr
             eigvals_3x3_resamples = ScatteringI1.variational_analysis_samples(Corr3x3;t0,deriv,gevp,symmetrise)
+            if !isempty(swap_metadata)
+                eigvals_3x3_resamples = swap_eigvals(eigvals_3x3_resamples, swap_metadata, ens, p, "A1", id)
+            end
             eigvals_3x3, Δeigvals_3x3 = LatticeUtils.apply_jackknife(real.(eigvals_3x3_resamples);dims=2)
             eigvals_cov_3x3 = LatticeUtils.cov_jackknife_eigenvalues(real.(eigvals_3x3_resamples))
             meff_3x3, Δmeff_3x3 = LatticeUtils.log_meff_jackknife(real.(eigvals_3x3_resamples))
-            if !isempty(swap_metadata)
-                eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = swap_eigvals(eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3, swap_metadata, ens, p, "A1", id)
-            end
         end
 
         Corrπ = read_meson_correlator(h5dset,ens,p,"correlator_pion";average_equivalent_momenta)
