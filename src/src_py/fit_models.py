@@ -123,21 +123,27 @@ def NR_II(s, A_1, B_1):
 def BW_I(s, m_R_I, gVPP2_I):
     return (m_R_I**2-s)*gVPP2_I
     # return 0 if gVPP2_I == 0 else 6*np.pi*(m_R_I**2-ECM**2)*ECM*gVPP2_I
+
 def BW_II(s, m_R_II, gVPP2_II, r02_II): 
     kR2 = m_R_II**2/4-1
     p2 = s/4-1
     return (m_R_II-s)*gVPP2_II*(1+p2*r02_II)/(1+kR2*r02_II)
     # return 0 if gVPP2_II == 0 else 6*np.pi*(m_R_II**2-ECM**2)*(1+p2*r0_II)/(1+kR2*r0_II)*ECM*gVPP2_II
 
-def BW_I_PS(s, m_R2_PS, gVPP2_PS): 
-    p2 = s/4-1
-    Gamma = gVPP2_PS*p2**(3/2)/s
-    return ((360/(2*np.pi))*np.arctan(np.sqrt(s)*Gamma/(m_R2_PS-s)))%180
+def BW_I_PS(s, exp_mR2_BW_I_PS, gVPP2_BW_I_PS): 
+    return ((180/(np.pi))*np.arctan((gVPP2_BW_I_PS*(s/4-1)**(3/2))/(6*np.pi*np.sqrt(s)*(4+np.exp(exp_mR2_BW_I_PS)-s))))%180
 
-# def BW_I_PS_FM(s, gVPP2_PS_FM): 
-#     p2 = s/4-1
-#     Gamma = gVPP2_PS_FM*p2**(3/2)/s
-#     return (360/(2*np.pi))*np.arctan(np.sqrt(s)*Gamma/(6-s))%180
+def BW_II_PS(s, exp_MR2_BW_II_PS, gVPP2_BW_II_PS, r02_BW_II_PS): 
+    return ((180/(np.pi))*np.arctan((gVPP2_BW_II_PS*(s/4-1)**(3/2)*(4+exp_MR2_BW_II_PS*r02_BW_II_PS))/(6*np.pi*np.sqrt(s)*(4+np.exp(exp_MR2_BW_II_PS)-s)*(4+r02_BW_II_PS*(s-4)))))%180
+
+def BW_I_NR_I_PS(s, exp_mR2_BW_I_NR_I_PS, gVPP2_BW_I_NR_I_PS, A_BW_I_NR_I): 
+    return ((180/(np.pi))*np.arctan((gVPP2_BW_I_NR_I_PS*(s/4-1)**(3/2))/(6*np.pi*np.sqrt(s)*(4+np.exp(exp_mR2_BW_I_NR_I_PS)-s)))+A_BW_I_NR_I)%180
+
+def BW_I_NR_II_PS(s, exp_mR2_BW_I_NR_II_PS, gVPP2_BW_I_NR_II_PS, A_BW_I_NR_II, B_BW_I_NR_II): 
+    return ((180/(np.pi))*np.arctan((gVPP2_BW_I_NR_II_PS*(s/4-1)**(3/2))/(6*np.pi*np.sqrt(s)*(4+np.exp(exp_mR2_BW_I_NR_II_PS)-s)))+A_BW_I_NR_II+B_BW_I_NR_II*s)%180
+
+def BW_II_NR_I_PS(s, exp_MR2_BW_II_NR_I_PS, gVPP2_BW_II_NR_I_PS, r02_BW_II_NR_I_PS, A_BW_II_NR_I): 
+    return ((180/(np.pi))*np.arctan((gVPP2_BW_II_NR_I_PS*(s/4-1)**(3/2)*(4+exp_MR2_BW_II_NR_I_PS*r02_BW_II_NR_I_PS))/(6*np.pi*np.sqrt(s)*(4+np.exp(exp_MR2_BW_II_NR_I_PS)-s)*(4+r02_BW_II_NR_I_PS*(s-4))))+A_BW_II_NR_I)%180
 
 ERE_0_model = fitting_model("ERE_0",ERE_0,["a1_0",],"p2star_prime", "p3cotPS_prime")
 ERE_1_model = fitting_model("ERE_1",ERE_1,["a1_1", "r1_1"],"p2star_prime", "p3cotPS_prime")
@@ -146,20 +152,18 @@ NR_I_model = fitting_model("NR_I",NR_I,["A_0",],"s_prime", "PS")
 NR_II_model = fitting_model("NR_II",NR_II,["A_1", "B_1"],"s_prime", "PS")
 BW_I_model = fitting_model("BW_I",BW_I,["m_R_I", "gVPP2_I"],"s_prime", "p3cotPS_Ecm_prime")
 BW_II_model = fitting_model("BW_II",BW_II,["m_R_II", "gVPP2_II","r02_II"],"s_prime", "p3cotPS_Ecm_prime")
-BW_I_PS_model = fitting_model("BW_I_PS",BW_I_PS,["m_R2_PS", "gVPP2_PS"],"s_prime", "PS")
-# BW_I_PS_FM_model = fitting_model("BW_I_PS_FM",BW_I_PS_FM,["gVPP2_PS_FM",],"s_prime", "PS")
+BW_I_PS_model = fitting_model("BW_I_PS",BW_I_PS,["exp_mR2_BW_I_PS", "gVPP2_BW_I_PS"],"s_prime", "PS")
+BW_II_PS_model = fitting_model("BW_II_PS",BW_II_PS,["exp_MR2_BW_II_PS","gVPP2_BW_II_PS","r02_BW_II_PS"],"s_prime", "PS")
+BW_I_NR_I_PS_model = fitting_model("BW_I_NR_I_PS",BW_I_NR_I_PS,["exp_mR2_BW_I_NR_I_PS","gVPP2_BW_I_NR_I_PS","A_BW_I_NR_I"],"s_prime", "PS")
+BW_I_NR_II_PS_model = fitting_model("BW_I_NR_II_PS",BW_I_NR_II_PS,["exp_mR2_BW_I_NR_II_PS","gVPP2_BW_I_NR_II_PS","A_BW_I_NR_II","B_BW_I_NR_II"],"s_prime", "PS")
+BW_II_NR_I_PS_model = fitting_model("BW_II_NR_I_PS",BW_II_NR_I_PS,["exp_MR2_BW_II_NR_I_PS","gVPP2_BW_II_NR_I_PS","r02_BW_II_NR_I_PS","A_BW_II_NR_I"],"s_prime", "PS")
 
 non_res_models = [ERE_0_model,ERE_1_model,ERE_2_model,NR_I_model,NR_II_model]
-res_models = [BW_I_model,BW_II_model,BW_I_PS_model]
-# mixed_models = []
-# for non_res_model in [ERE_0_model,]:
-#     for res_model in res_models:
-#         mixed_models.append(mixed_model(non_res_model,res_model))
+res_models = [BW_I_model,BW_II_model,BW_I_PS_model,BW_II_PS_model,BW_I_NR_I_PS_model,BW_I_NR_II_PS_model,BW_II_NR_I_PS_model]
 
 all_models = [*non_res_models,*res_models]
-# all_models = [*non_res_models,*res_models,*mixed_models]
 
-all_models_name = [[model.name, model] for model in all_models]
+# all_models_name = [[model.name, model] for model in all_models]
 
 # if __name__ == "__main__":
 #     p2arr = [0.17046961, 0.23746778, 0.07671255, 0.13276073, 0.19855] 

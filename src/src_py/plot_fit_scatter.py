@@ -146,9 +146,14 @@ def plot_E_CM_L(h5file,beta,m0,levels=False,outname=None,show=False):
         plt.plot(xarrinv,yarr3_2, ls="solid", c=color(3))
         plt.plot(xarrinv,yarr3_3, ls="solid", c=color(3))
         plt.plot(xarrinv,yarr3_4, ls="solid", c=color(3))
-    plt.plot([0,0],[0,0],c="grey", label = "non-int")
-    plt.xlim([1/40,1/13])
-    plt.ylim([1,6])
+    if levels:
+        plt.plot([0,0],[0,0],c="grey", label = "non-int")
+    if m0 == -0.92:
+        plt.xlim([1/26,1/13])
+        plt.ylim([1,2.5])
+    else:
+        plt.xlim([1/40,1/13])
+        plt.ylim([1,6])
 
     for tmp in [[None,0,"T1",0],[None,1,"E",0],[None,2,"B1",0],[None,3,"E",0],[None,1,"A1",0],[None,1,"A1",1],[None,2,"A1",0],[None,2,"A1",1],[None,3,"A1",0],[None,3,"A1",1]]:
         plt.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = "p=%i, %s, lv=%i"%(tmp[1],tmp[2],tmp[3]))
@@ -216,7 +221,7 @@ def ylim_f(m0, yaxis="p3cotPS_prime"):
             return [0,180]
         elif m0 == -0.867:
             return [0,180]
-    raise ValueError("x- or y-lim not defined for %s, %s"%(m0, yaxis))
+    raise ValueError("y-lim not defined for %s, %s"%(m0, yaxis))
 
 def xlabel_f(xaxis):
     if xaxis == "p2star_prime":
@@ -266,14 +271,36 @@ def ylabel_f(yaxis):
 #         return PS_f(p2,p3cotPS)
 #     raise ValueError("y axis func not defined for %s"%(yaxis))
 
-def PS_of_p3cotPS_Ecm_prime(x, y):
-    return 90 if y == 0 else np.arctan((x/4-1)**(3/2)/(np.sqrt(x)*y))*360/(2*np.pi)%180
+def PS_of_p3cotPS_Ecm_prime(s, PS_of_p3cotPS_Ecm):
+    return 90 if PS_of_p3cotPS_Ecm == 0 else np.arctan((s/4-1)**(3/2)/(np.sqrt(s)*PS_of_p3cotPS_Ecm))*360/(2*np.pi)%180
+
+def PS_of_p3cotPS_prime(s, PS_of_p3cotPS):
+    return 90 if PS_of_p3cotPS == 0 else np.arctan((s/4-1)**(3/2)/(PS_of_p3cotPS))*360/(2*np.pi)%180
+
+def sigma_of_p3cotPS_Ecm_prime(s, PS_of_p3cotPS_Ecm):
+    cot_PS = PS_of_p3cotPS_Ecm*np.sqrt(s)/(s/4-1)**(3/2)
+    return 12*np.pi/((s/4-1)*(1+cot_PS**2))
+
+def sigma_of_p3cotPS_prime(s, PS_of_p3cotPS):
+    cot_PS = PS_of_p3cotPS/(s/4-1)**(3/2)
+    return 12*np.pi/((s/4-1)*(1+cot_PS**2))
+
+# def s_of_p2(p2, p2_tmp):
+#     return 4+4*p2_tmp
 
 def from_to(x,f):
     if x == "p3cotPS_Ecm_prime" and f == "PS":
         return PS_of_p3cotPS_Ecm_prime
+    if x == "p3cotPS_prime" and f == "PS":
+        return PS_of_p3cotPS_prime
+    if x == "p3cotPS_Ecm_prime" and f == "sigma_prime":
+        return sigma_of_p3cotPS_Ecm_prime
+    if x == "p3cotPS_prime" and f == "sigma_prime":
+        return sigma_of_p3cotPS_prime
+    # if x == "p2star_prime" and f == "s_prime":
+    #     return s_of_p2
     else:
-        return None
+        raise ValueError("Invalid conversion given to from_to: %s to %s"%(x,f))
 
 def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model=None,outname=None,show=False):
     fit = fit_model != None
@@ -321,8 +348,6 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         sorted_indices = np.argsort(x_s[i])
         ax.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
 
-
-    
     if fit:
         x_nf_m       = np.asarray(scat_nf_mean[xaxis])
         x_nf_s   = np.asarray(scat_nf_spl[xaxis])
@@ -348,30 +373,28 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         yarr_m = np.asarray([fit_model.model(x,*fit_param_m) for x in xarr])
 
         fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
-        yarr_s = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in xarr])
-        y_f_med = np.asarray([yarr_s[i][length//2-1] for i in range(len(xarr))])
-        y_f_e_m = np.asarray([yarr_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(xarr))])
-        y_f_e_p = np.asarray([yarr_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(xarr))])
+        yarr_tmp = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in xarr])
 
-        if fit_model.xaxis == xaxis:
-            xarrplot = xarr
-        else:
-            xarrplot = np.vectorize(from_to(fit_model.xaxis,xaxis))(xarr)
+        # if fit_model.xaxis == xaxis:
+        #     xarrplot = xarr
+        # else:
+        #     xarrplot = np.vectorize(from_to(fit_model.xaxis,xaxis))(xarr, xarr)
+        #     print(xarr)
+        #     print(xarrplot)
         if fit_model.yaxis == yaxis:
+            yarr_s = yarr_tmp
             yarr_m_plot = yarr_m
-            yarr_med_plot = y_f_med
-            yarr_e_m_plot = y_f_e_m
-            yarr_e_p_plot = y_f_e_p
         else:
+            yarr_s = np.asarray([sorted([from_to(fit_model.yaxis,yaxis)(xarr[i],yarr_tmp[i,j]) for j in range(len(yarr_tmp[0]))]) for i in range(len(yarr_tmp))])
             yarr_m_plot = np.vectorize(from_to(fit_model.yaxis,yaxis))(xarr,yarr_m)
-            yarr_med_plot = np.vectorize(from_to(fit_model.yaxis,yaxis))(xarr,y_f_med)
-            yarr_e_m_plot = np.vectorize(from_to(fit_model.yaxis,yaxis))(xarr,y_f_e_m)
-            yarr_e_p_plot = np.vectorize(from_to(fit_model.yaxis,yaxis))(xarr,y_f_e_p)
+            
+        yarr_med_plot = np.asarray([yarr_s[i][length//2-1] for i in range(len(xarr))])
+        yarr_e_m_plot = np.asarray([yarr_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(xarr))])
+        yarr_e_p_plot = np.asarray([yarr_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(xarr))])
 
-
-        plt.plot(xarrplot,yarr_m_plot, color = "red")
-        plt.plot(xarrplot,yarr_med_plot, color = "blue")
-        plt.fill_between(xarrplot, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = "blue")
+        plt.plot(xarr,yarr_m_plot, color = "red")
+        plt.plot(xarr,yarr_med_plot, color = "blue")
+        plt.fill_between(xarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = "blue")
 
         if fit_model.yaxis == yaxis:
             y_e = np.asarray([sorted(y_s[i])[length//2] for i in range(len(y_s))])
@@ -396,10 +419,6 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
     fit_str = "" if fit_model == None else "_fit_%s"%fit_model.name
     out_str = "b%1.3f_m0%1.3f"%(beta,m0) if outname == None else outname
     plt.savefig(op.join(PLTDIR, "%s_%s%s__%s.pdf"%(yaxis,xaxis,fit_str,out_str)), bbox_inches='tight')
-    # if outname == None:    
-    #     plt.savefig(op.join(PLTDIR, "%s_%s%s__b%f_m0%f.pdf"%(yaxis,xaxis,fit_str,beta,m0)), bbox_inches='tight')
-    # else:    
-    #     plt.savefig(op.join(PLTDIR, "%s_%s%s__"%(yaxis,xaxis,fit_str)+outname+".pdf"), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
@@ -427,14 +446,35 @@ if __name__ == "__main__":
         plot_any(h5file, 7.05, -0.863, "s_prime", "PS", None, show = False)
         plot_any(h5file, 7.05, -0.867, "s_prime", "PS", None, show = False)
     else:
+        # betas = [6.9, 7.05]
+        # m0s = [-0.92, -0.867]
+        # for i in range(2):
+        #     for model in fm.all_models:
+        #         plot_any(h5file, betas[i], m0s[i], model.xaxis, model.yaxis, model)
+                
+        # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_0_model)
+        # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_1_model)
+        # plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_2_model)
+        # plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.NR_I_model)
+        # plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.NR_II_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_PS_model)
+        # plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_II_model)
+
+                
         plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_0_model)
         plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_1_model)
         plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_2_model)
-        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.NR_I_model)
-        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.NR_II_model)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.ERE_0_model)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.ERE_1_model)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.ERE_2_model)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_0_model)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_1_model)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_2_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
-        # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
-        plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_PS_model)
-
+        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_II_model)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", fm.BW_I_model)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", fm.BW_II_model)
