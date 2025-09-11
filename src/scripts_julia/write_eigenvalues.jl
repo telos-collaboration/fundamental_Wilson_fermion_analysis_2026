@@ -3,7 +3,7 @@ using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using ProgressMeter: @showprogress
 using DelimitedFiles: readdlm
 using HDF5: h5open, h5write
-using LatticeUtils: log_meff
+using LatticeUtils
 using ScatteringI1
 using Statistics
 include("utils_swap.jl")
@@ -76,20 +76,22 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
 
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
         # For the 2x2 problem the eigenvalues should always be relabelled (swapped) at swap_t = t0 when using the GEVP
-        eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap=gevp,swap_t=t0)
-        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp,symmetrise,swap=gevp,swap_t=t0)
-        eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
-
+        eigvals_resamples = ScatteringI1.variational_analysis_samples(Corr;t0,deriv,gevp,symmetrise,swap=gevp,swap_t=t0)
+        eigvals, Δeigvals = LatticeUtils.apply_jackknife(real.(eigvals_resamples);dims=2)
+        eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(real.(eigvals_resamples))
+        meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
+        
         three_by_three = haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
         if three_by_three
             Corr3x3, sources3x3, momenta3x3 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix_3x3_ext";maxhits,average_equivalent_momenta)
             Corr3x3[1:2,1:2,:,:] .= Corr
-            eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = ScatteringI1.variational_analysis(Corr3x3;t0,deriv,gevp,symmetrise)
-            eigvals_3x3, Δeigvals_3x3 = real.(eigvals_3x3), real.(Δeigvals_3x3), real.(eigvals_cov_3x3)
+            eigvals_3x3_resamples = ScatteringI1.variational_analysis_samples(Corr3x3;t0,deriv,gevp,symmetrise)
+            eigvals_3x3, Δeigvals_3x3 = LatticeUtils.apply_jackknife(real.(eigvals_3x3_resamples);dims=2)
+            eigvals_cov_3x3 = LatticeUtils.cov_jackknife_eigenvalues(real.(eigvals_3x3_resamples))
+            meff_3x3, Δmeff_3x3 = LatticeUtils.log_meff_jackknife(real.(eigvals_3x3_resamples))
             if !isempty(swap_metadata)
                 eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3 = swap_eigvals(eigvals_3x3, Δeigvals_3x3, eigvals_cov_3x3, swap_metadata, ens, p, "A1", id)
             end
-            meff_3x3, Δmeff_3x3 = ScatteringI1.effective_masses(Corr3x3;t0,deriv,gevp,symmetrise)
         end
 
         Corrπ = read_meson_correlator(h5dset,ens,p,"correlator_pion";average_equivalent_momenta)

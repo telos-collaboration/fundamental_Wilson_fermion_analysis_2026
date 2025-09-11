@@ -64,22 +64,22 @@ function _preprocess_correlator(Corr;deriv,symmetrise)
     end
     return Corr
 end
-function variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap=false,swap_t)
+function variational_analysis_samples(Corr;t0,deriv,gevp,symmetrise,swap=false,swap_t=0)
     Corr = _preprocess_correlator(Corr;deriv,symmetrise)
     eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp,sortby=x->-abs(x))
     if swap
         eigvals_resamples = swap_eigval_numbering(eigvals_resamples, swap_t)
     end
+    return eigvals_resamples
+end
+function variational_analysis(Corr;args...)
+    eigvals_resamples = variational_analysis_samples(Corr;args...)
     eigvals, Δeigvals = LatticeUtils.apply_jackknife(eigvals_resamples;dims=2)
     eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(eigvals_resamples)
     return eigvals, Δeigvals, eigvals_cov
 end
-function effective_masses(Corr;t0,deriv,gevp,symmetrise,swap=false,swap_t)
-    Corr = _preprocess_correlator(Corr;deriv,symmetrise)
-    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp)
-    if swap
-        eigvals_resamples = swap_eigval_numbering(eigvals_resamples, swap_t)
-    end
+function effective_masses(Corr;args...)
+    eigvals_resamples = variational_analysis_samples(Corr;args...)
     meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
     return meff, Δmeff
 end
