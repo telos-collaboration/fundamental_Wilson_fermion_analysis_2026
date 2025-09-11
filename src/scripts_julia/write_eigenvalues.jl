@@ -75,9 +75,9 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
         swap, swap_t = Bool(row[15]), Int(row[15])  
 
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
-        # For the 2x2 problem the eigenvalues should always be relabelled (swapped) at swap_t = t0
-        eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap=true,swap_t=t0)
-        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp,symmetrise,swap=true,swap_t=t0)
+        # For the 2x2 problem the eigenvalues should always be relabelled (swapped) at swap_t = t0 when using the GEVP
+        eigvals, Δeigvals, eigvals_cov = ScatteringI1.variational_analysis(Corr;t0,deriv,gevp,symmetrise,swap=gevp,swap_t=t0)
+        meff, Δmeff = ScatteringI1.effective_masses(Corr;t0,deriv,gevp,symmetrise,swap=gevp,swap_t=t0)
         eigvals, Δeigvals = real.(eigvals), real.(Δeigvals), real.(eigvals_cov)
 
         three_by_three = haskey(h5dset[ens][p],"correlation_matrix_3x3_ext")
