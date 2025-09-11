@@ -28,19 +28,27 @@ def fit_all_files(infile,outfile,parameterfile):
         if use3x3 and "eigvals_3x3" in fid[op.join(ensemble,p,irrep,fit_id)].keys():
             ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"eigvals_3x3"))
             cov_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"cov_eigvals_3x3"))
+            std_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"Delta_eigvals_3x3"))
         else:
             ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"eigvals"))
             cov_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"cov_eigvals"))
+            std_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"Delta_eigvals"))
 
         T = ev.shape[0]
         antisymmetric = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"deriv")) 
 
         # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
-        var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
-        var2 = gv.gvar(ev[:,1],cov_ev[:,:,1]/1)
+        # Use a try-exscept statement for relablled eigenvalues. needs to be removed
+        # once the swapped eigenvalues are calculated correctly.
+        #try:
+        #    var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
+        #    var2 = gv.gvar(ev[:,1],cov_ev[:,:,1]/1)
+        #except:
+        var1 = gv.gvar(ev[:,0],std_ev[:,0]/1)
+        var2 = gv.gvar(ev[:,1],std_ev[:,1]/1)
+        
         eig1 = dict(Gab=var1/var1[0])
         eig2 = dict(Gab=var2/var2[0])
-
         plotname = op.join(ensemble,irrep)
         plotdir  = "./data_assets/plots/"
         printing = False

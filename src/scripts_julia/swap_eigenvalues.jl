@@ -3,6 +3,7 @@ using HDF5
 using LatticeUtils
 using DelimitedFiles
 using ArgParse: ArgParseSettings, parse_args, @add_arg_table
+using LinearAlgebra
 
 function swap_eigvals(old,op1,op2,t)
     T = size(old,2)
@@ -17,7 +18,7 @@ function swap_eigvals_start(old,op1,op2,t)
     new = copy(old)
     r1 = 1:t-1
     r2 = T-t+2:T
-    @. new[op1,r1] = old[op2,r1]
+    #@. new[op1,r1] = old[op2,r1]
     @. new[op2,r1] = old[op1,r1]
     @. new[op1,r2] = old[op2,r2]
     @. new[op2,r2] = old[op1,r2]
@@ -25,30 +26,28 @@ function swap_eigvals_start(old,op1,op2,t)
 end
 
 function swap_eigvals_cov(old,op1,op2,t)
-    T = size(old,2)
+    Nops, T = size(old,1), size(old,3)
     new = copy(old)
     r1 = t:T-t+2
-    @. new[op1,op1,r1] = old[op2,op2,r1]
-    @. new[op2,op2,r1] = old[op1,op1,r1]
-    @. new[op1,op2,r1] = old[op2,op1,r1]
-    @. new[op2,op1,r1] = old[op1,op2,r1]
+    #@. new[op1,:,r1] = old[op2,:,r1]
+    @. new[op2,:,r1] = old[op1,:,r1]
+    @. new[:,op1,r1] = old[:,op2,r1]
+    @. new[:,op2,r1] = old[:,op1,r1]
     return new
 end
 function swap_eigvals_cov(old,op1,op2,t)
-    T = size(old,2)
+    Nops, T = size(old,1), size(old,3)
     new = copy(old)
     r1 = 1:t-1
     r2 = T-t+2:T
-    # TODO: This is probably not correct for elements
-    # involving a potentially unswapped operator
-    @. new[op1,op1,r1] = old[op2,op2,r1]
-    @. new[op2,op2,r1] = old[op1,op1,r1]
-    @. new[op1,op2,r1] = old[op2,op1,r1]
-    @. new[op2,op1,r1] = old[op1,op2,r1]
-    @. new[op1,op1,r2] = old[op2,op2,r2]
-    @. new[op2,op2,r2] = old[op1,op1,r2]
-    @. new[op1,op2,r2] = old[op2,op1,r2]
-    @. new[op2,op1,r2] = old[op1,op2,r2]
+    @. new[op1,:,r1] = old[op2,:,r1]
+    @. new[op2,:,r1] = old[op1,:,r1]
+    @. new[op1,:,r2] = old[op2,:,r2]
+    @. new[op2,:,r2] = old[op1,:,r2]
+    @. new[:,op1,r1] = old[:,op2,r1]
+    @. new[:,op2,r1] = old[:,op1,r1]
+    @. new[:,op1,r2] = old[:,op2,r2]
+    @. new[:,op2,r2] = old[:,op1,r2]
     return new
 end
 
