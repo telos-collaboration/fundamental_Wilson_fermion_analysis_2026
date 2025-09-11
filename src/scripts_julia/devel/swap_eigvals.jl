@@ -5,8 +5,8 @@ using Plots
 gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
 
 fid = h5open("data_assets/isospin1_eigenvalues_evp_gevp.hdf5")
-r  = keys(fid)[1]
-id = "gevp_t0_2"
+r  = keys(fid)[3]
+id = "gevp_t0_8"
 p  = "p(0,0,1)"
 irrep = "A1"
 
@@ -27,22 +27,22 @@ function swap_eigvals_start(old,op1,op2,t)
     new = copy(old)
     r1 = 1:t-1
     r2 = T-t+2:T
-    @. new[op1,:,r1] = old[op2,:,r1]
-    @. new[op2,:,r1] = old[op1,:,r1]
-    @. new[op1,:,r2] = old[op2,:,r2]
-    @. new[op2,:,r2] = old[op1,:,r2]
+    @. new[op1,r1] = old[op2,r1]
+    @. new[op2,r1] = old[op1,r1]
+    @. new[op1,r2] = old[op2,r2]
+    @. new[op2,r2] = old[op1,r2]
     return new
 end
 
-#op1,op2,t = 2,3,13
-#ev = swap_eigvals(ev,op1,op2,t)
-#Δev = swap_eigvals(Δev,op1,op2,t)
-#println("$r,\"$p\",$irrep,$id,$op1,$op2,$t")
+op1,op2,t = 1,3,8
+ev = swap_eigvals_start(ev,op1,op2,t)
+Δev = swap_eigvals_start(Δev,op1,op2,t)
+println("$r,\"$p\",$irrep,$id,$op1,$op2,-$t")
 
-#op1,op2,t = 1,3,14
-#ev = swap_eigvals(ev,op1,op2,t)
-#Δev = swap_eigvals(Δev,op1,op2,t)
-#println("$r,\"$p\",$irrep,$id,$op1,$op2,$t")
+op1,op2,t = 2,3,13
+ev = swap_eigvals(ev,op1,op2,t)
+Δev = swap_eigvals(Δev,op1,op2,t)
+println("$r,\"$p\",$irrep,$id,$op1,$op2,$t")
 
 t = filter(!isequal(T÷2+1),1:T)
 f = abs
