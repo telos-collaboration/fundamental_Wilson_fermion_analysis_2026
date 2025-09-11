@@ -24,7 +24,7 @@ h5file_scat_fit="data_assets/isospin1_fit_scatter.hdf5"
 inputfiles="metadata/input_files.csv"
 infvolfile="metadata/infinite_volume.csv"
 fitparam="metadata/pipi_fitintervals.csv"
-# fitparam_evp="metadata/pipi_fitintervals_gevp_test.csv"
+fitparam_evp="metadata/pipi_fitintervals_gevp_test.csv"
 fitparam_meson="metadata/meson_fitintervals.csv"
 
 input_scatter="metadata/scattering_input.csv"
@@ -53,7 +53,8 @@ julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig_gvp --metada
 julia src/scripts_julia/plot_eigenvalues_with_fits.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam --fitresults $h5file_fit
 julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
 julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath --fitresults $h5file_fit
-julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam
+julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam --plot_mesons true  --plotbasename "effective_masses"
+julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig_gvp --h5file_fit $h5file_fit_evp --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam_evp --plot_mesons false --plotbasename "effective_masses_comparison"
 
 mkdir -p tmp
 bash libs/zeta/compile.sh  &> tmp/make.log
