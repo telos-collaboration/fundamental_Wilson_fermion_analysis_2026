@@ -190,8 +190,8 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
             plot_effective_masses!(plt, meff, Δmeff, sources; markershape=:rect)
         end
         plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
-        if isfile(fitresults) && haskey(res,joinpath(ens,p))
-            r = res[joinpath(ens,p,"A1")]
+        if isfile(fitresults) && haskey(res,joinpath(ens,id,p))
+            r = res[joinpath(ens,id,p,"A1")]
             E0, ΔE0 = read(r,"E")[1], read(r,"Delta_E")[1] 
             E1, ΔE1 = read(r,"E")[2], read(r,"Delta_E")[2]
             tmin1 = read(r,"tmin1") + 1

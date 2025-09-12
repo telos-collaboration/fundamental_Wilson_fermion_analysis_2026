@@ -35,7 +35,9 @@ def fit_all_files(infile,outfile,parameterfile):
             std_ev = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"Delta_eigvals"))
 
         T = ev.shape[0]
+        t0 = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"t0"))
         antisymmetric = get_hdf5_value(fid,op.join(ensemble,p,irrep,fit_id,"deriv")) 
+        antisymmetric = antisymmetric and t0 < 3
 
         # Rescale data such that eig(t=0)=1 and use full covariance matrix estimator
         var1 = gv.gvar(ev[:,0],cov_ev[:,:,0]/1)
