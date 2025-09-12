@@ -1,31 +1,15 @@
-function swap_eigvals(old,op1,op2,t)
+function _swap_eigenvalues(old,op1,op2,t)
     T = size(old,3)
     new = copy(old)
-    r1 = t:T-t+2
+    # We use the sign of t to encode which parts of the correlator to relabel
+    if t > 0
+        r1 = t:T-t+2
+    else
+        r1 = vcat(collect(1:abs(t)-1), collect(T-abs(t)+2:T))
+    end
     @. new[op1,:,r1] = old[op2,:,r1]
     @. new[op2,:,r1] = old[op1,:,r1]
     return new
-end
-function swap_eigvals_start(old,op1,op2,t)
-    T = size(old,3)
-    new = copy(old)
-    r1 = 1:t-1
-    r2 = T-t+2:T
-    @. new[op1,:,r1] = old[op2,:,r1]
-    @. new[op2,:,r1] = old[op1,:,r1]
-    @. new[op1,:,r2] = old[op2,:,r2]
-    @. new[op2,:,r2] = old[op1,:,r2]
-    return new
-end
-function _swap_eigenvalues(eigenvalues_resamples, op1, op2, t_swap)
-    # load eigenvalues
-    if t_swap > 0
-        eigenvalues_resamples = swap_eigvals(eigenvalues_resamples,op1,op2,t_swap)
-    end
-    if t_swap < 0
-        eigenvalues_resamples = swap_eigvals_start(eigenvalues_resamples,op1,op2,abs(t_swap))
-    end
-    return eigenvalues_resamples
 end
 function swap_eigvals(eigenvalues_resamples,csvdat,r,p,irrep,id)
     data = readdlm(csvdat,',',skipstart=1)
