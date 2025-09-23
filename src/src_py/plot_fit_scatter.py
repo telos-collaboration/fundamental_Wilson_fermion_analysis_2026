@@ -302,6 +302,10 @@ def from_to(x,f):
     else:
         raise ValueError("Invalid conversion given to from_to: %s to %s"%(x,f))
 
+def sigma_14(s, a0, r0):
+    cot_PS = (-1/a0+(s/4-1)*r0/2)/np.sqrt(s/4-1)
+    return 4*np.pi/((s/4-1)*(1+cot_PS**2))
+
 def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model=None,outname=None,show=False):
     fit = fit_model != None
     plt.rcParams['figure.figsize'] = [10, 6]
@@ -396,6 +400,10 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         plt.plot(xarr,yarr_med_plot, color = "blue")
         plt.fill_between(xarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = "blue")
 
+        if xaxis == "s_prime" and yaxis == "sigma_prime":
+            yarr_14 = np.asarray([sigma_14(x,0.56,4.4) for x in xarr])
+            plt.plot(xarr,yarr_14, color = "green", label = "14-dim")
+
         if fit_model.yaxis == yaxis:
             y_e = np.asarray([sorted(y_s[i])[length//2] for i in range(len(y_s))])
             y_pred = np.asarray([fit_model.model(x, *fit_param_m) for x in x_m])
@@ -410,8 +418,9 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
             ndof = len(y_m) - fit_model.num_params  # degrees of freedom
             chi2_ndof = chi2 / ndof
             print("chi^2 = %1.3f,  dof = %i,  chi2/dof = %f"%(chi2,ndof,chi2_ndof),end="\n\n")
-            ax.text(0.05, 0.95, "chi^2/dof=%f"%chi2_ndof, transform=ax.transAxes, fontsize=12, verticalalignment="top", bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.7)
-)
+            ax.text(0.05, 0.85, "chi^2/dof=%1.3f"%chi2_ndof, transform=ax.transAxes, fontsize=12, verticalalignment="top", bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.7))
+    ax.text(0.05, 0.95, "$\\beta$=%1.3f, $m_0$=%1.3f"%(beta,m0), transform=ax.transAxes, fontsize=12, verticalalignment="top", bbox=dict(boxstyle="round,pad=0.3", facecolor="lightgray", alpha=0.7))
+
 
     for tmp in [[None,0,"T1",0],[None,1,"E",0],[None,2,"B1",0],[None,3,"E",0],[None,1,"A1",0],[None,1,"A1",1],[None,2,"A1",0],[None,2,"A1",1],[None,3,"A1",0],[None,3,"A1",1]]:
         plt.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = "p=%i, %s, lv=%i"%(tmp[1],tmp[2],tmp[3]))
@@ -469,11 +478,11 @@ if __name__ == "__main__":
         plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_1_model)
         plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_2_model)
         plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.ERE_0_model)
-        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.ERE_1_model)
-        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.ERE_2_model)
+        # plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.ERE_1_model)
+        # plot_any(h5file, 6.9, -0.92, "s_prime", "PS", fm.ERE_2_model)
         plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_0_model)
-        plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_1_model)
-        plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_2_model)
+        # plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_1_model)
+        # plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fm.ERE_2_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
         plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fm.BW_I_model)
