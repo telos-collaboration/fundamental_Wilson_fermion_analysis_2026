@@ -15,3 +15,4 @@ tmp
 data_assets
 raw_data
 !metadata/*
+*.zip
