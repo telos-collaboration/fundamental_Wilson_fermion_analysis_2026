@@ -117,35 +117,35 @@ def plot_E_CM_L(h5file,beta,m0,levels=False,outname=None,show=False):
         ECM_errms[i] = 0 if ECM_errms[i] > 1 else ECM_errms[i]
         ECM_errps[i] = 0 if ECM_errps[i] > 1 else ECM_errps[i]
         plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))   
-    plt.axhline(1,c="black", ls="dotted", label = r"$m_\pi$")
-    plt.axhline(mrho/mpi,c="red", ls="dotted", label = r"$m_\rho$")
+    # plt.axhline(1,c="black", ls="dotted", label = r"$m_\pi$")
+    # plt.axhline(mrho/mpi,c="red", ls="dotted", label = r"$m_\rho$")
     plt.axhline(2,c="black",label = r"2$m_\pi$")
     plt.axhline(4,c="black",label = r"4$m_\pi$")
     plt.grid()
     plt.title("$\\beta$ = %f, $m_0$ = %f"%(beta,m0))
-    xarrinv = np.linspace(1/40,1/13)
-    xarr = [1/x for x in xarrinv]
-    if levels:
-        yarr1_2 = [np.sqrt(E_pipi(mpi,1,0,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
-        yarr1_3 = [np.sqrt(E_pipi(mpi,2,1,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
-        yarr1_4 = [np.sqrt(E_pipi(mpi,3,2,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
-        yarr1_5 = [np.sqrt(E_pipi(mpi,4,1,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
-        yarr2_2 = [np.sqrt(E_pipi(mpi,2,0,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
-        yarr2_3 = [np.sqrt(E_pipi(mpi,3,1,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
-        yarr2_4 = [np.sqrt(E_pipi(mpi,4,2,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
-        yarr3_2 = [np.sqrt(E_pipi(mpi,3,0,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
-        yarr3_3 = [np.sqrt(E_pipi(mpi,2,1,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
-        yarr3_4 = [np.sqrt(E_pipi(mpi,4,3,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
-        plt.plot(xarrinv,yarr1_2, ls="dashed", c=color(1))
-        plt.plot(xarrinv,yarr1_3, ls="dashed", c=color(1))
-        plt.plot(xarrinv,yarr1_4, ls="dashed", c=color(1))
-        plt.plot(xarrinv,yarr1_5, ls="dashed", c=color(1))
-        plt.plot(xarrinv,yarr2_2, ls="dashdot", c=color(2))
-        plt.plot(xarrinv,yarr2_3, ls="dashdot", c=color(2))
-        plt.plot(xarrinv,yarr2_4, ls="dashdot", c=color(2))
-        plt.plot(xarrinv,yarr3_2, ls="solid", c=color(3))
-        plt.plot(xarrinv,yarr3_3, ls="solid", c=color(3))
-        plt.plot(xarrinv,yarr3_4, ls="solid", c=color(3))
+    # xarrinv = np.linspace(1/40,1/13)
+    # xarr = [1/x for x in xarrinv]
+    # if levels:
+    #     yarr1_2 = [np.sqrt(E_pipi(mpi,1,0,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
+    #     yarr1_3 = [np.sqrt(E_pipi(mpi,2,1,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
+    #     yarr1_4 = [np.sqrt(E_pipi(mpi,3,2,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
+    #     yarr1_5 = [np.sqrt(E_pipi(mpi,4,1,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
+    #     yarr2_2 = [np.sqrt(E_pipi(mpi,2,0,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
+    #     yarr2_3 = [np.sqrt(E_pipi(mpi,3,1,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
+    #     yarr2_4 = [np.sqrt(E_pipi(mpi,4,2,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
+    #     yarr3_2 = [np.sqrt(E_pipi(mpi,3,0,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
+    #     yarr3_3 = [np.sqrt(E_pipi(mpi,2,1,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
+    #     yarr3_4 = [np.sqrt(E_pipi(mpi,4,3,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
+    #     plt.plot(xarrinv,yarr1_2, ls="dashed", c=color(1))
+    #     plt.plot(xarrinv,yarr1_3, ls="dashed", c=color(1))
+    #     plt.plot(xarrinv,yarr1_4, ls="dashed", c=color(1))
+    #     plt.plot(xarrinv,yarr1_5, ls="dashed", c=color(1))
+    #     plt.plot(xarrinv,yarr2_2, ls="dashdot", c=color(2))
+    #     plt.plot(xarrinv,yarr2_3, ls="dashdot", c=color(2))
+    #     plt.plot(xarrinv,yarr2_4, ls="dashdot", c=color(2))
+    #     plt.plot(xarrinv,yarr3_2, ls="solid", c=color(3))
+    #     plt.plot(xarrinv,yarr3_3, ls="solid", c=color(3))
+    #     plt.plot(xarrinv,yarr3_4, ls="solid", c=color(3))
     if levels:
         plt.plot([0,0],[0,0],c="grey", label = "non-int")
     if m0 == -0.92:
@@ -449,13 +449,13 @@ if __name__ == "__main__":
         plot_E_CM_L(h5file, 7.05, -0.863)
         plot_E_CM_L(h5file, 7.05, -0.867)
 
-        # plot_any(h5file, 6.9, -0.92,   "p2star_prime", "p3cotPS_prime", None)
-        # plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_prime", None)
-        # plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", None)
-        # plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", None)
-        # plot_any(h5file, 6.9, -0.92,   "s_prime", "PS", None)
-        # plot_any(h5file, 7.05, -0.863, "s_prime", "PS", None, show = False)
-        # plot_any(h5file, 7.05, -0.867, "s_prime", "PS", None, show = False)
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", None)
+        plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_prime", None)
+        plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", None)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", None)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", None)
+        plot_any(h5file, 7.05, -0.863, "s_prime", "PS", None, show = False)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "PS", None, show = False)
     else:
         # betas = [6.9, 7.05]
         # m0s = [-0.92, -0.867]
