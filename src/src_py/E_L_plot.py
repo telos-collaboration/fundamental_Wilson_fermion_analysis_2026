@@ -10,6 +10,7 @@ import sys
 import plotting_functions_thesis as pf
 import fit_models as fm
 
+import styles
 
 def nth(num):
     if num <= 10:
@@ -22,14 +23,14 @@ def nth(num):
 # color_points = "green"
 color_fit = "olivedrab"
 
-plt.rcParams['figure.figsize'] = [10, 6] 
-fontsize = 14
-font = {'size'   : fontsize}
-matplotlib.rc('font', **font)
-plt.rcParams.update({
-    # "font.family": "serif",
-    "mathtext.fontset": "cm",   # Computer Modern
-})
+# plt.rcParams['figure.figsize'] = [10, 6] 
+# fontsize = 14
+# font = {'size'   : fontsize}
+# matplotlib.rc('font', **font)
+# plt.rcParams.update({
+#     # "font.family": "serif",
+#     "mathtext.fontset": "cm",   # Computer Modern
+# })
 
 num_perc = math.erf(1/np.sqrt(2))
 
