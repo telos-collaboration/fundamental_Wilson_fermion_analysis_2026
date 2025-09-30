@@ -177,7 +177,7 @@ def plot_E_CM_L_multi_non_res(h5file,beta,m0,levels=False,outname=None,show=Fals
     ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
     ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
 
-    ax2.legend(loc='center right', bbox_to_anchor=(1.2, 0.95))
+    ax2.legend(loc='center right', bbox_to_anchor=(1.25, 0.95))
 
     ax2.set_xlabel(r"$a/N_L$")
     # plt.ylabel("$E_{CM}$/$m_\\pi$")
@@ -211,7 +211,7 @@ def plot_E_CM_L_multi_non_res(h5file,beta,m0,levels=False,outname=None,show=Fals
     ax2.set_xticks(NL_inv_label, [r"$1/%i$"%x for x in NL_label])
     y1ticks = np.linspace(1.3,1.5,5)
     ax2.set_yticks(y1ticks, [r"$%1.2f$"%x for x in y1ticks])
-    y2ticks = np.linspace(2,2.3,4)
+    y2ticks = np.linspace(2,2.3,5)
     ax1.set_yticks(y2ticks, [r"$%1.1f$"%x for x in y2ticks])
 
     # plt.xticks([1/14,1/16,1/20,1/24,1/36],["1/14","1/16","1/20","1/24","1/36"])
@@ -315,7 +315,7 @@ def plot_E_CM_L_multi_705(h5file,levels=False,outname=None,show=False):
     ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
     ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
 
-    ax2.legend(loc='center right', bbox_to_anchor=(1.2, 1))
+    ax2.legend(loc='center right', bbox_to_anchor=(1.25, 1))
 
     ax2.set_xlabel(r"$a/N_L$")
 

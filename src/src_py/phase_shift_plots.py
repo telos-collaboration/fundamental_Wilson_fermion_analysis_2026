@@ -15,7 +15,7 @@ import styles
 
 mpl.rcParams['lines.markersize'] = 9
 
-figs1, figs2 = 10,7
+figs1, figs2 = 12,7
 
 def nth(num):
     if num <= 10:
@@ -24,9 +24,6 @@ def nth(num):
         return num//10
     else:
         return num//100
-    
-# color_points = "green"
-color_fit = "olivedrab"
 
 plt.rcParams['figure.figsize'] = [10, 6] 
 fontsize = 14
@@ -134,10 +131,7 @@ def plot_PS_ERE_non_res(h5file,show=False):
     ax2.yaxis.grid()
     info, info_nf, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_nf_mean, scat_nf_spl = get_data(h5file, 6.9, -0.92, True)
 
-    slow, shigh = 4,5.05
-    ax1.set_xlim([slow,shigh])
-    ax1.set_ylim([0,80])
-    ax2.set_ylim([0,0.55])
+    slow, shigh = 4,5.07
 
     x_m   = np.asarray(scat_fit_mean["s_prime"])
     x_s   = np.asarray(scat_fit_spl["s_prime"])
@@ -147,7 +141,7 @@ def plot_PS_ERE_non_res(h5file,show=False):
     p3cotPS_s   = np.asarray(scat_fit_spl["p3cotPS_prime"])
 
     ax2.set_xlabel(r"$s/m_\pi^2$")
-    ax2.set_ylabel(r"$p^3\, \cot(\delta)/m_\pi^3$")
+    ax2.set_ylabel(r"$p^3\, \cot(\delta_1)/m_\pi^3$")
     ax1.set_ylabel(r"$\delta_1$")
     
     length = len(x_s[0])
@@ -160,17 +154,6 @@ def plot_PS_ERE_non_res(h5file,show=False):
     irreps = info["irrep"]
     plot_args = list(zip(N_Ls,d2s,irreps,lvs))
     
-    for i in  range(len(x_m)):
-        # print(x_m[i])
-        ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-
-    for i in  range(len(x_m)):
-        ax2.scatter(x_m[i],p3cotPS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax2.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(p3cotPS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-   
     sarr = np.linspace(slow,shigh,100)
     p2arr = [p2_s(s) for s in sarr]
     fit_model = fm.ERE_0_model
@@ -185,30 +168,48 @@ def plot_PS_ERE_non_res(h5file,show=False):
     yarr_e_m_plot = np.asarray([yarr_tmp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(p2arr))])
     yarr_e_p_plot = np.asarray([yarr_tmp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(p2arr))])
 
-    ax2.plot(sarr,yarr_m, color = color_fit)
-    ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = color_fit)
+    ax2.plot(sarr,yarr_m, color = styles.c_10_non_res)
+    ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.5, color = styles.c_10_non_res)
 
     PS_m_plot = [delta_x(yarr_m[i], p2arr[i]) for i in range(len(p2arr))]
     PS_e_m_plot = [delta_x(yarr_e_m_plot[i], p2arr[i]) for i in range(len(p2arr))]
     PS_e_p_plot = [delta_x(yarr_e_p_plot[i], p2arr[i]) for i in range(len(p2arr))]
 
-    ax1.plot(sarr,PS_m_plot, color = color_fit)
-    ax1.fill_between(sarr, PS_e_m_plot, PS_e_p_plot, alpha = 0.3, color = color_fit)
+    ax1.plot(sarr,PS_m_plot, color = styles.c_10_non_res)
+    ax1.fill_between(sarr, PS_e_m_plot, PS_e_p_plot, alpha = 0.5, color = styles.c_10_non_res)
+
+    for i in  range(len(x_m)):
+        # print(x_m[i])
+        ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
+        sorted_indices = np.argsort(x_s[i])
+        ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
+
+    for i in  range(len(x_m)):
+        ax2.scatter(x_m[i],p3cotPS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
+        sorted_indices = np.argsort(x_s[i])
+        ax2.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(p3cotPS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
+   
 
     for tmp in [[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
+        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "^", label = r"$|p|=%i$"%(tmp[1]))
     # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
     ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
     # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
 
+    ax1.set_xlim([slow,shigh])
+    ax1.set_ylim([0,50])
+    ax2.set_ylim([0,0.55])
+
     xticks = np.linspace(4,5,6)
     ax1.set_xticks(xticks, [r"$%1.1f$"%x for x in xticks])
-    yticks = np.linspace(0,80,5)
+    yticks = np.linspace(0,50,6)
     ax1.set_yticks(yticks, [r"$%i$"%x for x in yticks])
     yticks = np.linspace(0,0.5,6)
     ax2.set_yticks(yticks, [r"$%1.1f$"%x for x in yticks])
     
-    ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
+    # ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
+    ax1.legend(loc='upper left')
+
     plt.savefig(op.join(PLTDIR, "phase_shift_plot_non_res.pdf"), bbox_inches='tight')
     if show:
         plt.show()
@@ -238,7 +239,7 @@ def plot_PS_ERE_res(h5file,show=False):
     p3cotPS_s   = np.asarray(scat_fit_spl["p3cotPS_Ecm_prime"])
 
     ax2.set_xlabel(r"$s/m_\pi^2$")
-    ax2.set_ylabel(r"$p^3\, \cot(\delta)/E_{cm}/m_\pi^2$")
+    ax2.set_ylabel(r"$p^3\, \cot(\delta_1)/E_{cm}/m_\pi^2$")
     ax1.set_ylabel(r"$\delta_1$")
     
     length = len(x_s[0])
@@ -250,17 +251,6 @@ def plot_PS_ERE_res(h5file,show=False):
     lvs = info["lv"]
     irreps = info["irrep"]
     plot_args = list(zip(N_Ls,d2s,irreps,lvs))
-    
-    for i in  range(len(x_m)):
-        # print(x_m[i])
-        ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-
-    for i in  range(len(x_m)):
-        ax2.scatter(x_m[i],p3cotPS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax2.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(p3cotPS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
     
     sarr = np.linspace(slow,shigh,100)
     p2arr = [p2_s(s) for s in sarr]
@@ -279,16 +269,27 @@ def plot_PS_ERE_res(h5file,show=False):
     # PS_arr_s = np.asarray([sorted([delta_res_x(fit_model.model(sarr[j],*fit_param_s[i]),p2arr[j]) for i in range(len(fit_param_s))]) for j in range(len(sarr))])
     # PS_arr_s = [[delta_res_x(yarr_tmp[i][j],p2arr[i]) for j in range(len(yarr_tmp[0]))] for i in range(len(p2arr))]
 
-    ax2.plot(sarr,yarr_m, color = color_fit)
-    ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = color_fit)
+    ax2.plot(sarr,yarr_m, color = styles.c_10_res)
+    ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.5, color = styles.c_10_res)
 
     PS_m_plot = [delta_res_x(yarr_m[i], p2arr[i])%180 for i in range(len(p2arr))]
     PS_e_m_plot = [delta_res_x(yarr_e_m_plot[i], p2arr[i])%180 for i in range(len(p2arr))]
     PS_e_p_plot = [delta_res_x(yarr_e_p_plot[i], p2arr[i])%180 for i in range(len(p2arr))]
 
-    ax1.plot(sarr,PS_m_plot, color = color_fit)
-    ax1.fill_between(sarr, PS_e_m_plot, PS_e_p_plot, alpha = 0.3, color = color_fit)
+    ax1.plot(sarr,PS_m_plot, color = styles.c_10_res)
+    ax1.fill_between(sarr, PS_e_m_plot, PS_e_p_plot, alpha = 0.5, color = styles.c_10_res)
 
+    for i in  range(len(x_m)):
+        # print(x_m[i])
+        ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
+        sorted_indices = np.argsort(x_s[i])
+        ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
+
+    for i in  range(len(x_m)):
+        ax2.scatter(x_m[i],p3cotPS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
+        sorted_indices = np.argsort(x_s[i])
+        ax2.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(p3cotPS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
+    
     for tmp in [[None,0,None,None],[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
         ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
     # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
@@ -302,7 +303,8 @@ def plot_PS_ERE_res(h5file,show=False):
     yticks = np.linspace(-0.75,0.25,5)
     ax2.set_yticks(yticks, [r"$%1.2f$"%x for x in yticks])
     
-    ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
+    # ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
+    ax1.legend(loc='lower right')
     plt.savefig(op.join(PLTDIR, "phase_shift_plot_res.pdf"), bbox_inches='tight')
     if show:
         plt.show()

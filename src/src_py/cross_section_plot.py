@@ -23,18 +23,6 @@ def nth(num):
         return num//10
     else:
         return num//100
-    
-# color_points = "green"
-color_fit = "olivedrab"
-
-plt.rcParams['figure.figsize'] = [10, 6] 
-fontsize = 14
-font = {'size'   : fontsize}
-matplotlib.rc('font', **font)
-plt.rcParams.update({
-    # "font.family": "serif",
-    "mathtext.fontset": "cm",   # Computer Modern
-})
 
 num_perc = math.erf(1/np.sqrt(2))
 
@@ -104,6 +92,16 @@ def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with
                                                 scat_nf_spl.setdefault(key,[]).append([float(x) for x in np.real(hfile[ens][P][irrep][lv]["sample"][key][()])])
     return info, info_nf, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_nf_mean, scat_nf_spl
 
+def read_from_hdf(filename):
+    res, res_tmp = [{},{}]
+    with h5py.File("data_assets/14_dim/"+filename+".hdf5","r") as hfile:
+        for key in hfile.keys():
+            if key[:4] == "orig":
+                res[key[5:]] = hfile[key][()]
+            if key[:4] == "samp":
+                res_tmp[key[7:]] = hfile[key][()]
+    return res, res_tmp
+
 def s_p2(p2):
     return 4*(1+p2)
 
@@ -116,272 +114,238 @@ def delta_x(x,p2):
 def delta_res_x(x,p2):
     return np.arctan(p2**(3/2)/(2*np.sqrt(1+p2)*x))*360/(2*np.pi)
 
-def plot_sigma(h5file,show=False):
+def sigma_of_p3cotPS_Ecm_prime(s, p3cotPS_Ecm_prime):
+    cot_PS = p3cotPS_Ecm_prime*np.sqrt(s)/(s/4-1)**(3/2)
+    return 12*np.pi/((s/4-1)*(1+cot_PS**2))
+
+def sigma_of_p3cotPS_prime(s, p3cotPS_prime):
+    cot_PS = p3cotPS_prime/(s/4-1)**(3/2)
+    return 12*np.pi/((s/4-1)*(1+cot_PS**2))
+
+def UTE(P2, a, b):
+    """
+    Second order univesal threshold expansion
+    """
+    return a+P2*b
+
+def sigma_of_pcotPS_prime(s, pcotPS_prime):
+    # cot_PS = pcotPS_prime/(s/4-1)**(1/2)
+    return 4*np.pi/(((s/4-1)+pcotPS_prime**2))
+
+def plot_sigma(h5file,show=False,units=False):
     fig, ax = plt.subplots(figsize=(figs1,figs2))
     plt.subplots_adjust(wspace=0, hspace=0.05)   
 
     plt.grid()
-
-    info, info_nf, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_nf_mean, scat_nf_spl = get_data(h5file, 6.9, -0.92, True)
-
     slow, shigh = 4,11.1
     ax.set_xlim([slow,shigh])
     ax.set_ylim([0,100])
 
-    x_m   = np.asarray(scat_fit_mean["s_prime"])
-    x_s   = np.asarray(scat_fit_spl["s_prime"])
-    PS_m   = np.asarray(scat_fit_mean["PS"])
-    PS_s   = np.asarray(scat_fit_spl["PS"])
-    p3cotPS_m   = np.asarray(scat_fit_mean["p3cotPS_prime"])
-    p3cotPS_s   = np.asarray(scat_fit_spl["p3cotPS_prime"])
+    info, info_nf, fit_param_mean_NR, fit_param_spl_NR, scat_fit_mean_NR, scat_fit_spl_NR, scat_nf_mean_NR, scat_nf_spl_NR = get_data(h5file, 6.9, -0.92, True)
+
+    x_NR   = np.asarray(scat_fit_mean_NR["s_prime"])
+    x_NR_s   = np.asarray(scat_fit_spl_NR["s_prime"])
+    sigma_NR_m   = np.asarray(scat_fit_mean_NR["sigma_prime"])
+    sigma_NR_s   = np.asarray(scat_fit_spl_NR["sigma_prime"])
+
+    info, info_nf, fit_param_mean_R, fit_param_spl_R, scat_fit_mean_R, scat_fit_spl_R, scat_nf_mean_R, scat_nf_spl_R = get_data(h5file, 7.05, -0.867, True)
+
+    x_R   = np.asarray(scat_fit_mean_R["s_prime"])
+    x_R_s   = np.asarray(scat_fit_spl_R["s_prime"])
+    sigma_R_m   = np.asarray(scat_fit_mean_R["sigma_prime"])
+    sigma_R_s   = np.asarray(scat_fit_spl_R["sigma_prime"])
+    
+    length = len(x_NR_s[0])
+    
+    sarr = np.linspace(slow-0.1,shigh,200)
+    p2arr = [p2_s(s) for s in sarr]
+    fit_model = fm.ERE_0_model
+    
+    fit_param_NR_m = np.asarray([fit_param_mean_NR[fp] for fp in fit_model.param_names])
+    yarr_NR_m = np.asarray([fit_model.model(x,*fit_param_NR_m) for x in p2arr])
+    sigma_NR_m = np.asarray([sigma_of_p3cotPS_prime(sarr[i],yarr_NR_m[i]) for i in range(len(sarr))])
+
+    fit_param_s = np.transpose(np.asarray([fit_param_spl_NR[fp] for fp in fit_model.param_names]))
+    yarr_NR_s = np.asarray([[fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))] for x in p2arr])
+    sigma_NR_s = np.asarray([sorted([sigma_of_p3cotPS_prime(sarr[i],yarr_NR_s[i][j]) for j in range(len(yarr_NR_s[0]))]) for i in range(len(sarr))])
+
+    sigma_NR_mean = [sigma_NR_s[i][length//2-1] for i in range(len(sarr))]
+    sigma_NR_em = [sigma_NR_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))]
+    sigma_NR_ep = [sigma_NR_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(sarr))]
+
+    ax.plot(sarr,sigma_NR_mean, color = styles.c_10_non_res, label = r"$\boldsymbol{10}:\,\beta=6.9,\,am_0=-0.92$")
+    ax.fill_between(sarr, sigma_NR_em, sigma_NR_ep, alpha = 0.5, color = styles.c_10_non_res)
+
+    #####################################################################################################################    
+
+    fit_model = fm.BW_I_model
+
+
+    fit_param_R_m = np.asarray([fit_param_mean_R[fp] for fp in fit_model.param_names])
+    yarr_R_m = np.asarray([fit_model.model(x,*fit_param_R_m) for x in sarr])
+    sigma_R_m = np.asarray([sigma_of_p3cotPS_Ecm_prime(sarr[i],yarr_R_m[i]) for i in range(len(sarr))])
+
+    fit_param_s = np.transpose(np.asarray([fit_param_spl_R[fp] for fp in fit_model.param_names]))
+    yarr_R_s = np.asarray([[fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))] for x in sarr])
+    sigma_R_s = np.asarray([sorted([sigma_of_p3cotPS_Ecm_prime(sarr[i],yarr_R_s[i][j])for j in range(len(yarr_R_s[0]))]) for i in range(len(sarr))])
+
+    sigma_R_mean = [sigma_R_s[i][length//2-1] for i in range(len(sarr))]
+    sigma_R_em = [sigma_R_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))]
+    sigma_R_ep = [sigma_R_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(sarr))]
+
+    ax.plot(sarr,sigma_R_mean, color = styles.c_10_res, label = r"$\boldsymbol{10}:\,\beta=7.05,\,am_0=-0.867$")
+    ax.fill_between(sarr, sigma_R_em, sigma_R_ep, alpha = 0.5, color = styles.c_10_res)
+
+    ###############################################################
+
+    res,  res_sample = read_from_hdf("scattering_Fig5.3_b6.900_m-0.920")
+
+    a_14_s = np.asarray(res_sample["a2"][:,0])
+    b_14_s = np.asarray(res_sample["b2"][:,0])
+
+    length = len(a_14_s)
+
+    pcot_PS_14_s = np.asarray([[UTE(p2arr[j], a_14_s[i], b_14_s[i]) for i in range(len(a_14_s))] for j in range(len(p2arr))])
+
+    print(pcot_PS_14_s.shape)
+
+    sigma_14_s = np.asarray([sorted([sigma_of_pcotPS_prime(sarr[i], pcot_PS_14_s[i,j]) for j in range(len(a_14_s))]) for i in range(len(p2arr))])
+
+    print(sigma_14_s.shape)
+
+    sigma_14_mean = [sigma_14_s[i][length//2-1] for i in range(len(sarr))]
+    sigma_14_em = [sigma_14_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))]
+    sigma_14_ep = [sigma_14_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(sarr))]
+
+    ax.plot(sarr,sigma_14_mean, color = styles.c_14, label = r"$\boldsymbol{14}:\,\beta=6.9,\,am_0=-0.92$")
+    ax.fill_between(sarr, sigma_14_em, sigma_14_ep, alpha = 0.5, color = styles.c_14)
 
     ax.set_xlabel(r"$s/m_\pi^2$")
     ax.set_ylabel(r"$\sigma_1 m_\pi^2$")
-    
-    length = len(x_s[0])
-    
-    N_Ls = [int(x) for x in scat_fit_mean["N_L"]]
-    dvecs = scat_fit_mean["dvec"]
-    dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
-    d2s = [np.dot(d,d) for d in dvecs]
-    lvs = info["lv"]
-    irreps = info["irrep"]
-    plot_args = list(zip(N_Ls,d2s,irreps,lvs))
-    
-    for i in  range(len(x_m)):
-        # print(x_m[i])
-        ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-
-    for i in  range(len(x_m)):
-        ax2.scatter(x_m[i],p3cotPS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax2.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(p3cotPS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-   
-    sarr = np.linspace(slow,shigh,100)
-    p2arr = [p2_s(s) for s in sarr]
-    fit_model = fm.ERE_0_model
-    
-    fit_param_m = np.asarray([fit_param_mean[fp] for fp in fit_model.param_names])
-    yarr_m = np.asarray([fit_model.model(x,*fit_param_m) for x in p2arr])
-
-    fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
-    yarr_tmp = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in p2arr])
-
-    # yarr_med_plot = np.asarray([yarr_tmp[i][length//2-1] for i in range(len(p2arr))])
-    yarr_e_m_plot = np.asarray([yarr_tmp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(p2arr))])
-    yarr_e_p_plot = np.asarray([yarr_tmp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(p2arr))])
-
-    ax2.plot(sarr,yarr_m, color = color_fit)
-    ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = color_fit)
-
-    PS_m_plot = [delta_x(yarr_m[i], p2arr[i]) for i in range(len(p2arr))]
-    PS_e_m_plot = [delta_x(yarr_e_m_plot[i], p2arr[i]) for i in range(len(p2arr))]
-    PS_e_p_plot = [delta_x(yarr_e_p_plot[i], p2arr[i]) for i in range(len(p2arr))]
-
-    ax1.plot(sarr,PS_m_plot, color = color_fit)
-    ax1.fill_between(sarr, PS_e_m_plot, PS_e_p_plot, alpha = 0.3, color = color_fit)
-
-    for tmp in [[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
-    ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
-
-    xticks = np.linspace(4,5,6)
-    ax1.set_xticks(xticks, [r"$%1.1f$"%x for x in xticks])
-    yticks = np.linspace(0,80,5)
-    ax1.set_yticks(yticks, [r"$%i$"%x for x in yticks])
-    yticks = np.linspace(0,0.5,6)
-    ax2.set_yticks(yticks, [r"$%1.1f$"%x for x in yticks])
-    
-    ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
-    plt.savefig(op.join(PLTDIR, "phase_shift_plot_non_res.pdf"), bbox_inches='tight')
-    if show:
-        plt.show()
-    plt.close(fig)
-
-def plot_PS_ERE_non_res(h5file,show=False):
-    fig, [ax1,ax2] = plt.subplots(nrows=2, ncols=1, sharex=True,figsize=(figs1,figs2))
-    plt.subplots_adjust(wspace=0, hspace=0.05)   
-
-    ax1.xaxis.grid()
-    ax2.xaxis.grid()
-    ax1.yaxis.grid()
-    ax2.yaxis.grid()
-    info, info_nf, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_nf_mean, scat_nf_spl = get_data(h5file, 6.9, -0.92, True)
-
-    slow, shigh = 4,5.05
-    ax1.set_xlim([slow,shigh])
-    ax1.set_ylim([0,80])
-    ax2.set_ylim([0,0.55])
-
-    x_m   = np.asarray(scat_fit_mean["s_prime"])
-    x_s   = np.asarray(scat_fit_spl["s_prime"])
-    PS_m   = np.asarray(scat_fit_mean["PS"])
-    PS_s   = np.asarray(scat_fit_spl["PS"])
-    p3cotPS_m   = np.asarray(scat_fit_mean["p3cotPS_prime"])
-    p3cotPS_s   = np.asarray(scat_fit_spl["p3cotPS_prime"])
-
-    ax2.set_xlabel(r"$s/m_\pi^2$")
-    ax2.set_ylabel(r"$p^3\, \cot(\delta)/m_\pi^3$")
-    ax1.set_ylabel(r"$\delta_1$")
-    
-    length = len(x_s[0])
-    
-    N_Ls = [int(x) for x in scat_fit_mean["N_L"]]
-    dvecs = scat_fit_mean["dvec"]
-    dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
-    d2s = [np.dot(d,d) for d in dvecs]
-    lvs = info["lv"]
-    irreps = info["irrep"]
-    plot_args = list(zip(N_Ls,d2s,irreps,lvs))
-    
-    for i in  range(len(x_m)):
-        # print(x_m[i])
-        ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-
-    for i in  range(len(x_m)):
-        ax2.scatter(x_m[i],p3cotPS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax2.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(p3cotPS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-   
-    sarr = np.linspace(slow,shigh,100)
-    p2arr = [p2_s(s) for s in sarr]
-    fit_model = fm.ERE_0_model
-    
-    fit_param_m = np.asarray([fit_param_mean[fp] for fp in fit_model.param_names])
-    yarr_m = np.asarray([fit_model.model(x,*fit_param_m) for x in p2arr])
-
-    fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
-    yarr_tmp = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in p2arr])
-
-    # yarr_med_plot = np.asarray([yarr_tmp[i][length//2-1] for i in range(len(p2arr))])
-    yarr_e_m_plot = np.asarray([yarr_tmp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(p2arr))])
-    yarr_e_p_plot = np.asarray([yarr_tmp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(p2arr))])
-
-    ax2.plot(sarr,yarr_m, color = color_fit)
-    ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = color_fit)
-
-    PS_m_plot = [delta_x(yarr_m[i], p2arr[i]) for i in range(len(p2arr))]
-    PS_e_m_plot = [delta_x(yarr_e_m_plot[i], p2arr[i]) for i in range(len(p2arr))]
-    PS_e_p_plot = [delta_x(yarr_e_p_plot[i], p2arr[i]) for i in range(len(p2arr))]
-
-    ax1.plot(sarr,PS_m_plot, color = color_fit)
-    ax1.fill_between(sarr, PS_e_m_plot, PS_e_p_plot, alpha = 0.3, color = color_fit)
-
-    for tmp in [[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
-    ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
-
-    xticks = np.linspace(4,5,6)
-    ax1.set_xticks(xticks, [r"$%1.1f$"%x for x in xticks])
-    yticks = np.linspace(0,80,5)
-    ax1.set_yticks(yticks, [r"$%i$"%x for x in yticks])
-    yticks = np.linspace(0,0.5,6)
-    ax2.set_yticks(yticks, [r"$%1.1f$"%x for x in yticks])
-    
-    ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
-    plt.savefig(op.join(PLTDIR, "phase_shift_plot_non_res.pdf"), bbox_inches='tight')
-    if show:
-        plt.show()
-    plt.close(fig)
-
-def plot_PS_ERE_res(h5file,show=False):
-    fig, [ax1,ax2] = plt.subplots(nrows=2, ncols=1, sharex=True,figsize=(figs1,figs2))
-    plt.subplots_adjust(wspace=0, hspace=0.05)   
-
-    ax1.xaxis.grid()
-    ax2.xaxis.grid()
-    ax1.yaxis.grid()
-    ax2.yaxis.grid()
-    info, info_nf, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_nf_mean, scat_nf_spl = get_data(h5file, 7.05, -0.867, True)
-
-    slow, shigh = 4,11.1
-    ax1.set_xlim([slow,shigh])
-    ax1.set_ylim([0,180])
-    # ax2.set_ylim([-0.75,1])
-    ax2.set_ylim([-0.75,0.3])
-
-    x_m   = np.asarray(scat_fit_mean["s_prime"])
-    x_s   = np.asarray(scat_fit_spl["s_prime"])
-    PS_m   = np.asarray(scat_fit_mean["PS"])
-    PS_s   = np.asarray(scat_fit_spl["PS"])
-    p3cotPS_m   = np.asarray(scat_fit_mean["p3cotPS_Ecm_prime"])
-    p3cotPS_s   = np.asarray(scat_fit_spl["p3cotPS_Ecm_prime"])
-
-    ax2.set_xlabel(r"$s/m_\pi^2$")
-    ax2.set_ylabel(r"$p^3\, \cot(\delta)/E_{cm}/m_\pi^2$")
-    ax1.set_ylabel(r"$\delta_1$")
-    
-    length = len(x_s[0])
-    
-    N_Ls = [int(x) for x in scat_fit_mean["N_L"]]
-    dvecs = scat_fit_mean["dvec"]
-    dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
-    d2s = [np.dot(d,d) for d in dvecs]
-    lvs = info["lv"]
-    irreps = info["irrep"]
-    plot_args = list(zip(N_Ls,d2s,irreps,lvs))
-    
-    for i in  range(len(x_m)):
-        # print(x_m[i])
-        ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-
-    for i in  range(len(x_m)):
-        ax2.scatter(x_m[i],p3cotPS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
-        sorted_indices = np.argsort(x_s[i])
-        ax2.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(p3cotPS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
-    
-    sarr = np.linspace(slow,shigh,100)
-    p2arr = [p2_s(s) for s in sarr]
-    fit_model = fm.BW_I_model
-    
-    fit_param_m = np.asarray([fit_param_mean[fp] for fp in fit_model.param_names])
-    yarr_m = np.asarray([fit_model.model(x,*fit_param_m) for x in sarr])
-
-    fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
-    yarr_tmp = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in sarr])
-
-    # yarr_med_plot = np.asarray([yarr_tmp[i][length//2-1] for i in range(len(p2arr))])
-    yarr_e_m_plot = np.asarray([yarr_tmp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))])
-    yarr_e_p_plot = np.asarray([yarr_tmp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(sarr))])
-
-    # PS_arr_s = np.asarray([sorted([delta_res_x(fit_model.model(sarr[j],*fit_param_s[i]),p2arr[j]) for i in range(len(fit_param_s))]) for j in range(len(sarr))])
-    # PS_arr_s = [[delta_res_x(yarr_tmp[i][j],p2arr[i]) for j in range(len(yarr_tmp[0]))] for i in range(len(p2arr))]
-
-    ax2.plot(sarr,yarr_m, color = color_fit)
-    ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.3, color = color_fit)
-
-    PS_m_plot = [delta_res_x(yarr_m[i], p2arr[i])%180 for i in range(len(p2arr))]
-    PS_e_m_plot = [delta_res_x(yarr_e_m_plot[i], p2arr[i])%180 for i in range(len(p2arr))]
-    PS_e_p_plot = [delta_res_x(yarr_e_p_plot[i], p2arr[i])%180 for i in range(len(p2arr))]
-
-    ax1.plot(sarr,PS_m_plot, color = color_fit)
-    ax1.fill_between(sarr, PS_e_m_plot, PS_e_p_plot, alpha = 0.3, color = color_fit)
-
-    for tmp in [[None,0,None,None],[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
-
     xticks = np.linspace(4,11,8)
-    ax1.set_xticks(xticks, [r"$%i$"%x for x in xticks])
-    yticks = np.linspace(0,180,7)
-    ax1.set_yticks(yticks, [r"$%i$"%x for x in yticks])
-    yticks = np.linspace(-0.75,0.25,5)
-    ax2.set_yticks(yticks, [r"$%1.2f$"%x for x in yticks])
+    yticks = np.linspace(0,100,6)
+    ax.set_xticks(xticks, [r"$%i$"%x for x in xticks])
+    ax.set_yticks(yticks, [r"$%i$"%x for x in yticks])
+
+
+    ax.legend(loc='upper right')
+    plt.savefig(op.join(PLTDIR, "sigma_comb.pdf"), bbox_inches='tight')
+    if show:
+        plt.show()
+    plt.close(fig)
+
+def plot_sigma_units(h5file,show=False):
+    fig, ax = plt.subplots(figsize=(figs1,figs2))
+
+    mDM = 100 # MeV
+    Ecm_conv = 1/mDM
+    sigma_conv = mDM**3/218426#/(10**(10))
+
+    plt.grid()
+    slow, shigh = 4+0.0001,11.1
+
+    # plt.scatter([0,],[0,], color = "white", label = r"$%i\,\text{MeV}$"%mDM)
+
+    info, info_nf, fit_param_mean_NR, fit_param_spl_NR, scat_fit_mean_NR, scat_fit_spl_NR, scat_nf_mean_NR, scat_nf_spl_NR = get_data(h5file, 6.9, -0.92, True)
+
+    x_NR   = np.asarray(scat_fit_mean_NR["s_prime"])
+    x_NR_s   = np.asarray(scat_fit_spl_NR["s_prime"])
+    sigma_NR_m   = np.asarray(scat_fit_mean_NR["sigma_prime"])
+    sigma_NR_s   = np.asarray(scat_fit_spl_NR["sigma_prime"])
+
+    info, info_nf, fit_param_mean_R, fit_param_spl_R, scat_fit_mean_R, scat_fit_spl_R, scat_nf_mean_R, scat_nf_spl_R = get_data(h5file, 7.05, -0.867, True)
+
+    x_R   = np.asarray(scat_fit_mean_R["s_prime"])
+    x_R_s   = np.asarray(scat_fit_spl_R["s_prime"])
+    sigma_R_m   = np.asarray(scat_fit_mean_R["sigma_prime"])
+    sigma_R_s   = np.asarray(scat_fit_spl_R["sigma_prime"])
     
-    ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
-    plt.savefig(op.join(PLTDIR, "phase_shift_plot_res.pdf"), bbox_inches='tight')
+    length = len(x_NR_s[0])
+    
+    sarr = np.linspace(slow,shigh,200)
+    ECMarr = [np.sqrt(s)*mDM for s in sarr]
+    p2arr = [p2_s(s) for s in sarr]
+    fit_model = fm.ERE_0_model
+    
+    fit_param_NR_m = np.asarray([fit_param_mean_NR[fp] for fp in fit_model.param_names])
+    yarr_NR_m = np.asarray([fit_model.model(x,*fit_param_NR_m) for x in p2arr])
+    sigma_NR_m = np.asarray([sigma_of_p3cotPS_prime(sarr[i],yarr_NR_m[i]) for i in range(len(sarr))])
+
+    fit_param_s = np.transpose(np.asarray([fit_param_spl_NR[fp] for fp in fit_model.param_names]))
+    yarr_NR_s = np.asarray([[fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))] for x in p2arr])
+    sigma_NR_s = np.asarray([sorted([sigma_of_p3cotPS_prime(sarr[i],yarr_NR_s[i][j]) for j in range(len(yarr_NR_s[0]))]) for i in range(len(sarr))])
+
+    sigma_NR_mean = [sigma_NR_s[i][length//2-1]/sigma_conv for i in range(len(sarr))]
+    sigma_NR_em = [sigma_NR_s[i][math.floor(length*(1-num_perc)/2)]/sigma_conv for i in range(len(sarr))]
+    sigma_NR_ep = [sigma_NR_s[i][math.ceil(length*(1+num_perc)/2)]/sigma_conv for i in range(len(sarr))]
+
+    ax.plot(ECMarr,sigma_NR_mean, color = styles.c_10_non_res, label = r"$\boldsymbol{10}:\,\beta=6.9,\,am_0=-0.92$", ls = "solid")
+    ax.fill_between(ECMarr, sigma_NR_em, sigma_NR_ep, alpha = 0.5, color = styles.c_10_non_res)
+
+    #####################################################################################################################    
+
+    fit_model = fm.BW_I_model
+
+
+    fit_param_R_m = np.asarray([fit_param_mean_R[fp] for fp in fit_model.param_names])
+    yarr_R_m = np.asarray([fit_model.model(x,*fit_param_R_m) for x in sarr])
+    sigma_R_m = np.asarray([sigma_of_p3cotPS_Ecm_prime(sarr[i],yarr_R_m[i]) for i in range(len(sarr))])
+
+    fit_param_s = np.transpose(np.asarray([fit_param_spl_R[fp] for fp in fit_model.param_names]))
+    yarr_R_s = np.asarray([[fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))] for x in sarr])
+    sigma_R_s = np.asarray([sorted([sigma_of_p3cotPS_Ecm_prime(sarr[i],yarr_R_s[i][j])for j in range(len(yarr_R_s[0]))]) for i in range(len(sarr))])
+
+    sigma_R_mean = [sigma_R_s[i][length//2-1]/sigma_conv for i in range(len(sarr))]
+    sigma_R_em = [sigma_R_s[i][math.floor(length*(1-num_perc)/2)]/sigma_conv for i in range(len(sarr))]
+    sigma_R_ep = [sigma_R_s[i][math.ceil(length*(1+num_perc)/2)]/sigma_conv for i in range(len(sarr))]
+
+    # ax.plot(sarr,sigma_R_m, color = "red")
+    ax.plot(ECMarr,sigma_R_mean, color = styles.c_10_res, label = r"$\boldsymbol{10}:\,\beta=7.05,\,am_0=-0.867$", ls = "dashed")
+    ax.fill_between(ECMarr, sigma_R_em, sigma_R_ep, alpha = 0.5, color = styles.c_10_res)
+
+    ###############################################################
+
+    res,  res_sample = read_from_hdf("scattering_Fig5.3_b6.900_m-0.920")
+
+    a_14_s = np.asarray(res_sample["a2"][:,0])
+    b_14_s = np.asarray(res_sample["b2"][:,0])
+
+    length = len(a_14_s)
+
+    pcot_PS_14_s = np.asarray([[UTE(p2arr[j], a_14_s[i], b_14_s[i]) for i in range(len(a_14_s))] for j in range(len(p2arr))])
+
+    print(pcot_PS_14_s.shape)
+
+    sigma_14_s = np.asarray([sorted([sigma_of_pcotPS_prime(sarr[i], pcot_PS_14_s[i,j]) for j in range(len(a_14_s))]) for i in range(len(p2arr))])
+
+    print(sigma_14_s.shape)
+
+    sigma_14_mean = [sigma_14_s[i][length//2-1]/sigma_conv for i in range(len(sarr))]
+    sigma_14_em = [sigma_14_s[i][math.floor(length*(1-num_perc)/2)]/sigma_conv for i in range(len(sarr))]
+    sigma_14_ep = [sigma_14_s[i][math.ceil(length*(1+num_perc)/2)]/sigma_conv for i in range(len(sarr))]
+
+    ax.plot(ECMarr,sigma_14_mean, color = styles.c_14, label = r"$\boldsymbol{14}:\,\beta=6.9,\,am_0=-0.92$", ls = "dashdot")
+    ax.fill_between(ECMarr, sigma_14_em, sigma_14_ep, alpha = 0.5, color = styles.c_14)
+
+    ax.set_xlabel(r"$E_{\text{cm}}\,[\text{MeV}]$")
+    ax.set_ylabel(r"$\sigma / m_{\text{DM}}\,[\text{cm}^2/g]$")
+    xticks = np.linspace(200,320,7)
+    yticks = np.linspace(0,35,8)
+    ax.set_xticks(xticks, [r"$%i$"%(x) for x in xticks])
+    ax.set_yticks(yticks, [r"$%i$"%(x) for x in yticks])
+    ax.set_xlim([200,320])
+    ax.set_ylim([0,36])
+
+    # gamma_lim = 1.1
+    # Ecmlim = np.sqrt(3+gamma_lim**2)*mDM
+    # ax.axvline(Ecmlim, color = "dimgrey", alpha = 0.7)
+    # ax.text(Ecmlim+0.4, 33.7, r"$\gamma = 1.1$", fontsize = 16, color = "dimgrey")
+
+
+    ax.legend(title=r'$m_{\text{DM}}=100\,\text{MeV}$', loc="upper right")
+
+    # ax.legend(loc='upper right')
+    plt.savefig(op.join(PLTDIR, "sigma_comb_units.pdf"), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
@@ -393,4 +357,5 @@ if __name__ == "__main__":
     PLTDIR = args[1]
     h5file  = args[2]
 
+    plot_sigma_units(h5file, False)
     plot_sigma(h5file, False)
