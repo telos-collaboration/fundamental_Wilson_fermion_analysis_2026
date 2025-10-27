@@ -7,7 +7,7 @@ import math
 import os.path as op
 import os
 import sys
-import plotting_functions_thesis as pf
+import plotting_functions as pf
 import fit_models as fm
 
 plt.rcParams['figure.figsize'] = [10, 6] 

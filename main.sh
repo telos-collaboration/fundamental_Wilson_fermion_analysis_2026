@@ -61,16 +61,14 @@ julia src/scripts_julia/instantiate.jl
 
 # cp $h5file_fit $h5file_scat
 # python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering gauss
-# python3 src/src_py/plot_fit_scatter_thesis.py $plotpathscatter $h5file_scat False
-# python3 src/src_py/plot_fit_scatter.py $plotpath/scattering $h5file_scat_fit False
+python3 src/src_py/plot_fit_scatter.py $plotpath/scattering $h5file_scat_fit False
 
 # cp $h5file_scat $h5file_scat_fit
 # python3 src/src_py/fit_scatter.py $h5file_scat_fit $fit_scatter_input
-# python3 src/src_py/plot_fit_scatter.py $plotpath/scattering $h5file_scat_fit True
+python3 src/src_py/plot_fit_scatter.py $plotpath/scattering $h5file_scat_fit True
 
-# python3 src/src_py/E_L_plot.py $plotpath/scattering $h5file_scat_fit
-python3 src/src_py/phase_shift_plots.py $plotpath/scattering $h5file_scat_fit True
-# python3 src/src_py/cross_section_plot.py $plotpath/scattering $h5file_scat_fit True
-
+python3 src/src_py/E_L_plot.py $plotpath/scattering $h5file_scat_fit
+python3 src/src_py/phase_shift_plots.py $plotpath/scattering $h5file_scat_fit
+python3 src/src_py/cross_section_plot.py $plotpath/scattering $h5file_scat_fit
 
 python3 src/src_py/result_tables.py $tablepath $h5file_scat_fit

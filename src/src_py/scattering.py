@@ -339,16 +339,6 @@ def calc_all_phaseshifts_parallel(input_file, fitresults, h5file):
             info[i][key] = val
         save_to_hdf(res, res_sampled, info[i], enss[i], Ps[i], irreps[i], lvs[i], h5file)
 
-
-    
-                                # E = hfile[ens][P][irrep]["E"][()][i]
-                                # E_m = hfile[ens][P][irrep]["Delta_E"][()][i]
-                                # E_p = hfile[ens][P][irrep]["Delta_E"][()][i]
-                                # res, res_sampled, info_tmp = result_sampled(NL, E, E_m, E_p, dvec, mpi, irrep, ld, resampling=resampling, num_resample=num_resample)
-                                # for key, val in info_tmp.items():
-                                #     info[key] = val
-                                # save_to_hdf(res, res_sampled, info, ens, P, irrep, i, h5file)
-
 if __name__ == "__main__":
     # avod hard-coding of names outside of main
     args = sys.argv

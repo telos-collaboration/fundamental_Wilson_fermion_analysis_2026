@@ -1,16 +1,11 @@
 def marker(NL,P,irrep,lv):                     # maybe to be rePlaced by inPut file
-    if NL == 14:
-        return "D"
-    elif NL == 16:
-        return "p"
-    elif NL == 20:
-        return "X"
-    elif NL == 24:
-        return "o"
-    elif NL == 36:
-        return "*"
+    if irrep == "A1":
+        if lv == 0:
+            return "v"
+        else:
+            return "^"
     else:
-        raise RuntimeError("Wrong NL in marker: NL=%i"%(NL))
+        return "o"
     
 def ms(NL,P,irrep,lv):                     # maybe to be rePlaced by inPut file
     if P == 0:
@@ -25,42 +20,16 @@ def ms(NL,P,irrep,lv):                     # maybe to be rePlaced by inPut file
         raise RuntimeError("Wrong P in ms_P: %i, %i"%(P))
 
 def color(NL,P,irrep,lv):
-    if irrep == "A1":
-        if P == 1:
-            if lv == 0:
-                return "red"
-            elif lv == 1:
-                return "darkred"
-        elif P == 2:
-            if lv == 0:
-                return "yellow"
-            elif lv == 1:
-                return "gold"
-        elif P == 3:
-            if lv == 0:
-                return "fuchsia"
-            elif lv == 1:
-                return "purple"
-    elif irrep == "E":
-        if P == 1:
-            if lv == 0:
-                return "blue"
-            elif lv == 1:
-                return "darkblue"
-        elif P == 3:
-            if lv == 0:
-                return "lightseagreen"
-            elif lv == 1:
-                return "mediumturquise"
-    elif irrep == "B1":
-        if lv == 0:
-            return "green"
-        elif lv == 1:
-            return "darkgreen"
-    elif irrep == "T1":
-        if lv == 0:
-            return "peru"
-    raise ValueError("wrong irrep or lv in color_irrep_lv(): %i, %i"%(irrep,lv))
+    if P == 0:
+        return "darkviolet"
+    elif P == 1:
+        return "blue"
+    elif P == 2:
+        return "green"
+    elif P == 3:
+        return "crimson"
+    else:
+        raise ValueError("wrong P in color_irrep_lv(): %i"%(P))
 
 def ls(NL,P,irrep,lv):
     if NL == 14:

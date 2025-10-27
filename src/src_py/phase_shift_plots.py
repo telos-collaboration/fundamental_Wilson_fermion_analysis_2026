@@ -8,7 +8,7 @@ import math
 import os.path as op
 import os
 import sys
-import plotting_functions_thesis as pf
+import plotting_functions as pf
 import fit_models as fm
 
 import styles
@@ -16,14 +16,6 @@ import styles
 mpl.rcParams['lines.markersize'] = 9
 
 figs1, figs2 = 12,7
-
-def nth(num):
-    if num <= 10:
-        return 1
-    elif num <= 500:
-        return num//10
-    else:
-        return num//100
 
 plt.rcParams['figure.figsize'] = [10, 6] 
 fontsize = 14
@@ -37,9 +29,6 @@ plt.rcParams.update({
 num_perc = math.erf(1/np.sqrt(2))
 
 def delete_steps(arr, sign = 1, delete=False):
-    # for i in range(1,len(arr)-1):
-    #     if abs(arr[i]-arr[i+1]) > 10*abs(arr[i-1]-arr[i]):
-    #         arr[i] = np.nan
     for i in range(1,len(arr)-1):
         if abs(arr[i] > 1):
             if np.sign(arr[i]) != np.sign(arr[i+1]):
@@ -50,13 +39,6 @@ def delete_steps(arr, sign = 1, delete=False):
         if arr[i] == 0:
             arr[i] = np.nan
     return arr
-    # if delete:
-    #     for i in range(len(arr)-1):
-    #         if arr[i+1] < sign*arr[i]: 
-    #             arr[i] = np.nan
-    #     return arr
-    # else:
-    #     return arr
 
 def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with current get_data()
     fit_param_mean = {}
@@ -133,7 +115,6 @@ def plot_PS_ERE_non_res(h5file,show=False):
 
     slow, shigh = 4,5.07
 
-    # x_m   = np.asarray(scat_fit_mean["s_prime"])
     x_s   = np.asarray(scat_fit_spl["s_prime"])
     PS_m   = np.asarray(scat_fit_mean["PS"])
     PS_s   = np.asarray(scat_fit_spl["PS"])
@@ -164,7 +145,6 @@ def plot_PS_ERE_non_res(h5file,show=False):
     fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
     yarr_tmp = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in p2arr])
 
-    # yarr_med_plot = np.asarray([yarr_tmp[i][length//2-1] for i in range(len(p2arr))])
     yarr_e_m_plot = np.asarray([yarr_tmp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(p2arr))])
     yarr_e_p_plot = np.asarray([yarr_tmp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(p2arr))])
 
@@ -181,7 +161,6 @@ def plot_PS_ERE_non_res(h5file,show=False):
     x_m = [sorted(x_s[i])[length//2-1] for i in range(len(x_s))]
 
     for i in  range(len(x_m)):
-        # print(x_m[i])
         ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
         sorted_indices = np.argsort(x_s[i])
         ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
@@ -209,7 +188,6 @@ def plot_PS_ERE_non_res(h5file,show=False):
     yticks = np.linspace(0,0.5,6)
     ax2.set_yticks(yticks, [r"$%1.1f$"%x for x in yticks])
     
-    # ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
     ax1.legend(loc='upper left', fontsize=styles.fontsize)
 
     plt.savefig(op.join(PLTDIR, "phase_shift_plot_non_res.pdf"), bbox_inches='tight')
@@ -227,9 +205,6 @@ def plot_PS_ERE_close_res(h5file,show=False):
     ax2.yaxis.grid()
     info, info_nf, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_nf_mean, scat_nf_spl = get_data(h5file, 7.05, -0.863, False)
 
-    slow, shigh = 4,5.07
-
-    # x_m   = np.asarray(scat_fit_mean["s_prime"])
     x_s   = np.asarray(scat_fit_spl["s_prime"])
     PS_m   = np.asarray(scat_fit_mean["PS"])
     PS_s   = np.asarray(scat_fit_spl["PS"])
@@ -249,30 +224,17 @@ def plot_PS_ERE_close_res(h5file,show=False):
     lvs = info["lv"]
     irreps = info["irrep"]
     plot_args = list(zip(N_Ls,d2s,irreps,lvs))
-    
-    sarr = np.linspace(slow,shigh,100)
-    p2arr = [p2_s(s) for s in sarr]
-    fit_model = fm.ERE_0_model
-    
-    # fit_param_m = np.asarray([fit_param_mean[fp] for fp in fit_model.param_names])
-    # yarr_m = np.asarray([fit_model.model(x,*fit_param_m) for x in p2arr])
 
-    # fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
-    # yarr_tmp = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in p2arr])
+    ax1.set_xlim([4,15])
+    ax1.set_ylim([0,180])
+    ax2.set_ylim([-8,8])
 
-    # yarr_med_plot = np.asarray([yarr_tmp[i][length//2-1] for i in range(len(p2arr))])
-    # yarr_e_m_plot = np.asarray([yarr_tmp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(p2arr))])
-    # yarr_e_p_plot = np.asarray([yarr_tmp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(p2arr))])
-
-    # ax2.plot(sarr,yarr_m, color = styles.c_10_non_res)
-    # ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.5, color = styles.c_10_non_res)
-
-    # PS_m_plot = [delta_x(yarr_m[i], p2arr[i]) for i in range(len(p2arr))]
-    # PS_e_m_plot = [delta_x(yarr_e_m_plot[i], p2arr[i]) for i in range(len(p2arr))]
-    # PS_e_p_plot = [delta_x(yarr_e_p_plot[i], p2arr[i]) for i in range(len(p2arr))]
-
-    # ax1.plot(sarr,PS_m_plot, color = styles.c_10_non_res)
-    # ax1.fill_between(sarr, PS_e_m_plot, PS_e_p_plot, alpha = 0.5, color = styles.c_10_non_res)
+    xticks = np.linspace(4,14,6)
+    ax1.set_xticks(xticks, [r"$%i$"%x for x in xticks])
+    yticks = np.linspace(0,180,7)
+    ax1.set_yticks(yticks, [r"$%i$"%x for x in yticks])
+    yticks = np.linspace(-6,6,7)
+    ax2.set_yticks(yticks, [r"$%1.2f$"%x for x in yticks])
 
     x_m = [sorted(x_s[i])[length//2-1] for i in range(len(x_s))]
 
@@ -289,24 +251,12 @@ def plot_PS_ERE_close_res(h5file,show=False):
    
 
     for tmp in [[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "^", label = r"$|p|=%i$"%(tmp[1]))
+        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
     # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
+    ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
     ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
 
-    # ax1.set_xlim([slow,shigh])
-    # ax1.set_ylim([0,50])
-    # ax2.set_ylim([0,0.55])
-
-    # xticks = np.linspace(4,5,6)
-    # ax1.set_xticks(xticks, [r"$%1.1f$"%x for x in xticks])
-    # yticks = np.linspace(0,50,6)
-    # ax1.set_yticks(yticks, [r"$%i$"%x for x in yticks])
-    # yticks = np.linspace(0,0.5,6)
-    # ax2.set_yticks(yticks, [r"$%1.1f$"%x for x in yticks])
-    
-    # ax1.legend(loc='center right',  bbox_to_anchor=(1.2, 0))
-    ax1.legend(loc='upper left', fontsize=styles.fontsize)
+    ax1.legend(loc='lower right', fontsize=styles.fontsize)
 
     plt.savefig(op.join(PLTDIR, "phase_shift_plot_close_res.pdf"), bbox_inches='tight')
     if show:
@@ -326,7 +276,6 @@ def plot_PS_ERE_res(h5file,show=False):
     slow, shigh = 4,11.1
     ax1.set_xlim([slow,shigh])
     ax1.set_ylim([0,180])
-    # ax2.set_ylim([-0.75,1])
     ax2.set_ylim([-0.75,0.3])
 
     # x_m   = np.asarray(scat_fit_mean["s_prime"])
@@ -360,12 +309,8 @@ def plot_PS_ERE_res(h5file,show=False):
     fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
     yarr_tmp = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in sarr])
 
-    # yarr_med_plot = np.asarray([yarr_tmp[i][length//2-1] for i in range(len(p2arr))])
     yarr_e_m_plot = np.asarray([yarr_tmp[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))])
     yarr_e_p_plot = np.asarray([yarr_tmp[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(sarr))])
-
-    # PS_arr_s = np.asarray([sorted([delta_res_x(fit_model.model(sarr[j],*fit_param_s[i]),p2arr[j]) for i in range(len(fit_param_s))]) for j in range(len(sarr))])
-    # PS_arr_s = [[delta_res_x(yarr_tmp[i][j],p2arr[i]) for j in range(len(yarr_tmp[0]))] for i in range(len(p2arr))]
 
     ax2.plot(sarr,yarr_m, color = styles.c_10_res)
     ax2.fill_between(sarr, yarr_e_m_plot, yarr_e_p_plot, alpha = 0.5, color = styles.c_10_res)
@@ -380,7 +325,6 @@ def plot_PS_ERE_res(h5file,show=False):
     x_m = [sorted(x_s[i])[length//2-1] for i in range(len(x_s))]
 
     for i in  range(len(x_m)):
-        # print(x_m[i])
         ax1.scatter(x_m[i],PS_m[i], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))#, s = 10*pf.ms(*plot_args[i]))   #, label = "|P|=%i, NL=%i"%(d2s[i],N_Ls[i])
         sorted_indices = np.argsort(x_s[i])
         ax1.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(PS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
@@ -406,7 +350,6 @@ def plot_PS_ERE_res(h5file,show=False):
     ax2.set_yticks(yticks, [r"$%1.2f$"%x for x in yticks])
     
     ax2.legend(loc='upper right', fontsize=styles.fontsize)
-    # ax1.legend(loc='lower right', fontsize=styles.fontsize)
     plt.savefig(op.join(PLTDIR, "phase_shift_plot_res.pdf"), bbox_inches='tight')
     if show:
         plt.show()
@@ -421,4 +364,4 @@ if __name__ == "__main__":
 
     plot_PS_ERE_non_res(h5file, False)
     plot_PS_ERE_close_res(h5file, False)
-    plot_PS_ERE_res(h5file, True)
+    plot_PS_ERE_res(h5file, False)

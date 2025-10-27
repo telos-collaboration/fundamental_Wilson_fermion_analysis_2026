@@ -7,7 +7,7 @@ import math
 import os.path as op
 import os
 import sys
-import plotting_functions_thesis as pf
+import plotting_functions as pf
 import fit_models as fm
 
 import styles
@@ -27,9 +27,6 @@ def nth(num):
 num_perc = math.erf(1/np.sqrt(2))
 
 def delete_steps(arr, sign = 1, delete=False):
-    # for i in range(1,len(arr)-1):
-    #     if abs(arr[i]-arr[i+1]) > 10*abs(arr[i-1]-arr[i]):
-    #         arr[i] = np.nan
     for i in range(1,len(arr)-1):
         if abs(arr[i] > 1):
             if np.sign(arr[i]) != np.sign(arr[i+1]):
@@ -207,11 +204,7 @@ def plot_sigma(h5file,show=False,units=False):
 
     pcot_PS_14_s = np.asarray([[UTE(p2arr[j], a_14_s[i], b_14_s[i]) for i in range(len(a_14_s))] for j in range(len(p2arr))])
 
-    print(pcot_PS_14_s.shape)
-
     sigma_14_s = np.asarray([sorted([sigma_of_pcotPS_prime(sarr[i], pcot_PS_14_s[i,j]) for j in range(len(a_14_s))]) for i in range(len(p2arr))])
-
-    print(sigma_14_s.shape)
 
     sigma_14_mean = [sigma_14_s[i][length//2-1] for i in range(len(sarr))]
     sigma_14_em = [sigma_14_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))]
@@ -243,8 +236,6 @@ def plot_sigma_units(h5file,show=False):
 
     plt.grid()
     slow, shigh = 4+0.0001,11.1
-
-    # plt.scatter([0,],[0,], color = "white", label = r"$%i\,\text{MeV}$"%mDM)
 
     info, info_nf, fit_param_mean_NR, fit_param_spl_NR, scat_fit_mean_NR, scat_fit_spl_NR, scat_nf_mean_NR, scat_nf_spl_NR = get_data(h5file, 6.9, -0.92, True)
 
@@ -314,11 +305,7 @@ def plot_sigma_units(h5file,show=False):
 
     pcot_PS_14_s = np.asarray([[UTE(p2arr[j], a_14_s[i], b_14_s[i]) for i in range(len(a_14_s))] for j in range(len(p2arr))])
 
-    print(pcot_PS_14_s.shape)
-
     sigma_14_s = np.asarray([sorted([sigma_of_pcotPS_prime(sarr[i], pcot_PS_14_s[i,j]) for j in range(len(a_14_s))]) for i in range(len(p2arr))])
-
-    print(sigma_14_s.shape)
 
     sigma_14_mean = [sigma_14_s[i][length//2-1]/sigma_conv for i in range(len(sarr))]
     sigma_14_em = [sigma_14_s[i][math.floor(length*(1-num_perc)/2)]/sigma_conv for i in range(len(sarr))]
@@ -336,18 +323,12 @@ def plot_sigma_units(h5file,show=False):
     ax.set_xlim([200,320])
     ax.set_ylim([0,36])
 
-    # gamma_lim = 1.1
-    # Ecmlim = np.sqrt(3+gamma_lim**2)*mDM
-    # ax.axvline(Ecmlim, color = "dimgrey", alpha = 0.7)
-    # ax.text(Ecmlim+0.4, 33.7, r"$\gamma = 1.1$", fontsize = 16, color = "dimgrey")
-
     handles, labels = ax.get_legend_handles_labels()
     ins = [2,0,1]
     handles = [handles[ins[0]],handles[ins[1]],handles[ins[2]]]
     labels = [labels[ins[0]],labels[ins[1]],labels[ins[2]]]
-    ax.legend(handles, labels, title=r'$m_{\text{DM}}=100\,\text{MeV}$', loc="upper right", fontsize=styles.fontsize)
+    ax.legend(handles, labels, title=r'$m_{\text{DM}}=%i\,\text{MeV}$'%(mDM), loc="upper right", fontsize=styles.fontsize)
 
-    # ax.legend(loc='upper right')
     plt.savefig(op.join(PLTDIR, "sigma_comb_units.pdf"), bbox_inches='tight')
     if show:
         plt.show()
