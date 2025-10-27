@@ -13,9 +13,6 @@ import fit_models as fm
 num_perc = math.erf(1/np.sqrt(2))
 
 def delete_steps(arr, sign = 1, delete=False):
-    # for i in range(1,len(arr)-1):
-    #     if abs(arr[i]-arr[i+1]) > 10*abs(arr[i-1]-arr[i]):
-    #         arr[i] = np.nan
     for i in range(1,len(arr)-1):
         if abs(arr[i] > 1):
             if np.sign(arr[i]) != np.sign(arr[i+1]):
@@ -26,13 +23,6 @@ def delete_steps(arr, sign = 1, delete=False):
         if arr[i] == 0:
             arr[i] = np.nan
     return arr
-    # if delete:
-    #     for i in range(len(arr)-1):
-    #         if arr[i+1] < sign*arr[i]: 
-    #             arr[i] = np.nan
-    #     return arr
-    # else:
-    #     return arr
 
 def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with current get_data()
     fit_param_mean = {}
@@ -240,36 +230,6 @@ def ylabel_f(yaxis):
     elif yaxis == "PS":
         return r"$\delta_1$"
     raise ValueError("Label not defined for %s"%(yaxis))
-
-# def p2_p2(p2):
-#     return p2
-# def p2_s(s):
-#     return s/4-1
-
-# def x_axis_func(x, xaxis):
-#     if xaxis == "p2star_prime":
-#         return x
-#     elif xaxis == "s_prime":
-#         return p2_s(x)
-#     raise ValueError("x axis func not defined for %s"%(xaxis))
-
-# def p3_cot_PS_ECM(p2, p3cotPS):
-#     ECM = np.sqrt(4+p2)
-#     return p3cotPS/ECM
-# def sigma_1(p2, p3cotPS):
-#     return 12*np.pi*p2**2/(p2**3+p3cotPS**2)
-# def PS_f(p2, p3cotPS):
-#     return 0 if p3cotPS == 0 else np.arctan(p2**(3/2)/p3cotPS)%180
-# def y_axis_func(p2, p3cotPS, yaxis):
-#     if yaxis == "p3cotPS_prime":
-#         return p3cotPS
-#     elif yaxis == "p3cotPS_Ecm_prime":
-#         return p3_cot_PS_ECM(p2,p3cotPS)
-#     elif yaxis == "sigma_prime":
-#         return sigma_1(p2,p3cotPS)
-#     elif yaxis == "PS":
-#         return PS_f(p2,p3cotPS)
-#     raise ValueError("y axis func not defined for %s"%(yaxis))
 
 def PS_of_p3cotPS_Ecm_prime(s, PS_of_p3cotPS_Ecm):
     return 90 if PS_of_p3cotPS_Ecm == 0 else np.arctan((s/4-1)**(3/2)/(np.sqrt(s)*PS_of_p3cotPS_Ecm))*360/(2*np.pi)%180
