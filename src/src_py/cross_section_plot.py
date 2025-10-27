@@ -327,8 +327,8 @@ def plot_sigma_units(h5file,show=False):
     ax.plot(ECMarr,sigma_14_mean, color = styles.c_14, label = r"$\boldsymbol{14}:\,\beta=6.9,\,am_0=-0.92$", ls = "dashdot")
     ax.fill_between(ECMarr, sigma_14_em, sigma_14_ep, alpha = 0.5, color = styles.c_14)
 
-    ax.set_xlabel(r"$E_{\text{cm}}\,[\text{MeV}]$")
-    ax.set_ylabel(r"$\sigma / m_{\text{DM}}\,[\text{cm}^2/g]$")
+    ax.set_xlabel(r"$E_{\text{cm}}\,[\text{MeV}]$", fontsize=styles.fontsize)
+    ax.set_ylabel(r"$\sigma / m_{\text{DM}}\,[\text{cm}^2/g]$", fontsize=styles.fontsize)
     xticks = np.linspace(200,320,7)
     yticks = np.linspace(0,35,8)
     ax.set_xticks(xticks, [r"$%i$"%(x) for x in xticks])
@@ -341,8 +341,11 @@ def plot_sigma_units(h5file,show=False):
     # ax.axvline(Ecmlim, color = "dimgrey", alpha = 0.7)
     # ax.text(Ecmlim+0.4, 33.7, r"$\gamma = 1.1$", fontsize = 16, color = "dimgrey")
 
-
-    ax.legend(title=r'$m_{\text{DM}}=100\,\text{MeV}$', loc="upper right")
+    handles, labels = ax.get_legend_handles_labels()
+    ins = [2,0,1]
+    handles = [handles[ins[0]],handles[ins[1]],handles[ins[2]]]
+    labels = [labels[ins[0]],labels[ins[1]],labels[ins[2]]]
+    ax.legend(handles, labels, title=r'$m_{\text{DM}}=100\,\text{MeV}$', loc="upper right", fontsize=styles.fontsize)
 
     # ax.legend(loc='upper right')
     plt.savefig(op.join(PLTDIR, "sigma_comb_units.pdf"), bbox_inches='tight')
@@ -358,4 +361,4 @@ if __name__ == "__main__":
     h5file  = args[2]
 
     plot_sigma_units(h5file, False)
-    plot_sigma(h5file, False)
+    # plot_sigma(h5file, False)

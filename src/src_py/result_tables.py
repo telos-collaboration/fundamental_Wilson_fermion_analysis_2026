@@ -14,7 +14,7 @@ def nth(num):
 num_perc = math.erf(1/np.sqrt(2))
 
 def sig_dig(x):
-    return -int(m.floor(np.log10(abs(x))))
+    return -int(math.floor(np.log10(abs(x))))
 
 def round_to_sig(x, y=0):
     if y == 0:
@@ -34,37 +34,13 @@ def get_str(val, errp, errm=None, sd = None):
     # res = "$%i^{+%i}_{-%i}$"%(int(val*10**sd), int(round(errp*10**sd)), int(round(errm*10**sd)))
     return res
 
-# def create_latex_table_I2_paper_resuts(pref = ""):
-#     data = np.genfromtxt("./output/tables/effective_range_parameters"+pref+".csv", delimiter=",")[1:]
-#     start_str = "\\begin{table}\n\t\centering\n\t\setlength{\\tabcolsep}{2pt}\n\t\\begin{tabular}{|c|c|c|c|c|}\n\t\t\hline\n\t\t"
-#     after_first_line_str = " \\\\ \hline \hline\n"
-#     end_str = "\t\end{tabular}\n\t\caption{xxx}\n\t\label{t:results}\n\end{table}\n"
-#     first_line = "$\\beta$ & $a m_{0}$ & $a m_\pi^\infty\\times 10^4$ & $a_0 m_\pi$ & $r_0 m_\pi$"
-#     latex_seperator =  " & "
+# V=134
+# E=13
 
-#     with open("output/tables/latex_table"+pref+".txt","w") as f:
-#         f.write(start_str)
-#         f.write(first_line)
-#         f.write(after_first_line_str)
-#         for line in data:
-#             line_str = "\t\t"
-#             line_str += "%g"%line[0] + latex_seperator
-#             line_str += "%g"%line[1] + latex_seperator  
+# print(V, E)
+# get_str(V,E)
 
-#             sd = 0
-#             line_str += get_str(line[2]*1e4,line[4]*1e4,line[3]*1e4, sd) + latex_seperator                             # m_pi_inf
-#             sd = 1
-#             line_str += "$%1.2f^{+%1.2f}_{-%1.2f}$"%(line[5],line[7],line[6]) + latex_seperator                             # a0
-#             if line[8] > 10:
-#                 line_str += "$%i^{+%i}_{-%i}$"%(line[8],line[10],line[9])                                              # re0
-#             else:
-#                 line_str += "$%1.1f^{+%1.1f}_{-%1.1f}$"%(line[8],line[10],line[9])                                              # re0
-
-#             f.write(line_str)
-#             f.write("\\\\")
-#             f.write("\n")
-#         f.write("\t\\hline\n")
-#         f.write(end_str)
+# exit()
 
 def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with current get_data()
     fit_param_mean = {}
@@ -129,47 +105,50 @@ def delta_x(x,p2):
 def delta_res_x(x,p2):
     return np.arctan(p2**(3/2)/(2*np.sqrt(1+p2)*x))*360/(2*np.pi)
 
-def delete_zeros(value, error):
-    if value == 0:
-        return "--"
-    else:
-        return format_with_error(value, error)
-
-def format_with_error(value: float, error: float, two_digits=False) -> str:
-    """
-    Format a value with uncertainty in LaTeX style: x = value(error).
+# def delete_zeros(value, error):
+#     if value == 0:
+#         return "--"
+#     else:
+#         return format_with_error(value, error)
     
-    Parameters:
-        value (float): Central value
-        error (float): Uncertainty
-        two_digits (bool): If True, show two significant digits in the error
+# def format_with_error(value: float, error: float, two_digits=False) -> str:
+#     """
+#     Format a value with uncertainty in LaTeX style: x = value(error).
     
-    Returns:
-        str: formatted string, e.g. "132.124(56)"
-    """
-    if error <= 0:
-        raise ValueError("Uncertainty must be positive")
-
-    # Determine number of significant digits for the error
-    digits = 2 if two_digits else 1
-
-    # Get the order of magnitude of the error
-    exponent = int(math.floor(math.log10(error)))
+#     Parameters:
+#         value (float): Central value
+#         error (float): Uncertainty
+#         two_digits (bool): If True, show two significant digits in the error
     
-    # Round error to `digits` significant figures
-    rounded_error = round(error, -exponent + (digits - 1))
+#     Returns:
+#         str: formatted string, e.g. "132.124(56)"
+#     """
+#     if error <= 0:
+#         raise ValueError("Uncertainty must be positive")
 
-    # Round value to the same decimal place
-    decimal_places = -exponent + (digits - 1)
-    rounded_value = round(value, decimal_places)%180
+#     # Determine number of significant digits for the error
+#     digits = 2 if two_digits else 1
 
-    # Scale the error for the parentheses
-    error_str = f"{int(rounded_error * 10**(-exponent + (digits - 1)))}"
+#     # Get the order of magnitude of the error
+#     exponent = int(math.floor(math.log10(error)))
+    
+#     # Round error to `digits` significant figures
+#     rounded_error = round(error, -exponent + (digits - 1))
 
-    # Format with correct number of decimals
-    value_str = f"{rounded_value:.{max(decimal_places,0)}f}"
+#     # Round value to the same decimal place
+#     decimal_places = -exponent + (digits - 1)
+#     rounded_value = round(value, decimal_places+1)%180
 
-    return f"{value_str}({error_str})"
+#     # Scale the error for the parentheses
+#     error_str = f"{int(rounded_error * 10**(-exponent + (digits - 1)))}"
+
+#     # Format with correct number of decimals
+#     value_str = f"{rounded_value:.{max(decimal_places,0)}f}"
+
+#     return f"{value_str}({error_str})"
+
+# print(format_with_error(140.1234123,3.21312))
+# exit()
 
 def irrep_str(irrep):
     if irrep == "T1":
@@ -180,6 +159,8 @@ def irrep_str(irrep):
         return "$B_1$"
     elif irrep == "E":
         return "$E$"
+    else:
+        raise ValueError
 
 def result_tables(h5file, beta, m0, TBLDIR):
     info, info_nf, fit_param_mean, fit_param_spl, scat_mean, scat_spl, scat_nf_mean, scat_nf_spl = get_data(h5file, beta, m0, False)
@@ -200,37 +181,35 @@ def result_tables(h5file, beta, m0, TBLDIR):
     PS_m = np.asarray(scat_mean["PS"])
     PS_s = np.asarray(scat_spl["PS"])
 
+
     length = len(E_s[0])
-    # ECM_errms = [abs(ECMs[i]-sorted(ECM_spl[i])[math.floor(length*(1-num_perc)/2)]) for i in range(len(ECMs))]
-    # ECM_errps = [abs(ECMs[i]-sorted(ECM_spl[i])[math.ceil(length*(1+num_perc)/2)]) for i in range(len(ECMs))]
 
-    E_err = [abs(sorted(E_s[i])[math.ceil(length*(1+num_perc)/2)]-sorted(E_s[i])[math.floor(length*(1-num_perc)/2)])/2 for i in range(len(E_s))]
-    s_err = [abs(sorted(s_s[i])[math.ceil(length*(1+num_perc)/2)]-sorted(s_s[i])[math.floor(length*(1-num_perc)/2)])/2 for i in range(len(E_s))]
-    PS_err = [abs(sorted(PS_s[i])[math.ceil(length*(1+num_perc)/2)]-sorted(PS_s[i])[math.floor(length*(1-num_perc)/2)])/2 for i in range(len(E_s))]
+    print(PS_s.shape)
 
+    def mean_err(arr):
+        mean = np.asarray([sorted(arr[i])[length//2-1] for i in range(len(arr))])
+        err = np.asarray([(abs(sorted(arr[i])[math.ceil(length*(1+num_perc)/2)] - mean[i]) + 
+                           abs(sorted(arr[i])[math.floor(length*(1-num_perc)/2)] - mean[i]))/4 for i in range(len(arr))])
+        # fac=10**20
+        # err_tmp = [round(err[i]*fac,0)/fac for i in range(len(err))]
+        # for i in range(len(err)):
+        #     print(err[i], err_tmp[i])
+        return mean, err
 
-    # print(N_Ls[0], d2s[0], irreps[0], lvs[0], E_m[0], s_m[0], PS_m[0])
-    # print(E_m[0], E_err[0])
-    # print(E_m.shape)
-    # print(E_s.shape)
+    # E_err = [abs(sorted(E_s[i])[math.ceil(length*(1+num_perc)/2)]-sorted(E_s[i])[math.floor(length*(1-num_perc)/2)])/2 for i in range(len(E_s))]
+    # s_err = [abs(sorted(s_s[i])[math.ceil(length*(1+num_perc)/2)]-sorted(s_s[i])[math.floor(length*(1-num_perc)/2)])/2 for i in range(len(E_s))]
+    # PS_err = [abs(sorted(PS_s[i])[math.ceil(length*(1+num_perc)/2)]-sorted(PS_s[i])[math.floor(length*(1-num_perc)/2)])/2 for i in range(len(E_s))]
 
-    # data = np.asarray(np.transpose([N_Ls, d2s, irreps, lvs, E_m, s_m, PS_m]))
-    # data_err = np.asarray(np.transpose([N_Ls, d2s, irreps, lvs, E_err, s_err, PS_err]))
+    E_m, E_err = mean_err(E_s)
+    s_m, s_err = mean_err(s_s)
+    PS_m, PS_err = mean_err(PS_s)
 
-    # print(data.shape)
-    # print(data_err.shape)
-
-    # for i in range(len(data)):
-    #     print(format_with_error(E_m[i],E_err[i]))
-
-    start_str = "\\begin{tabular}{|l|l|l|c|l|l|c|c|}\n \hline \n"
-    # after_first_line_str = " \\\\ \hline \hline\n"
-    # end_str = "\\t\end{tabular}\n\t\caption{xxx}\n\t\label{t:results}\n\end{table}\n"
-    end_str = "\end{tabular}"
-    first_line = "\t\t$N_L$ & $\\vec{P}$ & $\Lambda$ & n & $aE_n^{\Lambda,\,\\vec{P}}$ & $a\sqrt{s_n^{\Lambda,\,\\vec{P}}}$ & $\delta_1$   & Incl. \\\\ \hline \hline\n"
+    start_str = "\\begin{tabular}{|l|l|l|c|l|l|c|c|}\n \\hline \n"
+    end_str = "\\end{tabular}"
+    first_line = "\t\t$N_L$ & $\\vec{P}$ & $\Lambda$ & n & $aE_n^{\\Lambda,\\,\\vec{P}}$ & $a\sqrt{s_n^{\Lambda,\\,\\vec{P}}}$ & $\delta_1$   & Incl. \\\\ \\hline \\hline\n"
     latex_seperator =  " & "
 
-    with open(TBLDIR+"latex_scattering_b%1.2f_m%1.2f_table.txt"%(beta,m0),"w") as f:
+    with open(TBLDIR+"latex_scattering_b%1.2f_m%1.3f_table.txt"%(beta,m0),"w") as f:
         f.write(start_str)
         f.write(first_line)
         # f.write(after_first_line_str)
@@ -240,9 +219,12 @@ def result_tables(h5file, beta, m0, TBLDIR):
             line_str += "%i"%d2s[i] + latex_seperator
             line_str += irrep_str(irreps[i]) + latex_seperator
             line_str += "%i"%lvs[i] + latex_seperator
-            line_str += format_with_error(E_m[i],E_err[i]) + latex_seperator
-            line_str += format_with_error(s_m[i],s_err[i]) + latex_seperator
-            line_str += delete_zeros(PS_m[i],PS_err[i]) + latex_seperator
+            line_str += "%f\t%f"%(E_m[i],E_err[i]) + latex_seperator
+            line_str += "%f\t%f"%(s_m[i],s_err[i]) + latex_seperator
+            line_str += "%f\t%f"%(PS_m[i],PS_err[i]) + latex_seperator
+            # line_str += format_with_error(E_m[i],E_err[i]) + latex_seperator
+            # line_str += format_with_error(s_m[i],s_err[i]) + latex_seperator
+            # line_str += delete_zeros(PS_m[i],PS_err[i]) + latex_seperator
             line_str += "Yes"
 
             f.write(line_str)

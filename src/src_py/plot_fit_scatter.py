@@ -405,7 +405,7 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
             plt.plot(xarr,yarr_14, color = "green", label = "14-dim")
 
         if fit_model.yaxis == yaxis:
-            y_e = np.asarray([sorted(y_s[i])[length//2] for i in range(len(y_s))])
+            y_e = np.asarray([abs(sorted(y_s[i])[math.floor(length*(1-num_perc)/2)]-sorted(y_s[i])[math.ceil(length*(1+num_perc)/2)])/2 for i in range(len(y_s))])
             y_pred = np.asarray([fit_model.model(x, *fit_param_m) for x in x_m])
             print("beta = %1.3f, m0 = %1.3f"%(beta, m0))
             print(fit_model.name)
@@ -413,7 +413,7 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
                 param_med = (sorted(np.transpose(fit_param_s)[i])[length//2])
                 param_e_m = (sorted(np.transpose(fit_param_s)[i])[math.floor(length*(1-num_perc)/2)])
                 param_e_p = (sorted(np.transpose(fit_param_s)[i])[math.ceil(length*(1+num_perc)/2)])
-                print("%s  =  %.3f^{+%.3f}{-%.3f}"%(fit_model.param_names[i], fit_param_m[i], param_med-param_e_m, param_e_p-param_med))
+                print("%s  =  %.3f^{+%.3f}{-%.3f}"%(fit_model.param_names[i], fit_param_m[i], param_e_p-param_med, param_med-param_e_m))
             chi2 = np.sum(((y_m - y_pred) / y_e) ** 2)
             ndof = len(y_m) - fit_model.num_params  # degrees of freedom
             chi2_ndof = chi2 / ndof
@@ -456,6 +456,10 @@ if __name__ == "__main__":
         plot_any(h5file, 6.9, -0.92, "s_prime", "PS", None)
         plot_any(h5file, 7.05, -0.863, "s_prime", "PS", None, show = False)
         plot_any(h5file, 7.05, -0.867, "s_prime", "PS", None, show = False)
+
+        plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", None)
+        plot_any(h5file, 7.05, -0.863, "s_prime", "sigma_prime", None)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", None)
     else:
         # betas = [6.9, 7.05]
         # m0s = [-0.92, -0.867]

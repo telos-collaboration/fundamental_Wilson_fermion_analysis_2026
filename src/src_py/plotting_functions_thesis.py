@@ -21,13 +21,13 @@ def marker(NL,P,irrep,lv):                     # maybe to be rePlaced by inPut f
 
 def color(NL,P,irrep,lv):
     if P == 0:
-        return "red"
+        return "darkviolet"
     elif P == 1:
         return "blue"
     elif P == 2:
         return "green"
     elif P == 3:
-        return "orange"
+        return "crimson"
     else:
         raise ValueError("wrong P in color_irrep_lv(): %i"%(P))
 

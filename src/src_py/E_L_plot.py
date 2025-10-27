@@ -179,7 +179,7 @@ def plot_E_CM_L_multi_non_res(h5file,beta,m0,levels=False,outname=None,show=Fals
 
     ax2.legend(loc='center right', bbox_to_anchor=(1.25, 0.95))
 
-    ax2.set_xlabel(r"$a/N_L$")
+    ax2.set_xlabel(r"$a/L$")
     # plt.ylabel("$E_{CM}$/$m_\\pi$")
 
     # ax2.text(s="$E/m_\\pi^\\infty$", rotation = "vertical", x=0.0347, y = 1.55, fontsize = 14)
@@ -317,7 +317,7 @@ def plot_E_CM_L_multi_705(h5file,levels=False,outname=None,show=False):
 
     ax2.legend(loc='center right', bbox_to_anchor=(1.25, 1))
 
-    ax2.set_xlabel(r"$a/N_L$")
+    ax2.set_xlabel(r"$a/L$")
 
     ax1.set_ylabel("$E_{CM}$/$m_\\pi$")
     ax2.set_ylabel("$E_{CM}$/$m_\\pi$")
