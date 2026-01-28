@@ -22,7 +22,8 @@ function label_list(file)
     cut  = length("[IO][0]")
     conf = 0
     labels = String[]
-    for line in eachline(file)
+    io = HiRepParsing.makestream(file)
+    for line in eachline(io)
         if startswith(line,"[IO][0]")
             startswith(line,"[IO][0]Configuration") && continue
             if isletter(line[cut+1])
@@ -34,16 +35,19 @@ function label_list(file)
         if startswith(line,"[MAIN][0]Configuration from")
             conf += 1
             if conf == 2
+                close(io)
                 return unique(labels)
             end
         end
     end
+    close(io)
     return unique(labels)
 end
 function _nconfs(file)
     nconf   = 0
-    started = false 
-    for line in eachline(file)
+    started = false
+    io = HiRepParsing.makestream(file)
+    for line in eachline(io)
         if startswith(line,"[MAIN][0]Configuration from")
             started = true
         end
@@ -56,17 +60,21 @@ function _nconfs(file)
             end
         end
     end
+    close(io)
     return nconf
 end
 function _sources(file)
-    for line in eachline(file)
+    io = HiRepParsing.makestream(file)
+    for line in eachline(io)
         if startswith(line,"[MAIN][0]num sources:")
             c = length("[MAIN][0]num sources:")
             n = findnext(',',line,c+1)
             Nsrc = parse(Int,line[c+1:n-1])
+            close(io)
             return Nsrc 
         end
     end
+    close(io)
 end
 function _mom_from_label(label)
     label == "pi" && (return [0,0,0])
@@ -103,7 +111,8 @@ function parse_isospin_one(file,Nconf;desc="Progress:")
     p = Progress(Nconf; desc)
 
     labels = label_list(file)
-    for line in eachline(file)
+    io = HiRepParsing.makestream(file)
+    for line in eachline(io)
         if startswith(line,"[IO][0]Configuration")
             if occursin("read",line)
                 conf += 1
@@ -146,5 +155,6 @@ function parse_isospin_one(file,Nconf;desc="Progress:")
         end
     end
     finish!(p)
+    close(io)
     return Re, Im
 end
