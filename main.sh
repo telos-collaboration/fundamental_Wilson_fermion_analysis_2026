@@ -32,7 +32,6 @@ fit_scatter_input="metadata/fit_scatter_input.csv"
 ensembles_list="metadata/ensembles.csv"
 
 # update all submodules in libs/
-git submodule update --init --recursive
 julia src/scripts_julia/instantiate.jl
 julia src/scripts_julia/parse_all_files.jl --path $raw_path --h5file $h5file_raw --inputfiles $inputfiles
 julia src/scripts_julia/write_tables.jl --h5file $h5file_raw --outfile "$tablepath/all_runs.csv"
