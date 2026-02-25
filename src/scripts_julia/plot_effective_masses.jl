@@ -166,9 +166,9 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         deriv = read(h5dset,joinpath(ens,p,irrep,id,"deriv"))
         symmetrise = read(h5dset,joinpath(ens,p,irrep,id,"symmetrise"))
         if gevp
-            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, gevp, t_0 = %$(t0)"
+            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), gevp, t_0 = %$(t0)"
         else
-            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg, evp"
+            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), evp"
         end
         plt = plot(;title,legend=:outerright,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
         # get metadate for specific momentum
@@ -189,6 +189,8 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
             plot_effective_masses!(plt, meff, Δmeff, sources; markershape=:rect)
         end
         #plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
+        # use default x- and y-limits (override if we have fits)
+        plot!(plt,ylims=(0.0,1.1),xlims=(1.5,T÷2 + 0.5),xticks=2:2:T÷2)
         if isfile(fitresults) && haskey(res,joinpath(ens,id,p))
             r = res[joinpath(ens,id,p,"A1")]
             E0, ΔE0 = read(r,"E")[1], read(r,"Delta_E")[1] 
@@ -215,7 +217,6 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
                 add_fit_range!(plt_mesons, tmin, tmax, E, ΔE;label="")
             end
         end
-        plot!(plt,ylims=(0.0,1.1),xticks=2:2:T)
         savefig(plt,"temp.pdf")
         append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
     end
