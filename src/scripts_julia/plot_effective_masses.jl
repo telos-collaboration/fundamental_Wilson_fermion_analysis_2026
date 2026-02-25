@@ -4,10 +4,10 @@ using ProgressMeter: @showprogress
 using HDF5: h5open, h5write
 using ScatteringI1
 using LaTeXStrings: @L_str
-using Plots: gr, plot, plot!, scatter!, savefig, backend_name
+using Plots: gr, plot, plot!, scatter!, savefig, backend_name, ylims
 using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
-gr(fontfamily="Computer Modern",frame=:box, legend=:outerright, markeralpha=0.7,titlefontsize=11)
+gr(fontfamily="Computer Modern",frame=:box, legend=:topright, size = (400,300), markeralpha=0.7,titlefontsize=9)
 
 function plot_effective_mass!(plt, meff, Δmeff ;kws...)
     T = length(meff)
@@ -27,7 +27,7 @@ function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
         tmax2 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.5, T:-1:T÷2)
         tmax2 = isnothing(tmax2) ? T÷2 : tmax2 - 1
         t = vcat(1:tmax1,T:-1:T-tmax2)
-        scatter!(plt,t,meff[n,t],yerr=Δmeff[n,t],label=L"\textrm{eigenvalue }~%$n~~(n_{src}=%$(sources))";kws...)
+        scatter!(plt,t,meff[n,t],yerr=Δmeff[n,t],label=L"\textrm{eigenvalue }~%$n";kws...)
     end
 end
 function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
@@ -69,7 +69,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
             ncfg = read(h5dset,joinpath(ens,"Nconf"))
             m0 = only(read(h5dset,joinpath(ens,"quarkmasses")))
             β  = read(h5dset,joinpath(ens,"beta"))
-            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg"
+            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p)"
             plt_mesons = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
             if haskey(h5dset[ens][p],"T1")
                 meff = read(h5dset[ens][p]["T1"],"meff")
@@ -190,8 +190,8 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         end
         #plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
         # use default x- and y-limits (override if we have fits)
-        xl = (1.5,T÷2 + 0.5)
-        yl = (0.0,1.1)
+        y_min = +Inf
+        y_max = -Inf
         if isfile(fitresults) && haskey(res,joinpath(ens,id,p))
             r = res[joinpath(ens,id,p,"A1")]
             E0, ΔE0 = read(r,"E")[1], read(r,"Delta_E")[1] 
@@ -202,8 +202,23 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
             tmax2 = read(r,"tmax2") + 1
             add_fit_range!(plt, tmin1, tmax1, E0, ΔE0;label="fit #1")
             add_fit_range!(plt, tmin2, tmax2, E1, ΔE1;label="fit #2")
-            yl = (0.75*(E0-ΔE0),1.25*(E1+ΔE1))
-            
+
+            # update plot limits
+            y_min = min(0.75*(E0-ΔE0),y_min)
+            y_max = max(1.25*(E1+ΔE1),y_max)
+            if has3x3 && use3x3
+                meff_3x3 = read(h5dset[ens][p]["$irrep/$id"],"meff_3x3")
+                Δmeff_3x3 = read(h5dset[ens][p]["$irrep/$id"],"Delta_meff_3x3")
+                y_min = min(y_min,minimum(meff_3x3[end,  tmin2:tmax2]))
+                y_max = min(y_max,maximum(meff_3x3[end-1,tmin2:tmax2]))
+            end
+            if !(has3x3 && use3x3) || plot2x2
+                meff = read(h5dset[ens][p]["$irrep/$id"],"meff")
+                Δmeff = read(h5dset[ens][p]["$irrep/$id"],"Delta_meff")
+                y_min = min(y_min,minimum(meff[end,  tmin2:tmax2]))
+                y_max = min(y_max,maximum(meff[end-1,tmin2:tmax2]))
+            end
+
             if haskey(res,joinpath(ens,p,"B1"))
                 r = res[joinpath(ens,p,"B1")]
                 E, ΔE = read(r,"E")[1], read(r,"Delta_E")[1]
@@ -219,7 +234,8 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
                 add_fit_range!(plt_mesons, tmin, tmax, E, ΔE;label="")
             end
         end
-        plot!(plt,ylims=yl,xlims=xl,xticks=2:2:T÷2)
+        plot!(plt,xlims=(1.5,T÷2 - 0.5),xticks=2:2:T÷2)
+        plot!(plt,ylims=(0,π/2))
         savefig(plt,"temp.pdf")
         append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
     end
