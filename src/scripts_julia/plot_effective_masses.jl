@@ -20,15 +20,14 @@ function plot_effective_mass!(plt, meff, Δmeff ;kws...)
 end
 function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
     Nev,T = size(meff)
-    tmax  = 
-    for i in 1:Nev
-        n = Nev+1-i
+    Nev_max = 2
+    for n in Nev_max:-1:1
         tmax1 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.4, 1:T÷2)
         tmax1 = isnothing(tmax1) ? T÷2 : tmax1 - 1
         tmax2 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.4, T:-1:T÷2)
         tmax2 = isnothing(tmax2) ? T÷2 : tmax2 - 1
         t = vcat(1:tmax1,T:-1:T-tmax2)
-        scatter!(plt,t,meff[n,t],yerr=Δmeff[n,t],label=L"\textrm{eigenvalue }~%$i~~(n_{src}=%$(sources))";kws...)
+        scatter!(plt,t,meff[n,t],yerr=Δmeff[n,t],label=L"\textrm{eigenvalue }~%$n~~(n_{src}=%$(sources))";kws...)
     end
 end
 function plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
@@ -189,7 +188,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
             sources = read(h5dset[ens][p]["$irrep/$id"],"sources")
             plot_effective_masses!(plt, meff, Δmeff, sources; markershape=:rect)
         end
-        plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
+        #plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
         if isfile(fitresults) && haskey(res,joinpath(ens,id,p))
             r = res[joinpath(ens,id,p,"A1")]
             E0, ΔE0 = read(r,"E")[1], read(r,"Delta_E")[1] 
@@ -216,7 +215,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
                 add_fit_range!(plt_mesons, tmin, tmax, E, ΔE;label="")
             end
         end
-        plot!(plt,ylims=(0.0,π/2),xticks=2:2:T)
+        plot!(plt,ylims=(0.0,1.1),xticks=2:2:T)
         savefig(plt,"temp.pdf")
         append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
     end
