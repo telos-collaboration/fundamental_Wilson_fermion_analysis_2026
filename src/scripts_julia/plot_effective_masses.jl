@@ -7,7 +7,7 @@ using LaTeXStrings: @L_str
 using Plots: gr, plot, plot!, scatter!, savefig, backend_name
 using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
-gr(fontfamily="Computer Modern",frame=:box,markeralpha=0.7,titlefontsize=11)
+gr(fontfamily="Computer Modern",frame=:box, legend=:outerright, markeralpha=0.7,titlefontsize=11)
 
 function plot_effective_mass!(plt, meff, Δmeff ;kws...)
     T = length(meff)
@@ -22,9 +22,9 @@ function plot_effective_masses!(plt, meff, Δmeff, sources ;kws...)
     Nev,T = size(meff)
     Nev_max = 2
     for n in Nev_max:-1:1
-        tmax1 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.4, 1:T÷2)
+        tmax1 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.5, 1:T÷2)
         tmax1 = isnothing(tmax1) ? T÷2 : tmax1 - 1
-        tmax2 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.4, T:-1:T÷2)
+        tmax2 = findfirst(t->abs(Δmeff[n,t]/meff[n,t]) > 0.5, T:-1:T÷2)
         tmax2 = isnothing(tmax2) ? T÷2 : tmax2 - 1
         t = vcat(1:tmax1,T:-1:T-tmax2)
         scatter!(plt,t,meff[n,t],yerr=Δmeff[n,t],label=L"\textrm{eigenvalue }~%$n~~(n_{src}=%$(sources))";kws...)
@@ -170,7 +170,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         else
             title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), evp"
         end
-        plt = plot(;title,legend=:outerright,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+        plt = plot(;title,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
         # get metadate for specific momentum
         data = readdlm(metadata,',',skipstart=1)
         metadata_ind = findfirst(i -> isequal(joinpath(ens,p),joinpath(data[i,1:2]...)),1:first(size(data)))
@@ -190,7 +190,8 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         end
         #plot_non_interacting_levels!(plt,h5dset,ens,p,inf_vol)
         # use default x- and y-limits (override if we have fits)
-        plot!(plt,ylims=(0.0,1.1),xlims=(1.5,T÷2 + 0.5),xticks=2:2:T÷2)
+        xl = (1.5,T÷2 + 0.5)
+        yl = (0.0,1.1)
         if isfile(fitresults) && haskey(res,joinpath(ens,id,p))
             r = res[joinpath(ens,id,p,"A1")]
             E0, ΔE0 = read(r,"E")[1], read(r,"Delta_E")[1] 
@@ -201,6 +202,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
             tmax2 = read(r,"tmax2") + 1
             add_fit_range!(plt, tmin1, tmax1, E0, ΔE0;label="fit #1")
             add_fit_range!(plt, tmin2, tmax2, E1, ΔE1;label="fit #2")
+            yl = (0.75*(E0-ΔE0),1.25*(E1+ΔE1))
             
             if haskey(res,joinpath(ens,p,"B1"))
                 r = res[joinpath(ens,p,"B1")]
@@ -217,6 +219,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
                 add_fit_range!(plt_mesons, tmin, tmax, E, ΔE;label="")
             end
         end
+        plot!(plt,ylims=yl,xlims=xl,xticks=2:2:T÷2)
         savefig(plt,"temp.pdf")
         append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
     end
