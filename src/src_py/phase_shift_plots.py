@@ -121,8 +121,8 @@ def plot_PS_ERE_non_res(h5file,show=False):
     p3cotPS_m   = np.asarray(scat_fit_mean["p3cotPS_prime"])
     p3cotPS_s   = np.asarray(scat_fit_spl["p3cotPS_prime"])
 
-    ax2.set_xlabel(r"$s/m_\pi^2$", fontsize=styles.fontsize)
-    ax2.set_ylabel(r"$p^3\, \cot(\delta_1)/m_\pi^3$", fontsize=styles.fontsize)
+    ax2.set_xlabel(r"$s/m_{\rm PS}^2$", fontsize=styles.fontsize)
+    ax2.set_ylabel(r"$p^3\, \cot(\delta_1)/m_{\rm PS}^3$", fontsize=styles.fontsize)
     ax1.set_ylabel(r"$\delta_1$", fontsize=styles.fontsize)
     
     length = len(x_s[0])
@@ -172,10 +172,8 @@ def plot_PS_ERE_non_res(h5file,show=False):
    
 
     for tmp in [[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "^", label = r"$|p|=%i$"%(tmp[1]))
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
-    ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
+        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "^", label = r"$|d|=%i$"%(tmp[1]))
+    #ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
 
     ax1.set_xlim([slow,shigh])
     ax1.set_ylim([0,50])
@@ -190,7 +188,7 @@ def plot_PS_ERE_non_res(h5file,show=False):
     
     ax1.legend(loc='upper left', fontsize=styles.fontsize)
 
-    plt.savefig(op.join(PLTDIR, "phase_shift_plot_non_res.pdf"), bbox_inches='tight')
+    plt.savefig(op.join(PLTDIR, "phase_shift_plot_heavy.pdf"), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
@@ -211,8 +209,8 @@ def plot_PS_ERE_close_res(h5file,show=False):
     p3cotPS_m   = np.asarray(scat_fit_mean["p3cotPS_prime"])
     p3cotPS_s   = np.asarray(scat_fit_spl["p3cotPS_prime"])
 
-    ax2.set_xlabel(r"$s/m_\pi^2$", fontsize=styles.fontsize)
-    ax2.set_ylabel(r"$p^3\, \cot(\delta_1)/m_\pi^3$", fontsize=styles.fontsize)
+    ax2.set_xlabel(r"$s/m_{\rm PS}^2$", fontsize=styles.fontsize)
+    ax2.set_ylabel(r"$p^3\, \cot(\delta_1)/m_{\rm PS}^3$", fontsize=styles.fontsize)
     ax1.set_ylabel(r"$\delta_1$", fontsize=styles.fontsize)
     
     length = len(x_s[0])
@@ -251,14 +249,13 @@ def plot_PS_ERE_close_res(h5file,show=False):
    
 
     for tmp in [[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
-    ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
+        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|d|=%i$"%(tmp[1]))
+    ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rm V}$")
     ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
 
     ax1.legend(loc='lower right', fontsize=styles.fontsize)
 
-    plt.savefig(op.join(PLTDIR, "phase_shift_plot_close_res.pdf"), bbox_inches='tight')
+    plt.savefig(op.join(PLTDIR, "phase_shift_plot_medium.pdf"), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
@@ -285,8 +282,8 @@ def plot_PS_ERE_res(h5file,show=False):
     p3cotPS_m   = np.asarray(scat_fit_mean["p3cotPS_Ecm_prime"])
     p3cotPS_s   = np.asarray(scat_fit_spl["p3cotPS_Ecm_prime"])
 
-    ax2.set_xlabel(r"$s/m_\pi^2$", fontsize=styles.fontsize)
-    ax2.set_ylabel(r"$p^3\, \cot(\delta_1)/E_{cm}/m_\pi^2$", fontsize=styles.fontsize)
+    ax2.set_xlabel(r"$s/m_{\rm PS}^2$", fontsize=styles.fontsize)
+    ax2.set_ylabel(r"$p^3\, \cot(\delta_1)/E_{\rm CM}/m_{\rm PS}^2$", fontsize=styles.fontsize)
     ax1.set_ylabel(r"$\delta_1$", fontsize=styles.fontsize)
     
     length = len(x_s[0])
@@ -335,12 +332,12 @@ def plot_PS_ERE_res(h5file,show=False):
         ax2.plot(x_s[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(p3cotPS_s[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]))
     
     for tmp in [[None,0,None,None],[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
-        ax2.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
+        ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|d|=%i$"%(tmp[1]))
+        ax2.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|d|=%i$"%(tmp[1]))
     # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
     # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
-    ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
+    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rm V}$")
+    # ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rm V}$")
 
     xticks = np.linspace(4,11,8)
     ax1.set_xticks(xticks, [r"$%i$"%x for x in xticks])
@@ -350,7 +347,7 @@ def plot_PS_ERE_res(h5file,show=False):
     ax2.set_yticks(yticks, [r"$%1.2f$"%x for x in yticks])
     
     ax2.legend(loc='upper right', fontsize=styles.fontsize)
-    plt.savefig(op.join(PLTDIR, "phase_shift_plot_res.pdf"), bbox_inches='tight')
+    plt.savefig(op.join(PLTDIR, "phase_shift_plot_light.pdf"), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
