@@ -91,7 +91,7 @@ def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with
 
 def read_from_hdf(filename):
     res, res_tmp = [{},{}]
-    with h5py.File("data_assets/14_dim/"+filename+".hdf5","r") as hfile:
+    with h5py.File("raw_data/14_dim/"+filename+".hdf5","r") as hfile:
         for key in hfile.keys():
             if key[:4] == "orig":
                 res[key[5:]] = hfile[key][()]

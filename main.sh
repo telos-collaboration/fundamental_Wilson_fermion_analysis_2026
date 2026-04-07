@@ -69,6 +69,6 @@ python3 src/src_py/plot_fit_scatter.py $plotpath/scattering $h5file_scat_fit Tru
 
 python3 src/src_py/E_L_plot.py $plotpath/scattering $h5file_scat_fit
 python3 src/src_py/phase_shift_plots.py $plotpath/scattering $h5file_scat_fit
-#python3 src/src_py/cross_section_plot.py $plotpath/scattering $h5file_scat_fit
+python3 src/src_py/cross_section_plot.py $plotpath/scattering $h5file_scat_fit
 
 python3 src/src_py/result_tables.py $tablepath $h5file_scat_fit
