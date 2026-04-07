@@ -118,16 +118,10 @@ def plot_E_CM_L_multi_non_res(h5file,beta,m0,levels=False,outname=None,show=Fals
             else:
                 ax2.errorbar([NL_invs[i]-0.0006,],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))   
 
-    # plt.axhline(1,c="black", ls="dotted", label = r"$m_\pi$")
-    # plt.axhline(mrho/mpi,c="red", ls="dotted", label = r"$m_\rho$")
-    ax1.axhline(2,c="black",label = r"2$m_\pi$")
-    ax2.axhline(2,c="black",label = r"2$m_\pi$")
-    # ax2.axhline(4,c="black",label = r"4$m_\pi$")
+    ax1.axhline(2,c="black",label = r"$2 m_{\rm PS}$")
+    ax2.axhline(2,c="black",label = r"$2 m_{\rm PS}$")
     ax1.yaxis.grid()
     ax2.yaxis.grid()
-    # ax1.set_title(r"$\\beta$ = %1.1f, $am_0$ = %1.2f$"%(beta,m0))
-    # if levels:
-    #     plt.plot([0,0],[0,0],c="grey", label = "non-int")
     ax2_y_top = 1.52
     ax1_y_bot = 1.97
     ax1.set_ylim([ax1_y_bot,2.29])
@@ -137,20 +131,18 @@ def plot_E_CM_L_multi_non_res(h5file,beta,m0,levels=False,outname=None,show=Fals
 
 
     for tmp in [[None,0,None,None],[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax2.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
+        ax2.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|d|=%i$"%(tmp[1]))
     ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
     ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
+    ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rm V}$")
 
     ax2.legend(loc='center right', bbox_to_anchor=(1.25, 0.95))
 
     ax2.set_xlabel(r"$a/L$")
-    # plt.ylabel("$E_{CM}$/$m_\\pi$")
-
-    ax2.text(s="$E_{CM}$/$m_\\pi$", rotation = "vertical", x=0.0347, y = 1.5, fontsize = 14)
+    ax2.text(s=r"$E_{\rm CM}$/$m_{\rm PS}$", rotation = "vertical", x=0.0347, y = 1.5, fontsize = 14)
 
     props = dict(facecolor = "white")
-    ax1.text(0.02, 0.95, r'$\text{non-resonant}$',
+    ax1.text(0.02, 0.95, r'$\text{heavy}$',
      horizontalalignment='left',
      verticalalignment='top',
      transform = ax1.transAxes,
@@ -258,37 +250,37 @@ def plot_E_CM_L_multi_705(h5file,levels=False,outname=None,show=False):
             else:
                 ax2.errorbar([NL_invs[i]-0.0006,],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))   
 
-    ax2.axhline(2,c="black",label = r"2$m_\pi$")
+    ax2.axhline(2,c="black",label = r"$2 m_{\rm PS}$")
     ax2.yaxis.grid()
-    ax2.axhline(4,c="black",label = r"4$m_\pi$", ls= "dashed")
+    ax2.axhline(4,c="black",label = r"$4 m_{\rm PS}$", ls= "dashed")
     ax2.set_ylim([1,6])
-    ax1.axhline(2,c="black",label = r"2$m_\pi$")
+    ax1.axhline(2,c="black",label = r"$2 m_{\rm PS}$")
     ax1.yaxis.grid()
-    ax1.axhline(4,c="black",label = r"4$m_\pi$", ls= "dashed")
+    ax1.axhline(4,c="black",label = r"$4 m_{\rm PS}$", ls= "dashed")
     ax1.set_ylim([1,6])
 
 
     for tmp in [[None,0,None,None],[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
-        ax2.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|p|=%i$"%(tmp[1]))
+        ax2.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|d|=%i$"%(tmp[1]))
     ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
     ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rho}$")
+    ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rm V}$")
 
     ax2.legend(loc='center right', bbox_to_anchor=(1.25, 1))
 
     ax2.set_xlabel(r"$a/L$")
 
-    ax1.set_ylabel("$E_{CM}$/$m_\\pi$")
-    ax2.set_ylabel("$E_{CM}$/$m_\\pi$")
+    ax1.set_ylabel(r"$E_{\rm CM}$/$m_{\rm PS}$")
+    ax2.set_ylabel(r"$E_{\rm CM}$/$m_{\rm PS}$")
 
     props = dict(facecolor = "white")
-    ax1.text(0.02, 0.96, r'$\text{close to resonant}$',
+    ax1.text(0.02, 0.96, r'$\text{medium}$',
      horizontalalignment='left',
      verticalalignment='top',
      transform = ax1.transAxes,
      fontsize=18,
      bbox=props)
-    ax2.text(0.02, 0.96, r'$\text{resonant}$',
+    ax2.text(0.02, 0.96, r'$\text{light}$',
      horizontalalignment='left',
      verticalalignment='top',
      transform = ax2.transAxes,
