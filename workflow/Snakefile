@@ -5,6 +5,10 @@ rule all:
     input:
         julia_instantiated="tmp/julia_ready",
         h5file="data_assets/isospin1_corr.hdf5",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults.hdf5",
+        h5file_eig_gevp_evp="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
+        h5file_fit_gevp_evp="data_assets/isospin1_fitresults_evp_gevp.hdf5",
 
 
 rule julia_instantiate:
@@ -47,7 +51,7 @@ rule ensembles_tables:
 
 rule combine_runs_hdf5:
     input:
-        script="src/scripts_julia/write_tables.jl",
+        script="src/scripts_julia/combine_runs.jl",
         julia_instantiated="tmp/julia_ready",
         h5file_in="data_assets/isospin1_sorted.hdf5",
     output:
@@ -71,3 +75,44 @@ rule correlation_matrix:
     shell:
         'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out} --ensembles_list {input.metadata}'
 
+
+rule write_eigenvalues:
+    input:
+        script="src/scripts_julia/write_eigenvalues.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file_in="data_assets/isospin1_corr.hdf5",
+        metadata="metadata/pipi_fitintervals.csv",
+    output:
+        h5file_out="data_assets/isospin1_eigenvalues.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out}  --metadata {input.metadata} --avg true'
+
+
+rule write_eigenvalues_evp_vs_gevp:
+    input:
+        script="src/scripts_julia/write_eigenvalues.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file_in="data_assets/isospin1_corr.hdf5",
+        metadata="metadata/pipi_fitintervals_evp_gevp.csv",
+        swaps="metadata/swaps.csv",
+    output:
+        h5file_out="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out}  --metadata {input.metadata}  --swap_metadata {input.swaps} --avg true'
+
+
+rule fit_eigenvalues:
+    input:
+        script="src/src_py/fitting_eigenvalues.py",
+        metadata="metadata/pipi_fitintervals{label}.csv",
+        h5file_in="data_assets/isospin1_eigenvalues{label}.hdf5",
+    output:
+        h5file_out="data_assets/isospin1_fitresults{label}.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'python3 {input.script} {input.h5file_in} {output.h5file_out} {input.metadata}'
