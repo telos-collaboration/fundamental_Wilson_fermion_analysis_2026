@@ -1,0 +1,73 @@
+import os
+os.environ["GKSwstype"] = "100"
+
+rule all:
+    input:
+        julia_instantiated="tmp/julia_ready",
+        h5file="data_assets/isospin1_corr.hdf5",
+
+
+rule julia_instantiate:
+    input:
+        script="src/scripts_julia/instantiate.jl",
+    output:
+        julia_instantiated="tmp/julia_ready",
+    conda: 
+        "environment.yml"
+    shell:
+        "julia {input.script} && touch {output.julia_instantiated}"
+
+
+rule parse_logs:
+    input:
+        script="src/scripts_julia/parse_all_files.jl",
+        julia_instantiated="tmp/julia_ready",
+        metadata="metadata/input_files.csv",
+    output:
+        h5file="data_assets/isospin1_sorted.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --path raw_data/ --h5file {output.h5file} --inputfiles {input.metadata}'
+
+
+rule ensembles_tables:
+    input:
+        script="src/scripts_julia/write_tables.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file="data_assets/isospin1_sorted.hdf5",
+        metadata="metadata/ensembles.csv"
+    output:
+        table="assets/tables/analysed_runs.csv"
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file {input.h5file} --ensembles_list {input.metadata} --outfile {output.table}'
+
+
+rule combine_runs_hdf5:
+    input:
+        script="src/scripts_julia/write_tables.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file_in="data_assets/isospin1_sorted.hdf5",
+    output:
+        h5file_out="data_assets/isospin1_merged.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out}'
+
+
+rule correlation_matrix:
+    input:
+        script="src/scripts_julia/write_correlation_matrix.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file_in="data_assets/isospin1_merged.hdf5",
+        metadata="metadata/ensembles.csv"
+    output:
+        h5file_out="data_assets/isospin1_corr.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out} --ensembles_list {input.metadata}'
+
