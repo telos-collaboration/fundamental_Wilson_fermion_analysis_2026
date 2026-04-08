@@ -16,6 +16,7 @@ h5file_com="data_assets/isospin1_merged.hdf5"
 h5file_cor="data_assets/isospin1_corr.hdf5"
 h5file_eig="data_assets/isospin1_eigenvalues.hdf5"
 h5file_fit="data_assets/isospin1_fitresults.hdf5"
+h5file_fit_full="data_assets/isospin1_fitresults_full.hdf5"
 h5file_eig_gvp="data_assets/isospin1_eigenvalues_evp_gevp.hdf5"
 h5file_fit_evp="data_assets/isospin1_fitresults_evp_gevp.hdf5"
 # h5file_scat="data_assets/literature_scattering.hdf5"
@@ -42,25 +43,26 @@ julia src/scripts_julia/write_correlation_matrix.jl --h5file_in $h5file_com --h5
 julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig --metadata $fitparam --avg $average_equivalent_momenta
 julia src/scripts_julia/write_eigenvalues.jl --h5file_in $h5file_cor --h5file_out $h5file_eig_gvp --metadata $fitparam_evp --avg $average_equivalent_momenta --swap_metadata "metadata/swaps.csv"
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig $h5file_fit $fitparam
-python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit $fitparam_meson
+cp $h5file_fit $h5file_fit_full
+python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit_full $fitparam_meson
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig_gvp $h5file_fit_evp $fitparam_evp
-julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit --outfile "$tablepath/fit_results_3x3_tuned.csv"
+julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit_full --outfile "$tablepath/fit_results_3x3_tuned.csv"
 julia src/scripts_julia/gevp_vs_evp.jl
 
 julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
 julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --metadata $fitparam --plotname "$plotpath/eigenvalues.pdf"
 julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig_gvp --metadata $fitparam_evp --plotname "$plotpath/eigenvalues_evp_gevp.pdf"
-julia src/scripts_julia/plot_eigenvalues_with_fits.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam --fitresults $h5file_fit
+julia src/scripts_julia/plot_eigenvalues_with_fits.jl --h5file_in $h5file_eig --plotpath $plotpath --metadata $fitparam --fitresults $h5file_fit_full
 julia src/scripts_julia/plot_correlation_matrix_elements.jl --h5file_in $h5file_eig --plotpath $plotpath
-julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath --fitresults $h5file_fit
-julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam --plot_mesons true  --plotbasename "effective_masses"
+julia src/scripts_julia/plot_meson_correlators.jl --h5file_in $h5file_eig --plotpath $plotpath --fitresults $h5file_fit_full
+julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig --h5file_fit $h5file_fit_full --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam --plot_mesons true  --plotbasename "effective_masses"
 julia src/scripts_julia/plot_effective_masses.jl --h5file_eig $h5file_eig_gvp --h5file_fit $h5file_fit_evp --plotpath $plotpath --infinite_volume $infvolfile --metadata $fitparam_evp --plot_mesons false --plotbasename "effective_masses_comparison"
 
 mkdir -p tmp
 bash libs/zeta/compile.sh  &> tmp/make.log
 
-cp $h5file_fit $h5file_scat
-python3 src/src_py/scattering.py $input_scatter $h5file_fit $h5file_scat $num_resample_scattering gauss
+cp $h5file_fit_full $h5file_scat
+python3 src/src_py/scattering.py $input_scatter $h5file_fit_full $h5file_scat $num_resample_scattering gauss
 python3 src/src_py/plot_fit_scatter.py $plotpath/scattering $h5file_scat False
 
 cp $h5file_scat $h5file_scat_fit

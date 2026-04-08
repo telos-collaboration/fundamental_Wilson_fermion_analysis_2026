@@ -3,7 +3,7 @@ using HDF5
 using LatticeUtils
 using Plots
 
-file = "data_assets/isospin1_fitresults_evp.hdf5"
+file = "data_assets/isospin1_fitresults_evp_gevp.hdf5"
 runs = keys(h5open(file))
 
 println()

@@ -116,3 +116,20 @@ rule fit_eigenvalues:
         "environment.yml"
     shell:
         'python3 {input.script} {input.h5file_in} {output.h5file_out} {input.metadata}'
+
+
+rule fit_mesons:
+    input:
+        script="src/src_py/fitting_mesons.py",
+        metadata="metadata/pipi_fitintervals_mesons.csv",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit_pipi="data_assets/isospin1_fitresults_pipi.hdf5",
+    output:
+        h5file_out="data_assets/isospin1_fitresults_full.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        cp {input.h5file_eig} {output.h5file_out}
+        python3 {input.script} {input.h5file_in} {output.h5file_out} {input.metadata}
+        '''
