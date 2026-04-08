@@ -69,8 +69,9 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
             ncfg = read(h5dset,joinpath(ens,"Nconf"))
             m0 = only(read(h5dset,joinpath(ens,"quarkmasses")))
             β  = read(h5dset,joinpath(ens,"beta"))
-            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p)"
-            plt_mesons = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+            p_fmt = replace(p,"p"=>"")
+            title  = L"{%$T} \times {%$L}^3, \beta=%$β, am_0={%$m0}, \vec{d} = %$p_fmt)"
+            plt_mesons = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"am_\textrm{eff}")
             if haskey(h5dset[ens][p],"T1")
                 meff = read(h5dset[ens][p]["T1"],"meff")
                 Δmeff = read(h5dset[ens][p]["T1"],"Delta_meff")
@@ -111,10 +112,11 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         ncfg = read(h5dset,joinpath(ens,"Nconf"))
         m0 = only(read(h5dset,joinpath(ens,"quarkmasses")))
         β  = read(h5dset,joinpath(ens,"beta"))
-        title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), n_{cfg}=%$ncfg"
+        p_fmt = replace(p,"p"=>"")
+        title  = L"{%$T} \times {%$L}^3, \beta=%$β, am_0={%$m0}, \vec{d} = %$(p_fmt)"
 
         if plot_mesons
-            plt_mesons = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+            plt_mesons = plot(;title,legend=:bottomleft,xlabel=L"t",ylabel=L"am_\textrm{eff }")
             if isfile(fitresults) && haskey(res,joinpath(ens,p))
                 if haskey(res,joinpath(ens,p,"pi"))
                     r = res[joinpath(ens,p,"pi")]
@@ -166,11 +168,11 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         deriv = read(h5dset,joinpath(ens,p,irrep,id,"deriv"))
         symmetrise = read(h5dset,joinpath(ens,p,irrep,id,"symmetrise"))
         if gevp
-            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), gevp, t_0 = %$(t0)"
+            title  = L"{%$T} \times {%$L}^3, \beta=%$β, am_0={%$m0}, \vec{d} = %$(p_fmt), \mathrm{GEVP}, t_0 = %$(t0)"
         else
-            title  = L"{%$T} \times {%$L}^3: \beta=%$β, am^f_0={%$m0}, \mathbf{p} = %$(p), evp"
+            title  = L"{%$T} \times {%$L}^3, \beta=%$β, am_0={%$m0}, \vec{d} = %$(p_fmt), \mathrm{EVP}"
         end
-        plt = plot(;title,xlabel=L"t",ylabel=L"\textrm{effective mass } [a^{-1}]")
+        plt = plot(;title,xlabel=L"t",ylabel=L"am_\textrm{eff}")
         # get metadate for specific momentum
         data = readdlm(metadata,',',skipstart=1)
         metadata_ind = findfirst(i -> isequal(joinpath(ens,p),joinpath(data[i,1:2]...)),1:first(size(data)))
