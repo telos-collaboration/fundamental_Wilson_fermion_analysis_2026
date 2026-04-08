@@ -57,8 +57,9 @@ function plot_meson_correlators(file,plotpath,fitresults)
                 _read_plot_fitresults(plt,fitres,ens,p,irrep;label="")
             end
             
-            savefig(plt,"temp.pdf")
-            append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
+            tmpfile = tempname()*".pdf"
+            savefig(plt,tmpfile)
+            append_pdf!(joinpath(plotpath,plotname),tmpfile,cleanup=true)
         end
     end
 end

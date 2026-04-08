@@ -55,8 +55,9 @@ function plot_correlation_matrices(file_in,plotpath)
                     mi += 1
                 end 
                 
-                savefig(plt,"temp.pdf")
-                append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
+                tmpfile = tempname()*".pdf"
+                savefig(plt,tmpfile)
+                append_pdf!(joinpath(plotpath,plotname),tmpfile,cleanup=true)
 
                 if three_by_three
                     Corr_γ0γi_γi, Corr_γi_γ0γi, Corr_γ0γi_γ0γi, Corrγ0γiT1, Corrγ0γiT2 = correlators_xyz_3x3(fid,ens;p=pv)
@@ -73,8 +74,9 @@ function plot_correlation_matrices(file_in,plotpath)
                         mi += 1
                     end
 
-                    savefig(plt,"temp.pdf")
-                    append_pdf!(joinpath(plotpath,plotname3x3),"temp.pdf",cleanup=true)
+                    tmpfile = tempname()*".pdf"
+                    savefig(plt,tmpfile)
+                    append_pdf!(joinpath(plotpath,plotname3x3),tmpfile,cleanup=true)
                 end
             end
         end

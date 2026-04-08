@@ -97,8 +97,9 @@ function plot_eigenvalues(file,plotpath,metadata,fitresults)
                 plot_correlator!(plt,t,f.(eigvals[2,t2] ./ eigvals[2,1]),Δeigvals[2,t2] ./ eigvals[2,1],label="eigval #2")
             end
 
-            savefig(plt,"temp.pdf")
-            append_pdf!(joinpath(plotpath,plotname),"temp.pdf",cleanup=true)
+            tmpfile = tempname()*".pdf"
+            savefig(plt,tmpfile)
+            append_pdf!(joinpath(plotpath,plotname),tmpfile,cleanup=true)
         end
     end
 end

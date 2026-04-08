@@ -71,8 +71,9 @@ function plot_eigenvalues(file,plotname,metadata)
             plot!(plt,[T-t0+2],seriestype="vline", color=:black, label="")
         end
             
-        savefig(plt,"temp.pdf")
-        append_pdf!(plotname,"temp.pdf",cleanup=true)
+        tmpfile = tempname()*".pdf"
+        savefig(plt,tmpfile)
+        append_pdf!(plotname,tmpfile,cleanup=true)
     end
 end
 function parse_commandline()

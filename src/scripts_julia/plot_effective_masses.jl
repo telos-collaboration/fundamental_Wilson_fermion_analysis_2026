@@ -238,8 +238,10 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         end
         plot!(plt,xlims=(1.5,T÷2 - 0.5),xticks=2:2:T÷2)
         plot!(plt,ylims=(0,π/2))
-        savefig(plt,"temp.pdf")
-        append_pdf!(joinpath(plotpath,plotname), "temp.pdf", cleanup=true)
+
+        tmpfile = tempname()*".pdf"
+        savefig(plt,tmpfile)
+        append_pdf!(joinpath(plotpath,plotname), tmpfile, cleanup=true)
     end
 end
 function parse_commandline()
