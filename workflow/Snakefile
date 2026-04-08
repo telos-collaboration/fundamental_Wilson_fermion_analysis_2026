@@ -22,8 +22,6 @@ rule all:
         plot_meff_mesons="assets/plots/effective_masses_mesons.pdf",
         plot_meff_mesons_p0="assets/plots/effective_masses_mesons_p0.pdf",
         plot_meff_comparison_gevp="assets/plots/effective_masses_comparison_(g)evp.pdf",
-        plot_meff_comparison_mesons="assets/plots/effective_masses_comparison_mesons.pdf",
-        plot_meff_comparison_mesons_p0="assets/plots/effective_masses_comparison_mesons_p0.pdf",
 
 
 rule julia_instantiate:
@@ -241,7 +239,7 @@ rule plot_effective_masses:
     conda:
         "environment.yml"
     shell:
-        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.infinite_volume} --plotpath "assets/plots" --plot_mesons true --plotbasename "effective_masses"'
+        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.fitparam} --plotpath "assets/plots" --plot_mesons true --plotbasename "effective_masses"'
 
 
 rule plot_effective_masses_comparison:
@@ -253,11 +251,9 @@ rule plot_effective_masses_comparison:
         infinite_volume="metadata/infinite_volume.csv",
     output:
         plot_gevp="assets/plots/effective_masses_comparison_(g)evp.pdf",
-        plot_mesons="assets/plots/effective_masses_comparison_mesons.pdf",
-        plot_mesons_p0="assets/plots/effective_masses_comparison_mesons_p0.pdf",
     conda:
         "environment.yml"
     shell:
-        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.infinite_volume} --plotpath "assets/plots" --plot_mesons false --plotbasename "effective_masses_comparison"'
+        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.fitparam} --plotpath "assets/plots" --plot_mesons false --plotbasename "effective_masses_comparison"'
 
 
