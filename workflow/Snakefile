@@ -7,8 +7,23 @@ rule all:
         h5file="data_assets/isospin1_corr.hdf5",
         h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
         h5file_fit="data_assets/isospin1_fitresults.hdf5",
+        h5file_out="data_assets/isospin1_fitresults_full.hdf5",
         h5file_eig_gevp_evp="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
         h5file_fit_gevp_evp="data_assets/isospin1_fitresults_evp_gevp.hdf5",
+        plots2x2="assets/plots/diagrams.pdf",
+        plots3x3="assets/plots/diagrams_3x3.pdf",
+        table_fit="assets/tables/fit_results_3x3_tuned.csv",
+        plot_eig="assets/plots/eigenvalues.pdf",
+        plot_eig_evp_vs_gvp="assets/plots/eigenvalues_evp_gevp.pdf",
+        plot_eig_fits="assets/plots/eigenvalues_with_fit.pdf",
+        plot_cmat_elements="assets/plots/correlation_matrix_elements.pdf",
+        plot_meson_correlators="assets/plots/meson_correlators.pdf",
+        plot_meff_gevp="assets/plots/effective_masses_(g)evp.pdf",
+        plot_meff_mesons="assets/plots/effective_masses_mesons.pdf",
+        plot_meff_mesons_p0="assets/plots/effective_masses_mesons_p0.pdf",
+        plot_meff_comparison_gevp="assets/plots/effective_masses_comparison_(g)evp.pdf",
+        plot_meff_comparison_mesons="assets/plots/effective_masses_comparison_mesons.pdf",
+        plot_meff_comparison_mesons_p0="assets/plots/effective_masses_comparison_mesons_p0.pdf",
 
 
 rule julia_instantiate:
@@ -123,7 +138,7 @@ rule fit_mesons:
         script="src/src_py/fitting_mesons.py",
         metadata="metadata/pipi_fitintervals_mesons.csv",
         h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
-        h5file_fit_pipi="data_assets/isospin1_fitresults_pipi.hdf5",
+        h5file_fit_pipi="data_assets/isospin1_fitresults.hdf5",
     output:
         h5file_out="data_assets/isospin1_fitresults_full.hdf5",
     conda:
@@ -133,3 +148,116 @@ rule fit_mesons:
         cp {input.h5file_eig} {output.h5file_out}
         python3 {input.script} {input.h5file_in} {output.h5file_out} {input.metadata}
         '''
+
+
+rule fit_result_table:
+    input:
+        script="src/scripts_julia/write_table_fitresults.jl",
+        h5file="data_assets/isospin1_fitresults_full.hdf5",
+    output:
+        table="assets/tables/fit_results_3x3_tuned.csv"
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file {input.h5file} --outfile {output.table}'
+
+
+rule plot_individual_diagrams:
+    input:
+        script="src/scripts_julia/plot_diagrams.jl",
+        h5file="data_assets/isospin1_merged.hdf5",
+    output:
+        plots2x2="assets/plots/diagrams.pdf",
+        plots3x3="assets/plots/diagrams_3x3.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file} --plotpath "assets/plots/"'
+
+
+rule plot_eigenvalues:
+    input:
+        script="src/scripts_julia/plot_eigenvalues.jl",
+        h5file="data_assets/isospin1_eigenvalues{label}.hdf5",
+        metadata="metadata/pipi_fitintervals{label}.csv",
+    output:
+        plot="assets/plots/eigenvalues{label}.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file} --metadata {input.metadata} --plotname {output.plot}'
+
+
+rule plot_eigenvalues_with_fits:
+    input:
+        script="src/scripts_julia/plot_eigenvalues_with_fits.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults.hdf5",
+        metadata="metadata/pipi_fitintervals.csv",
+    output:
+        plot="assets/plots/eigenvalues_with_fit.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_eig} --plotpath "assets/plots/" --metadata {input.metadata} --fitresults {input.h5file_fit}'
+
+
+rule plot_correlation_matrix_elements:
+    input:
+        script="src/scripts_julia/plot_correlation_matrix_elements.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+    output:
+        plot="assets/plots/correlation_matrix_elements.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_eig} --plotpath "assets/plots/"'
+
+
+rule plot_meson_correlators:
+    input:
+        script="src/scripts_julia/plot_meson_correlators.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults.hdf5",
+    output:
+        plot="assets/plots/meson_correlators.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_eig} --plotpath "assets/plots/" --fitresults {input.h5file_fit}'
+
+
+rule plot_effective_masses:
+    input:
+        script="src/scripts_julia/plot_effective_masses.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults_full.hdf5",
+        fitparam="metadata/pipi_fitintervals.csv",
+        infinite_volume="metadata/infinite_volume.csv",
+    output:
+        plot_gevp="assets/plots/effective_masses_(g)evp.pdf",
+        plot_mesons="assets/plots/effective_masses_mesons.pdf",
+        plot_mesons_p0="assets/plots/effective_masses_mesons_p0.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.infinite_volume} --plotpath "assets/plots" --plot_mesons true --plotbasename "effective_masses"'
+
+
+rule plot_effective_masses_comparison:
+    input:
+        script="src/scripts_julia/plot_effective_masses.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults_evp_gevp.hdf5",
+        fitparam="metadata/pipi_fitintervals_evp_gevp.csv",
+        infinite_volume="metadata/infinite_volume.csv",
+    output:
+        plot_gevp="assets/plots/effective_masses_comparison_(g)evp.pdf",
+        plot_mesons="assets/plots/effective_masses_comparison_mesons.pdf",
+        plot_mesons_p0="assets/plots/effective_masses_comparison_mesons_p0.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.infinite_volume} --plotpath "assets/plots" --plot_mesons false --plotbasename "effective_masses_comparison"'
+
+

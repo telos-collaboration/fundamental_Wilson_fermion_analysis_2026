@@ -19,7 +19,6 @@ h5file_fit="data_assets/isospin1_fitresults.hdf5"
 h5file_fit_full="data_assets/isospin1_fitresults_full.hdf5"
 h5file_eig_gvp="data_assets/isospin1_eigenvalues_evp_gevp.hdf5"
 h5file_fit_evp="data_assets/isospin1_fitresults_evp_gevp.hdf5"
-# h5file_scat="data_assets/literature_scattering.hdf5"
 h5file_scat="data_assets/isospin1_scattering.hdf5"
 h5file_scat_fit="data_assets/isospin1_fit_scatter.hdf5"
 
