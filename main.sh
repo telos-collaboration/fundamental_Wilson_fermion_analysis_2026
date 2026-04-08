@@ -47,7 +47,6 @@ cp $h5file_fit $h5file_fit_full
 python3 src/src_py/fitting_mesons.py $h5file_eig $h5file_fit_full $fitparam_meson
 python3 src/src_py/fitting_eigenvalues.py $h5file_eig_gvp $h5file_fit_evp $fitparam_evp
 julia src/scripts_julia/write_table_fitresults.jl --h5file $h5file_fit_full --outfile "$tablepath/fit_results_3x3_tuned.csv"
-julia src/scripts_julia/gevp_vs_evp.jl
 
 julia src/scripts_julia/plot_diagrams.jl --h5file_in $h5file_com --plotpath $plotpath
 julia src/scripts_julia/plot_eigenvalues.jl --h5file_in $h5file_eig --metadata $fitparam --plotname "$plotpath/eigenvalues.pdf"
