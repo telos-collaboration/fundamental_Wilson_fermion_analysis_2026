@@ -18,33 +18,23 @@ The workflow in this repository performs the analysis presented in the paper
    cd ScatteringI1
    ```
 
-3. For now, I host the input on both VSC4 and DiaL3. They are rsyncable zstd
-archives. Download and decompress the zstd archive from either of the following two locations.
+3. Download the archive containing the raw log files named `raw_data.tar` and untar it in this directory.
+
+4. The workflow is run using Snakemake:
 
     ```shellsession
-    /scratch/dp208/shared/raw_data.tar.zst
-    ``` 
-    ```shellsession
-    /gpfs/data/fs71564/zierler/raw_data.tar.zst
-    ``` 
-
-4. Create and activate the conda environment.
-
-    ```shellsession
-    conda env create -f environment.yml
-    conda activate rho-pi-pi
-    ``` 
-5. Run the workflow
-
-    ```shellsession
-    bash main.sh
+    snakemake --cores 1 --use-conda
     ```
 
-On an AMD 5950X CPU the current workflow takes roughly 25 minutes to complete.
+where the number `1` may be replaced by the number of CPU cores you wish to allocate to the computation.
+
+Snakemake will automatically download and install all required Python packages. This requires an Internet connection; if you are running in an HPC environment where you would need to run the workflow without Internet access, details on how to preinstall the environment can be found in the Snakemake documentation.
+
 
 ## Output
 
-Output plots, tables, and definitions are placed into the `data_assets` directory.
+Output plots, tables, and definitions are placed into the `assets` directory.
+Files containing the underlying binary data are placed into the `data_assets` directory.
 
 ## Reusability
 
