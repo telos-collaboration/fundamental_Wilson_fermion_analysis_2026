@@ -7,7 +7,7 @@ rule all:
         h5file="data_assets/isospin1_corr.hdf5",
         h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
         h5file_fit="data_assets/isospin1_fitresults.hdf5",
-        h5file_out="data_assets/isospin1_fitresults_full.hdf5",
+        h5file_fit_full="data_assets/isospin1_fitresults_full.hdf5",
         h5file_eig_gevp_evp="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
         h5file_fit_gevp_evp="data_assets/isospin1_fitresults_evp_gevp.hdf5",
         plots2x2="assets/plots/diagrams.pdf",
@@ -22,6 +22,7 @@ rule all:
         plot_meff_mesons="assets/plots/effective_masses_mesons.pdf",
         plot_meff_mesons_p0="assets/plots/effective_masses_mesons_p0.pdf",
         plot_meff_comparison_gevp="assets/plots/effective_masses_comparison_(g)evp.pdf",
+        h5file_scattering="data_assets/isospin1_scattering.hdf5",
 
 
 rule julia_instantiate:
@@ -257,3 +258,32 @@ rule plot_effective_masses_comparison:
         'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.fitparam} --plotpath "assets/plots" --plot_mesons false --plotbasename "effective_masses_comparison"'
 
 
+rule compile_zeta:
+    input:
+        script="libs/zeta/compile.sh",
+    output:
+        binary="libs/zeta/out/get_wlm.so",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        mkdir -p tmp
+        bash {input.script}  &> tmp/make.log
+        '''
+
+
+rule luescher_analysis:
+    input:
+        script="src/src_py/scattering.py",
+        h5file_fit="data_assets/isospin1_fitresults_full.hdf5",
+        metadata="metadata/scattering_input.csv",
+        binary="libs/zeta/out/get_wlm.so",
+    output:
+        h5file_out="data_assets/isospin1_scattering.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        cp {input.h5file_fit} {output.h5file_out}
+        python3 {input.script} {input.metadata} {input.h5file_fit} {output.h5file_out} 500 gauss
+        '''
