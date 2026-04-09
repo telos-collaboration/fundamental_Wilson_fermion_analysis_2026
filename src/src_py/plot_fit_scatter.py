@@ -24,7 +24,7 @@ def delete_steps(arr, sign = 1, delete=False):
             arr[i] = np.nan
     return arr
 
-def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with current get_data()
+def get_data(h5file_scatter_fit, beta, m0, fit):
     fit_param_mean = {}
     fit_param_spl = {}
     scat_fit_mean = {}
@@ -81,87 +81,6 @@ def E_pipi(mpi,p12,p22,L):
 def color(d2):
     colors = ["cyan","orange", "green", "blueviolet"]
     return colors[d2]
-
-def plot_E_CM_L(h5file,beta,m0,levels=False,outname=None,show=False):
-    
-    info, info_nf, fit_param_mean, fit_param_spl, scat_fit_mean, scat_fit_spl, scat_nf_mean, scat_nf_spl = get_data(h5file, beta, m0, False)
-    
-    NLs = [int(x) for x in info["NL"]]
-    dvecs = scat_fit_mean["dvec"]
-    dvecs = [[int(x.decode("utf-8")[0]),int(x.decode("utf-8")[1]),int(x.decode("utf-8")[2])] for x in dvecs]
-    d2s = [np.dot(d,d) for d in dvecs]
-    lvs = info["lv"]
-    irreps = info["irrep"]
-    plot_args = list(zip(NLs,d2s,irreps,lvs))
-    mpi = info["mpi"][0]
-    mrho = info["mrho"][0]
-
-    ECMs = np.asarray(scat_fit_mean["E_cm_prime"])
-    ECM_spl = np.asarray(scat_fit_spl["E_cm_prime"])
-    length = len(ECM_spl[0])
-    ECM_errms = [abs(ECMs[i]-sorted(ECM_spl[i])[math.floor(length*(1-num_perc)/2)]) for i in range(len(ECMs))]
-    ECM_errps = [abs(ECMs[i]-sorted(ECM_spl[i])[math.ceil(length*(1+num_perc)/2)]) for i in range(len(ECMs))]
-    NL_invs = [1/x for x in NLs]
-    
-    for i in range(len(ECMs)):
-        ECM_errms[i] = 0 if ECM_errms[i] > 1 else ECM_errms[i]
-        ECM_errps[i] = 0 if ECM_errps[i] > 1 else ECM_errps[i]
-        plt.errorbar([NL_invs[i],],y=[ECMs[i],],yerr=[[ECM_errms[i],],[ECM_errps[i],]], solid_capstyle="projecting", capsize=5, color = pf.color(*plot_args[i]), ls = pf.ls(*plot_args[i]), marker = pf.marker(*plot_args[i]))   
-    plt.axhline(1,c="black", ls="dotted", label = r"$m_\pi$")
-    plt.axhline(mrho/mpi,c="red", ls="dotted", label = r"$m_\rho$")
-    plt.axhline(2,c="black",label = r"2$m_\pi$")
-    plt.axhline(4,c="black",label = r"4$m_\pi$")
-    plt.grid()
-    plt.title("$\\beta$ = %f, $m_0$ = %f"%(beta,m0))
-    xarrinv = np.linspace(1/40,1/13)
-    xarr = [1/x for x in xarrinv]
-    if levels:
-        yarr1_2 = [np.sqrt(E_pipi(mpi,1,0,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
-        yarr1_3 = [np.sqrt(E_pipi(mpi,2,1,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
-        yarr1_4 = [np.sqrt(E_pipi(mpi,3,2,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
-        yarr1_5 = [np.sqrt(E_pipi(mpi,4,1,x)**2-(2*np.pi/x)**2*1)/mpi for x in xarr]
-        yarr2_2 = [np.sqrt(E_pipi(mpi,2,0,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
-        yarr2_3 = [np.sqrt(E_pipi(mpi,3,1,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
-        yarr2_4 = [np.sqrt(E_pipi(mpi,4,2,x)**2-(2*np.pi/x)**2*2)/mpi for x in xarr]
-        yarr3_2 = [np.sqrt(E_pipi(mpi,3,0,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
-        yarr3_3 = [np.sqrt(E_pipi(mpi,2,1,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
-        yarr3_4 = [np.sqrt(E_pipi(mpi,4,3,x)**2-(2*np.pi/x)**2*3)/mpi for x in xarr]
-        plt.plot(xarrinv,yarr1_2, ls="dashed", c=color(1))
-        plt.plot(xarrinv,yarr1_3, ls="dashed", c=color(1))
-        plt.plot(xarrinv,yarr1_4, ls="dashed", c=color(1))
-        plt.plot(xarrinv,yarr1_5, ls="dashed", c=color(1))
-        plt.plot(xarrinv,yarr2_2, ls="dashdot", c=color(2))
-        plt.plot(xarrinv,yarr2_3, ls="dashdot", c=color(2))
-        plt.plot(xarrinv,yarr2_4, ls="dashdot", c=color(2))
-        plt.plot(xarrinv,yarr3_2, ls="solid", c=color(3))
-        plt.plot(xarrinv,yarr3_3, ls="solid", c=color(3))
-        plt.plot(xarrinv,yarr3_4, ls="solid", c=color(3))
-    if levels:
-        plt.plot([0,0],[0,0],c="grey", label = "non-int")
-    if m0 == -0.92:
-        plt.xlim([1/26,1/13])
-        plt.ylim([1,2.5])
-    else:
-        plt.xlim([1/40,1/13])
-        plt.ylim([1,6])
-
-    for tmp in [[None,0,"T1",0],[None,1,"E",0],[None,2,"B1",0],[None,3,"E",0],[None,1,"A1",0],[None,1,"A1",1],[None,2,"A1",0],[None,2,"A1",1],[None,3,"A1",0],[None,3,"A1",1]]:
-        plt.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = "p=%i, %s, lv=%i"%(tmp[1],tmp[2],tmp[3]))
-    for tmp in [[14,None,None,None],[16,None,None,None],[20,None,None,None],[24,None,None,None],[36,None,None,None]]:
-        plt.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(*tmp), label = "$N_L$=%i"%(tmp[0]))
-
-    plt.legend(loc='center right', bbox_to_anchor=(1.3, 0.5))
-
-    plt.xlabel("1/$N_L$")
-    plt.ylabel("$E_{CM}$/$m_\\pi$")
-    plt.xticks([1/14,1/16,1/20,1/24,1/36],["1/14","1/16","1/20","1/24","1/36"])
-    if outname == None:    
-        plt.savefig(op.join(PLTDIR, "E_CM_L_b%f_m0%f_levels_%r.pdf"%(beta,m0,levels)), bbox_inches='tight')
-    else:    
-        plt.savefig(op.join(PLTDIR, "E_CM_L_"+outname+"_levels_%r.pdf"%levels), bbox_inches='tight')
-    if show:
-        plt.show()
-    plt.clf()
 
 def xlim_f(m0, xaxis="p2star_prime"):
     if xaxis == "p2star_prime":
@@ -245,9 +164,6 @@ def sigma_of_p3cotPS_prime(s, PS_of_p3cotPS):
     cot_PS = PS_of_p3cotPS/(s/4-1)**(3/2)
     return 12*np.pi/((s/4-1)*(1+cot_PS**2))
 
-# def s_of_p2(p2, p2_tmp):
-#     return 4+4*p2_tmp
-
 def from_to(x,f):
     if x == "p3cotPS_Ecm_prime" and f == "PS":
         return PS_of_p3cotPS_Ecm_prime
@@ -257,8 +173,6 @@ def from_to(x,f):
         return sigma_of_p3cotPS_Ecm_prime
     if x == "p3cotPS_prime" and f == "sigma_prime":
         return sigma_of_p3cotPS_prime
-    # if x == "p2star_prime" and f == "s_prime":
-    #     return s_of_p2
     else:
         raise ValueError("Invalid conversion given to from_to: %s to %s"%(x,f))
 
@@ -339,12 +253,6 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         fit_param_s = np.transpose(np.asarray([fit_param_spl[fp] for fp in fit_model.param_names]))
         yarr_tmp = np.asarray([sorted([fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))]) for x in xarr])
 
-        # if fit_model.xaxis == xaxis:
-        #     xarrplot = xarr
-        # else:
-        #     xarrplot = np.vectorize(from_to(fit_model.xaxis,xaxis))(xarr, xarr)
-        #     print(xarr)
-        #     print(xarrplot)
         if fit_model.yaxis == yaxis:
             yarr_s = yarr_tmp
             yarr_m_plot = yarr_m
@@ -388,8 +296,9 @@ def plot_any(h5file,beta,m0,xaxis="p2star_prime",yaxis="p3cotPS_prime",fit_model
         plt.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(*tmp), label = "$N_L$=%i"%(tmp[0]))
     ax.legend(loc='center right', bbox_to_anchor=(1.35, 0.5))
     fit_str = "" if fit_model == None else "_fit_%s"%fit_model.name
-    out_str = "b%1.3f_m0%1.3f"%(beta,m0) if outname == None else outname
-    plt.savefig(op.join(PLTDIR, "%s_%s%s__%s.pdf"%(yaxis,xaxis,fit_str,out_str)), bbox_inches='tight')
+    out_str = "b%1.3f_m0%1.3f"%(beta,m0)
+    fname = "%s_%s%s__%s.pdf"%(yaxis,xaxis,fit_str,out_str) if outname == None else outname
+    plt.savefig(op.join(PLTDIR,fname), bbox_inches='tight')
     if show:
         plt.show()
     plt.close(fig)
@@ -404,20 +313,18 @@ if __name__ == "__main__":
     os.makedirs(PLTDIR, exist_ok=True)
 
     if not fit:
-        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", None)
-        plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_prime", None)
-        plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", None)
-        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", None)
-        plot_any(h5file, 6.9, -0.92, "s_prime", "PS", None)
-        plot_any(h5file, 7.05, -0.863, "s_prime", "PS", None, show = False)
-        plot_any(h5file, 7.05, -0.867, "s_prime", "PS", None, show = False)
-
-        plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", None)
-        plot_any(h5file, 7.05, -0.863, "s_prime", "sigma_prime", None)
-        plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", None)
-    else:                                                                       # Plots with fit are done in another script
-                
-        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_0_model)
-        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_1_model)
-        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model)
-        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model)
+        plot_any(h5file, 6.9 , -0.92 , "p2star_prime", "p3cotPS_prime", fit_model = None, outname = "p3cotPS_vs_p2star_heavy.pdf")
+        plot_any(h5file, 7.05, -0.863, "p2star_prime", "p3cotPS_prime", fit_model = None, outname = "p3cotPS_vs_p2star_medium.pdf")
+        plot_any(h5file, 7.05, -0.863, "s_prime", "p3cotPS_Ecm_prime", fit_model = None, outname = "p3cotPS_Ecm_vs_s_medium.pdf")
+        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fit_model = None, outname = "p3cotPS_Ecm_vs_s_light.pdf")
+        plot_any(h5file, 6.9 , -0.92 , "s_prime", "PS", fit_model = None, outname = "PS_heavy.pdf")
+        plot_any(h5file, 7.05, -0.863, "s_prime", "PS", fit_model = None, outname = "PS_medium.pdf", show = False)
+        plot_any(h5file, 7.05, -0.867, "s_prime", "PS", fit_model = None, outname = "PS_light.pdf", show = False)
+        plot_any(h5file, 6.9, -0.92, "s_prime", "sigma_prime", fit_model = None, outname = "sigma_heavy.pdf")
+        plot_any(h5file, 7.05, -0.863, "s_prime", "sigma_prime", fit_model = None, outname = "sigma_medium.pdf")
+        plot_any(h5file, 7.05, -0.867, "s_prime", "sigma_prime", fit_model = None, outname = "sigma_light.pdf")
+    else: 
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_0_model, outname = "p3cotPS_vs_p2star_heavy_ERE0.pdf" )
+        plot_any(h5file, 6.9, -0.92, "p2star_prime", "p3cotPS_prime", fm.ERE_1_model, outname = "p3cotPS_vs_p2star_heavy_ERE1.pdf" )
+        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_I_model, outname =  "p3cotPS_Ecm_vs_s_light_BWI.pdf" )
+        plot_any(h5file, 7.05, -0.867, "s_prime", "p3cotPS_Ecm_prime", fm.BW_II_model, outname = "p3cotPS_Ecm_vs_s_light_BWII.pdf" )
