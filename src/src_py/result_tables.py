@@ -111,10 +111,10 @@ def result_tables(h5file, beta, m0, TBLDIR):
     s_m, s_err = mean_err(s_s)
     PS_m, PS_err = mean_err(PS_s)
 
-    start_str = "\\begin{tabular}{|l|l|l|c|l|l|c|c|}\n \\hline \n"
+    start_str = "\\begin{tabular}{|c|c|c|c|c|c|c|c|}\n \\hline \n"
     end_str = "\\end{tabular}"
-    first_line = "\t\t$N_L$ & $\\vec{P}$ & $\\Lambda$ & n & $aE_n^{\\Lambda,\\,\\vec{P}}$ & $a\\sqrt{s_n^{\\Lambda,\\,\\vec{P}}}$ & $\\delta_1$   & Incl. \\\\ \\hline \\hline\n"
-    latex_seperator =  " & "
+    first_line = "\t\t$N_L$ & $|\\vec{d}|^2$ & $\\Lambda$ & n & $aE$ & $a\\sqrt{s}$ & $\\delta_1$ & Incl. \\\\ \\hline \\hline\n"
+    latex_seperator = " & "
 
     with open(TBLDIR+"latex_scattering_b%1.2f_m%1.3f_table.txt"%(beta,m0),"w") as f:
         f.write(start_str)
@@ -128,6 +128,7 @@ def result_tables(h5file, beta, m0, TBLDIR):
             line_str += "%f\t%f"%(E_m[i],E_err[i]) + latex_seperator
             line_str += "%f\t%f"%(s_m[i],s_err[i]) + latex_seperator
             line_str += "%f\t%f"%(PS_m[i],PS_err[i]) + latex_seperator
+            # This does not match Yannick's thesis
             line_str += "Yes"
 
             f.write(line_str)

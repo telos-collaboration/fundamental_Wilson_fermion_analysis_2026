@@ -16,29 +16,9 @@ mpl.rcParams['lines.markersize'] = 9
 
 figs1, figs2 = 10,7
 
-def nth(num):
-    if num <= 10:
-        return 1
-    elif num <= 500:
-        return num//10
-    else:
-        return num//100
-
 num_perc = math.erf(1/np.sqrt(2))
 
-def delete_steps(arr, sign = 1, delete=False):
-    for i in range(1,len(arr)-1):
-        if abs(arr[i] > 1):
-            if np.sign(arr[i]) != np.sign(arr[i+1]):
-                arr[i-1] = np.nan
-                arr[i] = np.nan
-                arr[i+1] = np.nan
-    for i in range(len(arr)):
-        if arr[i] == 0:
-            arr[i] = np.nan
-    return arr
-
-def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with current get_data()
+def get_data(h5file_scatter_fit, beta, m0, fit):
     fit_param_mean = {}
     fit_param_spl = {}
     scat_fit_mean = {}
@@ -126,113 +106,15 @@ def UTE(P2, a, b):
     return a+P2*b
 
 def sigma_of_pcotPS_prime(s, pcotPS_prime):
-    # cot_PS = pcotPS_prime/(s/4-1)**(1/2)
     return 4*np.pi/(((s/4-1)+pcotPS_prime**2))
 
-def plot_sigma(h5file,show=False,units=False):
-    fig, ax = plt.subplots(figsize=(figs1,figs2))
-    plt.subplots_adjust(wspace=0, hspace=0.05)   
-
-    plt.grid()
-    slow, shigh = 4,11.1
-    ax.set_xlim([slow,shigh])
-    ax.set_ylim([0,100])
-
-    info, info_nf, fit_param_mean_NR, fit_param_spl_NR, scat_fit_mean_NR, scat_fit_spl_NR, scat_nf_mean_NR, scat_nf_spl_NR = get_data(h5file, 6.9, -0.92, True)
-
-    x_NR   = np.asarray(scat_fit_mean_NR["s_prime"])
-    x_NR_s   = np.asarray(scat_fit_spl_NR["s_prime"])
-    sigma_NR_m   = np.asarray(scat_fit_mean_NR["sigma_prime"])
-    sigma_NR_s   = np.asarray(scat_fit_spl_NR["sigma_prime"])
-
-    info, info_nf, fit_param_mean_R, fit_param_spl_R, scat_fit_mean_R, scat_fit_spl_R, scat_nf_mean_R, scat_nf_spl_R = get_data(h5file, 7.05, -0.867, True)
-
-    x_R   = np.asarray(scat_fit_mean_R["s_prime"])
-    x_R_s   = np.asarray(scat_fit_spl_R["s_prime"])
-    sigma_R_m   = np.asarray(scat_fit_mean_R["sigma_prime"])
-    sigma_R_s   = np.asarray(scat_fit_spl_R["sigma_prime"])
-    
-    length = len(x_NR_s[0])
-    
-    sarr = np.linspace(slow-0.1,shigh,200)
-    p2arr = [p2_s(s) for s in sarr]
-    fit_model = fm.ERE_0_model
-    
-    fit_param_NR_m = np.asarray([fit_param_mean_NR[fp] for fp in fit_model.param_names])
-    yarr_NR_m = np.asarray([fit_model.model(x,*fit_param_NR_m) for x in p2arr])
-    sigma_NR_m = np.asarray([sigma_of_p3cotPS_prime(sarr[i],yarr_NR_m[i]) for i in range(len(sarr))])
-
-    fit_param_s = np.transpose(np.asarray([fit_param_spl_NR[fp] for fp in fit_model.param_names]))
-    yarr_NR_s = np.asarray([[fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))] for x in p2arr])
-    sigma_NR_s = np.asarray([sorted([sigma_of_p3cotPS_prime(sarr[i],yarr_NR_s[i][j]) for j in range(len(yarr_NR_s[0]))]) for i in range(len(sarr))])
-
-    sigma_NR_mean = [sigma_NR_s[i][length//2-1] for i in range(len(sarr))]
-    sigma_NR_em = [sigma_NR_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))]
-    sigma_NR_ep = [sigma_NR_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(sarr))]
-
-    ax.plot(sarr,sigma_NR_mean, color = styles.c_10_non_res, label = r"$\boldsymbol{10}:\,\beta=6.9,\,am_0=-0.92$")
-    ax.fill_between(sarr, sigma_NR_em, sigma_NR_ep, alpha = 0.5, color = styles.c_10_non_res)
-
-    #####################################################################################################################    
-
-    fit_model = fm.BW_I_model
-
-
-    fit_param_R_m = np.asarray([fit_param_mean_R[fp] for fp in fit_model.param_names])
-    yarr_R_m = np.asarray([fit_model.model(x,*fit_param_R_m) for x in sarr])
-    sigma_R_m = np.asarray([sigma_of_p3cotPS_Ecm_prime(sarr[i],yarr_R_m[i]) for i in range(len(sarr))])
-
-    fit_param_s = np.transpose(np.asarray([fit_param_spl_R[fp] for fp in fit_model.param_names]))
-    yarr_R_s = np.asarray([[fit_model.model(x,*fit_param_s[i]) for i in range(len(fit_param_s))] for x in sarr])
-    sigma_R_s = np.asarray([sorted([sigma_of_p3cotPS_Ecm_prime(sarr[i],yarr_R_s[i][j])for j in range(len(yarr_R_s[0]))]) for i in range(len(sarr))])
-
-    sigma_R_mean = [sigma_R_s[i][length//2-1] for i in range(len(sarr))]
-    sigma_R_em = [sigma_R_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))]
-    sigma_R_ep = [sigma_R_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(sarr))]
-
-    ax.plot(sarr,sigma_R_mean, color = styles.c_10_res, label = r"$\boldsymbol{10}:\,\beta=7.05,\,am_0=-0.867$")
-    ax.fill_between(sarr, sigma_R_em, sigma_R_ep, alpha = 0.5, color = styles.c_10_res)
-
-    ###############################################################
-
-    res,  res_sample = read_from_hdf("scattering_Fig5.3_b6.900_m-0.920")
-
-    a_14_s = np.asarray(res_sample["a2"][:,0])
-    b_14_s = np.asarray(res_sample["b2"][:,0])
-
-    length = len(a_14_s)
-
-    pcot_PS_14_s = np.asarray([[UTE(p2arr[j], a_14_s[i], b_14_s[i]) for i in range(len(a_14_s))] for j in range(len(p2arr))])
-
-    sigma_14_s = np.asarray([sorted([sigma_of_pcotPS_prime(sarr[i], pcot_PS_14_s[i,j]) for j in range(len(a_14_s))]) for i in range(len(p2arr))])
-
-    sigma_14_mean = [sigma_14_s[i][length//2-1] for i in range(len(sarr))]
-    sigma_14_em = [sigma_14_s[i][math.floor(length*(1-num_perc)/2)] for i in range(len(sarr))]
-    sigma_14_ep = [sigma_14_s[i][math.ceil(length*(1+num_perc)/2)] for i in range(len(sarr))]
-
-    ax.plot(sarr,sigma_14_mean, color = styles.c_14, label = r"$\boldsymbol{14}:\,\beta=6.9,\,am_0=-0.92$")
-    ax.fill_between(sarr, sigma_14_em, sigma_14_ep, alpha = 0.5, color = styles.c_14)
-
-    ax.set_xlabel(r"$s/m_\pi^2$")
-    ax.set_ylabel(r"$\sigma_1 m_\pi^2$")
-    xticks = np.linspace(4,11,8)
-    yticks = np.linspace(0,100,6)
-    ax.set_xticks(xticks, [r"$%i$"%x for x in xticks])
-    ax.set_yticks(yticks, [r"$%i$"%x for x in yticks])
-
-
-    ax.legend(loc='upper right')
-    plt.savefig(op.join(PLTDIR, "sigma_comb.pdf"), bbox_inches='tight')
-    if show:
-        plt.show()
-    plt.close(fig)
 
 def plot_sigma_units(h5file,show=False):
     fig, ax = plt.subplots(figsize=(figs1,figs2))
 
     mDM = 100 # MeV
     Ecm_conv = 1/mDM
-    sigma_conv = mDM**3/218426#/(10**(10))
+    sigma_conv = mDM**3/218426
 
     plt.grid()
     slow, shigh = 4+0.0001,11.1
@@ -342,4 +224,3 @@ if __name__ == "__main__":
     h5file  = args[2]
 
     plot_sigma_units(h5file, False)
-    # plot_sigma(h5file, False)

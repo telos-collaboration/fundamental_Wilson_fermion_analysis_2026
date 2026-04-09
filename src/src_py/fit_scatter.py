@@ -2,7 +2,6 @@ import numpy as np
 import h5py
 import sys
 from scipy.optimize import curve_fit
-# from tqdm import tqdm
 import fit_models as fm
 
 import warnings
@@ -26,24 +25,6 @@ def get_fits(data,err=True):
             res[key] = val
     return res
 
-# def get_fits_sample_again(data_spl,err=True):         # this did not work
-#     res = {}
-#     for model in fm.all_models:
-#         xtmp = data_spl[model.xaxis]
-#         ytmp = data_spl[model.yaxis]
-#         xaxis = []
-#         yaxis = []
-#         for i in range(len(xtmp)):
-#             for j in range(len(xtmp[i])):
-#                 xaxis.append(xtmp[i,j])
-#                 yaxis.append(ytmp[i,j])
-#         print(len(xaxis))
-#         # print(len(xaxis[0]))
-#         # exit()
-#         tmp = model.fit(xaxis,yaxis,err)
-#         for key, val in tmp.items():
-#             res[key] = val
-#     return res
 
 def get_fits_spl(data_spl,res,err=False):
     res_spl = {}
@@ -52,8 +33,6 @@ def get_fits_spl(data_spl,res,err=False):
     for model in fm.all_models:
         xaxis_spl = data_spl[model.xaxis]
         yaxis_spl = data_spl[model.yaxis]
-        # print(len(xaxis_spl),len(xaxis_spl[0]))
-        # exit()
         for i in range(len(xaxis_spl)):
             tmp = model.fit(xaxis_spl[i],yaxis_spl[i],err)
             for key, val in tmp.items():

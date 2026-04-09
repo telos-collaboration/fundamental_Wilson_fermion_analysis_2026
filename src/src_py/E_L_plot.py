@@ -3,28 +3,17 @@ import matplotlib
 import matplotlib.pyplot as plt
 import h5py
 import math
-# import fit_scatter
 import os.path as op
 import os
 import sys
 import plotting_functions as pf
 import fit_models as fm
-
 import styles
 
-def nth(num):
-    if num <= 10:
-        return 1
-    elif num <= 500:
-        return num//10
-    else:
-        return num//100
-    
 color_fit = "olivedrab"
-
 num_perc = math.erf(1/np.sqrt(2))
 
-def get_data(h5file_scatter_fit, beta, m0, fit):                # wont work with current get_data()
+def get_data(h5file_scatter_fit, beta, m0, fit): 
     fit_param_mean = {}
     fit_param_spl = {}
     scat_fit_mean = {}

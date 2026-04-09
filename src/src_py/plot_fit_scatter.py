@@ -104,7 +104,6 @@ def ylim_f(m0, yaxis="p3cotPS_prime"):
     if yaxis == "p3cotPS_prime":
         if m0 == -0.92:
             return [0,2]
-            # return [-3,3]
         elif m0 == -0.863:
             return [-4,4]
         elif m0 == -0.867:

@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import h5py
 import math
-# import fit_scatter
 import os.path as op
 import os
 import sys
@@ -334,10 +333,6 @@ def plot_PS_ERE_res(h5file,show=False):
     for tmp in [[None,0,None,None],[None,1,None,None],[None,2,None,None],[None,3,None,None]]:
         ax1.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|d|=%i$"%(tmp[1]))
         ax2.scatter(x=[-1,],y=[-1,], color = pf.color(*tmp), marker = "o", label = r"$|d|=%i$"%(tmp[1]))
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",0), label = r"$E^{A_1}_0$")
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"A1",1), label = r"$E^{A_1}_1$")
-    # ax1.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rm V}$")
-    # ax2.scatter(x=[-1,],y=[-1,], color = "grey", marker = pf.marker(None,None,"B1",0), label = r"$E^{\rm V}$")
 
     xticks = np.linspace(4,11,8)
     ax1.set_xticks(xticks, [r"$%i$"%x for x in xticks])
