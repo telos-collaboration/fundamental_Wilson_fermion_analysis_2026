@@ -179,7 +179,7 @@ def plot_E_CM_L_multi_non_res(h5file,beta,m0,levels=False,outname=None,show=Fals
     ax1.spines[['bottom',]].set_visible(False)
     ax2.spines[['top',]].set_visible(False)
     
-    plt.savefig(op.join(PLTDIR, "E_CM_L_b_%1.3f_m0_%1.3f_multi_levels_%r.pdf"%(beta,m0,levels)), bbox_inches='tight')
+    plt.savefig(op.join(PLTDIR, "E_vs_L_heavy.pdf"), bbox_inches='tight')
     if show:
         plt.show()
     plt.clf()
@@ -308,7 +308,7 @@ def plot_E_CM_L_multi_705(h5file,levels=False,outname=None,show=False):
     yticks = np.linspace(1,5.5,10)
     ax2.set_yticks(yticks, [r"$%1.1f$"%x for x in yticks])
     
-    plt.savefig(op.join(PLTDIR, "E_CM_L_705_multi_levels_%r.pdf"%(levels)), bbox_inches='tight')
+    plt.savefig(op.join(PLTDIR, "E_vs_L_medium_light.pdf"), bbox_inches='tight')
     if show:
         plt.show()
     plt.clf()
