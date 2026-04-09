@@ -1,1 +1,0 @@
-tar -cvf - raw_data/ | zstd --rsyncable --long -v -T14 -9 -o raw_data.tar.zst
