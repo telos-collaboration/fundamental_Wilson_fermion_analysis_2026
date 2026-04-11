@@ -62,7 +62,7 @@ rule parse_logs:
     conda:
         "environment.yml"
     shell:
-        'julia {input.script} --path raw_data/ --h5file {output.h5file} --inputfiles {input.metadata}'
+        'julia {input.script} --path raw_data/DataScattering/ --h5file {output.h5file} --inputfiles {input.metadata}'
 
 
 rule ensembles_tables:
