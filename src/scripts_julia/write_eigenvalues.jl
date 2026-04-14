@@ -64,8 +64,10 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
         # get correlators at vanishing momentum for every ensemble
         p = "p(0,0,0)"
         Corrπ = read_meson_correlator(h5dset,ens,p,"correlator_pion";average_equivalent_momenta)
+        Corrπ = LatticeUtils._bin_correlator(Corrπ;binsize=2)
         write_meson_correlators(outfile,ens,p,"pi",Corrπ)        
         Corrρ = read_meson_correlator(h5dset,ens,p,"correlator_rho";average_equivalent_momenta)
+        Corrρ = LatticeUtils._bin_correlator(Corrρ;binsize=2)
         write_meson_correlators(outfile,ens,p,"T1",Corrρ)
     end
 
@@ -76,7 +78,7 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
 
         Corr, sources, momenta = read_correlation_matrix(h5dset,ens,p,"correlation_matrix";maxhits,average_equivalent_momenta)    
         # For the 2x2 problem the eigenvalues should always be relabelled (swapped) at swap_t = t0 when using the GEVP
-        eigvals_resamples = ScatteringI1.variational_analysis_samples(Corr;t0,deriv,gevp,symmetrise,swap=gevp,swap_t=t0)
+        eigvals_resamples = ScatteringI1.variational_analysis_samples(Corr;t0,deriv,gevp,symmetrise,swap=gevp,swap_t=t0,binsize=2)
         eigvals, Δeigvals = LatticeUtils.apply_jackknife(real.(eigvals_resamples);dims=2)
         eigvals_cov = LatticeUtils.cov_jackknife_eigenvalues(real.(eigvals_resamples))
         meff, Δmeff = LatticeUtils.log_meff_jackknife(real.(eigvals_resamples))
@@ -85,7 +87,7 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
         if three_by_three
             Corr3x3, sources3x3, momenta3x3 = read_correlation_matrix(h5dset,ens,p,"correlation_matrix_3x3_ext";maxhits,average_equivalent_momenta)
             Corr3x3[1:2,1:2,:,:] .= Corr
-            eigvals_3x3_resamples = ScatteringI1.variational_analysis_samples(Corr3x3;t0,deriv,gevp,symmetrise)
+            eigvals_3x3_resamples = ScatteringI1.variational_analysis_samples(Corr3x3;t0,deriv,gevp,symmetrise,binsize=2)
             if !isempty(swap_metadata)
                 eigvals_3x3_resamples = swap_eigvals(eigvals_3x3_resamples, swap_metadata, ens, p, "A1", id)
             end
@@ -95,13 +97,16 @@ function write_all_eigenvalues(infile,outfile; maxhits=typemax(Int), average_equ
         end
 
         Corrπ = read_meson_correlator(h5dset,ens,p,"correlator_pion";average_equivalent_momenta)
+        Corrπ = LatticeUtils._bin_correlator(Corrπ;binsize=2)
         write_meson_correlators(outfile,ens,p,"pi",Corrπ)
         if haskey(h5dset,joinpath(ens,p,"B1"))
             B1 = dropdims(mean(read(h5dset,joinpath(ens,p,"B1")),dims=2);dims=2)
+            B1 = LatticeUtils._bin_correlator(B1;binsize=2)
             write_meson_correlators(outfile,ens,p,"B1",B1)
         end 
         if haskey(h5dset,joinpath(ens,p,"E"))
             E = dropdims(mean(read(h5dset,joinpath(ens,p,"E")),dims=2);dims=2)
+            E = LatticeUtils._bin_correlator(E;binsize=2)
             write_meson_correlators(outfile,ens,p,"E",E)
         end 
    
