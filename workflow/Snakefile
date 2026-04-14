@@ -24,6 +24,7 @@ rule all:
         table_heavy = "assets/tables/latex_scattering_b6.90_m-0.920_table.txt", 
         table_medium = "assets/tables/latex_scattering_b7.05_m-0.863_table.txt", 
         table_light = "assets/tables/latex_scattering_b7.05_m-0.867_table.txt",
+        h5file_topology = "data_assets/topology.hdf5",
         # move to tmp later
         # plot_luescher_1 = "assets/plots/scattering/p3cotPS_vs_p2star_heavy.pdf",
         # plot_luescher_2 = "assets/plots/scattering/p3cotPS_vs_p2star_medium.pdf",
@@ -446,3 +447,21 @@ rule luescher_tables:
         '''
         python3 {input.script} assets/tables/ {input.h5file} 
         '''
+
+
+rule parse_flows:
+    input:
+        script="src/src_py/package_flows.py",
+    output:
+        h5file="data_assets/topology.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        for filename in raw_data/raw_flow/*/topology/out/out_flow; do 
+            name=$(echo $filename | grep -o "Lt.*FUN")
+            echo $name 
+            python3 {input.script} --h5_filename {output.h5file} --ensemble $name $filename
+        done
+        '''
+
