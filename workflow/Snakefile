@@ -29,6 +29,7 @@ rule all:
         fv_light = "assets/plots/finite_volume/fv_b7.05_m0.867.pdf",
         fv_medium = "assets/plots/finite_volume/fv_b7.05_m0.863.pdf",
         fv_heavy = "assets/plots/finite_volume/fv_b6.9_m0.92.pdf",
+        table = "assets/tables/table_II.tex",
 
 
 rule julia_instantiate:
@@ -478,4 +479,17 @@ rule plot_meson_finite_volume:
         "environment.yml"
     shell:
         'julia {input.script} --h5file_in {input.h5file_in} --table_out {output.table} --plotpath "assets/plots/finite_volume/" '
+
+
+rule ensemble_table:
+    input:
+        script="src/scripts_julia/ensemble_tables.jl",
+        h5file_in="data_assets/topology.hdf5",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        table = "assets/tables/table_II.tex",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --table_out {output.table} '
 

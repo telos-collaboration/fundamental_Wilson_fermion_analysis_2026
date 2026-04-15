@@ -2,8 +2,9 @@ using Pkg; Pkg.activate("src/src_jl")
 using HDF5
 using MadrasSokal
 using Statistics
+using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 
-function ensemble_table(h5file)
+function ensemble_table(h5file,outfile)
 
     h5dset = h5open(h5file)
     ensembles = keys(h5dset)
@@ -53,21 +54,42 @@ function ensemble_table(h5file)
             \end{tabular}
             """
     label = ""
-    # actually write table to file            
-    print(header)
+    # actually write table to fields
+    io = open(outfile,"w")    
+    print(io,header)
     for r in eachrow(table)
         line = prod(string.(r) .* " & ")
         # remove last two characters to remove the trailing '&' and add a line brake
         line = line[1:end-2]*"\\\\"
         # if the label of the ensemble has changed insert extra hlines
         if label != r[1]
-            println("\t\\hline\\hline")
+            println(io,"\t\\hline\\hline")
         end
         label = r[1]
-        println("\t"*line)
+        println(io,"\t"*line)
     end
-    print(footer)
+    print(io,footer)
+    close(io)
 end
 
-h5file = "data_assets/topology.hdf5"
-ensemble_table(h5file)
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--h5file_in"
+        help = "HDF5 file containing the parsed data"
+        required = true
+        "--table_out"
+        help = "Where to save TEX table of all ensembles"
+        required = true
+    end
+    return parse_args(s)
+end
+
+function main()
+    args = parse_commandline()
+    h5file = args["h5file_in"]
+    outfile = args["table_out"]
+    ensemble_table(h5file,outfile)
+end
+
+main()
