@@ -30,9 +30,9 @@ function finite_volume_plots_appendix(file,dir,table)
         end
 
         # start plotting
-        plt = scatter(inv.(L),E,yerr=ΔE,label=L"\pi")
-        scatter!(inv.(L),Eρ,yerr=ΔEρ,label=L"\rho")
-        plot!(plt,xlabel=L"1/L",ylabel=L"E_{\rm PS}")
+        plt = scatter(inv.(L),E,yerr=ΔE,label="PS")
+        scatter!(inv.(L),Eρ,yerr=ΔEρ,label="V")
+        plot!(plt,xlabel=L"1/L",ylabel=L"a m_{\rm M}")
         plot!(plt,xlims=[0,maximum(inv,0.8L)])
         ispath(dir) || mkpath(dir)
         savefig(joinpath(dir,"fv_b$(β)_m$m.pdf"))
