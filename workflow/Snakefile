@@ -21,18 +21,14 @@ rule all:
         plot_phaseshift_medium = "assets/plots/scattering/phase_shift_plot_medium.pdf",
         plot_phaseshift_heavy = "assets/plots/scattering/phase_shift_plot_heavy.pdf",
         cross_section_plot1 = "assets/plots/scattering/sigma_comb_units.pdf",
-        table_heavy = "assets/tables/latex_scattering_b6.90_m-0.920_table.txt", 
-        table_medium = "assets/tables/latex_scattering_b7.05_m-0.863_table.txt", 
-        table_light = "assets/tables/latex_scattering_b7.05_m-0.867_table.txt",
         h5file_topology = "data_assets/topology.hdf5",
-        fv_table = "tmp/finite_volume.csv",
         fv_light = "assets/plots/finite_volume/fv_b7.05_m0.867.pdf",
         fv_medium = "assets/plots/finite_volume/fv_b7.05_m0.863.pdf",
         fv_heavy = "assets/plots/finite_volume/fv_b6.9_m0.92.pdf",
         table = "assets/tables/table_II.tex",
-        table_csv1 = "tmp/beta6.9m-0.92.csv",
-        table_csv2 = "tmp/beta7.05m-0.863.csv",
-        table_csv3 = "tmp/beta7.05m-0.867.csv",
+        table_tex1 = "assets/tables/beta6.9m-0.92.tex",
+        table_tex2 = "assets/tables/beta7.05m-0.863.tex",
+        table_tex3 = "assets/tables/beta7.05m-0.867.tex",
 
 
 rule julia_instantiate:
@@ -508,4 +504,18 @@ rule phase_shift_csv:
         "environment.yml"
     shell:
         'julia {input.script} --h5file_in {input.h5file_in} --outfile {output.table} --pattern {wildcards.pattern} '
+
+
+rule phase_shift_tex:
+    input:
+        script="src/scripts_julia/phase_shift_tex.jl",
+        table = "tmp/{pattern}.csv",
+        metadata = "metadata/fit_scatter_input.csv",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        table = "assets/tables/{pattern}.tex",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --csv_in {input.table} --outfile {output.table} --metadata {input.metadata}'
 

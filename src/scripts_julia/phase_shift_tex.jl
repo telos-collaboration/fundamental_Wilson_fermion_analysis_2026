@@ -3,26 +3,7 @@ using LatticeUtils
 using DelimitedFiles
 using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 
-function parse_commandline()
-    s = ArgParseSettings()
-    @add_arg_table s begin
-        "--csv_in"
-        help = "HDF5 file containing the parsed data"
-        required = true
-        "--outfile"
-        help = "CSV output containing the list of all parsed runs"
-        required = true
-        "--metadata"
-        help = "label of the ensemble in the form 'beta{coupling}m{mass}' "
-        default = nothing
-    end
-    return parse_args(s)
-end
-function main()
-    args = parse_commandline()
-end 
-
-function latex_table(datafile,metadatafile)
+function latex_table(datafile,metadatafile,outfile)
     metadata = readdlm(metadatafile,';',skipstart=0)
     csv_data = readdlm(datafile,';',skipstart=1)
 
@@ -34,7 +15,7 @@ function latex_table(datafile,metadatafile)
         \hline
     \end{tabular}"""
 
-    io = stdout
+    io = open(outfile,"w")
     counter = 0
     println(io,header)
     for (i,r) in enumerate(eachrow(csv_data))
@@ -58,8 +39,25 @@ function latex_table(datafile,metadatafile)
         println(io,"    $Ns & $d2 & $ir & $lv & $(errorstring(E, ΔE; nsig=1)) & $(errorstring(rs, Δrs; nsig=1)) & $(errorstring(δ, Δδ; nsig=1)) & $incl \\\\")
     end
     println(io,footer)
+    close(io)
 end
-
-metadatafile = "metadata/fit_scatter_input.csv"
-datafile = "tmp/beta6.9m-0.92.csv"
-latex_table(datafile,metadatafile)
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--csv_in"
+        help = "HDF5 file containing the parsed data"
+        required = true
+        "--outfile"
+        help = "CSV output containing the list of all parsed runs"
+        required = true
+        "--metadata"
+        help = "label of the ensemble in the form 'beta{coupling}m{mass}' "
+        default = nothing
+    end
+    return parse_args(s)
+end
+function main()
+    args = parse_commandline()
+    latex_table(args["csv_in"],args["metadata"],args["outfile"])
+end 
+main()
