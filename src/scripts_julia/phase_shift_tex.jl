@@ -25,11 +25,24 @@ end
 metadata = readdlm("metadata/fit_scatter_input.csv",';',skipstart=0)
 csv_data = readdlm("tmp/beta6.9m-0.92.csv",';',skipstart=1)
 
+header = raw"""
+\begin{tabular}[t]{|c|c|c|c|c|c|c|c|}
+    \hline 
+    $N_L$ & $|\vec{d}|^2$ & $\Lambda$ & n & $aE$ & $a\sqrt{s}$ & $\delta_1$   & Incl. \\ \hline \hline"""
+footer = raw"""
+    \hline
+\end{tabular}
+"""
+
+io = stdout
+
+println(io,header)
 for r in eachrow(csv_data)
     ens, Nt, Ns, mom, ir, lv, E, ΔE, rs, Δrs, δ, Δδ = r[1:end]
     d2  = length(findall('1',mom))
     key = ens*mom*ir*"lv$(lv-1)"
     incl = startswith(ens,"beta7.05m-0.863") ? false : key ∈ metadata
     incl = incl ? "yes" : "no" 
-    println("$Ns & $d2 & $ir & $lv & $(errorstring(E, ΔE; nsig=1)) & $(errorstring(rs, Δrs; nsig=1)) & $(errorstring(δ, Δδ; nsig=1)) & $incl")
+    println("    $Ns & $d2 & $ir & $lv & $(errorstring(E, ΔE; nsig=1)) & $(errorstring(rs, Δrs; nsig=1)) & $(errorstring(δ, Δδ; nsig=1)) & $incl \\\\")
 end
+println(io,footer)
