@@ -55,7 +55,7 @@ function phase_shift_table_csv(infile,outfile,pattern)
                         δ_sample = read(h5channel[l]["sample"],"PS")
                         δ, Δδ = uncertainty_from_samples(real.(δ_sample))
                         rs, Δrs = uncertainty_from_samples(real.(sqrt.(s_sample)))
-                        println(io,"$pattern;$Nt;$Ns;$mom;$ir;$i;$(E[i]);$(ΔE[i]);$(rs);$(Δrs);$δ;$Δδ")
+                        println(io,"$ens;$Nt;$Ns;$mom;$ir;$i;$(E[i]);$(ΔE[i]);$(rs);$(Δrs);$δ;$Δδ")
                     end
                 end
             end
