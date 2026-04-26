@@ -30,10 +30,12 @@ function latex_table(datafile,metadatafile,outfile)
         # once it has changed twice, create a new tabular environment
         if i == 1 ||  csv_data[i-1,3] != csv_data[i,3]
             counter += 1 
-            if counter == 2
+            if counter == 3
                 println(io,footer)
                 println(io,"\\quad")
                 println(io,header)
+            elseif counter > 1
+                println(io,"    \\hline")
             end
         end
         println(io,"    $Ns & $d2 & $ir & $lv & $(errorstring(E, ΔE; nsig=1)) & $(errorstring(rs, Δrs; nsig=1)) & $(errorstring(δ, Δδ; nsig=1)) & $incl \\\\")
