@@ -30,8 +30,8 @@ function finite_volume_plots_appendix(file,dir,table)
         end
 
         # start plotting
-        plt = scatter(L.* E,E,yerr=ΔE,label="PS")
-        scatter!(L.* E,Eρ,yerr=ΔEρ,label="V")
+        plt = scatter(L.* E,E,yerr=ΔE,label="{\rm PS}")
+        scatter!(L.* E,Eρ,yerr=ΔEρ,label="{\rm V}")
         plot!(plt,xlabel=L"m_{\rm PS} L",ylabel=L"a E")
         plot!(plt,legend=:right)
         ispath(dir) || mkpath(dir)
