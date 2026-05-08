@@ -10,7 +10,7 @@ function latex_table(datafile,metadatafile,outfile)
     header = raw"""
     \begin{tabular}[t]{|c|c|c|c|c|c|c|c|}
         \hline 
-        $N_L$ & $|\vec{d}|^2$ & $\Lambda$ & n & $aE$ & $a\sqrt{s}$ & $\delta_1$   & Incl. \\ \hline \hline"""
+        $N_L$ & $|\vec{d}|^2$ & $\Lambda$ & $n$ & $aE$ & $a\sqrt{s}$ & $\delta_1$ & Incl. \\ \hline \hline"""
     footer = raw"""
         \hline
     \end{tabular}"""
