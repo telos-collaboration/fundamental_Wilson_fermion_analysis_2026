@@ -28,7 +28,7 @@ rule package_gflow:
         files=glob("raw_data/gradient_flow/*/topology/out/out_flow"),
         script="src/package_flows.py",
     output:
-        h5=protected("data_assets/nf2_gflow.h5"),
+        h5="data_assets/nf2_gflow.h5",
     conda:
         "../envs/flow_analysis.yml"
     shell:
