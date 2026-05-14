@@ -9,6 +9,7 @@ import pathlib
 import psutil
 import socket
 import subprocess
+import getpass
 
 
 def get_commit_id():
@@ -36,7 +37,7 @@ def get_basic_metadata(*data_filenames):
     )
     metadata["workflow_run"] = {
         "completed": now,
-        "user_name": os.getlogin(),
+        "user_name": getpass.getuser(),
         "machine_name": socket.gethostname(),
     }
     metadata["analysis_code"] = {"version": get_commit_id()}

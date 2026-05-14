@@ -25,7 +25,7 @@ rule package_gflow:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        files=glob("raw_data/*/topology/out/out_flow"),
+        files=glob("raw_data/gradient_flow/*/topology/out/out_flow"),
         script="src/package_flows.py",
     output:
         h5=protected("data_assets/nf2_gflow.h5"),
