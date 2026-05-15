@@ -1,12 +1,12 @@
 [submodule "libs/HiRepParsing"]
-	path = libs/HiRepParsing
+	path = scattering/libs/HiRepParsing
 	url = https://github.com/fzierler/HiRepParsing
 [submodule "libs/LatticeUtils"]
-	path = libs/LatticeUtils
+	path = scattering/libs/LatticeUtils
 	url = https://github.com/fzierler/LatticeUtils
 [submodule "libs/flow_analysis"]
-	path = libs/flow_analysis
+	path = scattering/libs/flow_analysis
 	url = https://github.com/edbennett/flow_analysis
 [submodule "libs/MadrasSokal"]
-	path = libs/MadrasSokal
+	path = scattering/libs/MadrasSokal
 	url = https://github.com/fzierler/MadrasSokal
