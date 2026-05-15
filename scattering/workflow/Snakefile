@@ -35,7 +35,7 @@ rule julia_instantiate:
     input:
         script="src/scripts_julia/instantiate.jl",
     output:
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     conda: 
         "environment.yml"
     shell:
@@ -45,7 +45,7 @@ rule julia_instantiate:
 rule parse_logs:
     input:
         script="src/scripts_julia/parse_all_files.jl",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
         metadata="../metadata/scattering/input_files.csv",
     output:
         h5file="data_assets/isospin1_sorted.hdf5",
@@ -58,7 +58,7 @@ rule parse_logs:
 rule ensembles_tables:
     input:
         script="src/scripts_julia/write_tables.jl",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
         h5file="data_assets/isospin1_sorted.hdf5",
         metadata="../metadata/scattering/ensembles.csv"
     output:
@@ -72,7 +72,7 @@ rule ensembles_tables:
 rule combine_runs_hdf5:
     input:
         script="src/scripts_julia/combine_runs.jl",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
         h5file_in="data_assets/isospin1_sorted.hdf5",
     output:
         h5file_out="data_assets/isospin1_merged.hdf5",
@@ -85,7 +85,7 @@ rule combine_runs_hdf5:
 rule correlation_matrix:
     input:
         script="src/scripts_julia/write_correlation_matrix.jl",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
         h5file_in="data_assets/isospin1_merged.hdf5",
         metadata="../metadata/scattering/ensembles.csv"
     output:
@@ -99,7 +99,7 @@ rule correlation_matrix:
 rule write_eigenvalues:
     input:
         script="src/scripts_julia/write_eigenvalues.jl",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
         h5file_in="data_assets/isospin1_corr.hdf5",
         metadata="../metadata/scattering/pipi_fitintervals.csv",
     output:
@@ -113,7 +113,7 @@ rule write_eigenvalues:
 rule write_eigenvalues_evp_vs_gevp:
     input:
         script="src/scripts_julia/write_eigenvalues.jl",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
         h5file_in="data_assets/isospin1_corr.hdf5",
         metadata="../metadata/scattering/pipi_fitintervals_evp_gevp.csv",
         swaps="../metadata/scattering/swaps.csv",
@@ -172,7 +172,7 @@ rule fit_result_table:
     input:
         script="src/scripts_julia/write_table_fitresults.jl",
         h5file="data_assets/isospin1_full_fitresults.hdf5",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         table="assets/tables/fit_results_3x3_tuned.csv"
     conda:
@@ -185,7 +185,7 @@ rule plot_individual_diagrams:
     input:
         script="src/scripts_julia/plot_diagrams.jl",
         h5file="data_assets/isospin1_merged.hdf5",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         plots2x2="assets/plots/diagrams.pdf",
         plots3x3="assets/plots/diagrams_3x3.pdf",
@@ -200,7 +200,7 @@ rule plot_eigenvalues:
         script="src/scripts_julia/plot_eigenvalues.jl",
         h5file="data_assets/isospin1_eigenvalues.hdf5",
         metadata="../metadata/scattering/pipi_fitintervals.csv",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         plot="assets/plots/eigenvalues.pdf",
     conda:
@@ -214,7 +214,7 @@ rule plot_eigenvalues_comparison:
         script="src/scripts_julia/plot_eigenvalues.jl",
         h5file="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
         metadata="../metadata/scattering/pipi_fitintervals_evp_gevp.csv",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         plot="assets/plots/eigenvalues_evp_gevp.pdf",
     conda:
@@ -228,7 +228,7 @@ rule plot_eigenvalues_with_fits:
         h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
         h5file_fit="data_assets/isospin1_fitresults.hdf5",
         metadata="../metadata/scattering/pipi_fitintervals.csv",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         plot="assets/plots/eigenvalues_with_fit.pdf",
     conda:
@@ -241,7 +241,7 @@ rule plot_correlation_matrix_elements:
     input:
         script="src/scripts_julia/plot_correlation_matrix_elements.jl",
         h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         plot="assets/plots/correlation_matrix_elements.pdf",
     conda:
@@ -255,7 +255,7 @@ rule plot_meson_correlators:
         script="src/scripts_julia/plot_meson_correlators.jl",
         h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
         h5file_fit="data_assets/isospin1_fitresults.hdf5",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         plot="assets/plots/meson_correlators.pdf",
     conda:
@@ -271,7 +271,7 @@ rule plot_effective_masses:
         h5file_fit="data_assets/isospin1_full_fitresults.hdf5",
         fitparam="../metadata/scattering/pipi_fitintervals.csv",
         infinite_volume="../metadata/scattering/infinite_volume.csv",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         plot_gevp="assets/plots/effective_masses_(g)evp.pdf",
         plot_mesons="assets/plots/effective_masses_mesons.pdf",
@@ -289,7 +289,7 @@ rule plot_effective_masses_comparison:
         h5file_fit="data_assets/isospin1_fitresults_evp_gevp.hdf5",
         fitparam="../metadata/scattering/pipi_fitintervals_evp_gevp.csv",
         infinite_volume="../metadata/scattering/infinite_volume.csv",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         plot_gevp="assets/plots/effective_masses_comparison_(g)evp.pdf",
     conda:
@@ -308,7 +308,7 @@ rule compile_zeta:
     shell:
         '''
         mkdir -p tmp
-        bash {input.script}  &> tmp/make.log
+        bash {input.script}  &> ../intermediary_data/make.log
         '''
 
 
@@ -468,9 +468,9 @@ rule plot_meson_finite_volume:
     input:
         script="src/scripts_julia/finite_volume.jl",
         h5file_in="data_assets/isospin1_full_fitresults.hdf5",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
-        table = "tmp/finite_volume.csv",
+        table = "../intermediary_data/finite_volume.csv",
         fv_light = "assets/plots/finite_volume/fv_b7.05_m0.867.pdf",
         fv_medium = "assets/plots/finite_volume/fv_b7.05_m0.863.pdf",
         fv_heavy = "assets/plots/finite_volume/fv_b6.9_m0.92.pdf",
@@ -484,7 +484,7 @@ rule ensemble_table:
     input:
         script="src/scripts_julia/ensemble_tables.jl",
         h5file_in="data_assets/topology.hdf5",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         table = "assets/tables/table_II.tex",
     conda:
@@ -497,9 +497,9 @@ rule phase_shift_csv:
     input:
         script="src/scripts_julia/phase_shift_table.jl",
         h5file_in="data_assets/isospin1_fit_scatter.hdf5",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
-        table = "tmp/{pattern}.csv",
+        table = "../intermediary_data/{pattern}.csv",
     conda:
         "environment.yml"
     shell:
@@ -509,9 +509,9 @@ rule phase_shift_csv:
 rule phase_shift_tex:
     input:
         script="src/scripts_julia/phase_shift_tex.jl",
-        table = "tmp/{pattern}.csv",
+        table = "../intermediary_data/{pattern}.csv",
         metadata = "../metadata/scattering/fit_scatter_input.csv",
-        julia_instantiated="tmp/julia_ready",
+        julia_instantiated="../intermediary_data/julia_ready",
     output:
         table = "assets/tables/{pattern}.tex",
     conda:
