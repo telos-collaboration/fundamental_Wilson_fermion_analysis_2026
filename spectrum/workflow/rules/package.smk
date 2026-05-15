@@ -5,10 +5,10 @@ parsing_base = "src/HiRep_parsing"
 
 rule package_smeared:
     params:
-        file_dir="raw_data/corr/{smearing}",
+        file_dir="../raw_data/corr/{smearing}",
         script_file_name="scripts/write_meson_{smearing}.jl",
     input:
-        files=glob("raw_data/corr/{smearing}/*"),
+        files=glob("../raw_data/corr/{smearing}/*"),
         script=f"{parsing_base}/scripts/write_meson_{{smearing}}.jl",
     output:
         h5=protected("data_assets/correlators_{smearing}.h5"),
@@ -25,7 +25,7 @@ rule package_gflow:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        files=glob("raw_data/gradient_flow/*/topology/out/out_flow"),
+        files=glob("../raw_data/gradient_flow/*/topology/out/out_flow"),
         script="src/package_flows.py",
     output:
         h5="data_assets/nf2_gflow.h5",
@@ -39,7 +39,7 @@ rule package_hmc:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        files=glob("raw_data/hmc/out_hmc_*"),
+        files=glob("../raw_data/hmc/out_hmc_*"),
         script="src/package_hmc.py",
     output:
         h5=protected("data_assets/hmc.h5"),

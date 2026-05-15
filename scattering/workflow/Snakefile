@@ -52,7 +52,7 @@ rule parse_logs:
     conda:
         "environment.yml"
     shell:
-        'julia {input.script} --path raw_data/scattering/ --h5file {output.h5file} --inputfiles {input.metadata}'
+        'julia {input.script} --path ../raw_data/scattering/ --h5file {output.h5file} --inputfiles {input.metadata}'
 
 
 rule ensembles_tables:
@@ -420,7 +420,7 @@ rule crossection_plots:
     input:
         script="src/src_py/cross_section_plot.py",
         h5file="data_assets/isospin1_fit_scatter.hdf5",
-        I2results="raw_data/14_dim/scattering_Fig5.3_b6.900_m-0.920.hdf5",
+        I2results="../raw_data/14_dim/scattering_Fig5.3_b6.900_m-0.920.hdf5",
     output:
         cross_section_plot2 = "assets/plots/scattering/sigma_comb_units.pdf",
     conda:
@@ -456,7 +456,7 @@ rule parse_flows:
         "environment.yml"
     shell:
         '''
-        for filename in raw_data/gradient_flow/*/topology/out/out_flow; do 
+        for filename in ../raw_data/gradient_flow/*/topology/out/out_flow; do 
             name=$(echo $filename | grep -o "Lt.*FUN")
             echo $name 
             python3 {input.script} --h5_filename {output.h5file} --ensemble $name $filename
