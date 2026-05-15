@@ -98,7 +98,7 @@ csv_data = expand(
     csv=["ensemble_data", "chipt_deft_data", "global_eft_data"],
 )
 external_data = expand(
-    "external_data/{filename}",
+    "../external_data/{filename}",
     filename=["mv_fps_fund.csv", "meson_meta_fund.csv", "m2v_fit_pms.json"],
 )
 
