@@ -300,9 +300,9 @@ rule plot_effective_masses_comparison:
 
 rule compile_zeta:
     input:
-        script="libs/zeta/compile.sh",
+        script="../libs/zeta/compile.sh",
     output:
-        binary="libs/zeta/out/get_wlm.so",
+        binary="../libs/zeta/out/get_wlm.so",
     conda:
         "environment.yml"
     shell:
@@ -317,7 +317,7 @@ rule luescher_analysis:
         script="src/src_py/scattering.py",
         h5file_fit="data_assets/isospin1_full_fitresults.hdf5",
         metadata="metadata/scattering_input.csv",
-        binary="libs/zeta/out/get_wlm.so",
+        binary="../libs/zeta/out/get_wlm.so",
     output:
         h5file_out="data_assets/isospin1_scattering.hdf5",
     conda:
