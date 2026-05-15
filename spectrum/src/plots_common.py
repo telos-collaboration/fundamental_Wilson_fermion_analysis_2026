@@ -93,7 +93,7 @@ def get_standard_plot_args(fit_results=False, external_data=False, definitions=F
     )
     parser.add_argument(
         "--plot_styles",
-        default="styles/paperdraft.mplstyle",
+        default="../styles/paperdraft.mplstyle",
         help="Stylesheet to use for plots",
     )
     if definitions:
@@ -131,7 +131,7 @@ def get_args_ansatz():
     )
     parser.add_argument(
         "--plot_styles",
-        default="styles/paperdraft.mplstyle",
+        default="../styles/paperdraft.mplstyle",
         help="Stylesheet to use for plots",
     )
     parser.add_argument(

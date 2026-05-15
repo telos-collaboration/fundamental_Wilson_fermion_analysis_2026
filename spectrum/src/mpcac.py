@@ -109,7 +109,7 @@ def get_args():
     )
     parser.add_argument(
         "--plot_styles",
-        default="styles/paperdraft.mplstyle",
+        default="../styles/paperdraft.mplstyle",
         help="Stylesheet to use for plots",
     )
     return parser.parse_args()
