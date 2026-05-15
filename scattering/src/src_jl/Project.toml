@@ -1,0 +1,33 @@
+name = "ScatteringI1"
+uuid = "12725bdb-d882-4aa9-8667-8936410be29e"
+authors = ["Fabian Zierler <fabian.zierler@a1.net>"]
+version = "0.1.0"
+
+[deps]
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+HiRepParsing = "c7cc7de0-aa5c-4db3-979c-e9fc59cba489"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+LatticeUtils = "faef5128-6048-4e09-bb0e-6a325a68fa81"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MadrasSokal = "5c0a986f-5b00-49c7-a63c-a994e876fa55"
+PDFmerger = "3beb2ed1-af7d-458f-b727-6e9beb3586c0"
+PGFPlotsX = "8314cec4-20b6-5062-9cdb-752b83310925"
+Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
+[compat]
+BenchmarkTools = "1.6.0"
+Combinatorics = "1.0.2"
+DelimitedFiles = "1.9.1"
+HiRepParsing = "0.1.0"
+LatticeUtils = "0.1.0"
+PDFmerger = "0.3.2"
+PGFPlotsX = "1.6.2"
+Parsers = "2.8.1"

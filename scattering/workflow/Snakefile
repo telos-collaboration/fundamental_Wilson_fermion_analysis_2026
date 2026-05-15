@@ -1,0 +1,521 @@
+import os
+os.environ["GKSwstype"] = "100"
+
+rule all:
+    input:
+        plots2x2="assets/plots/diagrams.pdf",
+        plots3x3="assets/plots/diagrams_3x3.pdf",
+        table_fit="assets/tables/fit_results_3x3_tuned.csv",
+        plot_eig="assets/plots/eigenvalues.pdf",
+        plot_eig_evp_vs_gvp="assets/plots/eigenvalues_evp_gevp.pdf",
+        plot_eig_fits="assets/plots/eigenvalues_with_fit.pdf",
+        plot_cmat_elements="assets/plots/correlation_matrix_elements.pdf",
+        plot_meson_correlators="assets/plots/meson_correlators.pdf",
+        plot_meff_gevp="assets/plots/effective_masses_(g)evp.pdf",
+        plot_meff_mesons="assets/plots/effective_masses_mesons.pdf",
+        plot_meff_mesons_p0="assets/plots/effective_masses_mesons_p0.pdf",
+        plot_meff_comparison_gevp="assets/plots/effective_masses_comparison_(g)evp.pdf",
+        plot_volume_heavy = "assets/plots/scattering/E_vs_L_heavy.pdf",
+        plot_volume_lighter = "assets/plots/scattering/E_vs_L_medium_light.pdf",
+        plot_phaseshift_light = "assets/plots/scattering/phase_shift_plot_light.pdf",
+        plot_phaseshift_medium = "assets/plots/scattering/phase_shift_plot_medium.pdf",
+        plot_phaseshift_heavy = "assets/plots/scattering/phase_shift_plot_heavy.pdf",
+        cross_section_plot1 = "assets/plots/scattering/sigma_comb_units.pdf",
+        h5file_topology = "data_assets/topology.hdf5",
+        fv_light = "assets/plots/finite_volume/fv_b7.05_m0.867.pdf",
+        fv_medium = "assets/plots/finite_volume/fv_b7.05_m0.863.pdf",
+        fv_heavy = "assets/plots/finite_volume/fv_b6.9_m0.92.pdf",
+        table = "assets/tables/table_II.tex",
+        table_tex1 = "assets/tables/beta6.9m-0.92.tex",
+        table_tex2 = "assets/tables/beta7.05m-0.863.tex",
+        table_tex3 = "assets/tables/beta7.05m-0.867.tex",
+
+
+rule julia_instantiate:
+    input:
+        script="src/scripts_julia/instantiate.jl",
+    output:
+        julia_instantiated="tmp/julia_ready",
+    conda: 
+        "environment.yml"
+    shell:
+        "julia {input.script} && touch {output.julia_instantiated}"
+
+
+rule parse_logs:
+    input:
+        script="src/scripts_julia/parse_all_files.jl",
+        julia_instantiated="tmp/julia_ready",
+        metadata="metadata/input_files.csv",
+    output:
+        h5file="data_assets/isospin1_sorted.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --path raw_data/scattering/ --h5file {output.h5file} --inputfiles {input.metadata}'
+
+
+rule ensembles_tables:
+    input:
+        script="src/scripts_julia/write_tables.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file="data_assets/isospin1_sorted.hdf5",
+        metadata="metadata/ensembles.csv"
+    output:
+        table="assets/tables/analysed_runs.csv"
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file {input.h5file} --ensembles_list {input.metadata} --outfile {output.table}'
+
+
+rule combine_runs_hdf5:
+    input:
+        script="src/scripts_julia/combine_runs.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file_in="data_assets/isospin1_sorted.hdf5",
+    output:
+        h5file_out="data_assets/isospin1_merged.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out}'
+
+
+rule correlation_matrix:
+    input:
+        script="src/scripts_julia/write_correlation_matrix.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file_in="data_assets/isospin1_merged.hdf5",
+        metadata="metadata/ensembles.csv"
+    output:
+        h5file_out="data_assets/isospin1_corr.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out} --ensembles_list {input.metadata}'
+
+
+rule write_eigenvalues:
+    input:
+        script="src/scripts_julia/write_eigenvalues.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file_in="data_assets/isospin1_corr.hdf5",
+        metadata="metadata/pipi_fitintervals.csv",
+    output:
+        h5file_out="data_assets/isospin1_eigenvalues.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out}  --metadata {input.metadata} --avg true'
+
+
+rule write_eigenvalues_evp_vs_gevp:
+    input:
+        script="src/scripts_julia/write_eigenvalues.jl",
+        julia_instantiated="tmp/julia_ready",
+        h5file_in="data_assets/isospin1_corr.hdf5",
+        metadata="metadata/pipi_fitintervals_evp_gevp.csv",
+        swaps="metadata/swaps.csv",
+    output:
+        h5file_out="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --h5file_out {output.h5file_out}  --metadata {input.metadata}  --swap_metadata {input.swaps} --avg true'
+
+
+rule fit_eigenvalues:
+    input:
+        script="src/src_py/fitting_eigenvalues.py",
+        metadata="metadata/pipi_fitintervals.csv",
+        h5file_in="data_assets/isospin1_eigenvalues.hdf5",
+    output:
+        h5file_out="data_assets/isospin1_fitresults.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'python3 {input.script} {input.h5file_in} {output.h5file_out} {input.metadata}'
+
+
+rule fit_eigenvalues_comparison:
+    input:
+        script="src/src_py/fitting_eigenvalues.py",
+        metadata="metadata/pipi_fitintervals_evp_gevp.csv",
+        h5file_in="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
+    output:
+        h5file_out="data_assets/isospin1_fitresults_evp_gevp.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        'python3 {input.script} {input.h5file_in} {output.h5file_out} {input.metadata}'
+
+
+rule fit_mesons:
+    input:
+        script="src/src_py/fitting_mesons.py",
+        metadata="metadata/meson_fitintervals.csv",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit_pipi="data_assets/isospin1_fitresults.hdf5",
+    output:
+        h5file_out="data_assets/isospin1_full_fitresults.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        cp {input.h5file_fit_pipi} {output.h5file_out}
+        python3 {input.script} {input.h5file_eig} {output.h5file_out} {input.metadata}
+        '''
+
+
+rule fit_result_table:
+    input:
+        script="src/scripts_julia/write_table_fitresults.jl",
+        h5file="data_assets/isospin1_full_fitresults.hdf5",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        table="assets/tables/fit_results_3x3_tuned.csv"
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file {input.h5file} --outfile {output.table}'
+
+
+rule plot_individual_diagrams:
+    input:
+        script="src/scripts_julia/plot_diagrams.jl",
+        h5file="data_assets/isospin1_merged.hdf5",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        plots2x2="assets/plots/diagrams.pdf",
+        plots3x3="assets/plots/diagrams_3x3.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file} --plotpath "assets/plots/"'
+
+
+rule plot_eigenvalues:
+    input:
+        script="src/scripts_julia/plot_eigenvalues.jl",
+        h5file="data_assets/isospin1_eigenvalues.hdf5",
+        metadata="metadata/pipi_fitintervals.csv",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        plot="assets/plots/eigenvalues.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file} --metadata {input.metadata} --plotname {output.plot}'
+
+
+rule plot_eigenvalues_comparison:
+    input:
+        script="src/scripts_julia/plot_eigenvalues.jl",
+        h5file="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
+        metadata="metadata/pipi_fitintervals_evp_gevp.csv",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        plot="assets/plots/eigenvalues_evp_gevp.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file} --metadata {input.metadata} --plotname {output.plot}'
+
+rule plot_eigenvalues_with_fits:
+    input:
+        script="src/scripts_julia/plot_eigenvalues_with_fits.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults.hdf5",
+        metadata="metadata/pipi_fitintervals.csv",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        plot="assets/plots/eigenvalues_with_fit.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_eig} --plotpath "assets/plots/" --metadata {input.metadata} --fitresults {input.h5file_fit}'
+
+
+rule plot_correlation_matrix_elements:
+    input:
+        script="src/scripts_julia/plot_correlation_matrix_elements.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        plot="assets/plots/correlation_matrix_elements.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_eig} --plotpath "assets/plots/"'
+
+
+rule plot_meson_correlators:
+    input:
+        script="src/scripts_julia/plot_meson_correlators.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults.hdf5",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        plot="assets/plots/meson_correlators.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_eig} --plotpath "assets/plots/" --fitresults {input.h5file_fit}'
+
+
+rule plot_effective_masses:
+    input:
+        script="src/scripts_julia/plot_effective_masses.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues.hdf5",
+        h5file_fit="data_assets/isospin1_full_fitresults.hdf5",
+        fitparam="metadata/pipi_fitintervals.csv",
+        infinite_volume="metadata/infinite_volume.csv",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        plot_gevp="assets/plots/effective_masses_(g)evp.pdf",
+        plot_mesons="assets/plots/effective_masses_mesons.pdf",
+        plot_mesons_p0="assets/plots/effective_masses_mesons_p0.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.fitparam} --plotpath "assets/plots" --plot_mesons true --plotbasename "effective_masses"'
+
+
+rule plot_effective_masses_comparison:
+    input:
+        script="src/scripts_julia/plot_effective_masses.jl",
+        h5file_eig="data_assets/isospin1_eigenvalues_evp_gevp.hdf5",
+        h5file_fit="data_assets/isospin1_fitresults_evp_gevp.hdf5",
+        fitparam="metadata/pipi_fitintervals_evp_gevp.csv",
+        infinite_volume="metadata/infinite_volume.csv",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        plot_gevp="assets/plots/effective_masses_comparison_(g)evp.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_eig {input.h5file_eig} --h5file_fit {input.h5file_fit} --infinite_volume {input.infinite_volume} --metadata {input.fitparam} --plotpath "assets/plots" --plot_mesons false --plotbasename "effective_masses_comparison"'
+
+
+rule compile_zeta:
+    input:
+        script="libs/zeta/compile.sh",
+    output:
+        binary="libs/zeta/out/get_wlm.so",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        mkdir -p tmp
+        bash {input.script}  &> tmp/make.log
+        '''
+
+
+rule luescher_analysis:
+    input:
+        script="src/src_py/scattering.py",
+        h5file_fit="data_assets/isospin1_full_fitresults.hdf5",
+        metadata="metadata/scattering_input.csv",
+        binary="libs/zeta/out/get_wlm.so",
+    output:
+        h5file_out="data_assets/isospin1_scattering.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        cp {input.h5file_fit} {output.h5file_out}
+        python3 {input.script} {input.metadata} {input.h5file_fit} {output.h5file_out} 500 gauss
+        '''
+
+
+rule plot_luescher_results:
+    input:
+        script="src/src_py/plot_fit_scatter.py",
+        h5file="data_assets/isospin1_scattering.hdf5",
+    output:
+        plot1 = "assets/plots/scattering/p3cotPS_vs_p2star_heavy.pdf",
+        plot2 = "assets/plots/scattering/p3cotPS_vs_p2star_medium.pdf",
+        plot3 = "assets/plots/scattering/p3cotPS_Ecm_vs_s_medium.pdf",
+        plot4 = "assets/plots/scattering/p3cotPS_Ecm_vs_s_light.pdf",
+        plot5 = "assets/plots/scattering/PS_heavy.pdf",
+        plot6 = "assets/plots/scattering/PS_medium.pdf",
+        plot7 = "assets/plots/scattering/PS_light.pdf",
+        plot8 = "assets/plots/scattering/sigma_heavy.pdf",
+        plot9 = "assets/plots/scattering/sigma_medium.pdf",
+        plot10 = "assets/plots/scattering/sigma_light.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        python3 {input.script} assets/plots/scattering {input.h5file} False
+        '''
+
+
+rule plot_luescher_fits:
+    input:
+        script="src/src_py/plot_fit_scatter.py",
+        h5file="data_assets/isospin1_fit_scatter.hdf5",
+    output:
+        plot1 = "assets/plots/scattering/p3cotPS_vs_p2star_heavy_ERE0.pdf",
+        plot2 = "assets/plots/scattering/p3cotPS_vs_p2star_heavy_ERE1.pdf",
+        plot3 = "assets/plots/scattering/p3cotPS_Ecm_vs_s_light_BWI.pdf",
+        plot4 = "assets/plots/scattering/p3cotPS_Ecm_vs_s_light_BWII.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        python3 {input.script} assets/plots/scattering {input.h5file} True
+        '''
+
+
+rule fit_phase_shifts:
+    input:
+        script="src/src_py/fit_scatter.py",
+        h5file_in="data_assets/isospin1_scattering.hdf5",
+        metadata="metadata/fit_scatter_input.csv",
+    output:
+        h5file_out="data_assets/isospin1_fit_scatter.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        cp {input.h5file_in} {output.h5file_out}
+        python3 {input.script} {output.h5file_out} {input.metadata}
+        '''
+
+
+rule volume_dependence_plots:
+    input:
+        script="src/src_py/E_L_plot.py",
+        h5file="data_assets/isospin1_scattering.hdf5",
+    output:
+        plot_heavy = "assets/plots/scattering/E_vs_L_heavy.pdf",
+        plot_lighter = "assets/plots/scattering/E_vs_L_medium_light.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        python3 {input.script} assets/plots/scattering {input.h5file} 
+        '''
+
+
+rule phase_shift_plots:
+    input:
+        script="src/src_py/phase_shift_plots.py",
+        h5file="data_assets/isospin1_fit_scatter.hdf5",
+    output:
+        plot_light = "assets/plots/scattering/phase_shift_plot_light.pdf",
+        plot_medium = "assets/plots/scattering/phase_shift_plot_medium.pdf",
+        plot_heavy = "assets/plots/scattering/phase_shift_plot_heavy.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        python3 {input.script} assets/plots/scattering {input.h5file} 
+        '''
+
+
+rule crossection_plots:
+    input:
+        script="src/src_py/cross_section_plot.py",
+        h5file="data_assets/isospin1_fit_scatter.hdf5",
+        I2results="raw_data/14_dim/scattering_Fig5.3_b6.900_m-0.920.hdf5",
+    output:
+        cross_section_plot2 = "assets/plots/scattering/sigma_comb_units.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        python3 {input.script} assets/plots/scattering {input.h5file} 
+        '''
+
+
+rule luescher_tables:
+    input:
+        script="src/src_py/result_tables.py",
+        h5file="data_assets/isospin1_fit_scatter.hdf5",
+    output:
+        table_heavy = "assets/tables/latex_scattering_b6.90_m-0.920_table.txt", 
+        table_medium = "assets/tables/latex_scattering_b7.05_m-0.863_table.txt", 
+        table_light = "assets/tables/latex_scattering_b7.05_m-0.867_table.txt",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        python3 {input.script} assets/tables/ {input.h5file} 
+        '''
+
+
+rule parse_flows:
+    input:
+        script="src/src_py/package_flows.py",
+    output:
+        h5file="data_assets/topology.hdf5",
+    conda:
+        "environment.yml"
+    shell:
+        '''
+        for filename in raw_data/gradient_flow/*/topology/out/out_flow; do 
+            name=$(echo $filename | grep -o "Lt.*FUN")
+            echo $name 
+            python3 {input.script} --h5_filename {output.h5file} --ensemble $name $filename
+        done
+        '''
+
+
+rule plot_meson_finite_volume:
+    input:
+        script="src/scripts_julia/finite_volume.jl",
+        h5file_in="data_assets/isospin1_full_fitresults.hdf5",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        table = "tmp/finite_volume.csv",
+        fv_light = "assets/plots/finite_volume/fv_b7.05_m0.867.pdf",
+        fv_medium = "assets/plots/finite_volume/fv_b7.05_m0.863.pdf",
+        fv_heavy = "assets/plots/finite_volume/fv_b6.9_m0.92.pdf",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --table_out {output.table} --plotpath "assets/plots/finite_volume/" '
+
+
+rule ensemble_table:
+    input:
+        script="src/scripts_julia/ensemble_tables.jl",
+        h5file_in="data_assets/topology.hdf5",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        table = "assets/tables/table_II.tex",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --table_out {output.table} '
+
+
+rule phase_shift_csv:
+    input:
+        script="src/scripts_julia/phase_shift_table.jl",
+        h5file_in="data_assets/isospin1_fit_scatter.hdf5",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        table = "tmp/{pattern}.csv",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --h5file_in {input.h5file_in} --outfile {output.table} --pattern {wildcards.pattern} '
+
+
+rule phase_shift_tex:
+    input:
+        script="src/scripts_julia/phase_shift_tex.jl",
+        table = "tmp/{pattern}.csv",
+        metadata = "metadata/fit_scatter_input.csv",
+        julia_instantiated="tmp/julia_ready",
+    output:
+        table = "assets/tables/{pattern}.tex",
+    conda:
+        "environment.yml"
+    shell:
+        'julia {input.script} --csv_in {input.table} --outfile {output.table} --metadata {input.metadata}'
+
