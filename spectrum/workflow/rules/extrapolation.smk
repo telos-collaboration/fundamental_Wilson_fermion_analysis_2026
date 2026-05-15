@@ -2,7 +2,7 @@ from functools import partial
 import pandas as pd
 
 
-metadata = pd.read_csv("metadata/ensemble_metadata.csv")
+metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
 
 
 def extp_samples(wildcards, observables):

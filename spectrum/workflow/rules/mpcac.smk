@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-metadata = pd.read_csv("metadata/ensemble_metadata.csv")
+metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
 
 
 rule fit_pcac:

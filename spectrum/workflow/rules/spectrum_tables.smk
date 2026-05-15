@@ -2,7 +2,7 @@ import pandas as pd
 from functools import partial
 
 
-all_metadata = pd.read_csv("metadata/ensemble_metadata.csv")
+all_metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
 
 metadata_query = "Nc == {Nc} & Nt == {Nt} & Ns == {Ns} & beta == {beta} & nF == {nF} & mF == {mF}"
 metadata_lookup = partial(lookup, within=all_metadata, query=metadata_query)

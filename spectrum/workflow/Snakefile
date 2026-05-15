@@ -156,7 +156,7 @@ rule provenance_stamp:
         h5_data=h5_data,
         plots=plots,
         tables=tables,
-        ensemble_metadata="metadata/ensemble_metadata.csv",
+        ensemble_metadata="../metadata/spectrum/ensemble_metadata.csv",
         external_data=external_data,
     output:
         stamp="assets/info.json",
@@ -173,7 +173,7 @@ rule data_provenance_stamp:
         script="src/provenance.py",
         h5_data=h5_data,
         csv_data=csv_data,
-        ensemble_metadata="metadata/ensemble_metadata.csv",
+        ensemble_metadata="../metadata/spectrum/ensemble_metadata.csv",
         external_data=external_data,
     output:
         stamp="data_assets/info.json",
