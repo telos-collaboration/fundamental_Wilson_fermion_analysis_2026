@@ -26,9 +26,9 @@ rule gevp_meson_mass:
         data="data_assets/corr_sp4_FUN.h5",
         script="src/mass_gevp_meson.py",
     output:
-        mean=f"intermediary_data/{dir_template}/meson_gevp_E0_{{channel}}_mean.csv",
-        samples=f"intermediary_data/{dir_template}/meson_gevp_{{channel}}_samples.json",
-        plot=f"intermediary_data/{dir_template}/meson_gevp_{{channel}}_eff_mass.pdf",
+        mean=f"../intermediary_data/{dir_template}/meson_gevp_E0_{{channel}}_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/meson_gevp_{{channel}}_samples.json",
+        plot=f"../intermediary_data/{dir_template}/meson_gevp_{{channel}}_eff_mass.pdf",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -56,8 +56,8 @@ rule meson_matrix_element:
         data="data_assets/corr_sp4_FUN.h5",
         script="src/matrix_element_meson.py",
     output:
-        mean=f"intermediary_data/{dir_template}/meson_extraction_{{channel}}_mean.csv",
-        samples=f"intermediary_data/{dir_template}/meson_extraction_{{channel}}_samples.json",
+        mean=f"../intermediary_data/{dir_template}/meson_extraction_{{channel}}_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/meson_extraction_{{channel}}_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -80,9 +80,9 @@ rule smear_meson_mass:
         data="data_assets/corr_sp4_FUN.h5",
         script="src/mass_smear.py",
     output:
-        mean=f"intermediary_data/{dir_template}/meson_smear_mass_{{channel}}_mean.csv",
-        samples=f"intermediary_data/{dir_template}/meson_smear_mass_{{channel}}_samples.json",
-        plot=f"intermediary_data/{dir_template}/meson_smear_{{channel}}_eff_mass.pdf",
+        mean=f"../intermediary_data/{dir_template}/meson_smear_mass_{{channel}}_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/meson_smear_mass_{{channel}}_samples.json",
+        plot=f"../intermediary_data/{dir_template}/meson_smear_{{channel}}_eff_mass.pdf",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -102,9 +102,9 @@ rule fit_mass_GEVP_rhoE1:
         data="data_assets/corr_sp4_FUN.h5",
         script="src/mass_gevp_rho_prime.py",
     output:
-        mean=f"intermediary_data/{dir_template}/gevp_meson_rhoE1_mean.csv",
-        samples=f"intermediary_data/{dir_template}/gevp_meson_rhoE1_samples.json",
-        plot=f"intermediary_data/{dir_template}/gevp_meson_rhoE1_eff_mass.pdf",
+        mean=f"../intermediary_data/{dir_template}/gevp_meson_rhoE1_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/gevp_meson_rhoE1_samples.json",
+        plot=f"../intermediary_data/{dir_template}/gevp_meson_rhoE1_eff_mass.pdf",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -119,7 +119,7 @@ rule fit_mass_GEVP_rhoE1:
 
 def extraction_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av"]
         for rep in ["f"]
@@ -130,12 +130,12 @@ rule get_meson_decay:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        mass=f"intermediary_data/{dir_template}/meson_extraction_{{channel}}_samples.json",
-        plaq=f"intermediary_data/{dir_template}/plaquette_samples.json",
+        mass=f"../intermediary_data/{dir_template}/meson_extraction_{{channel}}_samples.json",
+        plaq=f"../intermediary_data/{dir_template}/plaquette_samples.json",
         script="src/decay_constant.py",
     output:
-        mean=f"intermediary_data/{dir_template}/decay_constant_{{channel}}_mean.csv",
-        samples=f"intermediary_data/{dir_template}/decay_constant_{{channel}}_samples.json",
+        mean=f"../intermediary_data/{dir_template}/decay_constant_{{channel}}_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/decay_constant_{{channel}}_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -152,8 +152,8 @@ rule ps_correlator_autocorrelation:
         data="data_assets/corr_sp4_FUN.h5",
         script="src/ps_correlators_autocorrelation.py",
     output:
-        mean=f"intermediary_data/{dir_template}/tau_ps_correlator_mean.csv",
-        bin_plot=f"intermediary_data/{dir_template}/ps_correlator_bin_size_check.pdf",
+        mean=f"../intermediary_data/{dir_template}/tau_ps_correlator_mean.csv",
+        bin_plot=f"../intermediary_data/{dir_template}/ps_correlator_bin_size_check.pdf",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -175,7 +175,7 @@ rule ps_eff_w0_autocorrelation:
         flow_data="data_assets/nf2_gflow.h5",
         script="src/ps_eff_w0_autocorrelation.py",
     output:
-        mean=f"intermediary_data/{dir_template}/tau_ps_eff_w0_mean.csv",
+        mean=f"../intermediary_data/{dir_template}/tau_ps_eff_w0_mean.csv",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -184,15 +184,15 @@ rule ps_eff_w0_autocorrelation:
 
 def mass_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/meson_{wildcards.channel}_samples.json",
-        f"intermediary_data/{dir_template}/plaquette_samples.json",
+        f"../intermediary_data/{dir_template}/meson_{wildcards.channel}_samples.json",
+        f"../intermediary_data/{dir_template}/plaquette_samples.json",
     ]
 
 
 def ratio_fps_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/decay_constant_ps_samples.json",
-        f"intermediary_data/{dir_template}/meson_{wildcards.channel}_samples.json",
+        f"../intermediary_data/{dir_template}/decay_constant_ps_samples.json",
+        f"../intermediary_data/{dir_template}/meson_{wildcards.channel}_samples.json",
     ]
 
 
@@ -203,8 +203,8 @@ rule get_fps_ratio:
         data=ratio_fps_samples,
         script="src/get_Rfps.py",
     output:
-        mean=f"intermediary_data/{dir_template}/Rfps_{{channel}}_mean.csv",
-        samples=f"intermediary_data/{dir_template}/Rfps_{{channel}}_samples.json",
+        mean=f"../intermediary_data/{dir_template}/Rfps_{{channel}}_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/Rfps_{{channel}}_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -213,22 +213,22 @@ rule get_fps_ratio:
 
 def ratio_fps_smear_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/decay_constant_ps_samples.json",
-        f"intermediary_data/{dir_template}/smear_meson_{wildcards.channel}_samples.json",
+        f"../intermediary_data/{dir_template}/decay_constant_ps_samples.json",
+        f"../intermediary_data/{dir_template}/smear_meson_{wildcards.channel}_samples.json",
     ]
 
 
 def ratio_fps_rhoE1_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/decay_constant_ps_samples.json",
-        f"intermediary_data/{dir_template}/gevp_smear_meson_rhoE1_samples.json",
+        f"../intermediary_data/{dir_template}/decay_constant_ps_samples.json",
+        f"../intermediary_data/{dir_template}/gevp_smear_meson_rhoE1_samples.json",
     ]
 
 
 def ratio_mv_rhoE1_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/smear_meson_v_samples.json",
-        f"intermediary_data/{dir_template}/gevp_smear_meson_rhoE1_samples.json",
+        f"../intermediary_data/{dir_template}/smear_meson_v_samples.json",
+        f"../intermediary_data/{dir_template}/gevp_smear_meson_rhoE1_samples.json",
     ]
 
 
@@ -239,8 +239,8 @@ rule get_fps_smear_meson_ratio:
         data=ratio_fps_smear_samples,
         script="src/get_Rfps.py",
     output:
-        mean=f"intermediary_data/{dir_template}/smear_Rfps_{{channel}}_mean.csv",
-        samples=f"intermediary_data/{dir_template}/smear_Rfps_{{channel}}_samples.json",
+        mean=f"../intermediary_data/{dir_template}/smear_Rfps_{{channel}}_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/smear_Rfps_{{channel}}_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -254,8 +254,8 @@ rule get_fps_smear_rhoE1_ratio:
         data=ratio_fps_rhoE1_samples,
         script="src/get_Rfps.py",
     output:
-        mean=f"intermediary_data/{dir_template}/gevp_smear_Rfps_rhoE1_mean.csv",
-        samples=f"intermediary_data/{dir_template}/gevp_smear_Rfps_rhoE1_samples.json",
+        mean=f"../intermediary_data/{dir_template}/gevp_smear_Rfps_rhoE1_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/gevp_smear_Rfps_rhoE1_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -269,8 +269,8 @@ rule get_Rmv_smear_rhoE1_ratio:
         data=ratio_mv_rhoE1_samples,
         script="src/get_Rmv.py",
     output:
-        mean=f"intermediary_data/{dir_template}/gevp_smear_Rmv_rhoE1_mean.csv",
-        samples=f"intermediary_data/{dir_template}/gevp_smear_Rmv_rhoE1_samples.json",
+        mean=f"../intermediary_data/{dir_template}/gevp_smear_Rmv_rhoE1_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/gevp_smear_Rmv_rhoE1_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -279,7 +279,7 @@ rule get_Rmv_smear_rhoE1_ratio:
 
 def linear_fittable_pcac_data(wildcards):
     return [
-        f"intermediary_data/{dir_template}/mass_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/mass_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_linear_PCAC_fits"] and row["use_in_main_plots"]
     ]

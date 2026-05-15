@@ -14,9 +14,9 @@ rule w0:
         script="src/flow.py",
         #top_charge=f"assets/plots/top_charge_history_{dir_template}.pdf"
     output:
-        mean=f"intermediary_data/{dir_template}/w0_mean.csv",
-        samples=f"intermediary_data/{dir_template}/w0_samples.json",
-        bin_size_plot=f"intermediary_data/{dir_template}/w0_bin_size_check.pdf"
+        mean=f"../intermediary_data/{dir_template}/w0_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/w0_samples.json",
+        bin_size_plot=f"../intermediary_data/{dir_template}/w0_bin_size_check.pdf"
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -50,7 +50,7 @@ rule topological_charge:
         data=f"data_assets/nf2_gflow.h5",
         script="src/top_charge.py",
     output:
-        data=f"intermediary_data/{dir_template}/top_charge_mean.csv",
+        data=f"../intermediary_data/{dir_template}/top_charge_mean.csv",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -74,7 +74,7 @@ rule topological_charge_history_plot:
 
 def all_flow_data(wildcards):
     return [
-        f"intermediary_data/{dir_template}/{basename}.csv".format(**row)
+        f"../intermediary_data/{dir_template}/{basename}.csv".format(**row)
         for basename in ["w0_mean", "top_charge_mean"]
         for row in metadata.to_dict(orient="records")
         if row["use_in_w0"]

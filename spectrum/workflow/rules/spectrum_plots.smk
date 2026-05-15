@@ -5,7 +5,7 @@ metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
 
 def extraction_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av", "t", "s", "at"]
         for rep in ["f"]
@@ -15,7 +15,7 @@ def extraction_samples(wildcards):
 
 def mass_gevp_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/meson_gevp_{rep}_{channel}_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/meson_gevp_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "t", "av", "at", "s"]
         for rep in ["f"]
@@ -26,7 +26,7 @@ def mass_gevp_samples(wildcards):
 
 def mass_gevp_rhoE1_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/gevp_meson_rhoE1_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/gevp_meson_rhoE1_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]
         if row["VT_cross"]
@@ -35,7 +35,7 @@ def mass_gevp_rhoE1_samples(wildcards):
 
 def mass_smear_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/meson_smear_mass_{rep}_{channel}_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/meson_smear_mass_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "t"]
         for rep in ["f"]
@@ -46,7 +46,7 @@ def mass_smear_samples(wildcards):
 
 def w0_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/w0_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/w0_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]
     ]
@@ -54,7 +54,7 @@ def w0_samples(wildcards):
 
 def decay_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/decay_constant_{rep}_{channel}_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/decay_constant_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av"]
         for rep in ["f"]
@@ -65,7 +65,7 @@ def decay_samples(wildcards):
 
 def mass_extp(wildcards, observables):
     return [
-        f"intermediary_data/extrapolation_results/{observable}_samples.json".format(
+        f"../intermediary_data/extrapolation_results/{observable}_samples.json".format(
             **row
         )
         for observable in observables
@@ -112,7 +112,7 @@ def fit_result_ansatze(wildcards):
     observables = [f"f_{ch}_extp_{an}_mass" for an in ansatze for ch in channels]
     
     return [
-        f"intermediary_data/extrapolation_results/{obs}_samples.json".format(**row)
+        f"../intermediary_data/extrapolation_results/{obs}_samples.json".format(**row)
         for obs in observables
         for row in metadata.to_dict(orient="records")
         if row["use_in_extrapolation"]
@@ -127,7 +127,7 @@ def fit_result_ansatze_decay(wildcards):
     observables = [f"f_{ch}_extp_{an}_decayconstant" for an in ansatze for ch in channels]
     
     return [
-        f"intermediary_data/extrapolation_results/{obs}_samples.json".format(**row)
+        f"../intermediary_data/extrapolation_results/{obs}_samples.json".format(**row)
         for obs in observables
         for row in metadata.to_dict(orient="records")
         if row["use_in_extrapolation"]

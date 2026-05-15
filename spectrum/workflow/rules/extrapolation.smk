@@ -7,7 +7,7 @@ metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
 
 def extp_samples(wildcards, observables):
     return [
-        f"intermediary_data/{dir_template}/{observable}_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/{observable}_samples.json".format(**row)
         for observable in observables
         for row in metadata.to_dict(orient="records")
         if row["use_in_extrapolation"]
@@ -16,7 +16,7 @@ def extp_samples(wildcards, observables):
 
 def rhoE1_samples(wildcards):
     return [
-        f"intermediary_data/{dir_template}/gevp_meson_rhoE1_samples.json".format(**row)
+        f"../intermediary_data/{dir_template}/gevp_meson_rhoE1_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_extrapolation"]
         if row["VT_cross"]
@@ -42,8 +42,8 @@ rule Mass_continuum_massless_extrapolation:
         data_rhoE1=rhoE1_samples,
         script="src/extrapolation_mass.py",
     output:
-        mean=f"intermediary_data/extrapolation_results/f_{{channel}}_extp_mass_mean.csv",
-        samples=f"intermediary_data/extrapolation_results/f_{{channel}}_extp_mass_samples.json",
+        mean=f"../intermediary_data/extrapolation_results/f_{{channel}}_extp_mass_mean.csv",
+        samples=f"../intermediary_data/extrapolation_results/f_{{channel}}_extp_mass_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -68,8 +68,8 @@ rule Mass_continuum_massless_ansatz_extrapolation:
         ),
         script="src/extrapolation_ansatze.py",
     output:
-        mean=f"intermediary_data/extrapolation_results/f_{{channel}}_extp_{{ansatz}}_mass_mean.csv",
-        samples=f"intermediary_data/extrapolation_results/f_{{channel}}_extp_{{ansatz}}_mass_samples.json",
+        mean=f"../intermediary_data/extrapolation_results/f_{{channel}}_extp_{{ansatz}}_mass_mean.csv",
+        samples=f"../intermediary_data/extrapolation_results/f_{{channel}}_extp_{{ansatz}}_mass_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -94,8 +94,8 @@ rule Decay_continuum_massless_ansatz_extrapolation:
         ),
         script="src/extrapolation_ansatze_decay.py",
     output:
-        mean=f"intermediary_data/extrapolation_results/f_{{channel}}_extp_{{ansatz}}_decayconstant_mean.csv",
-        samples=f"intermediary_data/extrapolation_results/f_{{channel}}_extp_{{ansatz}}_decayconstant_samples.json",
+        mean=f"../intermediary_data/extrapolation_results/f_{{channel}}_extp_{{ansatz}}_decayconstant_mean.csv",
+        samples=f"../intermediary_data/extrapolation_results/f_{{channel}}_extp_{{ansatz}}_decayconstant_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -118,8 +118,8 @@ rule Decay_continuum_massless_extrapolation:
         ),
         script="src/extrapolation_decay.py",
     output:
-        mean=f"intermediary_data/extrapolation_results/f_{{channel}}_extp_decayconstant_mean.csv", 
-        samples=f"intermediary_data/extrapolation_results/f_{{channel}}_extp_decayconstant_samples.json",
+        mean=f"../intermediary_data/extrapolation_results/f_{{channel}}_extp_decayconstant_mean.csv", 
+        samples=f"../intermediary_data/extrapolation_results/f_{{channel}}_extp_decayconstant_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:

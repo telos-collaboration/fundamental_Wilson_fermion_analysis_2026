@@ -12,9 +12,9 @@ rule fit_pcac:
         data="data_assets/corr_sp4_FUN.h5",
         script="src/mpcac.py",
     output:
-        mean=f"intermediary_data/{dir_template}/mpcac_mean.csv",
-        samples=f"intermediary_data/{dir_template}/mpcac_samples.json",
-        plot=f"intermediary_data/{dir_template}/pcac_eff_mass.pdf",
+        mean=f"../intermediary_data/{dir_template}/mpcac_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/mpcac_samples.json",
+        plot=f"../intermediary_data/{dir_template}/pcac_eff_mass.pdf",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -29,7 +29,7 @@ rule fit_pcac:
 
 def all_pcac_data(wildcards):
     return [
-        f"intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]
     ]
@@ -37,7 +37,7 @@ def all_pcac_data(wildcards):
 
 def linear_fittable_pcac_data(wildcards):
     return [
-        f"intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_extrapolation"] and row["use_in_main_plots"]
     ]

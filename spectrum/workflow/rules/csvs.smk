@@ -1,6 +1,6 @@
 def expand_ensemble(observables, condition_key, dir_slugs=[""]):
     return [
-        f"intermediary_data/{dir_template}{dir_slug}/{observable}_mean.csv".format(
+        f"../intermediary_data/{dir_template}{dir_slug}/{observable}_mean.csv".format(
             **row
         )
         for observable in observables
@@ -54,7 +54,7 @@ rule ensemble_csv:
 
 def per_beta_results(wildcards):
     return [
-        f"intermediary_data/{fit_form}_extrapolation_results/{fit_form}_b{beta}_extp_mean.csv"
+        f"../intermediary_data/{fit_form}_extrapolation_results/{fit_form}_b{beta}_extp_mean.csv"
         for fit_form in ["deft", "chipt"]
         for beta in [6.6, 6.65, 6.7, 6.75, 6.8]
     ]
@@ -80,10 +80,10 @@ def global_eft_results(wildcards):
         "decayconstant": ("av", "ps", "v"),
     }
     return [
-        f"intermediary_data/extrapolation_results/{channel}_extp_{observable}_mean.csv"
+        f"../intermediary_data/extrapolation_results/{channel}_extp_{observable}_mean.csv"
         for observable, obs_channels in channels.items()
         for channel in obs_channels
-    ] + ["intermediary_data/extrapolation_results/R_mvdfps_extp_mean.csv"]
+    ] + ["../intermediary_data/extrapolation_results/R_mvdfps_extp_mean.csv"]
 
 
 rule global_eft_fits:

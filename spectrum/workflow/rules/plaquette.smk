@@ -11,8 +11,8 @@ rule avg_plaquette:
     wildcard_constraints:
         Ns=r"\d+",
     output:
-        mean=f"intermediary_data/{dir_template}/plaquette_mean.csv",
-        samples=f"intermediary_data/{dir_template}/plaquette_samples.json",
+        mean=f"../intermediary_data/{dir_template}/plaquette_mean.csv",
+        samples=f"../intermediary_data/{dir_template}/plaquette_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -33,7 +33,7 @@ rule avg_plaquette_hmc:
         data="data_assets/hmc.h5",
         script="src/plaquette_hmc.py",
     output:
-        mean=f"intermediary_data/{dir_template}_{{start}}start/plaquette_mean.csv",
+        mean=f"../intermediary_data/{dir_template}_{{start}}start/plaquette_mean.csv",
     wildcard_constraints:
         Ns=r"\d+",
     conda:
@@ -44,7 +44,7 @@ rule avg_plaquette_hmc:
 
 def main_plaquette_data(wildcards):
     return [
-        f"intermediary_data/{dir_template}/{basename}.csv".format(**row)
+        f"../intermediary_data/{dir_template}/{basename}.csv".format(**row)
         for basename in ["plaquette_mean", "meson_gevp_E0_f_ps_mean"]
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]

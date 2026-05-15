@@ -14,7 +14,7 @@ W0_threshold = 0.28125
 
 def autocorr_data(wildcards):
     return [
-        f"intermediary_data/{dir_template}/{basename}.csv".format(**row)
+        f"../intermediary_data/{dir_template}/{basename}.csv".format(**row)
         for basename in [
             "tau_ps_correlator_mean",
             "plaquette_mean",
@@ -29,7 +29,7 @@ def autocorr_data(wildcards):
 
 def extraction_means(wildcards):
     return [
-        f"intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av"]
         for rep in ["f"]
@@ -39,7 +39,7 @@ def extraction_means(wildcards):
 
 def gevp_E0_means(wildcards):
     return [
-        f"intermediary_data/{dir_template}/meson_gevp_E0_{rep}_{channel}_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/meson_gevp_E0_{rep}_{channel}_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "t", "s", "av", "at"]
         for rep in ["f"]
@@ -49,7 +49,7 @@ def gevp_E0_means(wildcards):
 
 def mPCAC_means(wildcards):
     return [
-        f"intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_table"]
     ] 
@@ -57,7 +57,7 @@ def mPCAC_means(wildcards):
 
 def decay_constant_means(wildcards):
     return [
-        f"intermediary_data/{dir_template}/decay_constant_{rep}_{channel}_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/decay_constant_{rep}_{channel}_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av"]
         for rep in ["f"]
@@ -66,21 +66,21 @@ def decay_constant_means(wildcards):
 
 def w0_means(wildcards):
     return [
-        f"intermediary_data/{dir_template}/w0_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/w0_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_table"]
     ] 
 
 def top_charge_means(wildcards):
     return [
-        f"intermediary_data/{dir_template}/top_charge_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/top_charge_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_table"]
     ]
 
 def plaq_means(wildcards):
     return [
-        f"intermediary_data/{dir_template}/plaquette_mean.csv".format(**row)
+        f"../intermediary_data/{dir_template}/plaquette_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_table"]
     ] 
@@ -88,55 +88,55 @@ def plaq_means(wildcards):
 
 def continuum_massless_extrapolation_mass(wildcards):
     return [
-        f"intermediary_data/extrapolation_results/f_{channel}_extp_mass_mean.csv".format()
+        f"../intermediary_data/extrapolation_results/f_{channel}_extp_mass_mean.csv".format()
         for channel in ["v", "t", "s", "av", "at"]
     ]
 
 def continuum_massless_extrapolation_mass_ansatze(wildcards ):
     return [
-        f"intermediary_data/extrapolation_results/f_{channel}_extp_{wildcards.ansatz}_mass_mean.csv".format()
+        f"../intermediary_data/extrapolation_results/f_{channel}_extp_{wildcards.ansatz}_mass_mean.csv".format()
         for channel in ["v", "t", "s", "av", "at"]
     ]
 
 
 def continuum_massless_extrapolation_decay_ansatze(wildcards ):
     return [
-        f"intermediary_data/extrapolation_results/f_{channel}_extp_{wildcards.ansatz}_decayconstant_mean.csv".format()
+        f"../intermediary_data/extrapolation_results/f_{channel}_extp_{wildcards.ansatz}_decayconstant_mean.csv".format()
         for channel in ["ps", "v", "av"]
     ]
 
 
 def continuum_massless_extrapolation_decayconstant(wildcards):
     return [
-        f"intermediary_data/extrapolation_results/f_{channel}_extp_decayconstant_mean.csv".format()
+        f"../intermediary_data/extrapolation_results/f_{channel}_extp_decayconstant_mean.csv".format()
         for channel in ["ps", "v", "av"]
     ]
 
 
 def continuum_massless_extrapolation_mass_a2(wildcards):
     return [
-        f"intermediary_data/extrapolation_results/f_{channel}_extp_a2_mass_mean.csv".format()
+        f"../intermediary_data/extrapolation_results/f_{channel}_extp_a2_mass_mean.csv".format()
         for channel in ["v", "t", "s", "av", "at"]
     ]
 
 
 def continuum_massless_extrapolation_decayconstant_a2(wildcards):
     return [
-        f"intermediary_data/extrapolation_results/f_{channel}_extp_a2_decayconstant_mean.csv".format()
+        f"../intermediary_data/extrapolation_results/f_{channel}_extp_a2_decayconstant_mean.csv".format()
         for channel in ["ps", "v", "av"]
     ]
 
 
 def continuum_massless_extrapolation_mass_a2_am2(wildcards):
     return [
-        f"intermediary_data/extrapolation_results/f_{channel}_extp_a2_am2_mass_mean.csv".format()
+        f"../intermediary_data/extrapolation_results/f_{channel}_extp_a2_am2_mass_mean.csv".format()
         for channel in ["v", "t", "s", "av", "at"]
     ]
 
 
 def continuum_massless_extrapolation_decayconstant_a2_am2(wildcards):
     return [
-        f"intermediary_data/extrapolation_results/f_{channel}_extp_a2_am2_decayconstant_mean.csv".format()
+        f"../intermediary_data/extrapolation_results/f_{channel}_extp_a2_am2_decayconstant_mean.csv".format()
         for channel in ["ps", "v", "av"]
     ]
 
@@ -322,8 +322,8 @@ rule g_VPP_KSRF:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        mv="intermediary_data/extrapolation_results/f_v_extp_a2_mass_samples.json",
-        fps="intermediary_data/extrapolation_results/f_ps_extp_a2_decayconstant_samples.json",
+        mv="../intermediary_data/extrapolation_results/f_v_extp_a2_mass_samples.json",
+        fps="../intermediary_data/extrapolation_results/f_ps_extp_a2_decayconstant_samples.json",
         script="src/tables/g_VPP_KSRF.py",
     output:
         table="assets/tables/g_VPP_KSRF.tex",
