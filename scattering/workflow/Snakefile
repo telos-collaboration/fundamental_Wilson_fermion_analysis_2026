@@ -307,7 +307,7 @@ rule compile_zeta:
         "environment.yml"
     shell:
         '''
-        mkdir -p tmp
+        mkdir -p ../intermediary_data/
         bash {input.script}  &> ../intermediary_data/make.log
         '''
 
