@@ -9,7 +9,7 @@ rule fit_pcac:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data="data_assets/corr_sp4_FUN.h5",
+        data="../data_assets/spectrum/corr_sp4_FUN.h5",
         script="src/mpcac.py",
     output:
         mean=f"../intermediary_data/{dir_template}/mpcac_mean.csv",
@@ -51,7 +51,7 @@ rule plot_pcac:
         linear_fit_data=linear_fittable_pcac_data,
         script="src/plots/pcac_fits.py",
     output:
-        plot="assets/plots/mpcac_vs_m0.{plot_filetype}",
+        plot="../assets/spectrum/plots/mpcac_vs_m0.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:

@@ -45,7 +45,7 @@ rule ensemble_csv:
         data=all_spectrum_csvs,
         script="src/csvs/spectrum_csv.py",
     output:
-        csv="data_assets/ensemble_data.csv",
+        csv="../data_assets/spectrum/ensemble_data.csv",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -67,7 +67,7 @@ rule per_beta_fits:
         data=per_beta_results,
         script="src/csvs/per_beta_csv.py",
     output:
-        csv="data_assets/chipt_deft_data.csv",
+        csv="../data_assets/spectrum/chipt_deft_data.csv",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -93,7 +93,7 @@ rule global_eft_fits:
         data=global_eft_results,
         script="src/csvs/global_eft_csv.py",
     output:
-        csv="data_assets/global_eft_data.csv",
+        csv="../data_assets/spectrum/global_eft_data.csv",
     conda:
         "../envs/flow_analysis.yml"
     shell:

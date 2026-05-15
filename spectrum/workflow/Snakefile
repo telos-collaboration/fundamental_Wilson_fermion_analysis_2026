@@ -17,7 +17,7 @@ include: "rules/csvs.smk"
 
 
 h5_data = expand(
-    "data_assets/{datafile}.h5",
+    "../data_assets/spectrum/{datafile}.h5",
     datafile=["corr_sp4_FUN", "nf2_gflow"],
 )
 
@@ -54,7 +54,7 @@ topology_history_plots = [
     ]
 ]
 plots = expand(
-    f"assets/plots/{{plot}}.{plot_filetype}",
+    f"../assets/spectrum/plots/{{plot}}.{plot_filetype}",
     plot=[
         "w0_vs_mpcac",
         *topology_history_plots,
@@ -69,7 +69,7 @@ plots = expand(
     ],
 )
 tables = expand(
-    "assets/tables/{table}.tex",
+    "../assets/spectrum/tables/{table}.tex",
     table=[
         "ensemble",
         "nlo_coefficients_decayconstant_a2",
@@ -82,7 +82,7 @@ tables = expand(
         ],
 )
 definitions = expand(
-    "assets/definitions/{definition}.tex",
+    "../assets/spectrum/definitions/{definition}.tex",
     definition=[
         "gflow_incomplete_ensembles",
         "plaquette_phasediagram_betas",
@@ -94,7 +94,7 @@ definitions = expand(
     ],
 )
 csv_data = expand(
-    "data_assets/{csv}.csv",
+    "../data_assets/spectrum/{csv}.csv",
     csv=["ensemble_data", "chipt_deft_data", "global_eft_data"],
 )
 external_data = expand(
@@ -103,32 +103,32 @@ external_data = expand(
 )
 
 mass_lec_tables = expand(
-    "assets/tables/le_coefficients_mass_ansatz_{ansatz}.tex",
+    "../assets/spectrum/tables/le_coefficients_mass_ansatz_{ansatz}.tex",
     ansatz=["a", "a2", "m4", "a2_m4", "a2_am2", "full"],
 )
 
 decay_lec_tables = expand(
-    "assets/tables/le_coefficients_decayconstant_ansatz_{ansatz}.tex",
+    "../assets/spectrum/tables/le_coefficients_decayconstant_ansatz_{ansatz}.tex",
     ansatz=["a", "a2", "m4", "a2_m4", "a2_am2", "full"],
 )
 extrapolation_mass_plots = expand(
-    f"assets/plots/extrapolation_mass_ansatz_{{ansatz}}.{plot_filetype}",
+    f"../assets/spectrum/plots/extrapolation_mass_ansatz_{{ansatz}}.{plot_filetype}",
     ansatz=["a", "a2", "m4", "a2_m4", "a2_am2", "full"]
 )
 
 extrapolation_decayconstant_plots = expand(
-    f"assets/plots/extrapolation_decayconstant_ansatz_{{ansatz}}.{plot_filetype}",
+    f"../assets/spectrum/plots/extrapolation_decayconstant_ansatz_{{ansatz}}.{plot_filetype}",
     ansatz=["a", "a2", "m4", "a2_m4", "a2_am2", "full"]
 )
 extrapolation_by_meson = expand(
-    f"assets/plots/{{obs}}_all_con_sp4fund.pdf",
+    f"../assets/spectrum/plots/{{obs}}_all_con_sp4fund.pdf",
     obs = ["m2", "dec2"]
 )
 nlo_tables = [
-    "assets/tables/nlo_coefficients_decayconstant_a2_am2.tex",
-    "assets/tables/nlo_coefficients_decayconstant_a2.tex",
-    "assets/tables/nlo_coefficients_mass_a2_am2.tex",
-    "assets/tables/nlo_coefficients_mass_a2.tex",
+    "../assets/spectrum/tables/nlo_coefficients_decayconstant_a2_am2.tex",
+    "../assets/spectrum/tables/nlo_coefficients_decayconstant_a2.tex",
+    "../assets/spectrum/tables/nlo_coefficients_mass_a2_am2.tex",
+    "../assets/spectrum/tables/nlo_coefficients_mass_a2.tex",
 ]
 
 rule LECs:
@@ -142,8 +142,8 @@ rule LECs:
 
 rule all:
     input:
-        #assets="assets/info.json",
-        #data_assets="data_assets/info.json",
+        #assets="../assets/spectrum/info.json",
+        #data_assets="../data_assets/spectrum/info.json",
         plots=plots,
         tables=tables,
 
@@ -159,7 +159,7 @@ rule provenance_stamp:
         ensemble_metadata="../metadata/spectrum/ensemble_metadata.csv",
         external_data=external_data,
     output:
-        stamp="assets/info.json",
+        stamp="../assets/spectrum/info.json",
     conda:
         "envs/flow_analysis.yml"
     shell:
@@ -176,7 +176,7 @@ rule data_provenance_stamp:
         ensemble_metadata="../metadata/spectrum/ensemble_metadata.csv",
         external_data=external_data,
     output:
-        stamp="data_assets/info.json",
+        stamp="../data_assets/spectrum/info.json",
     conda:
         "envs/flow_analysis.yml"
     shell:

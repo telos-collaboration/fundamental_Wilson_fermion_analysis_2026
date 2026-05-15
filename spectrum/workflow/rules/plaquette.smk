@@ -6,7 +6,7 @@ rule avg_plaquette:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data="data_assets/corr_sp4_FUN.h5",
+        data="../data_assets/spectrum/corr_sp4_FUN.h5",
         script="src/plaquette_skip.py",
     wildcard_constraints:
         Ns=r"\d+",
@@ -30,7 +30,7 @@ rule avg_plaquette_hmc:
             within=metadata, query=metadata_query + " & start_type == '{start}'"
         ),
     input:
-        data="data_assets/hmc.h5",
+        data="../data_assets/spectrum/hmc.h5",
         script="src/plaquette_hmc.py",
     output:
         mean=f"../intermediary_data/{dir_template}_{{start}}start/plaquette_mean.csv",
@@ -58,8 +58,8 @@ rule tabulate_largevolume_plaquettes:
         data=main_plaquette_data,
         script="src/tables/plaquette.py",
     output:
-        table="assets/tables/plaquette_table.tex",
-        definitions="assets/definitions/heavy_ps_limit.tex",
+        table="../assets/spectrum/tables/plaquette_table.tex",
+        definitions="../assets/spectrum/definitions/heavy_ps_limit.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:

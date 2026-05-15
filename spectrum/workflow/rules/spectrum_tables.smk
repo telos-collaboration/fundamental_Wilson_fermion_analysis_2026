@@ -152,7 +152,7 @@ rule f_meson_mass_table:
         mPCAC=mPCAC_means,
         script="src/tables/print_spectrum_meson_1.py",
     output:
-        table="assets/tables/spectrum_meson_1.tex",
+        table="../assets/spectrum/tables/spectrum_meson_1.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -168,7 +168,7 @@ rule f_meson_mass_table2:
         E0=gevp_E0_means,
         script="src/tables/print_spectrum_meson_2.py",
     output:
-        table="assets/tables/spectrum_meson_2.tex",
+        table="../assets/spectrum/tables/spectrum_meson_2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -185,7 +185,7 @@ rule ens_table:
         top_charge=top_charge_means,
         script="src/tables/print_ens.py",
     output:
-        table="assets/tables/ensemble.tex",
+        table="../assets/spectrum/tables/ensemble.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -199,7 +199,7 @@ rule continuum_massless_mass_ansatze:
         data=continuum_massless_extrapolation_mass_ansatze,
         script="src/tables/continuum_massless_mass_ansatze.py",
     output:
-        table="assets/tables/le_coefficients_mass_ansatz_{ansatz}.tex",
+        table="../assets/spectrum/tables/le_coefficients_mass_ansatz_{ansatz}.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -212,7 +212,7 @@ rule continuum_massless_decay_ansatze:
         data=continuum_massless_extrapolation_decay_ansatze,
         script="src/tables/continuum_massless_decayconstant_ansatze.py",
     output:
-        table="assets/tables/le_coefficients_decayconstant_ansatz_{ansatz}.tex",
+        table="../assets/spectrum/tables/le_coefficients_decayconstant_ansatz_{ansatz}.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -227,7 +227,7 @@ rule continuum_massless_mass_a2_am2:
         data=continuum_massless_extrapolation_mass_a2_am2,
         script="src/tables/continuum_massless_mass_a2_am2.py",
     output:
-        table="assets/tables/nlo_coefficients_mass_a2_am2.tex",
+        table="../assets/spectrum/tables/nlo_coefficients_mass_a2_am2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -241,7 +241,7 @@ rule continuum_massless_decay_a2_am2:
         data=continuum_massless_extrapolation_decayconstant_a2_am2,
         script="src/tables/continuum_massless_decayconstant_a2_am2.py",
     output:
-        table="assets/tables/nlo_coefficients_decayconstant_a2_am2.tex",
+        table="../assets/spectrum/tables/nlo_coefficients_decayconstant_a2_am2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -255,7 +255,7 @@ rule continuum_massless_mass:
         data=continuum_massless_extrapolation_mass,
         script="src/tables/continuum_massless_mass.py",
     output:
-        table="assets/tables/nlo_coefficients_mass.tex",
+        table="../assets/spectrum/tables/nlo_coefficients_mass.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -269,7 +269,7 @@ rule continuum_massless_decayconstant:
         data=continuum_massless_extrapolation_decayconstant,
         script="src/tables/continuum_massless_decayconstant.py",
     output:
-        table="assets/tables/nlo_coefficients_decayconstant.tex",
+        table="../assets/spectrum/tables/nlo_coefficients_decayconstant.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -283,7 +283,7 @@ rule continuum_massless_mass_a2:
         data=continuum_massless_extrapolation_mass_a2,
         script="src/tables/continuum_massless_mass_a2.py",
     output:
-        table="assets/tables/nlo_coefficients_mass_a2.tex",
+        table="../assets/spectrum/tables/nlo_coefficients_mass_a2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -297,7 +297,7 @@ rule continuum_massless_decayconstant_a2:
         data=continuum_massless_extrapolation_decayconstant_a2,
         script="src/tables/continuum_massless_decayconstant_a2.py",
     output:
-        table="assets/tables/nlo_coefficients_decayconstant_a2.tex",
+        table="../assets/spectrum/tables/nlo_coefficients_decayconstant_a2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -311,7 +311,7 @@ rule autocorr_table:
         data=autocorr_data,
         script="src/tables/autocorr.py",
     output:
-        table="assets/tables/autocorr_table.tex",
+        table="../assets/spectrum/tables/autocorr_table.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -326,7 +326,7 @@ rule g_VPP_KSRF:
         fps="../intermediary_data/extrapolation_results/f_ps_extp_a2_decayconstant_samples.json",
         script="src/tables/g_VPP_KSRF.py",
     output:
-        table="assets/tables/g_VPP_KSRF.tex",
+        table="../assets/spectrum/tables/g_VPP_KSRF.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:

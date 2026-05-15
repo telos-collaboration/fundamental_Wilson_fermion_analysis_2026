@@ -23,7 +23,7 @@ rule gevp_meson_mass:
         E3_plateau_start=lambda wildcards: metadata_lookup(cols=f"{wildcards.channel}_E3_plateau_start"),
         E3_plateau_end=lambda wildcards: metadata_lookup(cols=f"{wildcards.channel}_E3_plateau_end"),
     input:
-        data="data_assets/corr_sp4_FUN.h5",
+        data="../data_assets/spectrum/corr_sp4_FUN.h5",
         script="src/mass_gevp_meson.py",
     output:
         mean=f"../intermediary_data/{dir_template}/meson_gevp_E0_{{channel}}_mean.csv",
@@ -53,7 +53,7 @@ rule meson_matrix_element:
         plateau_start=lambda wildcards: metadata_lookup(cols=f"{wildcards.channel}_matrix_element_plateau_start"),
         plateau_end=lambda wildcards: metadata_lookup(cols=f"{wildcards.channel}_matrix_element_plateau_end"),
     input:
-        data="data_assets/corr_sp4_FUN.h5",
+        data="../data_assets/spectrum/corr_sp4_FUN.h5",
         script="src/matrix_element_meson.py",
     output:
         mean=f"../intermediary_data/{dir_template}/meson_extraction_{{channel}}_mean.csv",
@@ -77,7 +77,7 @@ rule smear_meson_mass:
         plateau_end=lambda wildcards: metadata_lookup(cols=f"{wildcards.channel}_smear_mass_plateau_end"),
         n_source_smear=lambda wildcards: metadata_lookup(cols=f"{wildcards.channel}_n_source_smear"),
     input:
-        data="data_assets/corr_sp4_FUN.h5",
+        data="../data_assets/spectrum/corr_sp4_FUN.h5",
         script="src/mass_smear.py",
     output:
         mean=f"../intermediary_data/{dir_template}/meson_smear_mass_{{channel}}_mean.csv",
@@ -99,7 +99,7 @@ rule fit_mass_GEVP_rhoE1:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=metadata_lookup(),
     input:
-        data="data_assets/corr_sp4_FUN.h5",
+        data="../data_assets/spectrum/corr_sp4_FUN.h5",
         script="src/mass_gevp_rho_prime.py",
     output:
         mean=f"../intermediary_data/{dir_template}/gevp_meson_rhoE1_mean.csv",
@@ -149,7 +149,7 @@ rule ps_correlator_autocorrelation:
         plateau_start=lambda wildcards: metadata_lookup(cols="f_ps_matrix_element_plateau_start"),
         plateau_end=lambda wildcards: metadata_lookup(cols=f"f_ps_matrix_element_plateau_end"),
     input:
-        data="data_assets/corr_sp4_FUN.h5",
+        data="../data_assets/spectrum/corr_sp4_FUN.h5",
         script="src/ps_correlators_autocorrelation.py",
     output:
         mean=f"../intermediary_data/{dir_template}/tau_ps_correlator_mean.csv",
@@ -171,8 +171,8 @@ rule ps_eff_w0_autocorrelation:
         plateau_start=lambda wildcards: metadata_lookup(cols="f_ps_matrix_element_plateau_start"),
         plateau_end=lambda wildcards: metadata_lookup(cols=f"f_ps_matrix_element_plateau_end"),
     input:
-        data="data_assets/corr_sp4_FUN.h5",
-        flow_data="data_assets/nf2_gflow.h5",
+        data="../data_assets/spectrum/corr_sp4_FUN.h5",
+        flow_data="../data_assets/spectrum/nf2_gflow.h5",
         script="src/ps_eff_w0_autocorrelation.py",
     output:
         mean=f"../intermediary_data/{dir_template}/tau_ps_eff_w0_mean.csv",

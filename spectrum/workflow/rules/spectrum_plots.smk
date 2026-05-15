@@ -97,7 +97,7 @@ rule plot_extrapolations_meson_mass:
         ),
         script="src/plots/w0mps_vs_meson.py",
     output:
-        plot_data="assets/plots/m2_all_con_sp4fund.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/m2_all_con_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -142,7 +142,7 @@ rule plot_extrapolations_ansatz_mass:
         fit_results=fit_result_ansatze,
         script="src/plots/extrapolation_mass.py",
     output:
-        plot_data="assets/plots/extrapolation_mass_ansatz_{ansatz}.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/extrapolation_mass_ansatz_{ansatz}.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -159,7 +159,7 @@ rule plot_extrapolations_scan_decay:
         fit_results=fit_result_ansatze_decay,
         script="src/plots/extrapolation_decayconstant.py",
     output:
-        plot_data="assets/plots/extrapolation_decayconstant_ansatz_{ansatz}.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/extrapolation_decayconstant_ansatz_{ansatz}.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -186,7 +186,7 @@ rule plot_extrapolations_summary:
         ),
         script="src/plots/w0mps_summary.py",
     output:
-        summary_plot="assets/plots/spec_summary_sp4fund.{plot_filetype}",
+        summary_plot="../assets/spectrum/plots/spec_summary_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -213,7 +213,7 @@ rule plot_extrapolations_summary_ansatz:
         ),
         script="src/plots/w0mps_summary_ansatz.py",
     output:
-        summary_plot="assets/plots/spec_summary_{ansatz}_sp4fund.{plot_filetype}",
+        summary_plot="../assets/spectrum/plots/spec_summary_{ansatz}_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -240,7 +240,7 @@ rule plot_extrapolations_summary_in_fps_ansatz:
         ),
         script="src/plots/w0mps_summary_in_fps_ansatz.py",
     output:
-        summary_plot="assets/plots/spec_in_fps_summary_{ansatz}_sp4fund.{plot_filetype}",
+        summary_plot="../assets/spectrum/plots/spec_in_fps_summary_{ansatz}_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -269,7 +269,7 @@ rule plot_extrapolations_summary_in_fps:
         ),
         script="src/plots/w0mps_summary_in_fps.py",
     output:
-        summary_plot="assets/plots/spec_summary_in_fps_sp4fund.{plot_filetype}",
+        summary_plot="../assets/spectrum/plots/spec_summary_in_fps_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -284,7 +284,7 @@ rule plot_mpsL:
         w0=w0_samples,
         script="src/plots/mps_vs_mpsL.py",
     output:
-        plot_data="assets/plots/mpsL.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/mpsL.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -311,7 +311,7 @@ rule plot_extrapolations_meson_decay:
         ),
         script="src/plots/w0mps_vs_decay.py",
     output:
-        plot_data="assets/plots/dec2_all_con_sp4fund.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/dec2_all_con_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -326,7 +326,7 @@ rule plot_extrapolations_Rvps:
         w0=w0_samples,
         script="src/plots/w0mps_vs_Rvps.py",
     output:
-        plot_data="assets/plots/Rvps_all_con_sp4fund.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/Rvps_all_con_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -350,7 +350,7 @@ rule plot_g_rho_pipi:
         ),
         script="src/plots/w0_vs_mv_d_fps.py",
     output:
-        plot_data="assets/plots/R_g_rho_pipi.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/R_g_rho_pipi.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -365,7 +365,7 @@ rule plot_test:
         w0=w0_samples,
         script="src/plots/test.py",
     output:
-        plot_data="assets/plots/test.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/test.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -380,7 +380,7 @@ rule plot_extrapolations_meson_mass_smear:
         w0=w0_samples,
         script="src/plots/w0mps_vs_meson_smear.py",
     output:
-        plot_data="assets/plots/m2_all_con_sp4fund_smear.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/m2_all_con_sp4fund_smear.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -396,7 +396,7 @@ rule compare_mass_extraction_gevp:
         w0=w0_samples,
         script="src/plots/compare_extraction_gevp.py",
     output:
-        plot_data="assets/plots/compare_mass.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/compare_mass.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -412,7 +412,7 @@ rule compare_mass_smear_gevp:
         w0=w0_samples,
         script="src/plots/compare_extraction_gevp.py",
     output:
-        plot_data="assets/plots/compare_mass.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/compare_mass.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -437,7 +437,7 @@ rule check_lat_a_extrapolations_meson_mass:
         ),
         script="src/plots/lat_a_vs_meson.py",
     output:
-        plot_data="assets/plots/m2_all_lat_a_sp4fund.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/m2_all_lat_a_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -461,7 +461,7 @@ rule check_lat_a_extrapolations_meson_decay:
         ),
         script="src/plots/lat_a_vs_decay.py",
     output:
-        plot_data="assets/plots/dec2_all_lat_a_sp4fund.{plot_filetype}",
+        plot_data="../assets/spectrum/plots/dec2_all_lat_a_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:

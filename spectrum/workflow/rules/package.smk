@@ -11,7 +11,7 @@ rule package_smeared:
         files=glob("../raw_data/corr/{smearing}/*"),
         script=f"{parsing_base}/scripts/write_meson_{{smearing}}.jl",
     output:
-        h5=protected("data_assets/correlators_{smearing}.h5"),
+        h5=protected("../data_assets/spectrum/correlators_{smearing}.h5"),
     conda:
         "../envs/hirep_parsing.yml"
     # Start packaging early,
@@ -28,7 +28,7 @@ rule package_gflow:
         files=glob("../raw_data/gradient_flow/*/topology/out/out_flow"),
         script="src/package_flows.py",
     output:
-        h5="data_assets/nf2_gflow.h5",
+        h5="../data_assets/spectrum/nf2_gflow.h5",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -42,7 +42,7 @@ rule package_hmc:
         files=glob("../raw_data/hmc/out_hmc_*"),
         script="src/package_hmc.py",
     output:
-        h5=protected("data_assets/hmc.h5"),
+        h5=protected("../data_assets/spectrum/hmc.h5"),
     conda:
         "../envs/flow_analysis.yml"
     shell:

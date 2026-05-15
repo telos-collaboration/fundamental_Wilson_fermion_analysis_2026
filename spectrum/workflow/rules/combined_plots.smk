@@ -20,7 +20,7 @@ rule plot_w0_vs_mpcac:
         data=partial(all_samples, observables=["w0", "mpcac"]),
         script="src/plots/w0_vs_mpcac.py",
     output:
-        plot="assets/plots/w0_vs_mpcac.{plot_filetype}",
+        plot="../assets/spectrum/plots/w0_vs_mpcac.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -44,8 +44,8 @@ rule plaquette_phase_diagram:
         data=plaquette_data,
         script="src/plots/plaquette_phasediagram.py",
     output:
-        plot=f"assets/plots/plaquette_phasediagram.{plot_filetype}",
-        definitions="assets/definitions/plaquette_phasediagram_betas.tex",
+        plot=f"../assets/spectrum/plots/plaquette_phasediagram.{plot_filetype}",
+        definitions="../assets/spectrum/definitions/plaquette_phasediagram_betas.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:

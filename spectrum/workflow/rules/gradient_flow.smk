@@ -10,9 +10,9 @@ rule w0:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data=f"data_assets/nf2_gflow.h5",
+        data=f"../data_assets/spectrum/nf2_gflow.h5",
         script="src/flow.py",
-        #top_charge=f"assets/plots/top_charge_history_{dir_template}.pdf"
+        #top_charge=f"../assets/spectrum/plots/top_charge_history_{dir_template}.pdf"
     output:
         mean=f"../intermediary_data/{dir_template}/w0_mean.csv",
         samples=f"../intermediary_data/{dir_template}/w0_samples.json",
@@ -32,10 +32,10 @@ rule w0_flow_plot:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data=f"data_assets/nf2_gflow.h5",
+        data=f"../data_assets/spectrum/nf2_gflow.h5",
         script="src/plot_w_flow.py",
     output:
-        plot=f"assets/plots/w0_flow_{dir_template}.{{plot_filetype}}",
+        plot=f"../assets/spectrum/plots/w0_flow_{dir_template}.{{plot_filetype}}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -47,7 +47,7 @@ rule topological_charge:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data=f"data_assets/nf2_gflow.h5",
+        data=f"../data_assets/spectrum/nf2_gflow.h5",
         script="src/top_charge.py",
     output:
         data=f"../intermediary_data/{dir_template}/top_charge_mean.csv",
@@ -62,10 +62,10 @@ rule topological_charge_history_plot:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data=f"data_assets/nf2_gflow.h5",
+        data=f"../data_assets/spectrum/nf2_gflow.h5",
         script="src/top_charge.py",
     output:
-        plot=f"assets/plots/top_charge_history_{dir_template}.pdf",
+        plot=f"../assets/spectrum/plots/top_charge_history_{dir_template}.pdf",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -88,8 +88,8 @@ rule gflow_table:
         data=all_flow_data,
         script="src/tables/Q_table.py",
     output:
-        table="assets/tables/gflow_table.tex",
-        definitions="assets/definitions/gflow_incomplete_ensembles.tex",
+        table="../assets/spectrum/tables/gflow_table.tex",
+        definitions="../assets/spectrum/definitions/gflow_incomplete_ensembles.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
