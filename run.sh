@@ -1,6 +1,6 @@
 cd scattering
-snakemake --use-conda --cores 8 --forceall --rerun-incomplete
+snakemake --use-conda --cores all --rerun-incomplete
 cd -
 cd spectrum
-snakemake --use-conda --cores 8 --forceall --rerun-incomplete
+snakemake --use-conda --cores all --rerun-incomplete
 cd -
