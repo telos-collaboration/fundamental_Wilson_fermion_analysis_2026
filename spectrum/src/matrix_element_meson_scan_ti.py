@@ -48,7 +48,7 @@ def ps_extraction(ensemble, args):
     plt.xlabel('t_i')
     plt.ylabel('matrix element')
     plt.title(f'{args.ensemble_name} {args.channel}')
-    plt.savefig(f"../intermediary_data/check/f_ps/matrix_element_{args.ensemble_name}_ps.pdf")
+    plt.savefig(f"intermediary_data/check/f_ps/matrix_element_{args.ensemble_name}_ps.pdf")
     
 
     return mass, matrix_element, chi2
@@ -86,7 +86,7 @@ def ch_extraction(ensemble, args):
     plt.xlabel('t_i')
     plt.ylabel('matrix element')
     plt.title(f'{args.ensemble_name} {args.channel}')
-    plt.savefig(f"../intermediary_data/check/{args.channel}/matrix_element_{args.ensemble_name}_{args.channel}.pdf")
+    plt.savefig(f"intermediary_data/check/{args.channel}/matrix_element_{args.ensemble_name}_{args.channel}.pdf")
 
     
     return mass, matrix_element, chi2

@@ -68,7 +68,7 @@ the steps below involving running `snakemake` should work correctly.
        by running
 
        ```shellsession
-       snakemake --touch ../data_assets/spectrum/{correlators_smear,correlators_wall,flows,hmc}.h5
+       snakemake --touch data_assets/spectrum/{correlators_smear,correlators_wall,flows,hmc}.h5
        ```
 
 4. Download the `ensemble_metadata.csv` file from [the data release][datarelease],
@@ -101,7 +101,7 @@ and around 5 hours starting from raw data.
 ## Output
 
 Output plots, tables, and definitions
-are placed in the `../assets/spectrum/plots`, `../assets/spectrum/tables`, and `../assets/spectrum/definitions` directories.
+are placed in the `assets/spectrum/plots`, `assets/spectrum/tables`, and `assets/spectrum/definitions` directories.
 
 Output data assets are placed into the `data_assets` directory.
 

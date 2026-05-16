@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
+metadata = pd.read_csv("metadata/spectrum/ensemble_metadata.csv")
 
 
 rule fit_pcac:
@@ -9,12 +9,12 @@ rule fit_pcac:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data="../data_assets/spectrum/corr_sp4_FUN.h5",
-        script="src/mpcac.py",
+        data="data_assets/spectrum/corr_sp4_FUN.h5",
+        script="spectrum/src/mpcac.py",
     output:
-        mean=f"../intermediary_data/{dir_template}/mpcac_mean.csv",
-        samples=f"../intermediary_data/{dir_template}/mpcac_samples.json",
-        plot=f"../intermediary_data/{dir_template}/pcac_eff_mass.pdf",
+        mean=f"intermediary_data/{dir_template}/mpcac_mean.csv",
+        samples=f"intermediary_data/{dir_template}/mpcac_samples.json",
+        plot=f"intermediary_data/{dir_template}/pcac_eff_mass.pdf",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -29,7 +29,7 @@ rule fit_pcac:
 
 def all_pcac_data(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]
     ]
@@ -37,7 +37,7 @@ def all_pcac_data(wildcards):
 
 def linear_fittable_pcac_data(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_extrapolation"] and row["use_in_main_plots"]
     ]
@@ -49,9 +49,9 @@ rule plot_pcac:
     input:
         plot_data=all_pcac_data,
         linear_fit_data=linear_fittable_pcac_data,
-        script="src/plots/pcac_fits.py",
+        script="spectrum/src/plots/pcac_fits.py",
     output:
-        plot="../assets/spectrum/plots/mpcac_vs_m0.{plot_filetype}",
+        plot="assets/spectrum/plots/mpcac_vs_m0.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:

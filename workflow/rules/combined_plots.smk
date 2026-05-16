@@ -1,12 +1,12 @@
 from functools import partial
 
 
-metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
+metadata = pd.read_csv("metadata/spectrum/ensemble_metadata.csv")
 
 
 def all_samples(wildcards, observables):
     return [
-        f"../intermediary_data/{dir_template}/{observable}_samples.json".format(**row)
+        f"intermediary_data/{dir_template}/{observable}_samples.json".format(**row)
         for observable in observables
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]
@@ -18,9 +18,9 @@ rule plot_w0_vs_mpcac:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=partial(all_samples, observables=["w0", "mpcac"]),
-        script="src/plots/w0_vs_mpcac.py",
+        script="spectrum/src/plots/w0_vs_mpcac.py",
     output:
-        plot="../assets/spectrum/plots/w0_vs_mpcac.{plot_filetype}",
+        plot="assets/spectrum/plots/w0_vs_mpcac.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -29,7 +29,7 @@ rule plot_w0_vs_mpcac:
 
 def plaquette_data(wildcards):
     return [
-        f"../intermediary_data/{dir_template}_{{start_type}}start/plaquette_mean.csv".format(
+        f"intermediary_data/{dir_template}_{{start_type}}start/plaquette_mean.csv".format(
             **row
         )
         for row in metadata.to_dict(orient="records")
@@ -42,10 +42,10 @@ rule plaquette_phase_diagram:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=plaquette_data,
-        script="src/plots/plaquette_phasediagram.py",
+        script="spectrum/src/plots/plaquette_phasediagram.py",
     output:
-        plot=f"../assets/spectrum/plots/plaquette_phasediagram.{plot_filetype}",
-        definitions="../assets/spectrum/definitions/plaquette_phasediagram_betas.tex",
+        plot=f"assets/spectrum/plots/plaquette_phasediagram.{plot_filetype}",
+        definitions="assets/spectrum/definitions/plaquette_phasediagram_betas.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:

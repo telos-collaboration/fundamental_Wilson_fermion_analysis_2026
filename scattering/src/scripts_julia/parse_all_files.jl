@@ -1,4 +1,4 @@
-using Pkg; Pkg.activate("src/src_jl")
+using Pkg; Pkg.activate("scattering/src/src_jl")
 using ArgParse: ArgParseSettings, parse_args, @add_arg_table
 using DelimitedFiles: readdlm
 using ScatteringI1: isospin1_to_hdf5

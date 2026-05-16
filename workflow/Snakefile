@@ -1,6 +1,6 @@
 metadata_query = "Nc == {Nc} & Nt == {Nt} & Ns == {Ns} & beta == {beta} & nF == {nF} & mF == {mF}"
 dir_template = "Sp{Nc}b{beta}nF{nF}mF{mF}T{Nt}L{Ns}"
-plot_styles = "../styles/prd.mplstyle"
+plot_styles = "styles/prd.mplstyle"
 plot_filetype = "pdf"
 
 
@@ -51,7 +51,7 @@ topology_history_plots = [
 
 
 plots_spectrum = expand(
-    f"../assets/spectrum/plots/{{plot}}.{plot_filetype}",
+    f"assets/spectrum/plots/{{plot}}.{plot_filetype}",
     plot=[
         "w0_vs_mpcac",
         *topology_history_plots,
@@ -68,7 +68,7 @@ plots_spectrum = expand(
 
 
 tables_spectrum = expand(
-    "../assets/spectrum/tables/{table}.tex",
+    "assets/spectrum/tables/{table}.tex",
     table=[
         "ensemble",
         "nlo_coefficients_decayconstant_a2",
@@ -82,36 +82,60 @@ tables_spectrum = expand(
 )
 
 mass_lec_tables = expand(
-    "../assets/spectrum/tables/le_coefficients_mass_ansatz_{ansatz}.tex",
+    "assets/spectrum/tables/le_coefficients_mass_ansatz_{ansatz}.tex",
     ansatz=["a", "a2", "m4", "a2_m4", "a2_am2", "full"],
 )
 
 decay_lec_tables = expand(
-    "../assets/spectrum/tables/le_coefficients_decayconstant_ansatz_{ansatz}.tex",
+    "assets/spectrum/tables/le_coefficients_decayconstant_ansatz_{ansatz}.tex",
     ansatz=["a", "a2", "m4", "a2_m4", "a2_am2", "full"],
 )
 extrapolation_mass_plots = expand(
-    f"../assets/spectrum/plots/extrapolation_mass_ansatz_{{ansatz}}.{plot_filetype}",
+    f"assets/spectrum/plots/extrapolation_mass_ansatz_{{ansatz}}.{plot_filetype}",
     ansatz=["a", "a2", "m4", "a2_m4", "a2_am2", "full"]
 )
 
 extrapolation_decayconstant_plots = expand(
-    f"../assets/spectrum/plots/extrapolation_decayconstant_ansatz_{{ansatz}}.{plot_filetype}",
+    f"assets/spectrum/plots/extrapolation_decayconstant_ansatz_{{ansatz}}.{plot_filetype}",
     ansatz=["a", "a2", "m4", "a2_m4", "a2_am2", "full"]
 )
 extrapolation_by_meson = expand(
-    f"../assets/spectrum/plots/{{obs}}_all_con_sp4fund.pdf",
+    f"assets/spectrum/plots/{{obs}}_all_con_sp4fund.pdf",
     obs = ["m2", "dec2"]
 )
 nlo_tables = [
-    "../assets/spectrum/tables/nlo_coefficients_decayconstant_a2_am2.tex",
-    "../assets/spectrum/tables/nlo_coefficients_decayconstant_a2.tex",
-    "../assets/spectrum/tables/nlo_coefficients_mass_a2_am2.tex",
-    "../assets/spectrum/tables/nlo_coefficients_mass_a2.tex",
+    "assets/spectrum/tables/nlo_coefficients_decayconstant_a2_am2.tex",
+    "assets/spectrum/tables/nlo_coefficients_decayconstant_a2.tex",
+    "assets/spectrum/tables/nlo_coefficients_mass_a2_am2.tex",
+    "assets/spectrum/tables/nlo_coefficients_mass_a2.tex",
+]
+
+include: "rules/scattering.smk"
+
+plots_scattering = [
+    "assets/scattering/plots/effective_masses_(g)evp.pdf",
+    "assets/scattering/plots/scattering/E_vs_L_heavy.pdf",
+    "assets/scattering/plots/scattering/E_vs_L_medium_light.pdf",
+    "assets/scattering/plots/scattering/phase_shift_plot_light.pdf",
+    "assets/scattering/plots/scattering/phase_shift_plot_medium.pdf",
+    "assets/scattering/plots/scattering/phase_shift_plot_heavy.pdf",
+    "assets/scattering/plots/scattering/sigma_comb_units.pdf",
+    "assets/scattering/plots/finite_volume/fv_b7.05_m0.867.pdf",
+    "assets/scattering/plots/finite_volume/fv_b7.05_m0.863.pdf",
+    "assets/scattering/plots/finite_volume/fv_b6.9_m0.92.pdf",
+]
+
+tables_scattering = [
+    "assets/scattering/tables/table_II.tex",
+    "assets/scattering/tables/beta6.9m-0.92.tex",
+    "assets/scattering/tables/beta7.05m-0.863.tex",
+    "assets/scattering/tables/beta7.05m-0.867.tex",
 ]
 
 rule all:
     input:
+        tables_scattering = tables_scattering,
+        plots_scattering = plots_scattering,
         data=mass_lec_tables,
         decay_data=decay_lec_tables,
         mass_plots=extrapolation_mass_plots,

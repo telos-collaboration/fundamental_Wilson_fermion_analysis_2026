@@ -1,4 +1,4 @@
-using Pkg; Pkg.activate("src/src_jl")
+using Pkg; Pkg.activate("scattering/src/src_jl")
 using HDF5
 using MadrasSokal
 using Statistics

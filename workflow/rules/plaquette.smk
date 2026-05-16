@@ -6,13 +6,13 @@ rule avg_plaquette:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data="../data_assets/spectrum/corr_sp4_FUN.h5",
-        script="src/plaquette_skip.py",
+        data="data_assets/spectrum/corr_sp4_FUN.h5",
+        script="spectrum/src/plaquette_skip.py",
     wildcard_constraints:
         Ns=r"\d+",
     output:
-        mean=f"../intermediary_data/{dir_template}/plaquette_mean.csv",
-        samples=f"../intermediary_data/{dir_template}/plaquette_samples.json",
+        mean=f"intermediary_data/{dir_template}/plaquette_mean.csv",
+        samples=f"intermediary_data/{dir_template}/plaquette_samples.json",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -30,10 +30,10 @@ rule avg_plaquette_hmc:
             within=metadata, query=metadata_query + " & start_type == '{start}'"
         ),
     input:
-        data="../data_assets/spectrum/hmc.h5",
-        script="src/plaquette_hmc.py",
+        data="data_assets/spectrum/hmc.h5",
+        script="spectrum/src/plaquette_hmc.py",
     output:
-        mean=f"../intermediary_data/{dir_template}_{{start}}start/plaquette_mean.csv",
+        mean=f"intermediary_data/{dir_template}_{{start}}start/plaquette_mean.csv",
     wildcard_constraints:
         Ns=r"\d+",
     conda:
@@ -44,7 +44,7 @@ rule avg_plaquette_hmc:
 
 def main_plaquette_data(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/{basename}.csv".format(**row)
+        f"intermediary_data/{dir_template}/{basename}.csv".format(**row)
         for basename in ["plaquette_mean", "meson_gevp_E0_f_ps_mean"]
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]
@@ -56,10 +56,10 @@ rule tabulate_largevolume_plaquettes:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=main_plaquette_data,
-        script="src/tables/plaquette.py",
+        script="spectrum/src/tables/plaquette.py",
     output:
-        table="../assets/spectrum/tables/plaquette_table.tex",
-        definitions="../assets/spectrum/definitions/heavy_ps_limit.tex",
+        table="assets/spectrum/tables/plaquette_table.tex",
+        definitions="assets/spectrum/definitions/heavy_ps_limit.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:

@@ -1,3 +1,3 @@
 using Pkg
-Pkg.activate("src/src_jl")
+Pkg.activate("scattering/src/src_jl")
 Pkg.instantiate()

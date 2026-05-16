@@ -1,6 +1,6 @@
 import pandas as pd
 
-metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
+metadata = pd.read_csv("metadata/spectrum/ensemble_metadata.csv")
 
 W0_threshold = 0.28125
 
@@ -10,13 +10,13 @@ rule w0:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data=f"../data_assets/spectrum/nf2_gflow.h5",
-        script="src/flow.py",
-        #top_charge=f"../assets/spectrum/plots/top_charge_history_{dir_template}.pdf"
+        data=f"data_assets/spectrum/nf2_gflow.h5",
+        script="spectrum/src/flow.py",
+        #top_charge=f"assets/spectrum/plots/top_charge_history_{dir_template}.pdf"
     output:
-        mean=f"../intermediary_data/{dir_template}/w0_mean.csv",
-        samples=f"../intermediary_data/{dir_template}/w0_samples.json",
-        bin_size_plot=f"../intermediary_data/{dir_template}/w0_bin_size_check.pdf"
+        mean=f"intermediary_data/{dir_template}/w0_mean.csv",
+        samples=f"intermediary_data/{dir_template}/w0_samples.json",
+        bin_size_plot=f"intermediary_data/{dir_template}/w0_bin_size_check.pdf"
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -32,10 +32,10 @@ rule w0_flow_plot:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data=f"../data_assets/spectrum/nf2_gflow.h5",
-        script="src/plot_w_flow.py",
+        data=f"data_assets/spectrum/nf2_gflow.h5",
+        script="spectrum/src/plot_w_flow.py",
     output:
-        plot=f"../assets/spectrum/plots/w0_flow_{dir_template}.{{plot_filetype}}",
+        plot=f"assets/spectrum/plots/w0_flow_{dir_template}.{{plot_filetype}}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -47,10 +47,10 @@ rule topological_charge:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data=f"../data_assets/spectrum/nf2_gflow.h5",
-        script="src/top_charge.py",
+        data=f"data_assets/spectrum/nf2_gflow.h5",
+        script="spectrum/src/top_charge.py",
     output:
-        data=f"../intermediary_data/{dir_template}/top_charge_mean.csv",
+        data=f"intermediary_data/{dir_template}/top_charge_mean.csv",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -62,10 +62,10 @@ rule topological_charge_history_plot:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
         metadata=lookup(within=metadata, query=metadata_query),
     input:
-        data=f"../data_assets/spectrum/nf2_gflow.h5",
-        script="src/top_charge.py",
+        data=f"data_assets/spectrum/nf2_gflow.h5",
+        script="spectrum/src/top_charge.py",
     output:
-        plot=f"../assets/spectrum/plots/top_charge_history_{dir_template}.pdf",
+        plot=f"assets/spectrum/plots/top_charge_history_{dir_template}.pdf",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -74,7 +74,7 @@ rule topological_charge_history_plot:
 
 def all_flow_data(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/{basename}.csv".format(**row)
+        f"intermediary_data/{dir_template}/{basename}.csv".format(**row)
         for basename in ["w0_mean", "top_charge_mean"]
         for row in metadata.to_dict(orient="records")
         if row["use_in_w0"]
@@ -86,10 +86,10 @@ rule gflow_table:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=all_flow_data,
-        script="src/tables/Q_table.py",
+        script="spectrum/src/tables/Q_table.py",
     output:
-        table="../assets/spectrum/tables/gflow_table.tex",
-        definitions="../assets/spectrum/definitions/gflow_incomplete_ensembles.tex",
+        table="assets/spectrum/tables/gflow_table.tex",
+        definitions="assets/spectrum/definitions/gflow_incomplete_ensembles.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:

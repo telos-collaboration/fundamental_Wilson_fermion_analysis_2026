@@ -1,11 +1,11 @@
 from functools import partial
 
-metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
+metadata = pd.read_csv("metadata/spectrum/ensemble_metadata.csv")
 
 
 def extraction_samples(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_samples.json".format(**row)
+        f"intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av", "t", "s", "at"]
         for rep in ["f"]
@@ -15,7 +15,7 @@ def extraction_samples(wildcards):
 
 def mass_gevp_samples(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/meson_gevp_{rep}_{channel}_samples.json".format(**row)
+        f"intermediary_data/{dir_template}/meson_gevp_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "t", "av", "at", "s"]
         for rep in ["f"]
@@ -26,7 +26,7 @@ def mass_gevp_samples(wildcards):
 
 def mass_gevp_rhoE1_samples(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/gevp_meson_rhoE1_samples.json".format(**row)
+        f"intermediary_data/{dir_template}/gevp_meson_rhoE1_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]
         if row["VT_cross"]
@@ -35,7 +35,7 @@ def mass_gevp_rhoE1_samples(wildcards):
 
 def mass_smear_samples(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/meson_smear_mass_{rep}_{channel}_samples.json".format(**row)
+        f"intermediary_data/{dir_template}/meson_smear_mass_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "t"]
         for rep in ["f"]
@@ -46,7 +46,7 @@ def mass_smear_samples(wildcards):
 
 def w0_samples(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/w0_samples.json".format(**row)
+        f"intermediary_data/{dir_template}/w0_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_main_plots"]
     ]
@@ -54,7 +54,7 @@ def w0_samples(wildcards):
 
 def decay_samples(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/decay_constant_{rep}_{channel}_samples.json".format(**row)
+        f"intermediary_data/{dir_template}/decay_constant_{rep}_{channel}_samples.json".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av"]
         for rep in ["f"]
@@ -65,7 +65,7 @@ def decay_samples(wildcards):
 
 def mass_extp(wildcards, observables):
     return [
-        f"../intermediary_data/extrapolation_results/{observable}_samples.json".format(
+        f"intermediary_data/extrapolation_results/{observable}_samples.json".format(
             **row
         )
         for observable in observables
@@ -95,9 +95,9 @@ rule plot_extrapolations_meson_mass:
                 "f_s_extp_a2_mass",
             ],
         ),
-        script="src/plots/w0mps_vs_meson.py",
+        script="spectrum/src/plots/w0mps_vs_meson.py",
     output:
-        plot_data="../assets/spectrum/plots/m2_all_con_sp4fund.{plot_filetype}",
+        plot_data="assets/spectrum/plots/m2_all_con_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -112,7 +112,7 @@ def fit_result_ansatze(wildcards):
     observables = [f"f_{ch}_extp_{an}_mass" for an in ansatze for ch in channels]
     
     return [
-        f"../intermediary_data/extrapolation_results/{obs}_samples.json".format(**row)
+        f"intermediary_data/extrapolation_results/{obs}_samples.json".format(**row)
         for obs in observables
         for row in metadata.to_dict(orient="records")
         if row["use_in_extrapolation"]
@@ -127,7 +127,7 @@ def fit_result_ansatze_decay(wildcards):
     observables = [f"f_{ch}_extp_{an}_decayconstant" for an in ansatze for ch in channels]
     
     return [
-        f"../intermediary_data/extrapolation_results/{obs}_samples.json".format(**row)
+        f"intermediary_data/extrapolation_results/{obs}_samples.json".format(**row)
         for obs in observables
         for row in metadata.to_dict(orient="records")
         if row["use_in_extrapolation"]
@@ -140,9 +140,9 @@ rule plot_extrapolations_ansatz_mass:
         data=mass_gevp_samples,
         w0=w0_samples,
         fit_results=fit_result_ansatze,
-        script="src/plots/extrapolation_mass.py",
+        script="spectrum/src/plots/extrapolation_mass.py",
     output:
-        plot_data="../assets/spectrum/plots/extrapolation_mass_ansatz_{ansatz}.{plot_filetype}",
+        plot_data="assets/spectrum/plots/extrapolation_mass_ansatz_{ansatz}.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -157,9 +157,9 @@ rule plot_extrapolations_scan_decay:
         decay=decay_samples,
         w0=w0_samples,
         fit_results=fit_result_ansatze_decay,
-        script="src/plots/extrapolation_decayconstant.py",
+        script="spectrum/src/plots/extrapolation_decayconstant.py",
     output:
-        plot_data="../assets/spectrum/plots/extrapolation_decayconstant_ansatz_{ansatz}.{plot_filetype}",
+        plot_data="assets/spectrum/plots/extrapolation_decayconstant_ansatz_{ansatz}.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -184,9 +184,9 @@ rule plot_extrapolations_summary:
                 "f_av_extp_decayconstant",
             ],
         ),
-        script="src/plots/w0mps_summary.py",
+        script="spectrum/src/plots/w0mps_summary.py",
     output:
-        summary_plot="../assets/spectrum/plots/spec_summary_sp4fund.{plot_filetype}",
+        summary_plot="assets/spectrum/plots/spec_summary_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -211,9 +211,9 @@ rule plot_extrapolations_summary_ansatz:
                 "f_av_extp_{{ansatz}}_decayconstant",
             ],
         ),
-        script="src/plots/w0mps_summary_ansatz.py",
+        script="spectrum/src/plots/w0mps_summary_ansatz.py",
     output:
-        summary_plot="../assets/spectrum/plots/spec_summary_{ansatz}_sp4fund.{plot_filetype}",
+        summary_plot="assets/spectrum/plots/spec_summary_{ansatz}_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -238,9 +238,9 @@ rule plot_extrapolations_summary_in_fps_ansatz:
                 "f_av_extp_{{ansatz}}_decayconstant",
             ],
         ),
-        script="src/plots/w0mps_summary_in_fps_ansatz.py",
+        script="spectrum/src/plots/w0mps_summary_in_fps_ansatz.py",
     output:
-        summary_plot="../assets/spectrum/plots/spec_in_fps_summary_{ansatz}_sp4fund.{plot_filetype}",
+        summary_plot="assets/spectrum/plots/spec_in_fps_summary_{ansatz}_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -267,9 +267,9 @@ rule plot_extrapolations_summary_in_fps:
                 "f_av_extp_decayconstant",
             ],
         ),
-        script="src/plots/w0mps_summary_in_fps.py",
+        script="spectrum/src/plots/w0mps_summary_in_fps.py",
     output:
-        summary_plot="../assets/spectrum/plots/spec_summary_in_fps_sp4fund.{plot_filetype}",
+        summary_plot="assets/spectrum/plots/spec_summary_in_fps_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -282,9 +282,9 @@ rule plot_mpsL:
     input:
         data=mass_gevp_samples,
         w0=w0_samples,
-        script="src/plots/mps_vs_mpsL.py",
+        script="spectrum/src/plots/mps_vs_mpsL.py",
     output:
-        plot_data="../assets/spectrum/plots/mpsL.{plot_filetype}",
+        plot_data="assets/spectrum/plots/mpsL.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -309,9 +309,9 @@ rule plot_extrapolations_meson_decay:
                 "f_av_extp_a2_decayconstant",
             ],
         ),
-        script="src/plots/w0mps_vs_decay.py",
+        script="spectrum/src/plots/w0mps_vs_decay.py",
     output:
-        plot_data="../assets/spectrum/plots/dec2_all_con_sp4fund.{plot_filetype}",
+        plot_data="assets/spectrum/plots/dec2_all_con_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -324,9 +324,9 @@ rule plot_extrapolations_Rvps:
     input:
         data=mass_gevp_samples,
         w0=w0_samples,
-        script="src/plots/w0mps_vs_Rvps.py",
+        script="spectrum/src/plots/w0mps_vs_Rvps.py",
     output:
-        plot_data="../assets/spectrum/plots/Rvps_all_con_sp4fund.{plot_filetype}",
+        plot_data="assets/spectrum/plots/Rvps_all_con_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -348,9 +348,9 @@ rule plot_g_rho_pipi:
                 "f_ps_extp_decayconstant",
             ],
         ),
-        script="src/plots/w0_vs_mv_d_fps.py",
+        script="spectrum/src/plots/w0_vs_mv_d_fps.py",
     output:
-        plot_data="../assets/spectrum/plots/R_g_rho_pipi.{plot_filetype}",
+        plot_data="assets/spectrum/plots/R_g_rho_pipi.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -363,9 +363,9 @@ rule plot_test:
     input:
         #data=mass_gevp_samples,
         w0=w0_samples,
-        script="src/plots/test.py",
+        script="spectrum/src/plots/test.py",
     output:
-        plot_data="../assets/spectrum/plots/test.{plot_filetype}",
+        plot_data="assets/spectrum/plots/test.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -378,9 +378,9 @@ rule plot_extrapolations_meson_mass_smear:
     input:
         data=mass_smear_samples,
         w0=w0_samples,
-        script="src/plots/w0mps_vs_meson_smear.py",
+        script="spectrum/src/plots/w0mps_vs_meson_smear.py",
     output:
-        plot_data="../assets/spectrum/plots/m2_all_con_sp4fund_smear.{plot_filetype}",
+        plot_data="assets/spectrum/plots/m2_all_con_sp4fund_smear.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -394,9 +394,9 @@ rule compare_mass_extraction_gevp:
         data=extraction_samples,
         data2=mass_gevp_samples,
         w0=w0_samples,
-        script="src/plots/compare_extraction_gevp.py",
+        script="spectrum/src/plots/compare_extraction_gevp.py",
     output:
-        plot_data="../assets/spectrum/plots/compare_mass.{plot_filetype}",
+        plot_data="assets/spectrum/plots/compare_mass.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -410,9 +410,9 @@ rule compare_mass_smear_gevp:
         data=extraction_samples,
         data2=mass_gevp_samples,
         w0=w0_samples,
-        script="src/plots/compare_extraction_gevp.py",
+        script="spectrum/src/plots/compare_extraction_gevp.py",
     output:
-        plot_data="../assets/spectrum/plots/compare_mass.{plot_filetype}",
+        plot_data="assets/spectrum/plots/compare_mass.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -435,9 +435,9 @@ rule check_lat_a_extrapolations_meson_mass:
                 "f_s_extp_mass",
             ],
         ),
-        script="src/plots/lat_a_vs_meson.py",
+        script="spectrum/src/plots/lat_a_vs_meson.py",
     output:
-        plot_data="../assets/spectrum/plots/m2_all_lat_a_sp4fund.{plot_filetype}",
+        plot_data="assets/spectrum/plots/m2_all_lat_a_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -459,9 +459,9 @@ rule check_lat_a_extrapolations_meson_decay:
                 "f_av_extp_decayconstant",
             ],
         ),
-        script="src/plots/lat_a_vs_decay.py",
+        script="spectrum/src/plots/lat_a_vs_decay.py",
     output:
-        plot_data="../assets/spectrum/plots/dec2_all_lat_a_sp4fund.{plot_filetype}",
+        plot_data="assets/spectrum/plots/dec2_all_lat_a_sp4fund.{plot_filetype}",
     conda:
         "../envs/flow_analysis.yml"
     shell:

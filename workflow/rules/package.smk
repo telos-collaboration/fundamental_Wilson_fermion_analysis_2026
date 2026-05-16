@@ -1,17 +1,17 @@
 from glob import glob
 
-parsing_base = "src/HiRep_parsing"
+parsing_base = "spectrum/src/HiRep_parsing"
 
 
 rule package_smeared:
     params:
-        file_dir="../raw_data/corr/{smearing}",
+        file_dir="raw_data/corr/{smearing}",
         script_file_name="scripts/write_meson_{smearing}.jl",
     input:
-        files=glob("../raw_data/corr/{smearing}/*"),
+        files=glob("raw_data/corr/{smearing}/*"),
         script=f"{parsing_base}/scripts/write_meson_{{smearing}}.jl",
     output:
-        h5=protected("../data_assets/spectrum/correlators_{smearing}.h5"),
+        h5=protected("data_assets/spectrum/correlators_{smearing}.h5"),
     conda:
         "../envs/hirep_parsing.yml"
     # Start packaging early,
@@ -25,10 +25,10 @@ rule package_gflow:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        files=glob("../raw_data/gradient_flow/*/topology/out/out_flow"),
-        script="src/package_flows.py",
+        files=glob("raw_data/gradient_flow/*/topology/out/out_flow"),
+        script="spectrum/src/package_flows.py",
     output:
-        h5="../data_assets/spectrum/nf2_gflow.h5",
+        h5="data_assets/spectrum/nf2_gflow.h5",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -39,10 +39,10 @@ rule package_hmc:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        files=glob("../raw_data/hmc/out_hmc_*"),
-        script="src/package_hmc.py",
+        files=glob("raw_data/hmc/out_hmc_*"),
+        script="spectrum/src/package_hmc.py",
     output:
-        h5=protected("../data_assets/spectrum/hmc.h5"),
+        h5=protected("data_assets/spectrum/hmc.h5"),
     conda:
         "../envs/flow_analysis.yml"
     shell:

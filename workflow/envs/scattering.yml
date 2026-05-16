@@ -80,4 +80,4 @@ dependencies:
       - uncertainties==3.2.3
       - vegas==6.2.1
       - pyerrors==2.12.0
-      - -e ../../../libs/flow_analysis
+      - -e ../../libs/flow_analysis

@@ -18,7 +18,7 @@ num_perc = math.erf(1/np.sqrt(2))
 
 def read_from_hdf(filename):
     res, res_tmp = [{},{}]
-    with h5py.File("../raw_data/14_dim/"+filename+".hdf5","r") as hfile:
+    with h5py.File("raw_data/14_dim/"+filename+".hdf5","r") as hfile:
         for key in hfile.keys():
             if key[:4] == "orig":
                 res[key[5:]] = hfile[key][()]

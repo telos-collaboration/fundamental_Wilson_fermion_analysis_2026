@@ -2,7 +2,7 @@ import pandas as pd
 from functools import partial
 
 
-all_metadata = pd.read_csv("../metadata/spectrum/ensemble_metadata.csv")
+all_metadata = pd.read_csv("metadata/spectrum/ensemble_metadata.csv")
 
 metadata_query = "Nc == {Nc} & Nt == {Nt} & Ns == {Ns} & beta == {beta} & nF == {nF} & mF == {mF}"
 metadata_lookup = partial(lookup, within=all_metadata, query=metadata_query)
@@ -14,7 +14,7 @@ W0_threshold = 0.28125
 
 def autocorr_data(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/{basename}.csv".format(**row)
+        f"intermediary_data/{dir_template}/{basename}.csv".format(**row)
         for basename in [
             "tau_ps_correlator_mean",
             "plaquette_mean",
@@ -29,7 +29,7 @@ def autocorr_data(wildcards):
 
 def extraction_means(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/meson_extraction_{rep}_{channel}_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av"]
         for rep in ["f"]
@@ -39,7 +39,7 @@ def extraction_means(wildcards):
 
 def gevp_E0_means(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/meson_gevp_E0_{rep}_{channel}_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/meson_gevp_E0_{rep}_{channel}_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "t", "s", "av", "at"]
         for rep in ["f"]
@@ -49,7 +49,7 @@ def gevp_E0_means(wildcards):
 
 def mPCAC_means(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/mpcac_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_table"]
     ] 
@@ -57,7 +57,7 @@ def mPCAC_means(wildcards):
 
 def decay_constant_means(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/decay_constant_{rep}_{channel}_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/decay_constant_{rep}_{channel}_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         for channel in ["ps", "v", "av"]
         for rep in ["f"]
@@ -66,21 +66,21 @@ def decay_constant_means(wildcards):
 
 def w0_means(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/w0_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/w0_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_table"]
     ] 
 
 def top_charge_means(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/top_charge_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/top_charge_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_table"]
     ]
 
 def plaq_means(wildcards):
     return [
-        f"../intermediary_data/{dir_template}/plaquette_mean.csv".format(**row)
+        f"intermediary_data/{dir_template}/plaquette_mean.csv".format(**row)
         for row in metadata.to_dict(orient="records")
         if row["use_in_table"]
     ] 
@@ -88,55 +88,55 @@ def plaq_means(wildcards):
 
 def continuum_massless_extrapolation_mass(wildcards):
     return [
-        f"../intermediary_data/extrapolation_results/f_{channel}_extp_mass_mean.csv".format()
+        f"intermediary_data/extrapolation_results/f_{channel}_extp_mass_mean.csv".format()
         for channel in ["v", "t", "s", "av", "at"]
     ]
 
 def continuum_massless_extrapolation_mass_ansatze(wildcards ):
     return [
-        f"../intermediary_data/extrapolation_results/f_{channel}_extp_{wildcards.ansatz}_mass_mean.csv".format()
+        f"intermediary_data/extrapolation_results/f_{channel}_extp_{wildcards.ansatz}_mass_mean.csv".format()
         for channel in ["v", "t", "s", "av", "at"]
     ]
 
 
 def continuum_massless_extrapolation_decay_ansatze(wildcards ):
     return [
-        f"../intermediary_data/extrapolation_results/f_{channel}_extp_{wildcards.ansatz}_decayconstant_mean.csv".format()
+        f"intermediary_data/extrapolation_results/f_{channel}_extp_{wildcards.ansatz}_decayconstant_mean.csv".format()
         for channel in ["ps", "v", "av"]
     ]
 
 
 def continuum_massless_extrapolation_decayconstant(wildcards):
     return [
-        f"../intermediary_data/extrapolation_results/f_{channel}_extp_decayconstant_mean.csv".format()
+        f"intermediary_data/extrapolation_results/f_{channel}_extp_decayconstant_mean.csv".format()
         for channel in ["ps", "v", "av"]
     ]
 
 
 def continuum_massless_extrapolation_mass_a2(wildcards):
     return [
-        f"../intermediary_data/extrapolation_results/f_{channel}_extp_a2_mass_mean.csv".format()
+        f"intermediary_data/extrapolation_results/f_{channel}_extp_a2_mass_mean.csv".format()
         for channel in ["v", "t", "s", "av", "at"]
     ]
 
 
 def continuum_massless_extrapolation_decayconstant_a2(wildcards):
     return [
-        f"../intermediary_data/extrapolation_results/f_{channel}_extp_a2_decayconstant_mean.csv".format()
+        f"intermediary_data/extrapolation_results/f_{channel}_extp_a2_decayconstant_mean.csv".format()
         for channel in ["ps", "v", "av"]
     ]
 
 
 def continuum_massless_extrapolation_mass_a2_am2(wildcards):
     return [
-        f"../intermediary_data/extrapolation_results/f_{channel}_extp_a2_am2_mass_mean.csv".format()
+        f"intermediary_data/extrapolation_results/f_{channel}_extp_a2_am2_mass_mean.csv".format()
         for channel in ["v", "t", "s", "av", "at"]
     ]
 
 
 def continuum_massless_extrapolation_decayconstant_a2_am2(wildcards):
     return [
-        f"../intermediary_data/extrapolation_results/f_{channel}_extp_a2_am2_decayconstant_mean.csv".format()
+        f"intermediary_data/extrapolation_results/f_{channel}_extp_a2_am2_decayconstant_mean.csv".format()
         for channel in ["ps", "v", "av"]
     ]
 
@@ -150,9 +150,9 @@ rule f_meson_mass_table:
         E0=gevp_E0_means,
         w0=w0_means,
         mPCAC=mPCAC_means,
-        script="src/tables/print_spectrum_meson_1.py",
+        script="spectrum/src/tables/print_spectrum_meson_1.py",
     output:
-        table="../assets/spectrum/tables/spectrum_meson_1.tex",
+        table="assets/spectrum/tables/spectrum_meson_1.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -166,9 +166,9 @@ rule f_meson_mass_table2:
         decay=decay_constant_means,
         mass=extraction_means,
         E0=gevp_E0_means,
-        script="src/tables/print_spectrum_meson_2.py",
+        script="spectrum/src/tables/print_spectrum_meson_2.py",
     output:
-        table="../assets/spectrum/tables/spectrum_meson_2.tex",
+        table="assets/spectrum/tables/spectrum_meson_2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -183,9 +183,9 @@ rule ens_table:
         w0=w0_means,
         mass=gevp_E0_means,
         top_charge=top_charge_means,
-        script="src/tables/print_ens.py",
+        script="spectrum/src/tables/print_ens.py",
     output:
-        table="../assets/spectrum/tables/ensemble.tex",
+        table="assets/spectrum/tables/ensemble.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -197,9 +197,9 @@ rule continuum_massless_mass_ansatze:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=continuum_massless_extrapolation_mass_ansatze,
-        script="src/tables/continuum_massless_mass_ansatze.py",
+        script="spectrum/src/tables/continuum_massless_mass_ansatze.py",
     output:
-        table="../assets/spectrum/tables/le_coefficients_mass_ansatz_{ansatz}.tex",
+        table="assets/spectrum/tables/le_coefficients_mass_ansatz_{ansatz}.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -210,9 +210,9 @@ rule continuum_massless_decay_ansatze:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=continuum_massless_extrapolation_decay_ansatze,
-        script="src/tables/continuum_massless_decayconstant_ansatze.py",
+        script="spectrum/src/tables/continuum_massless_decayconstant_ansatze.py",
     output:
-        table="../assets/spectrum/tables/le_coefficients_decayconstant_ansatz_{ansatz}.tex",
+        table="assets/spectrum/tables/le_coefficients_decayconstant_ansatz_{ansatz}.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -225,9 +225,9 @@ rule continuum_massless_mass_a2_am2:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=continuum_massless_extrapolation_mass_a2_am2,
-        script="src/tables/continuum_massless_mass_a2_am2.py",
+        script="spectrum/src/tables/continuum_massless_mass_a2_am2.py",
     output:
-        table="../assets/spectrum/tables/nlo_coefficients_mass_a2_am2.tex",
+        table="assets/spectrum/tables/nlo_coefficients_mass_a2_am2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -239,9 +239,9 @@ rule continuum_massless_decay_a2_am2:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=continuum_massless_extrapolation_decayconstant_a2_am2,
-        script="src/tables/continuum_massless_decayconstant_a2_am2.py",
+        script="spectrum/src/tables/continuum_massless_decayconstant_a2_am2.py",
     output:
-        table="../assets/spectrum/tables/nlo_coefficients_decayconstant_a2_am2.tex",
+        table="assets/spectrum/tables/nlo_coefficients_decayconstant_a2_am2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -253,9 +253,9 @@ rule continuum_massless_mass:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=continuum_massless_extrapolation_mass,
-        script="src/tables/continuum_massless_mass.py",
+        script="spectrum/src/tables/continuum_massless_mass.py",
     output:
-        table="../assets/spectrum/tables/nlo_coefficients_mass.tex",
+        table="assets/spectrum/tables/nlo_coefficients_mass.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -267,9 +267,9 @@ rule continuum_massless_decayconstant:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=continuum_massless_extrapolation_decayconstant,
-        script="src/tables/continuum_massless_decayconstant.py",
+        script="spectrum/src/tables/continuum_massless_decayconstant.py",
     output:
-        table="../assets/spectrum/tables/nlo_coefficients_decayconstant.tex",
+        table="assets/spectrum/tables/nlo_coefficients_decayconstant.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -281,9 +281,9 @@ rule continuum_massless_mass_a2:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=continuum_massless_extrapolation_mass_a2,
-        script="src/tables/continuum_massless_mass_a2.py",
+        script="spectrum/src/tables/continuum_massless_mass_a2.py",
     output:
-        table="../assets/spectrum/tables/nlo_coefficients_mass_a2.tex",
+        table="assets/spectrum/tables/nlo_coefficients_mass_a2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -295,9 +295,9 @@ rule continuum_massless_decayconstant_a2:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=continuum_massless_extrapolation_decayconstant_a2,
-        script="src/tables/continuum_massless_decayconstant_a2.py",
+        script="spectrum/src/tables/continuum_massless_decayconstant_a2.py",
     output:
-        table="../assets/spectrum/tables/nlo_coefficients_decayconstant_a2.tex",
+        table="assets/spectrum/tables/nlo_coefficients_decayconstant_a2.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -309,9 +309,9 @@ rule autocorr_table:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
         data=autocorr_data,
-        script="src/tables/autocorr.py",
+        script="spectrum/src/tables/autocorr.py",
     output:
-        table="../assets/spectrum/tables/autocorr_table.tex",
+        table="assets/spectrum/tables/autocorr_table.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
@@ -322,11 +322,11 @@ rule g_VPP_KSRF:
     params:
         module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
     input:
-        mv="../intermediary_data/extrapolation_results/f_v_extp_a2_mass_samples.json",
-        fps="../intermediary_data/extrapolation_results/f_ps_extp_a2_decayconstant_samples.json",
-        script="src/tables/g_VPP_KSRF.py",
+        mv="intermediary_data/extrapolation_results/f_v_extp_a2_mass_samples.json",
+        fps="intermediary_data/extrapolation_results/f_ps_extp_a2_decayconstant_samples.json",
+        script="spectrum/src/tables/g_VPP_KSRF.py",
     output:
-        table="../assets/spectrum/tables/g_VPP_KSRF.tex",
+        table="assets/spectrum/tables/g_VPP_KSRF.tex",
     conda:
         "../envs/flow_analysis.yml"
     shell:
