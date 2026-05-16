@@ -7,7 +7,7 @@ def get_index_separation(indices):
     indices.sort()
     separation = indices[1] - indices[0]
     for idx1, idx2 in pairwise(indices):
-        if idx2 - idx1 != separation:
+        if (idx2 - idx1)%separation != 0:
             raise NotImplementedError(
                 f"Configurations have non-uniform separation or are out of order. {idx1}, {idx2}, {separation}\n {indices}"    
             )
