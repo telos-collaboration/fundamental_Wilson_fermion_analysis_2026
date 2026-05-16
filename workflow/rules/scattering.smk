@@ -22,6 +22,9 @@ rule parse_logs:
         h5file="data_assets/scattering/isospin1_sorted.hdf5",
     conda:
         "../envs/scattering.yml"
+    # Start parsing early,
+    # since it is time consuming and many other processes depend on it
+    priority: 10
     shell:
         'julia {input.script} --path raw_data/scattering/ --h5file {output.h5file} --inputfiles {input.metadata}'
 

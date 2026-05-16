@@ -1,24 +1,20 @@
 from glob import glob
 
-parsing_base = "spectrum/src/HiRep_parsing"
-
 
 rule package_smeared:
-    params:
-        file_dir="raw_data/corr/{smearing}",
-        script_file_name="scripts/write_meson_{smearing}.jl",
     input:
-        files=glob("raw_data/corr/{smearing}/*"),
-        script=f"{parsing_base}/scripts/write_meson_{{smearing}}.jl",
+        files=glob("raw_data/spectrum/*"),
+        script="spectrum/src/parse_mesons.jl",
+        julia_instantiated="intermediary_data/julia_ready",
     output:
-        h5=protected("data_assets/spectrum/correlators_{smearing}.h5"),
+        h5file="data_assets/spectrum/corr_sp4_FUN.h5",
     conda:
-        "../envs/hirep_parsing.yml"
+        "../envs/scattering.yml"
     # Start packaging early,
     # since it is time consuming and many other processes depend on it
     priority: 10
     shell:
-        "cd {parsing_base} && julia {params.script_file_name} ../../{params.file_dir} ../../{output.h5}"
+        "julia {input.script} --h5file {output.h5file} {input.files}"
 
 
 rule package_gflow:
@@ -29,20 +25,6 @@ rule package_gflow:
         script="spectrum/src/package_flows.py",
     output:
         h5="data_assets/spectrum/nf2_gflow.h5",
-    conda:
-        "../envs/flow_analysis.yml"
-    shell:
-        "python -m {params.module} {input.files} --h5_filename {output.h5}"
-
-
-rule package_hmc:
-    params:
-        module=lambda wildcards, input: input.script.replace("/", ".")[:-3],
-    input:
-        files=glob("raw_data/hmc/out_hmc_*"),
-        script="spectrum/src/package_hmc.py",
-    output:
-        h5=protected("data_assets/spectrum/hmc.h5"),
     conda:
         "../envs/flow_analysis.yml"
     shell:
