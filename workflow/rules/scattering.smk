@@ -19,7 +19,7 @@ rule parse_logs:
         julia_instantiated="intermediary_data/julia_ready",
         metadata="metadata/scattering/input_files.csv",
     output:
-        h5file="data_assets/scattering/isospin1_sorted.hdf5",
+        h5file="intermediary_data/scattering/isospin1_sorted.hdf5",
     conda:
         "../envs/scattering.yml"
     # Start parsing early,
@@ -33,7 +33,7 @@ rule ensembles_tables:
     input:
         script="scattering/src/scripts_julia/write_tables.jl",
         julia_instantiated="intermediary_data/julia_ready",
-        h5file="data_assets/scattering/isospin1_sorted.hdf5",
+        h5file="intermediary_data/scattering/isospin1_sorted.hdf5",
         metadata="metadata/scattering/ensembles.csv"
     output:
         table="assets/scattering/tables/analysed_runs.csv"
@@ -47,9 +47,9 @@ rule combine_runs_hdf5:
     input:
         script="scattering/src/scripts_julia/combine_runs.jl",
         julia_instantiated="intermediary_data/julia_ready",
-        h5file_in="data_assets/scattering/isospin1_sorted.hdf5",
+        h5file_in="intermediary_data/scattering/isospin1_sorted.hdf5",
     output:
-        h5file_out="data_assets/scattering/isospin1_merged.hdf5",
+        h5file_out="intermediary_data/scattering/isospin1_merged.hdf5",
     conda:
         "../envs/scattering.yml"
     shell:
@@ -60,7 +60,7 @@ rule correlation_matrix:
     input:
         script="scattering/src/scripts_julia/write_correlation_matrix.jl",
         julia_instantiated="intermediary_data/julia_ready",
-        h5file_in="data_assets/scattering/isospin1_merged.hdf5",
+        h5file_in="intermediary_data/scattering/isospin1_merged.hdf5",
         metadata="metadata/scattering/ensembles.csv"
     output:
         h5file_out="data_assets/scattering/isospin1_corr.hdf5",
@@ -105,7 +105,7 @@ rule fit_eigenvalues:
         metadata="metadata/scattering/pipi_fitintervals.csv",
         h5file_in="data_assets/scattering/isospin1_eigenvalues.hdf5",
     output:
-        h5file_out="data_assets/scattering/isospin1_fitresults.hdf5",
+        h5file_out="intermediary_data/scattering/isospin1_fitresults.hdf5",
     conda:
         "../envs/scattering.yml"
     shell:
@@ -130,9 +130,9 @@ rule fit_mesons:
         script="scattering/src/src_py/fitting_mesons.py",
         metadata="metadata/scattering/meson_fitintervals.csv",
         h5file_eig="data_assets/scattering/isospin1_eigenvalues.hdf5",
-        h5file_fit_pipi="data_assets/scattering/isospin1_fitresults.hdf5",
+        h5file_fit_pipi="intermediary_data/scattering/isospin1_fitresults.hdf5",
     output:
-        h5file_out="data_assets/scattering/isospin1_full_fitresults.hdf5",
+        h5file_out="intermediary_data/scattering/isospin1_full_fitresults.hdf5",
     conda:
         "../envs/scattering.yml"
     shell:
@@ -145,7 +145,7 @@ rule fit_mesons:
 rule fit_result_table:
     input:
         script="scattering/src/scripts_julia/write_table_fitresults.jl",
-        h5file="data_assets/scattering/isospin1_full_fitresults.hdf5",
+        h5file="intermediary_data/scattering/isospin1_full_fitresults.hdf5",
         julia_instantiated="intermediary_data/julia_ready",
     output:
         table="assets/scattering/tables/fit_results_3x3_tuned.csv"
@@ -158,7 +158,7 @@ rule fit_result_table:
 rule plot_individual_diagrams:
     input:
         script="scattering/src/scripts_julia/plot_diagrams.jl",
-        h5file="data_assets/scattering/isospin1_merged.hdf5",
+        h5file="intermediary_data/scattering/isospin1_merged.hdf5",
         julia_instantiated="intermediary_data/julia_ready",
     output:
         plots2x2="assets/scattering/plots/diagrams.pdf",
@@ -200,7 +200,7 @@ rule plot_eigenvalues_with_fits:
     input:
         script="scattering/src/scripts_julia/plot_eigenvalues_with_fits.jl",
         h5file_eig="data_assets/scattering/isospin1_eigenvalues.hdf5",
-        h5file_fit="data_assets/scattering/isospin1_fitresults.hdf5",
+        h5file_fit="intermediary_data/scattering/isospin1_fitresults.hdf5",
         metadata="metadata/scattering/pipi_fitintervals.csv",
         julia_instantiated="intermediary_data/julia_ready",
     output:
@@ -228,7 +228,7 @@ rule plot_meson_correlators:
     input:
         script="scattering/src/scripts_julia/plot_meson_correlators.jl",
         h5file_eig="data_assets/scattering/isospin1_eigenvalues.hdf5",
-        h5file_fit="data_assets/scattering/isospin1_fitresults.hdf5",
+        h5file_fit="intermediary_data/scattering/isospin1_fitresults.hdf5",
         julia_instantiated="intermediary_data/julia_ready",
     output:
         plot="assets/scattering/plots/meson_correlators.pdf",
@@ -242,7 +242,7 @@ rule plot_effective_masses:
     input:
         script="scattering/src/scripts_julia/plot_effective_masses.jl",
         h5file_eig="data_assets/scattering/isospin1_eigenvalues.hdf5",
-        h5file_fit="data_assets/scattering/isospin1_full_fitresults.hdf5",
+        h5file_fit="intermediary_data/scattering/isospin1_full_fitresults.hdf5",
         fitparam="metadata/scattering/pipi_fitintervals.csv",
         infinite_volume="metadata/scattering/infinite_volume.csv",
         julia_instantiated="intermediary_data/julia_ready",
@@ -289,11 +289,11 @@ rule compile_zeta:
 rule luescher_analysis:
     input:
         script="scattering/src/src_py/scattering.py",
-        h5file_fit="data_assets/scattering/isospin1_full_fitresults.hdf5",
+        h5file_fit="intermediary_data/scattering/isospin1_full_fitresults.hdf5",
         metadata="metadata/scattering/scattering_input.csv",
         binary="libs/zeta/out/get_wlm.so",
     output:
-        h5file_out="data_assets/scattering/isospin1_scattering.hdf5",
+        h5file_out="intermediary_data/scattering/isospin1_scattering.hdf5",
     conda:
         "../envs/scattering.yml"
     shell:
@@ -306,7 +306,7 @@ rule luescher_analysis:
 rule plot_luescher_results:
     input:
         script="scattering/src/src_py/plot_fit_scatter.py",
-        h5file="data_assets/scattering/isospin1_scattering.hdf5",
+        h5file="intermediary_data/scattering/isospin1_scattering.hdf5",
     output:
         plot1 = "assets/scattering/plots/scattering/p3cotPS_vs_p2star_heavy.pdf",
         plot2 = "assets/scattering/plots/scattering/p3cotPS_vs_p2star_medium.pdf",
@@ -346,7 +346,7 @@ rule plot_luescher_fits:
 rule fit_phase_shifts:
     input:
         script="scattering/src/src_py/fit_scatter.py",
-        h5file_in="data_assets/scattering/isospin1_scattering.hdf5",
+        h5file_in="intermediary_data/scattering/isospin1_scattering.hdf5",
         metadata="metadata/scattering/fit_scatter_input.csv",
     output:
         h5file_out="data_assets/scattering/isospin1_fit_scatter.hdf5",
@@ -362,7 +362,7 @@ rule fit_phase_shifts:
 rule volume_dependence_plots:
     input:
         script="scattering/src/src_py/E_L_plot.py",
-        h5file="data_assets/scattering/isospin1_scattering.hdf5",
+        h5file="intermediary_data/scattering/isospin1_scattering.hdf5",
     output:
         plot_heavy = "assets/scattering/plots/scattering/E_vs_L_heavy.pdf",
         plot_lighter = "assets/scattering/plots/scattering/E_vs_L_medium_light.pdf",
@@ -441,7 +441,7 @@ rule parse_flows:
 rule plot_meson_finite_volume:
     input:
         script="scattering/src/scripts_julia/finite_volume.jl",
-        h5file_in="data_assets/scattering/isospin1_full_fitresults.hdf5",
+        h5file_in="intermediary_data/scattering/isospin1_full_fitresults.hdf5",
         julia_instantiated="intermediary_data/julia_ready",
     output:
         table = "intermediary_data/finite_volume.csv",
