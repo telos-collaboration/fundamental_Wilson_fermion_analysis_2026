@@ -114,6 +114,7 @@ include: "rules/scattering.smk"
 
 plots_scattering = [
     "assets/scattering/plots/effective_masses_(g)evp.pdf",
+    "assets/scattering/plots/effective_masses_comparison_(g)evp.pdf",
     "assets/scattering/plots/scattering/E_vs_L_heavy.pdf",
     "assets/scattering/plots/scattering/E_vs_L_medium_light.pdf",
     "assets/scattering/plots/scattering/phase_shift_plot_light.pdf",
