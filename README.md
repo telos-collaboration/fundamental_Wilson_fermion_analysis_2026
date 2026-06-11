@@ -24,7 +24,7 @@ the analyses presented in the paper
    cd fundamental_Wilson_fermion_analysis_2026
    ```
 
-3. Download the archive containing the raw log files named `raw_data.tar` and untar it in this directory.
+3. Download the archive containing the raw log files named `raw_data.tar` and the archive containing the metadata used in the analysis `metadata.tar`, and untar them in this directory.
 
 4. The workflow is run using Snakemake:
 
