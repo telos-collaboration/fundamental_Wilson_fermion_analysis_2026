@@ -51,7 +51,7 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         res = h5open(fitresults)
     end
 
-    plotname = "$(basename)_(g)evp.pdf"
+    plotname = "$(basename)_evp_gevp.pdf"
     plotname_mesons = "$(basename)_mesons.pdf"
     plotname_mesons_p0 = "$(basename)_mesons_p0.pdf"
     

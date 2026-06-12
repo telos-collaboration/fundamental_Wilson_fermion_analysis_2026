@@ -247,7 +247,7 @@ rule plot_effective_masses:
         infinite_volume="metadata/scattering/infinite_volume.csv",
         julia_instantiated="intermediary_data/julia_ready",
     output:
-        plot_gevp="assets/scattering/plots/effective_masses_(g)evp.pdf",
+        plot_gevp="assets/scattering/plots/effective_masses_evp_gevp.pdf",
         plot_mesons="assets/scattering/plots/effective_masses_mesons.pdf",
         plot_mesons_p0="assets/scattering/plots/effective_masses_mesons_p0.pdf",
     conda:
@@ -265,7 +265,7 @@ rule plot_effective_masses_comparison:
         infinite_volume="metadata/scattering/infinite_volume.csv",
         julia_instantiated="intermediary_data/julia_ready",
     output:
-        plot_gevp="assets/scattering/plots/effective_masses_comparison_(g)evp.pdf",
+        plot_gevp="assets/scattering/plots/effective_masses_comparison_evp_gevp.pdf",
     conda:
         "../envs/scattering.yml"
     shell:
