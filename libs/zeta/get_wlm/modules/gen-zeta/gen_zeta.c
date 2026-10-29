@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_errno.h>
 #include <float.h>
 #include <lorentz.h>
 #include <gen_zeta.h>
