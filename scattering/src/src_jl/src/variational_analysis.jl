@@ -64,10 +64,10 @@ function _preprocess_correlator(Corr;deriv,symmetrise)
     end
     return Corr
 end
-function variational_analysis_samples(Corr;t0,deriv,gevp,symmetrise,swap=false,swap_t=0,binsize=2)
+function variational_analysis_samples(Corr;t0,deriv,gevp,symmetrise,swap=false,swap_t=0,binsize=2,kws...)
     Corr = _preprocess_correlator(Corr;deriv,symmetrise)
     Corr = LatticeUtils._bin_correlator_matrix(Corr;binsize)
-    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp,sortby=x->-abs(x))
+    eigvals_resamples = eigenvalues_jackknife_samples(Corr;t0,gevp,sortby=x->-abs(x),kws...)
     if swap
         eigvals_resamples = swap_eigval_numbering(eigvals_resamples, swap_t)
     end
