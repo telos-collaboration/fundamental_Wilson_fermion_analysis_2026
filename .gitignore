@@ -17,7 +17,6 @@ raw_data/
 intermediary_data/
 data_assets/
 assets/
-metadata/
 !*/.git_keep
 raw_data/
 *.hdf5
@@ -38,3 +37,6 @@ raw_data/
 *.png
 *.tex
 *.tar
+
+# Exclude fitting metadata while tuning it
+!metadata/scattering/pipi_fitintervals_evp_gevp.csv
