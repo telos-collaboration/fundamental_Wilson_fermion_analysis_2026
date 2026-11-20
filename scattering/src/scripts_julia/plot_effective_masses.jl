@@ -7,7 +7,7 @@ using LaTeXStrings: @L_str
 using Plots: gr, plot, plot!, scatter!, savefig, backend_name, ylims
 using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
-gr(fontfamily="Computer Modern",frame=:box, legend=:topright, size = (400,300), markeralpha=0.7,titlefontsize=9)
+gr(fontfamily="Computer Modern",frame=:box, legend=:bottomleft, size = (400,300), markeralpha=0.7,titlefontsize=9)
 
 function plot_effective_mass!(plt, meff, Δmeff ;kws...)
     T = length(meff)
@@ -175,8 +175,6 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         plt = plot(;title,xlabel=L"t",ylabel=L"am_\textrm{eff}")
         # get metadate for specific momentum
         data = readdlm(metadata,',',skipstart=1)
-        metadata_ind = findfirst(i -> isequal(joinpath(ens,p),joinpath(data[i,1:2]...)),1:first(size(data)))
-        use3x3 = data[metadata_ind,12]
         has3x3 = haskey(h5dset[ens][p]["$irrep/$id"],"meff_3x3")
         if has3x3 && use3x3
             meff_3x3 = read(h5dset[ens][p]["$irrep/$id"],"meff_3x3")
