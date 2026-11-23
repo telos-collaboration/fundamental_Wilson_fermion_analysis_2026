@@ -7,7 +7,7 @@ using LaTeXStrings: @L_str
 using Plots: gr, plot, plot!, scatter!, savefig, backend_name, ylims
 using PDFmerger: append_pdf!
 using DelimitedFiles: readdlm
-gr(fontfamily="Computer Modern",frame=:box, legend=:bottomleft, size = (400,300), markeralpha=0.7,titlefontsize=9)
+gr(fontfamily="Computer Modern",frame=:box, legend=:bottomleft, size = (400,300), markeralpha=0.7,titlefontsize=8)
 
 function plot_effective_mass!(plt, meff, Δmeff ;kws...)
     T = length(meff)
@@ -167,15 +167,15 @@ function plot_effective_masses(corr_file, fitresults, infvolfile, plotpath, meta
         gevp = read(h5dset,joinpath(ens,p,irrep,id,"gevp"))
         deriv = read(h5dset,joinpath(ens,p,irrep,id,"deriv"))
         symmetrise = read(h5dset,joinpath(ens,p,irrep,id,"symmetrise"))
+        has3x3 = haskey(h5dset[ens][p]["$irrep/$id"],"meff_3x3")
+        NxN = (has3x3 && use3x3) ? "3\\times 3" : "2\\times 2"
         if gevp
-            title  = L"{%$T} \times {%$L}^3, \beta=%$β, am_0={%$m0}, \vec{d} = %$(p_fmt), \mathrm{GEVP}, t_0 = %$(t0)"
+            title  = L"{%$T}\times{%$L}^3, \beta=%$β, am_0={%$m0}, \vec{d}=%$(p_fmt), \mathrm{GEVP}, %$(NxN), t_0=%$(t0)"
         else
-            title  = L"{%$T} \times {%$L}^3, \beta=%$β, am_0={%$m0}, \vec{d} = %$(p_fmt), \mathrm{EVP}"
+            title  = L"{%$T}\times{%$L}^3, \beta=%$β, am_0={%$m0}, \vec{d}=%$(p_fmt), \mathrm{EVP}, %$(NxN)"
         end
         plt = plot(;title,xlabel=L"t",ylabel=L"am_\textrm{eff}")
         # get metadate for specific momentum
-        data = readdlm(metadata,',',skipstart=1)
-        has3x3 = haskey(h5dset[ens][p]["$irrep/$id"],"meff_3x3")
         if has3x3 && use3x3
             meff_3x3 = read(h5dset[ens][p]["$irrep/$id"],"meff_3x3")
             Δmeff_3x3 = read(h5dset[ens][p]["$irrep/$id"],"Delta_meff_3x3")
