@@ -4,12 +4,15 @@ using ScatteringI1
 using LatticeUtils
 using Plots
 using LaTeXStrings
-gr(fontfamily="Computer Modern",frame=:box,legend=:right,markeralpha=0.9,size=(400,300),titlefontsize=11)
+gr(fontfamily="Computer Modern",frame=:box,legend=:left,markeralpha=0.9,size=(400,300),titlefontsize=11)
 
 function format_fit_names(fits)
     # get dimension of correlation matrix and t0 
     rx = r"(?<N>[0-9])x([0-9])|t0_(?<t0>[0-9]+)"
     fit_fmt = copy(fits)
+
+    # collect N and t0 for later sorting
+    param = zeros(Int,length(fits)) 
 
     for (i,f) in enumerate(fits)
         m = match(rx,f)
@@ -17,11 +20,13 @@ function format_fit_names(fits)
         t0 = m["t0"]
         if isnothing(t0)
             fit_fmt[i] = L"evp $(%$N\times %$N)$"
+            param[i] = typemax(Int)
         else
             fit_fmt[i] = L"$t_0=%$t0$"
+            param[i] = parse(Int,t0)
         end
     end
-    return fit_fmt
+    return fit_fmt, param
 end
 
 h5file = "data_assets/scattering/isospin1_fitresults_evp_gevp.hdf5"
@@ -33,7 +38,8 @@ for ens in ensembles
     # only look at datasets corresponding to fits
     fits = filter(contains("evp"),keys(h5id[ens]))
     moms = filter(!isequal("p(0,0,0)"),keys(h5id[ens][fits[1]]))
-    fits_fmt = format_fit_names(fits)
+    fits_fmt, param = format_fit_names(fits)
+    perm = sortperm(param)
 
     for p in moms
         E  = hcat([read(h5id, joinpath(ens,f,p,"A1/E")) for f in fits ]...)
@@ -49,9 +55,9 @@ for ens in ensembles
         # obtain tick label    
 
         plt = plot(;title)
-        scatter!(plt,E[1,:],yerr=ΔE[1,:], label = "state #0")
-        scatter!(plt,E[2,:],yerr=ΔE[2,:], label = "state #1")
-        plot!(plt,xticks=(1:length(fits),fits_fmt),xrotation = 45)
+        scatter!(plt,E[1,perm],yerr=ΔE[1,perm], label = "state #0")
+        scatter!(plt,E[2,perm],yerr=ΔE[2,perm], label = "state #1")
+        plot!(plt,xticks=(1:length(fits),fits_fmt[perm]),xrotation = 45)
         display(plt)
     end
 
